@@ -5,8 +5,7 @@
 &nbsp;
 
 ## Getting started ##
-Please find all the information related this app on our [wiki](m9FvbVTr2W7ZgQwCayKU7RSg
-pQGUNpNdYymMWzTknxsyCRjy).
+Please find all the information related this app on our [wiki](https://github.com/Barbarur/NovaPoint/wiki).
 
 &nbsp;
 
