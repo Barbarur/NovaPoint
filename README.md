@@ -8,11 +8,11 @@ Regular users can also find some benefits using **NovaPoint** specially on the *
 
 ## Getting started ##
 
-All Documentation related with this project can be found in our [Wiki](https://github.com/Barbarur/NovaPoint/wiki),. As first step; [ learn how to setup NovaPoint](https://github.com/Barbarur/NovaPoint/wiki/Setup).
+All Documentation related with this project can be found in our [Wiki](https://github.com/Barbarur/NovaPoint/wiki),. As first step; [Learn how to setup NovaPoint](https://github.com/Barbarur/NovaPoint/wiki/Setup).
 
 &nbsp;
 
-## Package used for by this App ##
+## Package used by this App ##
 
 - [Microsoft.Identity.Client](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet)
 - [Microsoft.Identity.Client.Extensions.Msal](https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet)
