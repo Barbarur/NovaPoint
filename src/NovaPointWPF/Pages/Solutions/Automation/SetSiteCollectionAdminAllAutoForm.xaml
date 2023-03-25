@@ -1,0 +1,54 @@
+﻿<Page x:Class="NovaPointWPF.Pages.Solutions.Automation.SetSiteCollectionAdminAllAutoForm"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Automation" xmlns:designmaterial="clr-namespace:NovaPointWPF.Pages.DesignMaterial"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="SetSiteCollectionAdminAllAutoForm">
+
+    <Grid Background="Transparent">
+        <StackPanel>
+
+            <Label Content="Set user Site Collection Admin property fo all Site Collections"
+                   FontWeight="Bold"/>
+            <Label Height="15"/>
+
+            <designmaterial:NPTextBoxField
+                Title="Target User UPN"
+                Text="{Binding Path=TargetUserUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+            <Label Height="9"/>
+            <CheckBox x:Name="CheckBoxAddAdmin"
+                      Content="Add as Site collection Admin"
+                      IsChecked="{Binding AddAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                      Checked="CheckBox_AddAdmin_Checked"/>
+
+            <CheckBox x:Name="CheckBoxRemoveAdmin"
+                      Content="Remove as Site collection Admin"
+                      IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                      Checked="CheckBox_RemoveAdmin_Checked"/>
+
+            <Label Height="15"/>
+
+            <Label Content="Sites Filter"/>
+            <CheckBox x:Name="CheckBoxIncludePersonalSites"
+                      Content="Include Personal Sites"
+                      IsChecked="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                      Checked="CheckBox_IncludePersonalSites_Checked"/>
+
+            <CheckBox x:Name="CheckBoxIncludeShareSites"
+                      Content="Include Share Sites"
+                      IsChecked="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                      Unchecked="CheckBox_IncludeShareSites_Unchecked"/>
+
+            <CheckBox x:Name="CheckBoxIncludeGroupIdDefined"
+                      Content="Only MS365 Group Connected Sites"
+                      IsChecked="{Binding GroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                      Checked="CheckBox_IncludeGroupIdDefined_Checked"/>
+
+        </StackPanel>
+
+    </Grid>
+</Page>
