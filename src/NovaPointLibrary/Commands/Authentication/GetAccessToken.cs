@@ -1,4 +1,5 @@
-﻿using Microsoft.Identity.Client;
+﻿using CamlBuilder;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
 using NovaPointLibrary.Solutions;
 using System;
@@ -12,26 +13,22 @@ namespace NovaPointLibrary.Commands.Authentication
 {
     internal class GetAccessToken
     {
-        private AppInfo AppInfo
-        {
-            init
-            {
-                _authority = new Uri($"https://login.microsoftonline.com/{value._tenantId}");
-                _clientId = value._clientId;
-                _cachingToken = value._cachingToken;
-            }
-        }
+        private LogHelper _logHelper;
+        private AppInfo _appInfo;
+
         private readonly string _clientId = string.Empty;
         private readonly  Uri? _authority;
         private readonly bool _cachingToken;
         private readonly string redirectUri = "http://localhost";
 
-        private LogHelper _logHelper;
-
         internal GetAccessToken(LogHelper logHelper, AppInfo appInfo)
         {
             _logHelper = logHelper;
-            AppInfo = appInfo;
+            _appInfo = appInfo;
+
+            _authority = new Uri($"https://login.microsoftonline.com/{appInfo._tenantId}");
+            _clientId = appInfo._clientId;
+            _cachingToken = appInfo._cachingToken;
 
         }
 
@@ -64,11 +61,11 @@ namespace NovaPointLibrary.Commands.Authentication
 
         }
 
-        internal async Task<string> SpoInteractiveAsync(string siteUrl)
+        internal async Task<string?> SpoInteractiveAsync(string siteUrl)
         {
             _logHelper = new(_logHelper, $"{GetType().Name}.SpoInteractiveAsync");
-
             _logHelper.AddLogToTxt($"Getting Access Token for SPO API as Interactive for '{siteUrl}'");
+            if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
 
             string defaultPermissions = siteUrl + "/.default";
             string[] scopes = new string[] { defaultPermissions };
@@ -87,6 +84,29 @@ namespace NovaPointLibrary.Commands.Authentication
                 cacheHelper.RegisterCache(app.UserTokenCache);
             }
 
+            // Reference: https://johnthiriet.com/cancel-asynchronous-operation-in-csharp/
+            var aquireToken = SpoInteractiveAcquireTokenAsync(app, scopes);
+
+            TaskCompletionSource taskCompletionSource = new();
+
+            _appInfo.CancelToken.Register(() => taskCompletionSource.TrySetCanceled());
+
+            var completedTask = await Task.WhenAny(aquireToken, taskCompletionSource.Task);
+
+            if (completedTask != aquireToken || _appInfo.CancelToken.IsCancellationRequested )
+            {
+                _appInfo.CancelToken.ThrowIfCancellationRequested();
+                return null;
+            }
+            else
+            {
+                return await aquireToken;
+            }
+
+        }
+
+        private async Task<string> SpoInteractiveAcquireTokenAsync(IPublicClientApplication app, string[] scopes)
+        {
             AuthenticationResult result;
             try
             {
@@ -96,21 +116,24 @@ namespace NovaPointLibrary.Commands.Authentication
                 result = await app.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
                             .ExecuteAsync();
 
-                _logHelper.AddLogToTxt($"Getting Access Token for SPO API as Interactive for '{siteUrl}' COMPLETED");
+                _logHelper.AddLogToTxt($"Getting Access Token for SPO API as Interactive COMPLETED");
 
                 return result.AccessToken;
             }
             catch (MsalUiRequiredException ex)
             {
+                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                 _logHelper.AddLogToTxt("Getting Access Token from Cache failed");
+                _logHelper.AddLogToTxt(ex.Message);
+                _logHelper.AddLogToTxt($"{ex.StackTrace}");
                 _logHelper.AddLogToTxt("Getting new Access Token from AAD");
 
                 result = await app.AcquireTokenInteractive(scopes)
                             .WithUseEmbeddedWebView(false)
                             .ExecuteAsync();
 
-                _logHelper.AddLogToTxt($"Getting Access Token for SPO API as Interactive for '{siteUrl}' COMPLETED");
-                
+                _logHelper.AddLogToTxt($"Getting Access Token for SPO API as Interactive COMPLETED");
+
                 return result.AccessToken;
             }
             catch (MsalServiceException ex)
@@ -162,6 +185,8 @@ namespace NovaPointLibrary.Commands.Authentication
             catch (MsalUiRequiredException ex)
             {
                 _logHelper.AddLogToTxt("Getting Access Token from Cache failed");
+                _logHelper.AddLogToTxt(ex.Message);
+                _logHelper.AddLogToTxt($"{ex.StackTrace}");
                 _logHelper.AddLogToTxt("Getting new Access Token from AAD");
 
                 result = await app.AcquireTokenInteractive(scopes)
