@@ -61,9 +61,11 @@ namespace NovaPointLibrary.Solutions.Reports
             string accessToken = await new GetAccessToken(_logHelper, AppInfo).SpoInteractiveAsync(rootUrl);
 
             double counterList = 0;
+            if (AppInfo.CancelToken.IsCancellationRequested) { AppInfo.CancelToken.ThrowIfCancellationRequested(); };
             List<List> collList = new GetList(_logHelper, accessToken).CSOM_All(SiteUrl, IncludeSystemLists, IncludeResourceLists);
             foreach (List oList in collList)
             {
+                if (AppInfo.CancelToken.IsCancellationRequested) { AppInfo.CancelToken.ThrowIfCancellationRequested(); };
 
                 double progress = Math.Round(counterList * 100 / collList.Count, 2);
                 counterList++;

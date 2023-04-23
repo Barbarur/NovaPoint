@@ -49,10 +49,12 @@ namespace NovaPointLibrary.Solutions.Reports
             string rootUrl = SiteUrl.Substring(0, SiteUrl.IndexOf(".com") + 4);
             string rootAccessToken = await new GetAccessToken(_logHelper, AppInfo).SpoInteractiveAsync(rootUrl);
 
+            if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
             var collSiteCollAdmins = new GetSiteCollectionAdmin(_logHelper, rootAccessToken).Csom(SiteUrl);
 
             foreach (User oAdmin in collSiteCollAdmins)
             {
+                if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
 
                 dynamic recordAdmin = new ExpandoObject();
                 recordAdmin.SiteUrl = SiteUrl;
@@ -64,10 +66,13 @@ namespace NovaPointLibrary.Solutions.Reports
                 recordAdmin.SPOUserID = userId;
 
                 _logHelper.AddRecordToCSV(recordAdmin);
+
             }
 
             _logHelper.ScriptFinishSuccessfulNotice();
+
         }
+
     }
     public class AdminAllSiteSingleReportParameters
     {

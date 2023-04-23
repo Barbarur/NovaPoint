@@ -61,9 +61,11 @@ namespace NovaPointLibrary.Solutions.Reports
             string rootSiteAccessToken = await new GetAccessToken(_logHelper, AppInfo).SpoInteractiveAsync(rootUrl);
 
             double counterList = 0;
+            if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
             List<List> collList = new GetList(_logHelper, rootSiteAccessToken).CSOM_All(SiteUrl, IncludeSystemLists, IncludeResourceLists);
             foreach (List oList in collList)
             {
+                if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
 
                 double progress = Math.Round(counterList * 100 / collList.Count, 2);
                 counterList++;
@@ -75,7 +77,8 @@ namespace NovaPointLibrary.Solutions.Reports
                 List<ListItem> collItems = new GetItem(_logHelper, rootSiteAccessToken).CsomAllItems(SiteUrl, oList.Title);
                 foreach (ListItem oItem in collItems)
                 {
-                    
+                    if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                     double subprogress = Math.Round(counterItem * (100 / collList.Count / collItems.Count) + progress, 2);
 
                     counterItem++;
@@ -99,6 +102,8 @@ namespace NovaPointLibrary.Solutions.Reports
                     FieldUserValue editor = (FieldUserValue)oItem["Editor"];
                     recordItem.ModifiedBy = editor.Email;
 
+                    if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                     if (oList.BaseType.ToString() == "DocumentLibrary")
                     {
 
@@ -110,10 +115,9 @@ namespace NovaPointLibrary.Solutions.Reports
                         recordItem.FileSizeTotalMB = fileSizeTotalMb;
 
                     }
-
-                    if (oList.BaseType.ToString() == "GenericList")
+                    else if (oList.BaseType.ToString() == "GenericList")
                     {
-                        
+
                         recordItem.FileSizeMB = $"Size for items is not yet supported";
                         recordItem.FileSizeTotalMB = $"Size for items is not yet supported";
 

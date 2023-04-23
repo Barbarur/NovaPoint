@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CamlBuilder;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -9,7 +10,6 @@ namespace NovaPointLibrary.Commands.Authentication
 {
     public class AppInfo
     {
-        internal string _domain = string.Empty;
         internal string Domain
         {
             init
@@ -20,6 +20,7 @@ namespace NovaPointLibrary.Commands.Authentication
                 _rootSharedUrl = "https://" + value + ".sharepoint.com";
             }
         }
+        internal string _domain = string.Empty;
         internal string _adminUrl = string.Empty;
         internal string _rootPersonalUrl = string.Empty;
         internal string _rootSharedUrl = string.Empty;
@@ -29,12 +30,20 @@ namespace NovaPointLibrary.Commands.Authentication
         internal string _clientId = "31359c7f-bd7e-475c-86db-fdb8c937548e";
         internal bool _cachingToken = false;
 
+        public CancellationTokenSource CancelTokenSource { get; init; }
+        public CancellationToken CancelToken { get; init; }
+
+
         public AppInfo(string domain, string tenantId, string clientId, bool cachingToken)
         {
             Domain = domain;
             _tenantId = tenantId;
             _clientId = clientId;
             _cachingToken = cachingToken;
+
+            this.CancelTokenSource = new();
+            this.CancelToken = CancelTokenSource.Token;
+
         }
 
         public static void RemoveTokenCache()

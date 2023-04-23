@@ -102,11 +102,13 @@ namespace NovaPointLibrary.Solutions.Reports
             if (IncludePersonalSite) { rootPersonalSiteAccessToken = await new GetAccessToken(_LogHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl); }
             if (IncludeShareSite) { rootShareSiteAccessToken = await new GetAccessToken(_LogHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl); }
 
+            if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
             var collSiteCollections = new GetSiteCollection(_LogHelper, adminAccessToken).CSOM_AdminAll(AdminUrl, IncludePersonalSite, GroupIdDefined);
             double counter = 0;
             List<List> collList;
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
+                if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
 
                 if (oSiteCollection.Title == "" || oSiteCollection.Template.Contains("Redirect")) { continue; }
                 if (oSiteCollection.Template.Contains("SPSPERS") && !IncludePersonalSite) { continue; }
@@ -118,7 +120,8 @@ namespace NovaPointLibrary.Solutions.Reports
 
                 try
                 {
-                    
+                    if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                     new SetSiteCollectionAdmin(_LogHelper, adminAccessToken, _appInfo._domain).Add(SiteAdminUPN, oSiteCollection.Url);
 
                     string currentSiteAccessToken = oSiteCollection.Url.Contains("-my.sharepoint.com") ? rootPersonalSiteAccessToken : rootShareSiteAccessToken;
@@ -127,6 +130,7 @@ namespace NovaPointLibrary.Solutions.Reports
 
                     foreach (List oList in collList)
                     {
+                        if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
 
                         AddListRecordToCSV(oSiteCollection, list: oList);
 
@@ -137,6 +141,8 @@ namespace NovaPointLibrary.Solutions.Reports
 
                         try
                         {
+                            if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                             new RemoveSiteCollectionAdmin(_LogHelper, currentSiteAccessToken, _appInfo._domain).Csom(SiteAdminUPN, oSiteCollection.Url);
                         }
                         catch (Exception e)

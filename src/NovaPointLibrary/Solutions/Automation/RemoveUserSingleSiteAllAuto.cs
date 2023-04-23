@@ -90,6 +90,7 @@ namespace NovaPointLibrary.Solutions.Automation
             string rootPersonalSiteAccessToken = _includePersonalSite ? await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl) : "";
             string rootShareSiteAccessToken = _includeShareSite ? await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl) : "";
 
+            if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
             var collSiteCollections = new GetSiteCollection(_logHelper, adminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, _includePersonalSite, _groupIdDefined);
             collSiteCollections.RemoveAll(s => s.Title == "" || s.Template.Contains("Redirect"));
             if (!_includePersonalSite) { collSiteCollections.RemoveAll(s => s.Template.Contains("SPSPERS")); }
@@ -98,6 +99,9 @@ namespace NovaPointLibrary.Solutions.Automation
             double counter = 0;
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
+
+                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                 double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
                 counter++;
                 _logHelper.AddProgressToUI(progress);
@@ -107,18 +111,29 @@ namespace NovaPointLibrary.Solutions.Automation
                 
                 try
                 {
+                    
+                    if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                    
                     new SetSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Add(_adminUPN, oSiteCollection.Url);
+
                 }
                 catch (Exception ex)
                 {
+                    if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); }; 
+                    
                     ManageCatchedError(oSiteCollection, $"Error while adding Site Collection Admin: {ex.Message}", ex);
                     continue;
+                
                 }
 
                 try
                 {
+                    
+                    if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                     RemoveSiteUser(currentSiteAccessToken, oSiteCollection.Url);
                     AddSiteRecordToCSV(oSiteCollection, "User Removed from Site correctly");
+
                 }
                 catch (Exception ex)
                 {
@@ -129,6 +144,9 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 if (_removeAdmin)
                 {
+                    
+                    if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                    
                     try
                     {
                         new RemoveSiteCollectionAdmin(_logHelper, currentSiteAccessToken, _appInfo._domain).Csom(_adminUPN, oSiteCollection.Url);

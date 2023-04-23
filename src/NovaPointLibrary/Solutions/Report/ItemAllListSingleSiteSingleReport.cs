@@ -62,6 +62,7 @@ namespace NovaPointLibrary.Solutions.Reports
             string rootUrl = SiteUrl.Substring(0, SiteUrl.IndexOf(".com") + 4);
             string accessToken = await new GetAccessToken(_logHelper, AppInfo).SpoInteractiveAsync(rootUrl);
 
+            if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
             List? list = new GetList(_logHelper, accessToken).CSOM_Single(SiteUrl, Listname);
 
             if (list == null)
@@ -71,10 +72,11 @@ namespace NovaPointLibrary.Solutions.Reports
                 throw ex;
             }
 
-
+            if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
             List<ListItem> collItems = new GetItem(_logHelper, accessToken).CsomAllItems(SiteUrl, Listname);
             foreach (ListItem oItem in collItems)
             {
+                if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
 
                 dynamic recordItem = new ExpandoObject();
                 recordItem.SiteUrl = SiteUrl;
@@ -95,6 +97,7 @@ namespace NovaPointLibrary.Solutions.Reports
 
                 if (list.BaseType.ToString() == "DocumentLibrary")
                 {
+                    if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
 
                     float fileSizeMb = oItem.FileSystemObjectType.ToString() == "Folder" ? 0 : (float)Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2);
                     recordItem.FileSizeMB = fileSizeMb;
@@ -106,6 +109,8 @@ namespace NovaPointLibrary.Solutions.Reports
                 }
                 if (list.BaseType.ToString() == "GenericList")
                 {
+                    if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); }; 
+                    
                     recordItem.FileSizeMB = $"Size for items is not yet supported";
                 }
 

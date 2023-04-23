@@ -39,6 +39,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
+                    <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
                 <Button x:Name="BackButton"
@@ -49,11 +50,19 @@
                         Width="120"/>
 
                 <Button x:Name="RunButton"
-                        Content="Run Report"
-                        Click="RunSolution_ClickAsync"
+                        Content="Run Solution"
+                        Click="RunButton_ClickAsync"
                         Grid.Column="1"
                         Height="60"
                         Width="120"/>
+
+                <Button x:Name="CancelButton"
+                        Content="Cancel Solution"
+                        Click="CancelButton_ClickAsync"
+                        Grid.Column="2"
+                        Height="60"
+                        Width="120"
+                        IsEnabled="False"/>
 
             </Grid>
 

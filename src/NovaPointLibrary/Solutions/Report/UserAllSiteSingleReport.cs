@@ -55,10 +55,12 @@ namespace NovaPointLibrary.Solutions.Reports
 
             string rootUrl = SiteUrl.Substring(0, SiteUrl.IndexOf(".com") + 4);
             string rootSiteAccessToken = await new GetAccessToken(_logHelper, AppInfo).SpoInteractiveAsync(rootUrl);
-
+            
+            if (AppInfo.CancelToken.IsCancellationRequested) { AppInfo.CancelToken.ThrowIfCancellationRequested(); };
             List<Microsoft.SharePoint.Client.User> collUsers = new GetUser(_logHelper, rootSiteAccessToken).CsomAll(SiteUrl, false);
             foreach (Microsoft.SharePoint.Client.User oUser in collUsers)
             {
+                if (AppInfo.CancelToken.IsCancellationRequested) { AppInfo.CancelToken.ThrowIfCancellationRequested(); };
 
                 dynamic recordUser = new ExpandoObject();
                 recordUser.SiteUrl = SiteUrl;

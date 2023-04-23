@@ -96,6 +96,7 @@ namespace NovaPointLibrary.Solutions.Reports
             if ( IncludeAdmins && IncludePersonalSite) { rootPersonalSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl); }
             if (IncludeAdmins && IncludeShareSite) { rootShareSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl); }
 
+            if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
             var collSiteCollections = new GetSiteCollection(_logHelper, adminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, IncludePersonalSite, GroupIdDefined);
             collSiteCollections.RemoveAll(s => s.Title == "" || s.Template.Contains("Redirect"));
             if (!IncludePersonalSite) { collSiteCollections.RemoveAll(s => s.Template.Contains("SPSPERS")); }
@@ -104,9 +105,12 @@ namespace NovaPointLibrary.Solutions.Reports
             double counter = 0;
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
+                if(_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                
                 counter++;
                 double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
                 _logHelper.AddProgressToUI(progress);
+                _logHelper.AddLogToUI($"Processing Site '{oSiteCollection.Title}'");
 
                 dynamic recordSite = new ExpandoObject();
                 recordSite.Title = oSiteCollection.Title;
@@ -127,7 +131,8 @@ namespace NovaPointLibrary.Solutions.Reports
 
                 if (IncludeAdmins)
                 {
-                    
+                    if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                     new SetSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Add(AdminUPN, oSiteCollection.Url);
                     
                     string currentSiteAccessToken = oSiteCollection.Url.Contains("-my.sharepoint.com") ? rootPersonalSiteAccessToken : rootShareSiteAccessToken;
@@ -148,6 +153,8 @@ namespace NovaPointLibrary.Solutions.Reports
                 
                     if (RemoveAdmin)
                     {
+                        if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                         try
                         {
                             new RemoveSiteCollectionAdmin(_logHelper, currentSiteAccessToken, _appInfo._domain).Csom(AdminUPN, oSiteCollection.Url);

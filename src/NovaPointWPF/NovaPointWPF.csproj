@@ -5,6 +5,7 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>NovaPoint.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +13,10 @@
     <EmbeddedResource Remove="Media\**" />
     <None Remove="Media\**" />
     <Page Remove="Media\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="NovaPoint.ico" />
   </ItemGroup>
 
   <ItemGroup>
