@@ -82,8 +82,10 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
             if (_preventAllSites) 
             {
+                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                 new RegisterUser(_logHelper, rootSiteAccessToken).Csom(_siteUrl, _userUpn);
 
+                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                 User? user = new GetUser(_logHelper, rootSiteAccessToken).CsomSingle(_siteUrl, _userUpn);
                 if (user != null) { throw new Exception("User couldn't be found to obtain connect user ID"); }
 
@@ -102,8 +104,10 @@ namespace NovaPointLibrary.Solutions.QuickFix
             {
                 _logHelper.AddLogToUI($"Processing site: {siteUrl}");
 
+                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                 new SetSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Add(_adminUpn, siteUrl);
 
+                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                 User? user = new GetUser(_logHelper, siteAccessToken).CsomSingle(siteUrl, _userUpn);
 
                 if (user == null) { return; }
@@ -113,9 +117,11 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 {
                     if (user.IsSiteAdmin)
                     {
+                        if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                         new RemoveSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Csom(siteUrl, user.UserPrincipalName);
                     }
 
+                    if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                     new RemoveUser(_logHelper, siteAccessToken).Csom(siteUrl, user.UserPrincipalName);
 
                     string remarks = "User with incorrect ID found on Site and Removed";
@@ -131,11 +137,13 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 string urlOwnerODBCheckUp = _userUpn.Replace("@", "_").Replace(".", "_");
                 if (_siteUrl.Contains(urlOwnerODBCheckUp) && _siteUrl.Contains("-my.sharepoint.com"))
                 {
+                    if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                     new SetSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Add(user.UserPrincipalName, siteUrl);
                 }
 
                 if (_removeAdmin)
                 {
+                    if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                     new RemoveSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Csom(siteUrl, _adminUpn);
                 }
 
@@ -157,14 +165,17 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
         private async Task AllSitesAsync(string adminAccessToken, string correctUserID)
         {
-
+            if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
             string rootPersonalSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl);
             string rootShareSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl);
 
+            if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
             var collSiteCollections = new GetSiteCollection(_logHelper, adminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, true);
             double counter = 0;
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
+                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                 double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
                 counter++;
                 _logHelper.AddProgressToUI(progress);

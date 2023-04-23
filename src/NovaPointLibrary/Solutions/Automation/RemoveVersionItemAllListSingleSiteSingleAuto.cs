@@ -71,10 +71,13 @@ namespace NovaPointLibrary.Solutions.Automation
             string rootUrl = _siteUrl.Substring(0, _siteUrl.IndexOf(".com") + 4);
             string rootSiteAccessToken = await new GetAccessToken(_logHelper, AppInfo).SpoInteractiveAsync(rootUrl);
 
+            if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
             List<ListItem> collItems = new GetItem(_logHelper, rootSiteAccessToken).CsomAllItems(_siteUrl, _ListName);
             double counter = 0;
             foreach (ListItem oItem in collItems)
             {
+                if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                 counter++;
                 double progress = Math.Round(counter * 100 / collItems.Count, 2);
                 _logHelper.AddProgressToUI(progress);
@@ -84,6 +87,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 recordSite.SiteUrl = _siteUrl;
                 recordSite.ListName = _ListName;
                 
+                if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
                 if (DeleteAll)
                 {
                     try
@@ -111,6 +115,8 @@ namespace NovaPointLibrary.Solutions.Automation
                         int errorsCount = 0;
                         for (int i = 0; i < versionToDelete; i++)
                         {
+                            if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                             try
                             {
                                 new RemoveItemVersion(_logHelper.AddLog, rootSiteAccessToken).Csom(_siteUrl, (string)oItem["FileRef"], DeleteAll, versionToDelete, Recycle);

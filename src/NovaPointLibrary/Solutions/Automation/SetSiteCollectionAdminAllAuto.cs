@@ -57,6 +57,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             string accessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
 
+            if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
             var collSiteCollections = new GetSiteCollection(_logHelper, accessToken).CSOM_AdminAll(_appInfo._adminUrl, _includePersonalSite, _groupIdDefined);
             collSiteCollections.RemoveAll(s => s.Title == "" || s.Template.Contains("Redirect"));
             if (!_includePersonalSite) { collSiteCollections.RemoveAll(s => s.Template.Contains("SPSPERS")); }
@@ -70,6 +71,8 @@ namespace NovaPointLibrary.Solutions.Automation
             double counter = 0;
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
+                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+
                 double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
                 counter++;
                 _logHelper.AddProgressToUI(progress);
