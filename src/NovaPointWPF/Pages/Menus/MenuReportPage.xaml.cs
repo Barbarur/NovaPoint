@@ -42,6 +42,11 @@ namespace NovaPointWPF.Pages.Menus
             GoToSolutionForm(new SiteCollAllReportForm());
         }
 
+        private void GoSiteAllReportForm(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new SiteAllReportForm());
+        }
+
         private void GoAdminAllSiteSingleReportForm(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new AdminAllSiteSingleReportForm());

@@ -29,7 +29,11 @@
                 <Label Content="Site Collection / Subsite"/>
 
                 <Button Content="All Site Collections"
-                        Click="GoSiteCollAllReportForm"/>
+                        Click="GoSiteCollAllReportForm"
+                        Visibility="Collapsed"/>
+
+                <Button Content="All Site Collections and Subsites"
+                        Click="GoSiteAllReportForm"/>
 
                 <Button Content="All Site Collection Admins in a single Site Collection"
                         Click="GoAdminAllSiteSingleReportForm"/>
