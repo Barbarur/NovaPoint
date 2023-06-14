@@ -10,6 +10,8 @@ using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.User;
 using NovaPointLibrary.Commands.Site;
 using System.Diagnostics.Metrics;
+using NovaPointLibrary.Commands.AzureAD;
+using NovaPointLibrary.Solutions.Report;
 
 namespace NovaPointLibrary
 {
@@ -24,6 +26,19 @@ namespace NovaPointLibrary
             // Baic parameters required for all reports
             _LogHelper = new(uiAddLog, "Reports", GetType().Name);
             _appInfo = appInfo;
+        }
+
+        public async Task GetGroupMembersTest(string guid)
+        {
+            string graphAccessToken = await new GetAccessToken(_LogHelper, _appInfo).GraphTest();
+
+            var collMembers = await new GetAzureADGroup(_LogHelper, _appInfo, graphAccessToken).GraphMembersAsync(guid);
+
+            foreach (var oMember in collMembers)
+            {
+                _LogHelper.AddLogToUI($"{oMember.DisplayName}");
+                _LogHelper.AddLogToUI($"{oMember.UserPrincipalName}");
+            }
         }
 
         public async Task GetUser(string siteUrl, string UserUPN)
@@ -47,32 +62,6 @@ namespace NovaPointLibrary
 
         }
 
-        public async Task TestGetSite(string siteUrl)
-        {
-            string rootUrl = siteUrl.Substring(0, siteUrl.IndexOf(".com") + 4);
-            string accessToken = await new GetAccessToken(_LogHelper, _appInfo).SpoInteractiveAsync(rootUrl);
-
-            var site = new GetSite(_LogHelper, _appInfo, accessToken).Csom(siteUrl);
-
-            _LogHelper.AddLogToUI($"Site Unique {site.HasUniqueRoleAssignments}");
-            _LogHelper.AddLogToUI($"Site RoleAssignments {site.RoleAssignments}");
-
-            foreach (var role in site.RoleAssignments)
-            {
-                _LogHelper.AddLogToUI($"Site Role: {role.RoleDefinitionBindings}");
-                //_LogHelper.AddLogToUI($"Site Role: {role.Member.PrincipalType}");
-                //_LogHelper.AddLogToUI($"Site Role: {role.Member.Title}");
-
-                //foreach (var binding in role.RoleDefinitionBindings)
-                //{
-                //    _LogHelper.AddLogToUI($"Site Role: {binding}");
-                //    //_LogHelper.AddLogToUI($"Site Role: {role.Member.PrincipalType}");
-                //    //_LogHelper.AddLogToUI($"Site Role: {role.Member.Title}");
-                //}
-
-            }
-        }
-
         public async Task<int> TestGetAllSubsites(string siteUrl)
         {
             var watch = new System.Diagnostics.Stopwatch();
@@ -82,7 +71,7 @@ namespace NovaPointLibrary
             string rootUrl = siteUrl.Substring(0, siteUrl.IndexOf(".com") + 4);
             string accessToken = await new GetAccessToken(_LogHelper, _appInfo).SpoInteractiveAsync(rootUrl);
 
-            var collSubsites = new GetSubsite(_LogHelper, _appInfo, accessToken).CsomAllSubsitesWithRoles(siteUrl);
+            var collSubsites = new GetSubsite(_LogHelper, _appInfo, accessToken).CsomAllSubsitesWithRolesAndSiteDetails(siteUrl);
 
 
             //foreach (var oSubsite in collSubsites)

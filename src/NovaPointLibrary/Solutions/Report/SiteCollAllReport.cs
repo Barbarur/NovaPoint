@@ -20,6 +20,7 @@ using System.Xml.Linq;
 
 namespace NovaPointLibrary.Solutions.Reports
 {
+    // TO BE DEPRECATED ONCE SiteAllReport IS IN MATURE
     public class SiteCollAllReport
     {
         // Baic parameters required for all reports
