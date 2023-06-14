@@ -9,6 +9,8 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "NovaPointSetup", "NovaPoint
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NovaPointLibrary", "NovaPointLibrary\NovaPointLibrary.csproj", "{8B37C7E5-326F-471A-B4BF-51AEE535DDDA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaPointConsoleTester", "NovaPointConsoleTester\NovaPointConsoleTester.csproj", "{1F3BBB23-9D86-4B62-81B6-D14D319269A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{8B37C7E5-326F-471A-B4BF-51AEE535DDDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B37C7E5-326F-471A-B4BF-51AEE535DDDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B37C7E5-326F-471A-B4BF-51AEE535DDDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F3BBB23-9D86-4B62-81B6-D14D319269A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F3BBB23-9D86-4B62-81B6-D14D319269A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F3BBB23-9D86-4B62-81B6-D14D319269A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F3BBB23-9D86-4B62-81B6-D14D319269A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
