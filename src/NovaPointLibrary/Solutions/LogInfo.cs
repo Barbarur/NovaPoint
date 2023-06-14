@@ -14,8 +14,10 @@ namespace NovaPointLibrary.Solutions
         public string ClassMethod { get; set; } = String.Empty;
         public string MainClassInfo { get; set; } = String.Empty;
         public string DetailInfo { get; set; } = String.Empty;
-        public double PercentageProgress { get; set; } = 0;
+        public double PercentageProgress { get; set; } = -1;
+        public string PendingTime { get; set; } = String.Empty;
 
+        // TO BE DEPRECATED
         public LogInfo(string classMethod, string mainInfo = "", double percentageProgress = 0)
         {
             ClassMethod = classMethod;
@@ -23,17 +25,20 @@ namespace NovaPointLibrary.Solutions
             PercentageProgress = percentageProgress;
         }
 
-        public LogInfo(string classMethod)
+        public LogInfo(string mainInfo)
         {
-            ClassMethod = classMethod;
+            MainClassInfo = mainInfo;
         }
 
         public LogInfo(Action<LogInfo> logger)
         {
             logger(this);
         }
-
-
+        public LogInfo(double percentageProgress, string pendingTime)
+        {
+            PercentageProgress = percentageProgress;
+            PendingTime = pendingTime;
+        }
 
         internal void Clear()
         {

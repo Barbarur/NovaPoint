@@ -15,7 +15,7 @@ namespace NovaPoint.Commands.Site
 {
     internal class GetSiteCollection
     {
-        private LogHelper _logHelper;
+        private readonly LogHelper _logHelper;
         private readonly string AccessToken;
         internal GetSiteCollection(LogHelper logHelper, string accessToken)
         {
@@ -23,7 +23,7 @@ namespace NovaPoint.Commands.Site
             AccessToken = accessToken;
         }
 
-        private static string graphUrl = "https://graph.microsoft.com/v1.0/";
+        //private static string graphUrl = "https://graph.microsoft.com/v1.0/";
         //public static async Task<List<GraphAdminListSite>> Graph_AdminListAll(Action<string> addRecord, string accessToken)
         //{
         //    string message = graphUrl + "sites/m365x29094319-admin.sharepoint.com/lists/bd34467c-d7ce-4074-b9ab-acc392392342/items?$top=5000&$expand=fields";
@@ -102,9 +102,7 @@ namespace NovaPoint.Commands.Site
 
         internal List<SiteProperties> CSOM_AdminAll(string adminUrl, bool includePersonalSite = false, bool groupIdDefined = false)
         {
-            _logHelper = new(_logHelper, $"{GetType().Name}.CSOM_AdminAll");
-
-            _logHelper.AddLogToTxt($"Getting Site Collections; IncludePersonalSite '{includePersonalSite}', Group ID Defined '{groupIdDefined}'");
+            _logHelper.AddLogToTxt($"[{GetType().Name}.CSOM_AdminAll] - Start getting Site Collections; IncludePersonalSite '{includePersonalSite}', Group ID Defined '{groupIdDefined}'");
             
             using var clientContext = new ClientContext(adminUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -121,26 +119,20 @@ namespace NovaPoint.Commands.Site
             
             var tenant = new Tenant(clientContext);
             var collSites = new List<SiteProperties>();
-            try
+            
+            do
             {
-                do
-                {
-                    SPOSitePropertiesEnumerable subcollSiteCollections = tenant.GetSitePropertiesFromSharePointByFilters(filter);
-                    clientContext.Load(subcollSiteCollections);
-                    clientContext.ExecuteQuery();
-                    collSites.AddRange(subcollSiteCollections);
-                    filter.StartIndex = subcollSiteCollections.NextStartIndexFromSharePoint;
-                    _logHelper.AddLogToTxt($"Obtaining Site Collections... {collSites.Count}");
-                    //_logHelper.LogMainInfo($"{GetType().Name}.{methodName}", $"Subtotal number of Site Collections obtained: {collSites.Count}");
-                } while (!string.IsNullOrWhiteSpace(filter.StartIndex));
+                SPOSitePropertiesEnumerable subcollSiteCollections = tenant.GetSitePropertiesFromSharePointByFilters(filter);
+                clientContext.Load(subcollSiteCollections);
+                clientContext.ExecuteQuery();
+                collSites.AddRange(subcollSiteCollections);
+                filter.StartIndex = subcollSiteCollections.NextStartIndexFromSharePoint;
+                _logHelper.AddLogToTxt($"[{GetType().Name}.CSOM_AdminAll] - getting Site Collections... {collSites.Count}");
 
-                _logHelper.AddLogToTxt($"Total number of Site Collections collected: {collSites.Count}");
-                return collSites;
-            }
-            catch
-            {
-                throw;
-            }
+            } while (!string.IsNullOrWhiteSpace(filter.StartIndex));
+
+            _logHelper.AddLogToTxt($"({GetType().Name}.CSOM_AdminAll] - Finish getting Site Collections. Total: {collSites.Count}");
+            return collSites;
         }
 
 

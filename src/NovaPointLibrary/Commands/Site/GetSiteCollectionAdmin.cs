@@ -41,13 +41,13 @@ namespace NovaPointLibrary.Commands.Site
             var retrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
             {
                 u => u.Id,
+                u => u.AadObjectId,
                 u => u.Title,
                 u => u.LoginName,
                 u => u.Email,
-                u => u.IsShareByEmailGuestUser,
+                u => u.UserPrincipalName,
                 u => u.IsSiteAdmin,
                 u => u.UserId,
-                u => u.IsHiddenInUI,
                 u => u.PrincipalType,
                 u => u.Alerts.Include(
                     a => a.Title,

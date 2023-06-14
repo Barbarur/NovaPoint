@@ -1,6 +1,7 @@
 ﻿using CamlBuilder;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
+using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,52 @@ namespace NovaPointLibrary.Commands.Authentication
 
         }
 
+        internal async Task<string> GraphInteractiveAsync()
+        {
+            _appInfo.IsCancelled();
+            _logHelper.AddLogToTxt($"{GetType().Name}.GraphInteractiveAsync - Start getting Graph Access Token");
+
+            return await GraphTest();
+        }
+
+        internal async Task<string> GraphTest()
+        {
+            _appInfo.IsCancelled();
+            _logHelper.AddLogToTxt($"[{GetType().Name}.GraphTest] - Start getting Graph Access Token");
+
+            string[] scopes = new string[] { "https://graph.microsoft.com/.default" };
+
+            var app = PublicClientApplicationBuilder.Create(_clientId)
+                                                    .WithAuthority(_authority)
+                                                    .WithRedirectUri(redirectUri)
+                                                    .Build();
+
+            if (_cachingToken)
+            {
+                _logHelper.AddLogToTxt("Adding UserTokenCache");
+
+                MsalCacheHelper cacheHelper = await TokenCacheHelper.GetCache();
+                cacheHelper.RegisterCache(app.UserTokenCache);
+            }
+
+            AuthenticationResult result;
+            try
+            {
+                var accounts = await app.GetAccountsAsync();
+                result = await app.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
+                            .ExecuteAsync();
+            }
+            catch (MsalUiRequiredException)
+            {
+                result = await app.AcquireTokenInteractive(scopes)
+                            .WithUseEmbeddedWebView(false)
+                            .ExecuteAsync();
+            }
+
+            _logHelper.AddLogToTxt($"[{GetType().Name}.GraphTest] - Finish getting Graph Access Token");
+            return result.AccessToken;
+        }
+
         internal async Task<string> Graph_Interactive()
         {
             string[] scopes = new string[] { "https://graph.microsoft.com/Sites.FullControl.All" };
@@ -61,11 +108,10 @@ namespace NovaPointLibrary.Commands.Authentication
 
         }
 
-        internal async Task<string?> SpoInteractiveAsync(string siteUrl)
+        internal async Task<string> SpoInteractiveAsync(string siteUrl)
         {
-            _logHelper = new(_logHelper, $"{GetType().Name}.SpoInteractiveAsync");
-            _logHelper.AddLogToTxt($"Getting Access Token for SPO API as Interactive for '{siteUrl}'");
-            if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+            _appInfo.IsCancelled();
+            _logHelper.AddLogToTxt($"{GetType().Name}.SpoInteractiveAsync - Start getting Access Token for SPO API as Interactive for '{siteUrl}'");
 
             string defaultPermissions = siteUrl + "/.default";
             string[] scopes = new string[] { defaultPermissions };
@@ -146,9 +192,8 @@ namespace NovaPointLibrary.Commands.Authentication
 
         internal async Task<string> SpoInteractiveNoTenatIdAsync(string siteUrl)
         {
-            _logHelper = new(_logHelper, $"{GetType().Name}.SpoInteractiveNoTenatIdAsync");
-
-            _logHelper.AddLogToTxt($"Getting Access Token for SPO API as Interactive for '{siteUrl}'");
+            _appInfo.IsCancelled();
+            _logHelper.AddLogToTxt($"{GetType().Name}.SpoInteractiveNoTenatIdAsync - Start getting Access Token for SPO API as Interactive for '{siteUrl}'");
 
             string defaultPermissions = siteUrl + "/.default";
             string[] scopes = new string[] { defaultPermissions };
@@ -239,7 +284,6 @@ namespace NovaPointLibrary.Commands.Authentication
             }
             return result.AccessToken;
         }
-
 
     }
 }

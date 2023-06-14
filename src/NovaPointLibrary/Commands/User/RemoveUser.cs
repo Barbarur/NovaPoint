@@ -48,7 +48,7 @@ namespace NovaPointLibrary.Commands.User
                 clientContext.Web.SiteUsers.RemoveByLoginName(userLoginName);
                 clientContext.ExecuteQueryRetry();
             }
-            catch (Exception ex)
+            catch
             {
 
                 string message = $"You cannot remove '{userUPN}' from the site '{siteUrl}'";

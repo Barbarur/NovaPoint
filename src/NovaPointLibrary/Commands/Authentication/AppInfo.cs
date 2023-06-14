@@ -45,7 +45,10 @@ namespace NovaPointLibrary.Commands.Authentication
             this.CancelToken = CancelTokenSource.Token;
 
         }
-
+        public void IsCancelled()
+        {
+            if ( CancelToken.IsCancellationRequested) { CancelToken.ThrowIfCancellationRequested(); }
+        }
         public static void RemoveTokenCache()
         {
             TokenCacheHelper.RemoveCache();

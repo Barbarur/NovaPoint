@@ -5,6 +5,7 @@ using PnP.Framework.Diagnostics;
 using PnP.Framework.Modernization.Telemetry;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,9 +14,7 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions
 {
-    //
-    //
-    //
+
     internal class LogHelper
     {
         private readonly Action<LogInfo> _uiAddLog;
@@ -24,6 +23,8 @@ namespace NovaPointLibrary.Solutions
         internal readonly string _csvPath;
 
         private string _classMethod = "LogHelper.Constructor";
+
+        private Stopwatch SW = new();
 
         internal LogHelper(Action<LogInfo> uiAddLog, string solutionType, string solutionName)
         {
@@ -40,6 +41,8 @@ namespace NovaPointLibrary.Solutions
             RecordsLocation();
 
             _classMethod = $"{solutionName}.RunAsync";
+
+            SW.Start();
         }
 
         internal LogHelper(LogHelper logHelper, string classMethod)
@@ -53,18 +56,7 @@ namespace NovaPointLibrary.Solutions
             _classMethod = classMethod;
         }
 
-
-        // To be deprecated
-        internal void LogMainInfo(string classMethod, string log)
-        {
-            AddLogToTxt(log);
-
-            LogInfo logInfo = new(classMethod, log, 0);
-            _uiAddLog(logInfo);
-        }
-
-
-        // To be deprecated
+        // TO BE DEPRECATED
         internal void AddLog(string classMethod,string log)
         {
 
@@ -77,26 +69,50 @@ namespace NovaPointLibrary.Solutions
         {
             AddLogToTxt(log);
 
-            LogInfo logInfo = new(_classMethod, mainInfo: log);
+            LogInfo logInfo = new(log);
             _uiAddLog(logInfo);
         }
+
+        internal void AddLogToUI(string classMethod, string log)
+        {
+            AddLogToTxt(classMethod, log);
+
+            LogInfo logInfo = new(log);
+            _uiAddLog(logInfo);
+        }
+
+
         internal void AddProgressToUI(double progress)
         {
             AddLogToTxt($"Progress {progress}%");
+            string pendingTime = $"Pending Time: Calculating...";
 
-            LogInfo logInfo = new(_classMethod, percentageProgress: progress);
+            if (progress > 1)
+            {
+                TimeSpan ts = TimeSpan.FromMilliseconds( (SW.Elapsed.TotalMilliseconds * 100 / progress - SW.Elapsed.TotalMilliseconds) );
+                pendingTime = $"Pending Time: {ts.Hours}h:{ts.Minutes}m:{ts.Seconds}s";
+            }
+ 
+            LogInfo logInfo = new(progress, pendingTime);
             _uiAddLog(logInfo);
         }
 
+        // TO BE DEPRECATED
         internal void AddLogToTxt(string log)
         {
             using StreamWriter txt = new(new FileStream(_txtPath, FileMode.Append, FileAccess.Write));
             txt.WriteLine($"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} - [{_classMethod}] {log}");
         }
 
+        internal void AddLogToTxt(string classMethod, string log)
+        {
+            using StreamWriter txt = new(new FileStream(_txtPath, FileMode.Append, FileAccess.Write));
+            txt.WriteLine($"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} - [{classMethod}] - {log}");
+        }
+
         internal void AddRecordToCSV(dynamic o)
         {
-            AddLogToTxt($"Adding Record to csv report");
+            AddLogToTxt($"[{GetType().Name}.AddRecordToCSV] - Adding Record to csv report");
             StringBuilder sb = new();
             using StreamWriter csv = new(new FileStream(_csvPath, FileMode.Append, FileAccess.Write));
             {
@@ -132,7 +148,6 @@ namespace NovaPointLibrary.Solutions
         internal void ScriptStartNotice()
         {
             AddLogToUI($"Solution has started, please wait to the end");
-            AddLogToUI($"   ");
         }
 
         internal void ScriptFinishSuccessfulNotice()
@@ -150,6 +165,7 @@ namespace NovaPointLibrary.Solutions
 
         private void ScriptFinishNotice()
         {
+            SW.Stop();
             AddProgressToUI(100);
             AddLogToUI($"   ");
             RecordsLocation();
