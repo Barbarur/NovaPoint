@@ -24,6 +24,9 @@ namespace NovaPointLibrary.Commands.Site
 
         internal List<Web> CsomAllSubsitesBasicExpressions(string siteUrl)
         {
+            _appInfo.IsCancelled();
+            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesBasicExpressions - Start getting all Subsites with basic expresions");
+
             var retrievalExpressions = new Expression<Func<Web, object>>[]
             {
                 w => w.Id,
@@ -36,37 +39,64 @@ namespace NovaPointLibrary.Commands.Site
 
             var results = CsomAllSubsites(siteUrl, retrievalExpressions);
 
+            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesBasicExpressions - Finish getting all Subsites with basic expresions");
             return results;
         }
 
         internal List<Web> CsomAllSubsitesWithRoles(string siteUrl)
         {
+            _appInfo.IsCancelled();
+            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRoles - Start getting all Subsites with roles");
+
             var retrievalExpressions = new Expression<Func<Web, object>>[]
             {
-                w => w.Id,
-                w => w.Url,
-                w => w.Title,
-                w => w.ServerRelativeUrl,
                 w => w.HasUniqueRoleAssignments,
+                w => w.Id,
                 w => w.RoleAssignments.Include(
                     ra => ra.RoleDefinitionBindings,
                     ra => ra.Member),
+                w => w.ServerRelativeUrl,
+                w => w.Title,
+                w => w.Url,
             };
 
             var results = CsomAllSubsites(siteUrl, retrievalExpressions);
 
+            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRoles - Finish getting all Subsites with roles");
+            return results;
+
+        }
+
+        internal List<Web> CsomAllSubsitesWithRolesAndSiteDetails(string siteUrl)
+        {
+            _appInfo.IsCancelled();
+            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRolesAndSiteDetails - Start getting all Subsites with roles");
+
+            var retrievalExpressions = new Expression<Func<Web, object>>[]
+            {
+                w => w.HasUniqueRoleAssignments,
+                w => w.Id,
+                w => w.LastItemModifiedDate,
+                w => w.RoleAssignments.Include(
+                    ra => ra.RoleDefinitionBindings,
+                    ra => ra.Member),
+                w => w.ServerRelativeUrl,
+                w => w.Title,
+                w => w.Url,
+                w => w.WebTemplate,
+            };
+
+            var results = CsomAllSubsites(siteUrl, retrievalExpressions);
+
+            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRolesAndSiteDetails - Finish getting all Subsites with roles");
             return results;
 
         }
 
         private List<Web> CsomAllSubsites(string siteUrl, Expression<Func<Web, object>>[] retrievalExpressions)
         {
-
-            if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-            
-            _logHelper = new(_logHelper, $"{GetType().Name}.CsomAllSubsites");
-
-            _logHelper.AddLogToTxt($"Getting Subsite");
+            _appInfo.IsCancelled();
+            _logHelper.AddLogToTxt( $"{GetType().Name}.CsomAllSubsites - Start getting all Subsites");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -83,13 +113,15 @@ namespace NovaPointLibrary.Commands.Site
 
             results.AddRange(GetSubWebsInternal(subsites, retrievalExpressions));
 
+            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsites - Finish getting all Subsites");
             return results;
 
         }
 
         private List<Web> GetSubWebsInternal(WebCollection subsites, Expression<Func<Web, object>>[] retrievalExpressions)
         {
-            if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); }
+            _appInfo.IsCancelled();
+            _logHelper.AddLogToTxt($"{GetType().Name}.GetSubWebsInternal - Start getting Subsites internals");
 
             var subwebs = new List<Web>();
 
@@ -106,6 +138,7 @@ namespace NovaPointLibrary.Commands.Site
 
             }
 
+            _logHelper.AddLogToTxt($"{GetType().Name}.GetSubWebsInternal - Finish getting Subsites internals");
             return subwebs;
         }
     }

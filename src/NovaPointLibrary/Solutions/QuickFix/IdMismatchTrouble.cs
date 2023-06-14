@@ -20,18 +20,19 @@ namespace NovaPointLibrary.Solutions.QuickFix
 {
     public class IdMismatchTrouble
     {
-        // Baic parameters required for all reports
+        public static string _solutionName = "Report of all Permissions in a Site";
+        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/";
+
         private readonly LogHelper _logHelper;
         private readonly Commands.Authentication.AppInfo _appInfo;
         
-        // Required parameters for the current report
         private readonly string _userUpn;
         private readonly string _siteUrl;
         private readonly string _adminUpn;
         
-        // Optional parameters for the current report
-        private readonly bool _preventAllSites = false;
-        private readonly bool _removeAdmin = false;
+        private readonly bool _preventAllSites;
+        private readonly bool _removeAdmin;
+
 
         public IdMismatchTrouble(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo,
                                  IdMismatchTroubleParameters parameters)
@@ -46,6 +47,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             _preventAllSites = parameters.PreventAllSites;
             _removeAdmin = parameters.RemoveAdmin;
         }
+
 
         public async Task RunAsync()
         {

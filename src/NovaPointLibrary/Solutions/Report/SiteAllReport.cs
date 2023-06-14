@@ -2,6 +2,8 @@
 using Microsoft.SharePoint.Client;
 using NovaPoint.Commands.Site;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.SharePoint.Permision;
+using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.Site;
 using NovaPointLibrary.Solutions.Reports;
 using System;
@@ -15,60 +17,56 @@ namespace NovaPointLibrary.Solutions.Report
 {
     public class SiteAllReport
     {
-        // Baic parameters required for all reports
+        public static string _solutionName = "Report of all Site Collections and Subsites";
+        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/";
+
         private readonly LogHelper _logHelper;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        // Optional parameters for current report
-        private readonly bool IncludeAdmins = false;
         private readonly string AdminUPN = "";
-
         private readonly bool RemoveAdmin = false;
-
+ 
         private readonly bool IncludePersonalSite = false;
         private readonly bool IncludeShareSite = true;
         private readonly bool GroupIdDefined = false;
 
+        private readonly bool IncludeAdmins = false;
+        private readonly bool IncludeSiteAccess = false;
         private readonly bool IncludeSubsites = false;
+
+        List<SPORoleAssignmentKnownGroup> KnownGroups { get; set; } = new() { };
 
         public SiteAllReport(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, SiteAllReportParameters parameters)
         {
-            // Baic parameters required for all reports
             _logHelper = new(uiAddLog, "Reports", GetType().Name);
             _appInfo = appInfo;
-
-            // Optional parameters for current report
-            IncludeAdmins = parameters.IncludeAdmins;
-            AdminUPN = parameters.AdminUPN;
-
-            RemoveAdmin = parameters.RemoveAdmin;
 
             IncludeShareSite = parameters.IncludeShareSite;
             IncludePersonalSite = parameters.IncludePersonalSite;
             GroupIdDefined = parameters.GroupIdDefined;
 
+            AdminUPN = parameters.AdminUPN;
+            RemoveAdmin = parameters.RemoveAdmin;
+
+            IncludeAdmins = parameters.IncludeAdmins;
+            IncludeSiteAccess = parameters.IncludeSiteAccess;
             IncludeSubsites = parameters.IncludeSubsites;
+
         }
 
         public async Task RunAsync()
         {
             try
             {
-                if ( IncludeAdmins && String.IsNullOrWhiteSpace(AdminUPN) )
+                if ( ( IncludeAdmins || IncludeSiteAccess || IncludeSubsites ) && String.IsNullOrWhiteSpace(AdminUPN) )
                 {
-                    string message = "FORM INCOMPLETED: Admin UPN cannot be empty if you want to include Site Collection Administrators";
+                    string message = "FORM INCOMPLETED: Admin UPN cannot be empty if you want to include Site Collection Administrators, Site Access or Subsites";
                     Exception ex = new(message);
                     throw ex;
                 }
                 else if ( !IncludeShareSite && GroupIdDefined )
                 {
                     string message = $"FORM INCOMPLETED: If you want to get GroupIdDefined Sites, you want to include ShareSites";
-                    Exception ex = new(message);
-                    throw ex;
-                }
-                else if ( IncludeSubsites && String.IsNullOrWhiteSpace(AdminUPN))
-                {
-                    string message = "FORM INCOMPLETED: Admin UPN cannot be empty if you waint to include Subsites";
                     Exception ex = new(message);
                     throw ex;
                 }
@@ -80,7 +78,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 else
                 {
-                    await RunScriptAsync();
+                    await RunScriptAsyncUSINGSITEPERMISIONS();
                 }
             }
             catch (Exception ex)
@@ -89,151 +87,407 @@ namespace NovaPointLibrary.Solutions.Report
             }
         }
 
-        private async Task RunScriptAsync()
+
+
+        private async Task RunScriptAsyncUSINGSITEPERMISIONS()
         {
-            if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
+            _appInfo.IsCancelled();
 
             _logHelper.ScriptStartNotice();
 
-            string? adminAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
-            string? rootPersonalSiteAccessToken = String.Empty;
-            string? rootShareSiteAccessToken = String.Empty;
-            if(IncludeAdmins || IncludeSubsites)
+            string aadAccessToken = await new GetAccessToken(_logHelper, _appInfo).GraphInteractiveAsync();
+            string spoAdminAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
+            string? spoRootPersonalSiteAccessToken = String.Empty;
+            string? spoRootShareSiteAccessToken = String.Empty;
+            if (IncludeAdmins || IncludeSiteAccess || IncludeSubsites)
             {
-            
-                if (IncludePersonalSite) { rootPersonalSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl); }
-                if (IncludeShareSite) { rootShareSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl); }
+
+                if (IncludePersonalSite) { spoRootPersonalSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl); }
+                if (IncludeShareSite) { spoRootShareSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl); }
 
             }
 
-            List<SiteProperties> collSiteCollections = new GetSiteCollection(_logHelper, adminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, IncludePersonalSite, GroupIdDefined);
+            List<SiteProperties> collSiteCollections = new GetSiteCollection(_logHelper, spoAdminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, IncludePersonalSite, GroupIdDefined);
             collSiteCollections.RemoveAll(s => s.Title == "" || s.Template.Contains("Redirect"));
             if (!IncludePersonalSite) { collSiteCollections.RemoveAll(s => s.Template.Contains("SPSPERS")); }
             if (!IncludeShareSite) { collSiteCollections.RemoveAll(s => !s.Template.Contains("SPSPERS")); }
 
             double counter = 0;
-            double counterStep = 1 / collSiteCollections.Count;
+            float counterStep = 1 / collSiteCollections.Count;
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
-                if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                _appInfo.IsCancelled();
 
-                string? currentSiteAccessToken = oSiteCollection.Url.Contains("-my.sharepoint.com") ? rootPersonalSiteAccessToken : rootShareSiteAccessToken;
+                //if (oSiteCollection.Url != "https://m365x88421522.sharepoint.com/sites/35581560BirendarKumar") { continue; }
 
-                counter++;
                 double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
+                counter++;
                 _logHelper.AddProgressToUI(progress);
-                _logHelper.AddLogToUI($"Processing Site Collestion '{oSiteCollection.Title}'");
+                _logHelper.AddLogToUI($"Processing Site Collection '{oSiteCollection.Title}'");
 
+                string? currentSiteAccessToken = oSiteCollection.Url.Contains("-my.sharepoint.com") ? spoRootPersonalSiteAccessToken : spoRootShareSiteAccessToken;
 
                 try
                 {
 
-                    if (IncludeAdmins || IncludeSubsites)
+                    if (IncludeAdmins || IncludeSiteAccess || IncludeSubsites)
                     {
+                        new SetSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Add(AdminUPN, oSiteCollection.Url);
 
-                        new SetSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Add(AdminUPN, oSiteCollection.Url);
+                        GetSPOSitePermissions getPermissions = new(_logHelper, _appInfo, currentSiteAccessToken, aadAccessToken, KnownGroups);
 
-                    }
-
-                    string admins = string.Empty;
-                    if (IncludeAdmins)
-                    {
-
-                        admins = GetAdmins(_logHelper, currentSiteAccessToken, oSiteCollection.Url);
-
-                    }
-
-                    AddSiteRecordToCSV(true, siteCollection: oSiteCollection, admins: admins);
-
-                    if (IncludeSubsites)
-                    {
-                        var collSubsites = new GetSubsite(_logHelper, _appInfo, currentSiteAccessToken).CsomAllSubsitesBasicExpressions(oSiteCollection.Url);
-
-                        foreach (var oSubsite in collSubsites)
+                        if (IncludeAdmins || IncludeSiteAccess)
                         {
-                            if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                            Web oSite = new GetSPOSite(_logHelper, _appInfo, currentSiteAccessToken).CSOMWithRoles(oSiteCollection.Url);
 
-                            progress = Math.Round(progress + counterStep / (collSubsites.Count + 1), 2);
-                            _logHelper.AddProgressToUI(progress);
-                            _logHelper.AddLogToUI($"Processing Subsite '{oSubsite.Title}'");
+                            AddSiteListRecordToCSVWITHPERMISSIONS(oSiteCollection, null, await getPermissions.CSOMSiteAsync(oSite, IncludeAdmins, IncludeSiteAccess, false, false, false));
+                        }
+                        else
+                        {
+                            SPORoleAssignmentRecord blankPermissions = new();
+                            AddSiteRecordToCSVWITHPERMISSIONS(oSiteCollection, null, blankPermissions);
+                        }
 
-                            AddSiteRecordToCSV(false, subsiteWeb: oSubsite);
+                        if (IncludeSubsites)
+                        {
+                            var collSubsites = new GetSubsite(_logHelper, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRolesAndSiteDetails(oSiteCollection.Url);
+                            foreach (var oSubsite in collSubsites)
+                            {
+                                progress = Math.Round( progress + ( counterStep * 100 / ( collSubsites.Count + 1) ), 2);
+                                _logHelper.AddProgressToUI(progress);
+                                _logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}' Pregress {progress}");
+                                _logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}' COunterStep {counterStep}");
+                                _logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}'");
 
+                                if (IncludeSiteAccess)
+                                {
+                                    AddSiteListRecordToCSVWITHPERMISSIONS(null, oSubsite, await getPermissions.CSOMSubsiteAsync(oSubsite, IncludeSiteAccess, false, false, false));
+
+                                }
+                                else
+                                {
+                                    SPORoleAssignmentRecord blankPermissions = new();
+                                    AddSiteRecordToCSVWITHPERMISSIONS(null, oSubsite, blankPermissions);
+                                }
+                            }
                         }
                     }
-
-                    if (IncludeAdmins && RemoveAdmin)
+                    else
                     {
-
-                        if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
-                        new RemoveSiteCollectionAdmin(_logHelper, currentSiteAccessToken, _appInfo._domain).Csom(AdminUPN, oSiteCollection.Url);
-
+                        SPORoleAssignmentRecord blankPermissions = new();
+                        AddSiteRecordToCSVWITHPERMISSIONS(oSiteCollection, null, blankPermissions);
                     }
                 }
                 catch (Exception ex)
                 {
-
-                    _logHelper.AddLogToUI($"Error processing Site Collestion '{oSiteCollection.Url}'");
+                    _logHelper.AddLogToUI($"Error processing Site Collection '{oSiteCollection.Url}'");
                     _logHelper.AddLogToTxt($"Exception: {ex.Message}");
                     _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
-                    AddSiteRecordToCSV(true, siteCollection: oSiteCollection, remarks: ex.Message);
 
+                    SPORoleAssignmentRecord blankPermissions = new("", "", "", "", ex.Message);
+                    AddSiteRecordToCSVWITHPERMISSIONS(oSiteCollection, null, blankPermissions);
                 }
             }
 
             _logHelper.ScriptFinishSuccessfulNotice();
-
         }
 
-        private string GetAdmins(LogHelper logHelper, string accessToken, string siteUrl)
+
+
+        //private async Task RunScriptAsyncNew()
+        //{
+        //    _appInfo.IsCancelled();
+
+        //    _logHelper.ScriptStartNotice();
+
+        //    string aadAccessToken = await new GetAccessToken(_logHelper, _appInfo).GraphInteractiveAsync();
+        //    string spoAdminAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
+        //    string? spoRootPersonalSiteAccessToken = String.Empty;
+        //    string? spoRootShareSiteAccessToken = String.Empty;
+        //    if (IncludeAdmins || IncludeSiteAccess || IncludeSubsites)
+        //    {
+
+        //        if (IncludePersonalSite) { spoRootPersonalSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl); }
+        //        if (IncludeShareSite) { spoRootShareSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl); }
+
+        //    }
+
+        //    List<SiteProperties> collSiteCollections = new GetSiteCollection(_logHelper, spoAdminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, IncludePersonalSite, GroupIdDefined);
+        //    collSiteCollections.RemoveAll(s => s.Title == "" || s.Template.Contains("Redirect"));
+        //    if (!IncludePersonalSite) { collSiteCollections.RemoveAll(s => s.Template.Contains("SPSPERS")); }
+        //    if (!IncludeShareSite) { collSiteCollections.RemoveAll(s => !s.Template.Contains("SPSPERS")); }
+
+        //    double counter = 0;
+        //    double counterStep = 1 / collSiteCollections.Count;
+        //    foreach (SiteProperties oSiteCollection in collSiteCollections)
+        //    {
+        //        _appInfo.IsCancelled();
+
+        //        //if (oSiteCollection.Url != "https://m365x88421522.sharepoint.com/sites/35581560BirendarKumar") { continue; }
+
+        //        double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
+        //        counter++;
+        //        _logHelper.AddProgressToUI(progress);
+        //        _logHelper.AddLogToUI($"Processing Site Collection '{oSiteCollection.Title}'");
+
+        //        string? currentSiteAccessToken = oSiteCollection.Url.Contains("-my.sharepoint.com") ? spoRootPersonalSiteAccessToken : spoRootShareSiteAccessToken;
+
+        //        try
+        //        {
+
+        //            if (IncludeAdmins || IncludeSiteAccess || IncludeSubsites)
+        //            {
+        //                new SetSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Add(AdminUPN, oSiteCollection.Url);
+        //            }
+
+        //            if (IncludeAdmins && currentSiteAccessToken != null)
+        //            {
+        //                await GetAdmins(currentSiteAccessToken, aadAccessToken, oSiteCollection);
+        //            }
+
+        //            if (IncludeSiteAccess && currentSiteAccessToken != null)
+        //            {
+        //                Web siteWeb = new Commands.SharePoint.Site.GetSPOSite(_logHelper, _appInfo, currentSiteAccessToken).CSOMWithRoles(oSiteCollection.Url);
+
+        //                var collRoleAssigmentUsers = await new GetSPORoleAssigmentUsers(_logHelper, _appInfo, aadAccessToken, currentSiteAccessToken, oSiteCollection.Url, KnownGroups)
+        //                    .GetUsersAsync(siteWeb.RoleAssignments);
+
+        //                foreach (var roleAssigmentUsers in collRoleAssigmentUsers)
+        //                {
+        //                    SPOLocationPermissionsRecord usersPermissionsRecord = new(roleAssigmentUsers.AccessType, roleAssigmentUsers.AccountType, roleAssigmentUsers.Users, roleAssigmentUsers.PermissionLevels);
+        //                    AddSiteRecordToCSV(oSiteCollection, usersPermissionsRecord, roleAssigmentUsers.Remarks);
+        //                }
+
+        //                if (collRoleAssigmentUsers.Count == 0)
+        //                {
+        //                    SPOLocationPermissionsRecord siteAccessBlankPermissions = new("", "", "", "");
+        //                    AddSiteRecordToCSV(oSiteCollection, siteAccessBlankPermissions, "No user has access to the site");
+        //                }
+
+        //            }
+
+        //            if (IncludeSubsites)
+        //            {
+        //                var collSubsites = new GetSubsite(_logHelper, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRolesAndSiteDetails(oSiteCollection.Url);
+        //                foreach (var oSubsite in collSubsites)
+        //                {
+        //                    _logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}'");
+
+        //                    try
+        //                    {
+        //                        if (oSubsite.HasUniqueRoleAssignments)
+        //                        {
+        //                            _logHelper.AddLogToUI($"SubSite '{oSubsite.Title}' has unique permissions");
+
+        //                            var collRoleAssigmentUsers = await new GetSPORoleAssigmentUsers(_logHelper, _appInfo, aadAccessToken, currentSiteAccessToken, oSubsite.Url, KnownGroups)
+        //                                .GetUsersAsync(oSubsite.RoleAssignments);
+
+        //                            foreach (var roleAssigmentUsers in collRoleAssigmentUsers)
+        //                            {
+        //                                SPOLocationPermissionsRecord usersPermissionsRecord = new(roleAssigmentUsers.AccessType, roleAssigmentUsers.AccountType, roleAssigmentUsers.Users, roleAssigmentUsers.PermissionLevels);
+        //                                AddSiteRecordToCSV(oSubsite, usersPermissionsRecord, roleAssigmentUsers.Remarks);
+        //                            }
+        //                        }
+        //                        else
+        //                        {
+        //                            _logHelper.AddLogToUI($"SubSite '{oSubsite.Title}' inherits permissions");
+        //                            SPOLocationPermissionsRecord subsiteAccessBlankPermissions = new("", "", "", "");
+        //                            AddSiteRecordToCSV(oSubsite, subsiteAccessBlankPermissions, "Inheriting Permissions");
+        //                        }
+        //                    }
+        //                    catch (Exception ex)
+        //                    {
+        //                        _logHelper.AddLogToUI($"Error processing Subsite '{oSubsite.Url}'");
+        //                        _logHelper.AddLogToTxt($"Exception: {ex.Message}");
+        //                        _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
+        //                        SPOLocationPermissionsRecord blankPermissions = new("", "", "", "");
+        //                        AddSiteRecordToCSV(oSubsite, blankPermissions, ex.Message);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            _logHelper.AddLogToUI($"Error processing Site Collection '{oSiteCollection.Url}'");
+        //            _logHelper.AddLogToTxt($"Exception: {ex.Message}");
+        //            _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
+        //            SPOLocationPermissionsRecord blankPermissions = new("", "", "", "");
+        //            AddSiteRecordToCSV(oSiteCollection, blankPermissions, ex.Message);
+        //        }
+        //    }
+
+        //    _logHelper.ScriptFinishSuccessfulNotice();
+        //}
+
+
+        //private async Task GetAdmins(string spoAccessToken, string aadAccessToken, SiteProperties siteCollection)
+        //{
+        //    _appInfo.IsCancelled();
+        //    _logHelper.AddLogToTxt($"[{GetType().Name}.GetAdmins] - Getting Admins for Site Collestion '{siteCollection.Url}'");
+
+        //    string accessType = "Direct Permissions";
+        //    string permissionLevels = "Site Collection Administrator";
+
+        //    IEnumerable<Microsoft.SharePoint.Client.User> collSiteCollAdmins = new GetSiteCollectionAdmin(_logHelper, spoAccessToken).Csom(siteCollection.Url);
+
+        //    _logHelper.AddLogToTxt($"[{GetType().Name}.GetAdmins] - Provessing users '{siteCollection.Url}'");
+        //    string users = String.Join(" ", collSiteCollAdmins.Where(sca => sca.PrincipalType.ToString() == "User").Select(sca => sca.UserPrincipalName).ToList());
+        //    SPOLocationPermissionsRecord usersPermissionsRecord = new(accessType, "User", users, permissionLevels);
+        //    AddSiteRecordToCSV(siteCollection, usersPermissionsRecord);
+
+        //    _logHelper.AddLogToTxt($"[{GetType().Name}.GetAdmins] - Provessing Security Groups '{siteCollection.Url}'");
+        //    var collSecurityGroups = collSiteCollAdmins.Where(sca => sca.PrincipalType.ToString() == "SecurityGroup").ToList();
+        //    foreach (var securityGroup in collSecurityGroups)
+        //    {
+        //        List<SPORoleAssigmentKnownGroup> collKnownGroups = new() { };
+        //        collKnownGroups = KnownGroups.Where(kg => kg.PrincipalType == "SecurityGroup" && kg.GroupName == securityGroup.Title && kg.GroupID == securityGroup.AadObjectId.NameId).ToList();
+
+        //        if (collKnownGroups.Count > 0)
+        //        {
+        //            foreach (var knownGroup in collKnownGroups)
+        //            {
+        //                usersPermissionsRecord = new(accessType, knownGroup.AccountType, knownGroup.Users, permissionLevels);
+        //                AddSiteRecordToCSV(siteCollection, usersPermissionsRecord);
+        //            }
+        //        }
+        //        else
+        //        {
+
+        //            var collRoleAssigmentUsers = await new GetSPORoleAssigmentUsers(_logHelper, _appInfo, aadAccessToken, spoAccessToken, siteCollection.Url, KnownGroups)
+        //                .GetSecurityGroupUsersReturnsAsync(securityGroup.Title, securityGroup.LoginName, accessType, "", permissionLevels);
+
+        //            foreach (var roleAssigmentUsers in collRoleAssigmentUsers)
+        //            {
+        //                usersPermissionsRecord = new(roleAssigmentUsers.AccessType, roleAssigmentUsers.AccountType, roleAssigmentUsers.Users, permissionLevels);
+        //                AddSiteRecordToCSV(siteCollection, usersPermissionsRecord, roleAssigmentUsers.Remarks);
+        //            }
+        //        }
+        //    }
+        //}
+
+        //private void AddSiteRecordToCSV(SiteProperties siteCollection, SPOLocationPermissionsRecord? permissionRecord = null, string remarks = "")
+        //{
+        //    AddSiteRecordToCSV(siteCollection, null, permissionRecord, remarks);
+        //}
+
+        //private void AddSiteRecordToCSV(Web subsiteWeb, SPOLocationPermissionsRecord? permissionRecord = null, string remarks = "")
+        //{
+        //    AddSiteRecordToCSV(null, subsiteWeb, permissionRecord, remarks);
+        //}
+
+        //private void AddSiteRecordToCSV(SiteProperties? siteCollection, Web? subsiteWeb, SPOLocationPermissionsRecord? permissionRecord = null, string remarks = "")
+        //{
+        //    _appInfo.IsCancelled();
+        //    _logHelper.AddLogToTxt($"[{GetType().Name}.AddSiteRecordToCSV] - Adding Site record");
+
+        //    dynamic record = new ExpandoObject();
+        //    record.Title = siteCollection != null ? siteCollection?.Title : subsiteWeb?.Title;
+        //    record.SiteUrl = siteCollection != null ? siteCollection?.Url : subsiteWeb?.Url;
+        //    record.GroupId = siteCollection != null ? siteCollection?.GroupId.ToString() : string.Empty;
+        //    record.Tempalte = siteCollection != null ? siteCollection?.Template : subsiteWeb.WebTemplate;
+
+        //    record.StorageQuotaGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageMaximumLevel / Math.Pow(1024, 3), 2)) : string.Empty;
+        //    record.StorageUsedGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageUsage / Math.Pow(1024, 3), 2)) : string.Empty; // ADD CONSUMPTION FOR SUBSITES
+        //    record.storageWarningLevelGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageWarningLevel / Math.Pow(1024, 3), 2)) : string.Empty;
+
+        //    record.IsHubSite = siteCollection != null ? siteCollection?.IsHubSite.ToString() : "False";
+        //    record.LastContentModifiedDate = siteCollection != null ? siteCollection?.LastContentModifiedDate.ToString() : subsiteWeb?.LastItemModifiedDate.ToString();
+        //    record.LockState = siteCollection != null ? siteCollection?.LockState.ToString() : string.Empty;
+
+        //    if (permissionRecord != null)
+        //    {
+        //        record.AccessType = permissionRecord != null ? permissionRecord.AccessType : string.Empty;
+        //        record.AccountType = permissionRecord != null ? permissionRecord.AccountType : string.Empty;
+        //        record.User = permissionRecord != null ? permissionRecord.Users : string.Empty;
+        //        record.PermissionsLevel = permissionRecord != null ? permissionRecord.PermissionLevels : string.Empty;
+        //    }
+
+        //    record.Remarks = remarks;
+
+        //    _logHelper.AddRecordToCSV(record);
+        //}
+
+
+
+
+        //private void AddSiteRecordToCSVWITHPERMISSIONS(SiteProperties siteCollection, List<SPOLocationPermissionsRecord>? listRecord, string remarks)
+        //{
+        //    if (listRecord == null)
+        //    {
+        //        AddSiteRecordToCSVWITHPERMISSIONS(siteCollection, null, null);
+        //    }
+        //    else
+        //    {
+        //        foreach (var record in listRecord)
+        //        {
+        //            AddSiteRecordToCSVWITHPERMISSIONS(siteCollection, null, record);
+        //        }
+        //    }
+        //}
+
+        //private void AddSiteRecordToCSVWITHPERMISSIONS(Web subsiteWeb, List<SPOLocationPermissionsRecord> listRecord)
+        //{
+        //    AddSiteRecordToCSVWITHPERMISSIONS(null, subsiteWeb, listRecord);
+        //}
+
+
+        private void AddSiteListRecordToCSVWITHPERMISSIONS(SiteProperties? siteCollection, Web? subsiteWeb, List<SPOLocationPermissionsRecord> recordsList)
         {
-            if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
+            _appInfo.IsCancelled();
+            _logHelper.AddLogToTxt($"[{GetType().Name}.AddSiteListRecordToCSVWITHPERMISSIONS] - Adding Site record");
 
-            StringBuilder sb = new();
-
-            var collSiteCollAdmins = new GetSiteCollectionAdmin(logHelper, accessToken).Csom(siteUrl);
-            foreach (Microsoft.SharePoint.Client.User oAdmin in collSiteCollAdmins)
+            foreach (var record in recordsList)
             {
-                sb.Append($"{oAdmin.Email} ");
+                foreach (var roleAssigmentUser in record.SPORoleAssignmentUsersList)
+                {
+                    AddSiteRecordToCSVWITHPERMISSIONS(siteCollection, subsiteWeb, roleAssigmentUser);
+                }
             }
-            return sb.ToString();
         }
 
-        private void AddSiteRecordToCSV(bool isSiteCollection, SiteProperties? siteCollection = null, Web? subsiteWeb = null, string admins = "", string remarks = "")
+        private void AddSiteRecordToCSVWITHPERMISSIONS(SiteProperties? siteCollection, Web? subsiteWeb, SPORoleAssignmentRecord permissionRecord)
         {
+            _appInfo.IsCancelled();
+            _logHelper.AddLogToTxt($"[{GetType().Name}.AddSiteRecordToCSV] - Adding Site record");
 
             dynamic record = new ExpandoObject();
-            record.Title = isSiteCollection ? siteCollection?.Title : subsiteWeb?.Title;
-            record.SiteUrl = isSiteCollection ? siteCollection?.Url : subsiteWeb?.Url;
-            record.GroupId = isSiteCollection ? siteCollection?.GroupId.ToString() : string.Empty;
-            record.Tempalte = isSiteCollection ? siteCollection?.Template : subsiteWeb.WebTemplate;
+            record.Title = siteCollection != null ? siteCollection?.Title : subsiteWeb?.Title;
+            record.SiteUrl = siteCollection != null ? siteCollection?.Url : subsiteWeb?.Url;
+            record.GroupId = siteCollection != null ? siteCollection?.GroupId.ToString() : string.Empty;
+            record.Tempalte = siteCollection != null ? siteCollection?.Template : subsiteWeb?.WebTemplate;
 
+            record.StorageQuotaGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageMaximumLevel / Math.Pow(1024, 3), 2)) : string.Empty;
+            record.StorageUsedGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageUsage / Math.Pow(1024, 3), 2)) : string.Empty; // ADD CONSUMPTION FOR SUBSITES
+            record.storageWarningLevelGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageWarningLevel / Math.Pow(1024, 3), 2)) : string.Empty;
 
-            record.StorageQuotaGB = isSiteCollection ? string.Format("{0:N2}", Math.Round(siteCollection.StorageMaximumLevel / Math.Pow(1024, 3), 2)) : string.Empty;
-            record.StorageUsedGB = isSiteCollection ? string.Format("{0:N2}", Math.Round(siteCollection.StorageUsage / Math.Pow(1024, 3), 2)) : string.Empty; // ADD CONSUMPTION FOR SUBSITES
-            record.storageWarningLevelGB = isSiteCollection ? string.Format("{0:N2}", Math.Round(siteCollection.StorageWarningLevel / Math.Pow(1024, 3), 2)) : string.Empty;
+            record.IsHubSite = siteCollection != null ? siteCollection?.IsHubSite.ToString() : "False";
+            record.LastContentModifiedDate = siteCollection != null ? siteCollection?.LastContentModifiedDate.ToString() : subsiteWeb?.LastItemModifiedDate.ToString();
+            record.LockState = siteCollection != null ? siteCollection?.LockState.ToString() : string.Empty;
 
+            record.AccessType = permissionRecord.AccessType;
+            record.AccountType = permissionRecord.AccountType;
+            record.User = permissionRecord.Users;
+            record.PermissionsLevel = permissionRecord.PermissionLevels;
 
-
-            record.IsHubSite = isSiteCollection ? siteCollection?.IsHubSite.ToString() : string.Empty;
-            record.LastContentModifiedDate = isSiteCollection ? siteCollection?.LastContentModifiedDate.ToString() : subsiteWeb?.LastItemModifiedDate.ToString();
-            record.LockState = isSiteCollection ? siteCollection?.LockState.ToString() : string.Empty;
-
-            record.SiteCollectionAdminstrators = isSiteCollection ? admins : string.Empty;
-
-            record.Remarks = remarks;
+            record.Remarks = permissionRecord.Remarks;
 
             _logHelper.AddRecordToCSV(record);
         }
     }
+
+
     public class SiteAllReportParameters
     {
-        public bool IncludeAdmins { get; set; } = false;
-        public string AdminUPN { get; set; } = "";
-        public bool RemoveAdmin { get; set; } = false;
         public bool IncludePersonalSite { get; set; } = false;
         public bool IncludeShareSite { get; set; } = true;
         public bool GroupIdDefined { get; set; } = false;
+        
+        public string AdminUPN { get; set; } = "";
+        public bool RemoveAdmin { get; set; } = false;
+        
+        public bool IncludeAdmins { get; set; } = false;
+        public bool IncludeSiteAccess { get; set; } = false;
         public bool IncludeSubsites { get; set; } = false;
+
     }
 }
