@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NovaPointLibrary.Commands.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,13 @@ namespace NovaPointWPF.Pages
         public MainPage()
         {
             InitializeComponent();
+            CheckUpdate();
+        }
+
+        private void CheckUpdate()
+        {
+            if (Properties.Settings.Default.IsUpdated) { SettingsButton.Background = Brushes.GhostWhite; }
+            else { SettingsButton.Background = Brushes.DarkRed; }
         }
 
         private void Reports_Click(object sender, RoutedEventArgs e)
@@ -42,6 +50,7 @@ namespace NovaPointWPF.Pages
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
+            CheckUpdate();
             SolutionListFrame.Content = new Pages.Menus.MenuSettingsPage();
         }
     }

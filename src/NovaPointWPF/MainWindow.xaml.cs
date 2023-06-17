@@ -1,4 +1,5 @@
-﻿using NovaPointWPF.Pages;
+﻿using NovaPointLibrary.Commands.Utilities;
+using NovaPointWPF.Pages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,19 @@ namespace NovaPointWPF
             InitializeComponent();
 
             MainWindowMainFrame.Content = MainPage;
+
+
+            IsUpdated().
+                ContinueWith(t => Console.WriteLine(t.Exception),TaskContinuationOptions.OnlyOnFaulted);
+        }
+
+        private static async Task IsUpdated()
+        {
+            await Task.Run(async() =>
+            {
+                Properties.Settings.Default.IsUpdated = await VersionControl.IsUpdated();
+                Properties.Settings.Default.Save();
+            });
         }
     }
 }

@@ -26,13 +26,18 @@
         <StackPanel Background="Transparent"
                     Margin="0,0,6,0">
             <Button Content="Reports"
+                    Background="GhostWhite"
                 Click="Reports_Click"/>
             <Button Content="Automation"
+                    Background="GhostWhite"
                 Click="Automation_Click"/>
             <Button Content="Quick Fix"
-                Click="QuickFix_Click"/>
-            <Button Content="Settings"
-                Click="Settings_Click"/>
+                    Background="GhostWhite"
+                    Click="QuickFix_Click"/>
+            <Button x:Name="SettingsButton"
+                    Content="Settings"
+                    Background="DarkRed"
+                    Click="Settings_Click"/>
         </StackPanel>
 
         <Frame x:Name="SolutionListFrame"

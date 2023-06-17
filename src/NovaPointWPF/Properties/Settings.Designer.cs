@@ -70,5 +70,17 @@ namespace NovaPointWPF.Properties {
                 this["CachingToken"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsUpdated {
+            get {
+                return ((bool)(this["IsUpdated"]));
+            }
+            set {
+                this["IsUpdated"] = value;
+            }
+        }
     }
 }
