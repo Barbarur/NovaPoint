@@ -58,6 +58,17 @@
                     Width="120"
                     Margin="0, 42, 0, 0"/>
 
+            <Button x:Name="UpdateButton"
+                    Content="Update"
+                    Click="Update_Click"
+                    Background="DarkRed"
+                    FontWeight="Bold"
+                    Height="60"
+                    Width="120"
+                    Margin="0, 42, 0, 0"
+                    Visibility="Collapsed"/>
+
+
         </StackPanel>
 
     </Grid>

@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NovaPointLibrary.Solutions.QuickFix;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Solutions.Report;
 
 namespace NovaPointWPF.Pages.Solutions.QuickFix
 {
@@ -24,12 +25,11 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
     /// </summary>
     public partial class IdMismatchTroubleForm : Page, ISolutionForm
     {
-        // Optional parameters for the current report to filter sites
-        public string UserUpn { get; set; } = string.Empty;
-        public string SiteUrl { get; set; } = string.Empty;
-        public string AdminUpn { get; set; } = string.Empty;
-        public bool RemoveAdmin { get; set; } = true;
-        public bool PreventAllSites { get; set; } = false;
+        public string UserUpn { get; set; }
+        public string SiteUrl { get; set; }
+        public string AdminUpn { get; set; }
+        public bool RemoveAdmin { get; set; }
+        public bool PreventAllSites { get; set; }
 
 
         public IdMismatchTroubleForm()
@@ -37,6 +37,18 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
             InitializeComponent();
 
             DataContext = this;
+
+            UserUpn = string.Empty;
+            SiteUrl = string.Empty;
+            AdminUpn = string.Empty;
+            RemoveAdmin = true;
+            PreventAllSites = false;
+
+
+            SolutionHeader.SolutionTitle = IdMismatchTrouble._solutionName;
+            SolutionHeader.SolutionCode = nameof(IdMismatchTrouble);
+            SolutionHeader.SolutionDocs = IdMismatchTrouble._solutionDocs;
+
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)

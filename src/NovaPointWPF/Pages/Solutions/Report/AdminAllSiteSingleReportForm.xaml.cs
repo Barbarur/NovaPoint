@@ -19,7 +19,7 @@ using NovaPointLibrary.Commands.Authentication;
 namespace NovaPointWPF.Pages.Solutions.Report
 {
     /// <summary>
-    /// Interaction logic for AdminAllSiteSingleReportForm.xaml
+    /// TO BE DEPRECATED
     /// </summary>
     public partial class AdminAllSiteSingleReportForm : Page, ISolutionForm
     {

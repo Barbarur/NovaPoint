@@ -42,10 +42,16 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
                 <Button x:Name="BackButton"
                         Content="Back to Menu"
                         Click="Back_Click"
                         Grid.Column="0"
+                        Grid.RowSpan="2"
                         Height="60"
                         Width="120"/>
 
@@ -53,16 +59,26 @@
                         Content="Run Solution"
                         Click="RunButton_ClickAsync"
                         Grid.Column="1"
-                        Height="60"
+                        Height="40"
                         Width="120"/>
 
                 <Button x:Name="CancelButton"
                         Content="Cancel Solution"
                         Click="CancelButton_ClickAsync"
                         Grid.Column="2"
-                        Height="60"
+                        Height="40"
                         Width="120"
                         IsEnabled="False"/>
+
+                <Button x:Name="FilesButton"
+                        Content="Open Solution Folder"
+                        Click="FilesButton_Click"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        Grid.Row="1"
+                        Height="40"
+                        Width="150"
+                        IsEnabled="false"/>
 
             </Grid>
 
@@ -73,7 +89,7 @@
               Grid.Column="3">
             <Grid.RowDefinitions>
                 <RowDefinition/>
-                <RowDefinition Height="21"/>
+                <RowDefinition Height="27"/>
             </Grid.RowDefinitions>
 
             <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -94,6 +110,20 @@
                          Orientation="Horizontal"
                          Minimum="0"
                          Maximum="100"/>
+        
+            <StackPanel Grid.Row="1"
+                        Orientation="Horizontal">
+
+                <Label x:Name="PercentageCompleted"
+                       FontSize="12"
+                       FontWeight="Bold"/>
+
+                <Label x:Name="PendingTime"
+                       FontSize="12"
+                       FontWeight="Bold"/>
+
+
+            </StackPanel>
 
         </Grid>
 

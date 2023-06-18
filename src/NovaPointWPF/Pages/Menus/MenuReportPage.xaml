@@ -28,16 +28,23 @@
             <StackPanel Margin="0, 0, 0, 12">
                 <Label Content="Site Collection / Subsite"/>
 
-                <Button Content="All Site Collections"
+                <!--To be deprecated-->
+                <!--<Button Content="All Site Collections"
                         Click="GoSiteCollAllReportForm"
-                        Visibility="Collapsed"/>
+                        Visibility="Collapsed"/>-->
 
                 <Button Content="All Site Collections and Subsites"
                         Click="GoSiteAllReportForm"/>
 
-                <Button Content="All Site Collection Admins in a single Site Collection"
-                        Click="GoAdminAllSiteSingleReportForm"/>
-                
+                <!--TO BE DEPRECATED-->
+                <!--<Button Content="All Site Collection Admins in a single Site Collection"
+                        Click="GoAdminAllSiteSingleReportForm"
+                        Visibility="Collapsed"/>-->
+
+                <Button Content="Report of all Permissions in a Site"
+                        Click="GoPermissionsAllSiteSingleReportForm"/>
+
+
             </StackPanel>
 
             <StackPanel Margin="0, 0, 0, 12">

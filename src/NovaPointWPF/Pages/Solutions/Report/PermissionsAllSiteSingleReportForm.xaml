@@ -21,16 +21,16 @@
 
             <Label Content="Permission Filter"/>
 
-            <CheckBox Content="Include Personal Sites"
+            <CheckBox Content="Include Site Collection Admins"
                       IsChecked="{Binding IncludeAdmins, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-            <CheckBox Content="Include Share Sites"
+            <CheckBox Content="Include Site Access"
                       IsChecked="{Binding IncludeSiteAccess, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-            <CheckBox Content="Only MS365 Group Connected Sites"
+            <CheckBox Content="Include Unique Permissions"
                       IsChecked="{Binding IncludeUniquePermissions, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-            <CheckBox Content="Only MS365 Group Connected Sites"
+            <CheckBox Content="Include Subsites"
                       IsChecked="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
             <Label Height="15"/>

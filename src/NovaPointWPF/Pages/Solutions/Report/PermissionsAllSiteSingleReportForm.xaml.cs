@@ -52,9 +52,9 @@ namespace NovaPointWPF.Pages.Solutions.Report
             IncludeResourceLists = false;
 
 
-            SolutionHeader.SolutionTitle = SiteAllReport._solutionName;
-            SolutionHeader.SolutionCode = nameof(SiteAllReport);
-            SolutionHeader.SolutionDocs = SiteAllReport._solutionDocs;
+            SolutionHeader.SolutionTitle = PermissionsAllSiteSingleReport._solutionName;
+            SolutionHeader.SolutionCode = nameof(PermissionsAllSiteSingleReport);
+            SolutionHeader.SolutionDocs = PermissionsAllSiteSingleReport._solutionDocs;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)

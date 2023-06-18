@@ -1,8 +1,11 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Solutions;
+using PnP.Framework.Diagnostics.Tree;
 using PnP.Framework.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -28,8 +31,31 @@ namespace NovaPointWPF.Pages.Solutions
     public partial class SolutionBasePage : Page
     {
         private readonly ISolutionForm _solutionForm;
-        public string Notification { get; set; } = "";
-        public CancellationTokenSource CancelTokenSource { get; set; }
+
+        private string _solutionFolder;
+        private string SolutionFolder
+        {
+            get
+            {
+                return _solutionFolder;
+            }
+            set
+            {
+                if (Directory.Exists(value))
+                {
+                    FilesButton.IsEnabled = true;
+                    _solutionFolder = value;
+                };
+            }
+        }
+        private string SolutionFolder2 = "C:\\Users\\ax_zi\\MEGA\\Coding Projects\\NovaPoint Project\\NovaPoint.wiki"; //string.Empty;
+
+
+
+        //public string Notification { get; set; } = string.Empty;
+        //public string PercentageCompleted { get; set; } = string.Empty;
+        //public string PendingTime { get; set; } = string.Empty;
+        public CancellationTokenSource CancelTokenSource { get; set; } = new();
 
         public SolutionBasePage(ISolutionForm solutionForm)
         {
@@ -67,7 +93,7 @@ namespace NovaPointWPF.Pages.Solutions
                 string.IsNullOrWhiteSpace(Properties.Settings.Default.TenantId) ||
                 string.IsNullOrWhiteSpace(Properties.Settings.Default.ClientId))
             {
-                LogInfo logInfo = new(GetType().Name, mainInfo: "Please go to Settings and fill the App Information");
+                LogInfo logInfo = new("Please go to Settings and fill the App Information");
                 UILog(logInfo);
             }
             else
@@ -103,21 +129,53 @@ namespace NovaPointWPF.Pages.Solutions
             this.CancelTokenSource.Dispose();
         }
 
+
+        private void FilesButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (Directory.Exists(SolutionFolder))
+            {
+                try { Process.Start("explorer.exe", @SolutionFolder); }
+                catch (Exception ex)
+                {
+                    LogInfo logInfo = new(ex.Message);
+                    UILog(logInfo);
+                }
+            };
+        }
+
+
         private void UILog(LogInfo logInfo)
         {
             // https://stackoverflow.com/questions/2382663/ensuring-that-things-run-on-the-ui-thread-in-wpf
             if (BoxText.Dispatcher.CheckAccess())
             {
                 if (!string.IsNullOrEmpty(logInfo.MainClassInfo)) { BoxText.Text = BoxText.Text + logInfo.MainClassInfo + "\n"; }
-                if (logInfo.PercentageProgress != 0) { Progress.Value = logInfo.PercentageProgress; }
+                if (logInfo.PercentageProgress != -1)
+                {
+                    Progress.Value = logInfo.PercentageProgress;
+                    PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
+                    if ( !string.IsNullOrWhiteSpace(logInfo.PendingTime))
+                    {
+                        PendingTime.Content = $" - {logInfo.PendingTime}";
+                    }
+                }
             }
             else
             {
                 BoxText.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
                 new Action(() =>
                 {
+                    if (!string.IsNullOrEmpty(logInfo.SolutionFolder)) { SolutionFolder = logInfo.SolutionFolder; }
                     if (!string.IsNullOrEmpty(logInfo.MainClassInfo)) { BoxText.Text = BoxText.Text + logInfo.MainClassInfo + "\n"; }
-                    if (logInfo.PercentageProgress != 0) { Progress.Value = logInfo.PercentageProgress; }
+                    if (logInfo.PercentageProgress != -1)
+                    {
+                        Progress.Value = logInfo.PercentageProgress;
+                        PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
+                        if (!string.IsNullOrWhiteSpace(logInfo.PendingTime))
+                        {
+                            PendingTime.Content = $" - {logInfo.PendingTime}";
+                        }
+                    }
                 }));
             }
         }

@@ -9,32 +9,29 @@
       Title="SiteAllReportForm">
 
     <Grid Background="Transparent">
-
         <StackPanel>
 
-            <StackPanel>
-                <Label Content="Report of all Site Collections and Subsites"
+            <designmaterial:NPSolutionFormHeader
+                x:Name="SolutionHeader"/>
+            
+            <!--<StackPanel Orientation="Horizontal">
+                <Label x:Name="SolutionName"
                        FontWeight="Bold"/>
+
                 <TextBlock Margin="6">
                     <Hyperlink Click="GoToDocumentation">
                         Learn more
                     </Hyperlink>
                 </TextBlock>
-
             </StackPanel>
 
-            <designmaterial:NPTextBoxField Title="Global or SharePoint Admin UPN"
-                                           Text="{Binding SPOAdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-            
-            <CheckBox Content="Remove Admin after finish solution"
-                      IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-            
-            <Label Height="20"/>
-
-            <CheckBox Content="Include Site Collection Admins"
-                      IsChecked="{Binding IncludeAdmins, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-            <Label Height="15"/>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Solution Code:"
+                       FontWeight="Bold"/>
+                <Label x:Name="SolutionCodeName"
+                       FontStyle="Italic"
+                       Content=""/>
+            </StackPanel>-->
 
             <Label Content="Sites Filter"/>
             <CheckBox x:Name="CheckBoxIncludePersonalSites"
@@ -52,12 +49,29 @@
                       IsChecked="{Binding GroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                       Checked="CheckBoxIncludeGroupIdDefined_Checked"/>
 
+            
             <Label Height="15"/>
+            
+            <designmaterial:NPTextBoxField Title="Global or SharePoint Admin UPN"
+                                           Text="{Binding SPOAdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
+            <CheckBox Content="Remove Admin after finish solution"
+                      IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+           
+
+            <Label Height="20"/>
+            <Label Content="Report Optional Informaiton"/>
+
+            <CheckBox Content="Include Site Collection Admins"
+                      IsChecked="{Binding IncludeAdmins, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+            <CheckBox Content="Include Site Access"
+                      IsChecked="{Binding IncludeSiteAccess, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+            
             <CheckBox Content="Include Subsites"
                       IsChecked="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-        </StackPanel>
 
+        </StackPanel>
     </Grid>
 </Page>

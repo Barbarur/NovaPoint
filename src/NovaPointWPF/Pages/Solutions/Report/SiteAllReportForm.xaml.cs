@@ -25,31 +25,53 @@ namespace NovaPointWPF.Pages.Solutions.Report
     /// </summary>
     public partial class SiteAllReportForm : Page, ISolutionForm
     {
+        public bool IncludePersonalSite { get; set; }
+        public bool IncludeShareSite { get; set; }
+        public bool GroupIdDefined { get; set; }
 
-        // Optional parameters for the current report to filter sites
-        public bool IncludeAdmins { get; set; } = false;
-        public string SPOAdminUPN { get; set; } = String.Empty;
+        public string SPOAdminUPN { get; set; }
+        public bool RemoveAdmin { get; set; }
 
-        public bool RemoveAdmin { get; set; } = false;
+        public bool IncludeAdmins { get; set; }
+        public bool IncludeSiteAccess { get; set; }
+        public bool IncludeSubsites { get; set; }
 
-        public bool IncludePersonalSite { get; set; } = false;
-        public bool IncludeShareSite { get; set; } = true;
-        public bool GroupIdDefined { get; set; } = false;
-
-        public bool IncludeSubsites { get; set; } = false;
+        //private readonly string SolutionDocs;
 
         public SiteAllReportForm()
         {
             InitializeComponent();
 
             DataContext = this;
+
+
+            IncludePersonalSite = false;
+            IncludeShareSite = true;
+            GroupIdDefined = false;
+
+            SPOAdminUPN = string.Empty;
+            RemoveAdmin = false;
+
+            IncludeAdmins = false;
+            IncludeSiteAccess = false;
+            IncludeSubsites = false;
+
+
+            SolutionHeader.SolutionTitle = SiteAllReport._solutionName;
+            SolutionHeader.SolutionCode = nameof(SiteAllReport);
+            SolutionHeader.SolutionDocs = SiteAllReport._solutionDocs;
+
+
+            //SolutionName.Content = SiteAllReport._solutionName;
+            //SolutionCodeName.Content = nameof(SiteAllReport);
+            //SolutionDocs = SiteAllReport._solutionDocs;
         }
+
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
         {
             SiteAllReportParameters parameters = new()
             {
-                IncludeAdmins = IncludeAdmins,
                 AdminUPN = SPOAdminUPN,
                 RemoveAdmin = RemoveAdmin,
 
@@ -57,6 +79,8 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 IncludeShareSite = IncludeShareSite,
                 GroupIdDefined = GroupIdDefined,
 
+                IncludeAdmins = IncludeAdmins,
+                IncludeSiteAccess = IncludeSiteAccess,
                 IncludeSubsites = IncludeSubsites
 
             };
@@ -79,11 +103,10 @@ namespace NovaPointWPF.Pages.Solutions.Report
             CheckBoxIncludeShareSites.IsChecked = true;
         }
 
-        private void GoToDocumentation(object sender, RoutedEventArgs e)
-        {
-            string NavigateUri = "https://github.com/Barbarur/NovaPoint/wiki/Solution:-Report#all-site-collections";
-            var url = NavigateUri.Replace("&", "^&");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-        }
+        //private void GoToDocumentation(object sender, RoutedEventArgs e)
+        //{
+        //    var url = SolutionDocs.Replace("&", "^&");
+        //    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+        //}
     }
 }

@@ -1,6 +1,7 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,6 +38,9 @@ namespace NovaPointWPF.Pages.Menus
             TenantId = Properties.Settings.Default.TenantId;
             ClientId = Properties.Settings.Default.ClientId;
             CachingToken = Properties.Settings.Default.CachingToken;
+
+            if (Properties.Settings.Default.IsUpdated) { UpdateButton.Visibility = Visibility.Collapsed; }
+            else { UpdateButton.Visibility = Visibility.Visible; }
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -59,6 +63,14 @@ namespace NovaPointWPF.Pages.Menus
         private void About_Click(object sender, RoutedEventArgs e)
         {
             NavigationService.Content = new AboutPage();
+        }
+
+        private void Update_Click(object sender, RoutedEventArgs e)
+        {
+            string NavigateUri = "https://github.com/Barbarur/NovaPoint/releases/latest";
+            //var url = NavigateUri.Replace("&", "^&");
+            //Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            Process.Start(new ProcessStartInfo("cmd", $"/c start {NavigateUri}") { CreateNoWindow = true });
         }
 
     }

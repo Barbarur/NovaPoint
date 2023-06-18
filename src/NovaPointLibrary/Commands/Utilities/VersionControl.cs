@@ -14,8 +14,17 @@ namespace NovaPointLibrary.Commands.Utilities
 
         public static async Task<bool> IsUpdated()
         {
-            string? versionAssembly = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            string? versionGitHub = await GetGithubLatestRelease();
+            string? versionAssembly;
+            string? versionGitHub;
+            try
+            {
+                versionAssembly = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                versionGitHub = await GetGithubLatestRelease();
+            }
+            catch
+            {
+                return true;
+            }
 
             if (versionAssembly != null && versionGitHub != null)
             {
@@ -27,7 +36,7 @@ namespace NovaPointLibrary.Commands.Utilities
             }
             else
             {
-                return false;
+                return true;
             }
         }
 

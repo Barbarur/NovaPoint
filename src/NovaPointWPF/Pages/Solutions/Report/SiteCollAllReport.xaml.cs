@@ -20,7 +20,7 @@ using System.Windows.Shapes;
 namespace NovaPointWPF.Pages.Solutions.Report
 {
     /// <summary>
-    /// Interaction logic for SiteCollAllReport.xaml
+    /// TO BE DEPRECATED
     /// </summary>
     public partial class SiteCollAllReportForm : Page, ISolutionForm
     {
