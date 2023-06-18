@@ -12,7 +12,7 @@
     <Grid Background="Transparent">
         <StackPanel>
 
-            <Label Content="Remove a User from All Site Collections"
+            <Label Content="Set/Remove a User as Site Collection Admin from all Site Collections"
                    FontWeight="Bold"/>
             <Label Height="15"/>
 

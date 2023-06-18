@@ -28,7 +28,7 @@
             <StackPanel Margin="0, 0, 0, 12">
                 <Label Content="Site Collection / Subsite"/>
 
-                <Button Content="Add/Remove a Site Collection Admin on All Site Collections"
+                <Button Content="Set/Remove a User as Site Collection Admin from all Site Collections"
                         Click="GoSetSiteCollectionAdminAllAutoForm"/>
 
             </StackPanel>

@@ -11,7 +11,7 @@
     <Grid Background="Transparent">
         <StackPanel>
 
-            <Label Content="Dele File or Item versions from a single Library or list in a single Site"
+            <Label Content="Remove versions from Files/Items from a single Library/list in a Site"
                    FontWeight="Bold"/>
             <Label Height="15"/>
 
