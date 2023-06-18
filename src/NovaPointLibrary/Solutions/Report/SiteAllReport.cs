@@ -95,13 +95,13 @@ namespace NovaPointLibrary.Solutions.Report
 
             _logHelper.ScriptStartNotice();
 
-            string aadAccessToken = await new GetAccessToken(_logHelper, _appInfo).GraphInteractiveAsync();
             string spoAdminAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
+            string aadAccessToken = String.Empty;
             string? spoRootPersonalSiteAccessToken = String.Empty;
             string? spoRootShareSiteAccessToken = String.Empty;
             if (IncludeAdmins || IncludeSiteAccess || IncludeSubsites)
             {
-
+                aadAccessToken = await new GetAccessToken(_logHelper, _appInfo).GraphInteractiveAsync();
                 if (IncludePersonalSite) { spoRootPersonalSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl); }
                 if (IncludeShareSite) { spoRootShareSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl); }
 

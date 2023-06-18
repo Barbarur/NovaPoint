@@ -127,6 +127,7 @@ namespace NovaPointWPF.Pages.Solutions
         {
             this.CancelTokenSource.Cancel();
             this.CancelTokenSource.Dispose();
+            CancelButton.IsEnabled = false;
         }
 
 

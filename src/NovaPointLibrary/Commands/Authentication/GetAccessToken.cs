@@ -35,10 +35,34 @@ namespace NovaPointLibrary.Commands.Authentication
 
         internal async Task<string> GraphInteractiveAsync()
         {
-            _appInfo.IsCancelled();
-            _logHelper.AddLogToTxt($"{GetType().Name}.GraphInteractiveAsync - Start getting Graph Access Token");
+            //_appInfo.IsCancelled();
+            //_logHelper.AddLogToTxt($"{GetType().Name}.GraphInteractiveAsync - Start getting Graph Access Token");
 
-            return await GraphTest();
+            //return await GraphTest();
+
+            _appInfo.IsCancelled();
+            string methodName = $"{GetType().Name}.GraphInteractiveAsync";
+            _logHelper.AddLogToTxt(methodName, $"Start getting Graph Access Token");
+
+            // Reference: https://johnthiriet.com/cancel-asynchronous-operation-in-csharp/
+            var aquireGraphToken = GraphTest();
+
+            TaskCompletionSource taskCompletionSource = new();
+
+            _appInfo.CancelToken.Register(() => taskCompletionSource.TrySetCanceled());
+
+            var completedTask = await Task.WhenAny(aquireGraphToken, taskCompletionSource.Task);
+
+            if (completedTask != aquireGraphToken || _appInfo.CancelToken.IsCancellationRequested)
+            {
+                _appInfo.CancelToken.ThrowIfCancellationRequested();
+                return null;
+            }
+            else
+            {
+                return await aquireGraphToken;
+            }
+
         }
 
         internal async Task<string> GraphTest()
