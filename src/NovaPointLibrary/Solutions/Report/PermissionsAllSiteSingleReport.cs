@@ -16,7 +16,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class PermissionsAllSiteSingleReport
     {
         public static string _solutionName = "Report of all Permissions in a Site";
-        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/"; 
+        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PermissionSiteAccessSiteAllReport"; 
         
         private readonly LogHelper _logHelper;
         private readonly Commands.Authentication.AppInfo _appInfo;
@@ -97,29 +97,35 @@ namespace NovaPointLibrary.Solutions.Report
             GetSPOSitePermissions getPermissions = new(_logHelper, _appInfo, spoSiteAccessToken, aadAccessToken, KnownGroups);
 
             Web oSite = new GetSPOSite(_logHelper, _appInfo, spoSiteAccessToken).CSOMWithRoles(SiteUrl);
-            
-            double counter = 0;
-            double progress = Math.Round(counter * 100 / 1, 2);
-            counter++;
-            _logHelper.AddProgressToUI(progress);
-            _logHelper.AddLogToUI($"Processing Site '{oSite.Title}'");
+
+            //double counter = 0;
+            //double progress = Math.Round(counter * 100 / 1, 2);
+            //counter++;
+            //_logHelper.AddProgressToUI(progress);
+            //_logHelper.AddLogToUI($"Processing Site '{oSite.Title}'");
+            ProgressTracker progress = new(_logHelper, 1);
+            progress.MainReportProgress($"Processing Site '{oSite.Title}'");
 
             AddRecordToCSV( await getPermissions.CSOMSiteAsync(oSite, IncludeAdmins, IncludeSiteAccess, IncludeUniquePermissions, IncludeSystemLists, IncludeResourceLists) );
 
             if (IncludeSubsites)
             {
                 var collSubsites = new GetSubsite(_logHelper, _appInfo, spoSiteAccessToken).CsomAllSubsitesWithRolesAndSiteDetails(SiteUrl);
+                progress.SubTaskProgressReset(collSubsites.Count);
                 foreach (var oSubsite in collSubsites)
                 {
-
-                    progress = Math.Round(counter * 100 / (collSubsites.Count + 1), 2);
-                    counter++;
-                    _logHelper.AddProgressToUI(progress);
-                    _logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}'");
+                    //progress = Math.Round(counter * 100 / (collSubsites.Count + 1), 2);
+                    //counter++;
+                    //_logHelper.AddProgressToUI(progress);
+                    //_logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}'");
+                    progress.SubTaskReportProgress($"Processing SubSite '{oSubsite.Title}'");
                     
                     AddRecordToCSV( await getPermissions.CSOMSubsiteAsync(oSubsite, IncludeSiteAccess, IncludeUniquePermissions, IncludeSystemLists, IncludeResourceLists) );
+
+                    progress.SubTaskCounterIncrement();
                 }
             }
+            progress.MainCounterIncrement();
 
             _logHelper.ScriptFinishSuccessfulNotice();
         }

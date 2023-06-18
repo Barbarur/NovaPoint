@@ -1,5 +1,6 @@
 ﻿using AngleSharp.Css.Dom;
 using Microsoft.Graph;
+using Microsoft.SharePoint.Client;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;
@@ -11,18 +12,15 @@ namespace NovaPointLibrary.Solutions
 {
     public class LogInfo
     {
-        public string ClassMethod { get; set; } = String.Empty;
-        public string MainClassInfo { get; set; } = String.Empty;
-        public string DetailInfo { get; set; } = String.Empty;
+        public string ClassMethod { get; set; } = string.Empty;
+        public string MainClassInfo { get; set; } = string.Empty;
+        public string DetailInfo { get; set; } = string.Empty;
         public double PercentageProgress { get; set; } = -1;
-        public string PendingTime { get; set; } = String.Empty;
+        public string PendingTime { get; set; } = string.Empty;
+        public string SolutionFolder { get; set; } = string.Empty;
 
-        // TO BE DEPRECATED
-        public LogInfo(string classMethod, string mainInfo = "", double percentageProgress = 0)
+        public LogInfo()
         {
-            ClassMethod = classMethod;
-            MainClassInfo = mainInfo;
-            PercentageProgress = percentageProgress;
         }
 
         public LogInfo(string mainInfo)
@@ -40,6 +38,12 @@ namespace NovaPointLibrary.Solutions
             PendingTime = pendingTime;
         }
 
+        public static LogInfo FolderInfo(string folder)
+        {
+            LogInfo logInfo = new();
+            logInfo.SolutionFolder = folder;
+            return logInfo;
+        }
         internal void Clear()
         {
             MainClassInfo = String.Empty;

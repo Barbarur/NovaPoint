@@ -17,8 +17,8 @@ namespace NovaPointLibrary.Solutions.Report
 {
     public class SiteAllReport
     {
-        public static string _solutionName = "Report of all Site Collections and Subsites";
-        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/";
+        public static string _solutionName = "All Site Collections and Subsites";
+        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-SiteAllReport";
 
         private readonly LogHelper _logHelper;
         private readonly Commands.Authentication.AppInfo _appInfo;
@@ -112,18 +112,18 @@ namespace NovaPointLibrary.Solutions.Report
             if (!IncludePersonalSite) { collSiteCollections.RemoveAll(s => s.Template.Contains("SPSPERS")); }
             if (!IncludeShareSite) { collSiteCollections.RemoveAll(s => !s.Template.Contains("SPSPERS")); }
 
-            double counter = 0;
-            float counterStep = 1 / collSiteCollections.Count;
+            //double counter = 0;
+            //float counterStep = 1 / collSiteCollections.Count;
+            ProgressTracker progress = new(_logHelper, collSiteCollections.Count);
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
                 _appInfo.IsCancelled();
 
-                //if (oSiteCollection.Url != "https://m365x88421522.sharepoint.com/sites/35581560BirendarKumar") { continue; }
-
-                double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
-                counter++;
-                _logHelper.AddProgressToUI(progress);
-                _logHelper.AddLogToUI($"Processing Site Collection '{oSiteCollection.Title}'");
+                //double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
+                //counter++;
+                //_logHelper.AddProgressToUI(progress);
+                //_logHelper.AddLogToUI($"Processing Site Collection '{oSiteCollection.Title}'");
+                progress.MainReportProgress($"Processing Site Collection '{oSiteCollection.Title}'");
 
                 string? currentSiteAccessToken = oSiteCollection.Url.Contains("-my.sharepoint.com") ? spoRootPersonalSiteAccessToken : spoRootShareSiteAccessToken;
 
@@ -151,13 +151,15 @@ namespace NovaPointLibrary.Solutions.Report
                         if (IncludeSubsites)
                         {
                             var collSubsites = new GetSubsite(_logHelper, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRolesAndSiteDetails(oSiteCollection.Url);
+                            progress.SubTaskProgressReset(collSubsites.Count);
                             foreach (var oSubsite in collSubsites)
                             {
-                                progress = Math.Round( progress + ( counterStep * 100 / ( collSubsites.Count + 1) ), 2);
-                                _logHelper.AddProgressToUI(progress);
-                                _logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}' Pregress {progress}");
-                                _logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}' COunterStep {counterStep}");
-                                _logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}'");
+                                //progress = Math.Round( progress + ( counterStep * 100 / ( collSubsites.Count + 1) ), 2);
+                                //_logHelper.AddProgressToUI(progress);
+                                //_logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}' Pregress {progress}");
+                                //_logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}' COunterStep {counterStep}");
+                                //_logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}'");
+                                progress.SubTaskReportProgress($"Processing SubSite '{oSubsite.Title}'");
 
                                 if (IncludeSiteAccess)
                                 {
@@ -169,6 +171,7 @@ namespace NovaPointLibrary.Solutions.Report
                                     SPORoleAssignmentRecord blankPermissions = new();
                                     AddSiteRecordToCSVWITHPERMISSIONS(null, oSubsite, blankPermissions);
                                 }
+                                progress.SubTaskCounterIncrement();
                             }
                         }
                     }
@@ -187,6 +190,7 @@ namespace NovaPointLibrary.Solutions.Report
                     SPORoleAssignmentRecord blankPermissions = new("", "", "", "", ex.Message);
                     AddSiteRecordToCSVWITHPERMISSIONS(oSiteCollection, null, blankPermissions);
                 }
+                progress.MainCounterIncrement();
             }
 
             _logHelper.ScriptFinishSuccessfulNotice();
@@ -456,9 +460,9 @@ namespace NovaPointLibrary.Solutions.Report
             record.GroupId = siteCollection != null ? siteCollection?.GroupId.ToString() : string.Empty;
             record.Tempalte = siteCollection != null ? siteCollection?.Template : subsiteWeb?.WebTemplate;
 
-            record.StorageQuotaGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageMaximumLevel / Math.Pow(1024, 3), 2)) : string.Empty;
-            record.StorageUsedGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageUsage / Math.Pow(1024, 3), 2)) : string.Empty; // ADD CONSUMPTION FOR SUBSITES
-            record.storageWarningLevelGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageWarningLevel / Math.Pow(1024, 3), 2)) : string.Empty;
+            record.StorageQuotaGB = siteCollection != null ? Math.Round(((float)siteCollection.StorageMaximumLevel / 1024), 2).ToString() : string.Empty;
+            record.StorageUsedGB = siteCollection != null ? Math.Round(((float)siteCollection.StorageUsage / 1024), 2).ToString() : string.Empty; // ADD CONSUMPTION FOR SUBSITES
+            record.storageWarningPercentageLevelGB = siteCollection != null ? Math.Round( (float)siteCollection.StorageWarningLevel / (float)siteCollection.StorageMaximumLevel * 100, 2).ToString() : string.Empty;
 
             record.IsHubSite = siteCollection != null ? siteCollection?.IsHubSite.ToString() : "False";
             record.LastContentModifiedDate = siteCollection != null ? siteCollection?.LastContentModifiedDate.ToString() : subsiteWeb?.LastItemModifiedDate.ToString();

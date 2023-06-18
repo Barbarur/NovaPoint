@@ -20,8 +20,8 @@ namespace NovaPointLibrary.Solutions.QuickFix
 {
     public class IdMismatchTrouble
     {
-        public static string _solutionName = "Report of all Permissions in a Site";
-        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/";
+        public static string _solutionName = "Resolve user ID Mismatch";
+        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-ID-Match";
 
         private readonly LogHelper _logHelper;
         private readonly Commands.Authentication.AppInfo _appInfo;
@@ -84,12 +84,12 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
             if (_preventAllSites) 
             {
-                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                _appInfo.IsCancelled();
                 new RegisterUser(_logHelper, rootSiteAccessToken).Csom(_siteUrl, _userUpn);
 
-                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                _appInfo.IsCancelled();
                 User? user = new GetUser(_logHelper, rootSiteAccessToken).CsomSingle(_siteUrl, _userUpn);
-                if (user != null) { throw new Exception("User couldn't be found to obtain connect user ID"); }
+                if (user != null) { throw new Exception("User couldn't be found to obtain correct user ID"); }
 
                 UserIdInfo userIdInfo = user.UserId;
                 string userCorrectId = userIdInfo.NameId;
@@ -104,8 +104,6 @@ namespace NovaPointLibrary.Solutions.QuickFix
         {
             try
             {
-                _logHelper.AddLogToUI($"Processing site: {siteUrl}");
-
                 if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                 new SetSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Add(_adminUpn, siteUrl);
 
@@ -167,29 +165,30 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
         private async Task AllSitesAsync(string adminAccessToken, string correctUserID)
         {
-            if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+            _appInfo.IsCancelled();
             string rootPersonalSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl);
             string rootShareSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl);
 
-            if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+            _appInfo.IsCancelled(); 
             var collSiteCollections = new GetSiteCollection(_logHelper, adminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, true);
-            double counter = 0;
+            //double counter = 0;
+            ProgressTracker progress = new(_logHelper, collSiteCollections.Count);
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
-                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                _appInfo.IsCancelled();
 
-                double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
-                counter++;
-                _logHelper.AddProgressToUI(progress);
+                //double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
+                //counter++;
+                //_logHelper.AddProgressToUI(progress);
+                progress.MainReportProgress($"Processing Site '{oSiteCollection.Title}'");
 
                 string currentSiteAccessToken = oSiteCollection.Url.Contains("-my.sharepoint.com") ? rootPersonalSiteAccessToken : rootShareSiteAccessToken;
 
                 SingleSiteAsync(adminAccessToken, oSiteCollection.Url, currentSiteAccessToken, correctUserID);
 
+                progress.MainCounterIncrement();
             }
-
         }
-
     }
 
     public class IdMismatchTroubleParameters

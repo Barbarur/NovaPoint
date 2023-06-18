@@ -38,7 +38,12 @@ namespace NovaPointLibrary.Solutions
             _txtPath = System.IO.Path.Combine(_folderPath, folderName + "_Logs.txt");
             _csvPath = System.IO.Path.Combine(_folderPath, folderName + "_Report.csv");
 
-            RecordsLocation();
+
+            AddLogToTxt($"Solution logs can be found at: {_txtPath}");
+            AddLogToTxt($"Solution report can be found at: {_csvPath}");
+            _uiAddLog(LogInfo.FolderInfo(_folderPath));
+
+            //RecordsLocation();
 
             _classMethod = $"{solutionName}.RunAsync";
 
@@ -139,11 +144,11 @@ namespace NovaPointLibrary.Solutions
 
         }
 
-        internal void RecordsLocation()
-        {
-            AddLogToUI($"Solution logs can be found at: {_txtPath}");
-            AddLogToUI($"Solution report can be found at: {_csvPath}");
-        }
+        //internal void RecordsLocation()
+        //{
+        //    AddLogToUI($"Solution logs can be found at: {_txtPath}");
+        //    AddLogToUI($"Solution report can be found at: {_csvPath}");
+        //}
 
         internal void ScriptStartNotice()
         {
@@ -167,9 +172,9 @@ namespace NovaPointLibrary.Solutions
         {
             SW.Stop();
             AddProgressToUI(100);
-            AddLogToUI($"   ");
-            RecordsLocation();
-            AddLogToUI($"   ");
+            //AddLogToUI($"   ");
+            //RecordsLocation();
+            //AddLogToUI($"   ");
         }
     }
 }
