@@ -26,7 +26,7 @@ All Documentation related with this project can be found in our [Wiki](https://g
  
 ## Support ##
 
-If you need any asistance, you can ask for help on the [discussions](https://github.com/Barbarur/NovaPoint/discussions).
+If you need any assistance, you can ask for help on the [discussions](https://github.com/Barbarur/NovaPoint/discussions).
 
 Please report any issues using the [issues list](https://github.com/Barbarur/NovaPoint/issues).
 
