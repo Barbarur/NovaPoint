@@ -5,6 +5,9 @@ using Microsoft.SharePoint.Client;
 using NovaPoint.Commands.Site;
 using NovaPointLibrary.Commands;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.SharePoint.Permision;
+using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Commands.SharePoint.User;
 using NovaPointLibrary.Commands.Site;
 using NovaPointLibrary.Commands.User;
 using PnP.Framework.Modernization.Telemetry;
@@ -32,12 +35,14 @@ namespace NovaPointLibrary.Solutions.QuickFix
         
         private readonly bool _preventAllSites;
         private readonly bool _removeAdmin;
+        public readonly bool _reportMode;
 
 
-        public IdMismatchTrouble(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo,
+        public IdMismatchTrouble(Action<LogInfo> uiAddLog,
+                                 Commands.Authentication.AppInfo appInfo,
                                  IdMismatchTroubleParameters parameters)
         {
-            _logHelper = new(uiAddLog, "Reports", GetType().Name);
+            _logHelper = new(uiAddLog, "QuickFix", GetType().Name);
             _appInfo = appInfo;
             
             _userUpn = parameters.UserUpn;
@@ -46,6 +51,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
             _preventAllSites = parameters.PreventAllSites;
             _removeAdmin = parameters.RemoveAdmin;
+            _reportMode = parameters.ReportMode;
         }
 
 
@@ -75,78 +81,83 @@ namespace NovaPointLibrary.Solutions.QuickFix
         {
             _logHelper.ScriptStartNotice();
 
-            string adminAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
-
+            string spoAdminAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
             string rootUrl = _siteUrl.Substring(0, _siteUrl.IndexOf(".com") + 4);
             string rootSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(rootUrl);
 
-            SingleSiteAsync(adminAccessToken, _siteUrl, rootSiteAccessToken, "abcdefghijk");
+            new SetSPOSiteCollectionAdmin(_logHelper, _appInfo, spoAdminAccessToken).CSOM(_adminUpn, _siteUrl);
+            if (!_reportMode)
+            {
+                SingleSiteAsync(spoAdminAccessToken, _siteUrl, rootSiteAccessToken, "abcdefghijk");
+            }
+
 
             if (_preventAllSites) 
             {
-                _appInfo.IsCancelled();
-                new RegisterUser(_logHelper, rootSiteAccessToken).Csom(_siteUrl, _userUpn);
+                new RegisterSPOSiteUser(_logHelper, _appInfo, rootSiteAccessToken).CSOM(_siteUrl, _userUpn);
 
-                _appInfo.IsCancelled();
                 User? user = new GetUser(_logHelper, rootSiteAccessToken).CsomSingle(_siteUrl, _userUpn);
-                if (user != null) { throw new Exception("User couldn't be found to obtain correct user ID"); }
+                if (user == null) { throw new Exception("User couldn't be found to obtain correct user ID"); }
 
                 UserIdInfo userIdInfo = user.UserId;
                 string userCorrectId = userIdInfo.NameId;
 
-                await AllSitesAsync(adminAccessToken, userCorrectId); 
+                await AllSitesAsync(spoAdminAccessToken, userCorrectId); 
+            }
+
+            if (!_reportMode && _removeAdmin)
+            {
+                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                new RemoveSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Csom(_siteUrl, _adminUpn);
             }
 
             _logHelper.ScriptFinishSuccessfulNotice();
         }
 
-        private void SingleSiteAsync(string adminAccessToken, string siteUrl, string siteAccessToken, string correctUserID)
+        private void SingleSiteAsync(string spoAdminAccessToken, string siteUrl, string siteAccessToken, string correctUserID)
         {
+            _appInfo.IsCancelled();
+            string methodName = $"{GetType().Name}.SingleSiteAsync";
+            _logHelper.AddLogToTxt(methodName, $"Start processing Site '{siteUrl}'");
+
             try
             {
-                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-                new SetSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Add(_adminUpn, siteUrl);
-
-                if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                 User? user = new GetUser(_logHelper, siteAccessToken).CsomSingle(siteUrl, _userUpn);
 
                 if (user == null) { return; }
 
                 string siteUserID = ((UserIdInfo)user.UserId).NameId;
-                if (siteUserID == correctUserID)
+                if (siteUserID != correctUserID)
                 {
-                    if (user.IsSiteAdmin)
+                    if (!_reportMode)
                     {
-                        if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-                        new RemoveSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Csom(siteUrl, user.UserPrincipalName);
-                    }
+                        if (user.IsSiteAdmin)
+                        {
+                            if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                            new RemoveSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Csom(siteUrl, user.UserPrincipalName);
+                        }
 
-                    if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-                    new RemoveUser(_logHelper, siteAccessToken).Csom(siteUrl, user.UserPrincipalName);
+                        if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                        new RemoveUser(_logHelper, siteAccessToken).Csom(siteUrl, user.UserPrincipalName);
+                    }
 
                     string remarks = "User with incorrect ID found on Site and Removed";
 
-                    dynamic recordSite = new ExpandoObject();
-                    recordSite.SiteUrl = siteUrl;
-                    recordSite.Remarks = remarks;
-                    _logHelper.AddRecordToCSV(recordSite);
+                    AddRecordToCSV(siteUrl, remarks);
+                    //dynamic recordSite = new ExpandoObject();
+                    //recordSite.SiteUrl = siteUrl;
+                    //recordSite.Remarks = remarks;
+                    //_logHelper.AddRecordToCSV(recordSite);
 
-                    _logHelper.AddLogToUI(remarks);
+                    _logHelper.AddLogToTxt(remarks);
                 }
 
                 string urlOwnerODBCheckUp = _userUpn.Replace("@", "_").Replace(".", "_");
-                if (_siteUrl.Contains(urlOwnerODBCheckUp) && _siteUrl.Contains("-my.sharepoint.com"))
+                if (siteUrl.Contains(urlOwnerODBCheckUp, StringComparison.OrdinalIgnoreCase) && siteUrl.Contains("-my.sharepoint.com") && !_reportMode)
                 {
-                    if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-                    new SetSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Add(user.UserPrincipalName, siteUrl);
+                    _logHelper.AddLogToUI(methodName, $"Adding user '{user.UserPrincipalName}' as OneDrive Admin for site {siteUrl}");
+                    new SetSPOSiteCollectionAdmin(_logHelper, _appInfo, spoAdminAccessToken).CSOM(_userUpn, siteUrl);
                 }
-
-                if (_removeAdmin)
-                {
-                    if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-                    new RemoveSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Csom(siteUrl, _adminUpn);
-                }
-
             }
             catch(Exception ex)
             {
@@ -163,31 +174,82 @@ namespace NovaPointLibrary.Solutions.QuickFix
         }
 
 
-        private async Task AllSitesAsync(string adminAccessToken, string correctUserID)
+        private async Task AllSitesAsync(string spoAdminAccessToken, string correctUserID)
         {
             _appInfo.IsCancelled();
-            string rootPersonalSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl);
-            string rootShareSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl);
+            string methodName = $"{GetType().Name}.AllSitesAsync";
+            _logHelper.AddLogToTxt(methodName, $"Start fixing ID Mismatch for all Sites");
 
-            _appInfo.IsCancelled(); 
-            var collSiteCollections = new GetSiteCollection(_logHelper, adminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, true);
-            //double counter = 0;
+            string rootPersonalSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl);
+            string rootShareSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl);
+
+            List<SiteProperties> collSiteCollections = new GetSPOSiteCollection(_logHelper, _appInfo, spoAdminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, true);
             ProgressTracker progress = new(_logHelper, collSiteCollections.Count);
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
                 _appInfo.IsCancelled();
 
-                //double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
-                //counter++;
-                //_logHelper.AddProgressToUI(progress);
                 progress.MainReportProgress($"Processing Site '{oSiteCollection.Title}'");
-
+                
                 string currentSiteAccessToken = oSiteCollection.Url.Contains("-my.sharepoint.com") ? rootPersonalSiteAccessToken : rootShareSiteAccessToken;
+                
+                try
+                {
+                    new SetSPOSiteCollectionAdmin(_logHelper, _appInfo, spoAdminAccessToken).CSOM(_adminUpn, oSiteCollection.Url);
 
-                SingleSiteAsync(adminAccessToken, oSiteCollection.Url, currentSiteAccessToken, correctUserID);
+                    SingleSiteAsync(spoAdminAccessToken, oSiteCollection.Url, currentSiteAccessToken, correctUserID);
+
+                    var collSubsites = new GetSubsite(_logHelper, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRoles(oSiteCollection.Url);
+                    progress.SubTaskProgressReset(collSubsites.Count);
+                    foreach (var oSubsite in collSubsites)
+                    {
+                        progress.SubTaskReportProgress($"Processing SubSite '{oSubsite.Title}'");
+
+                        if (oSubsite.HasUniqueRoleAssignments)
+                        {
+                            try
+                            {
+                                SingleSiteAsync(spoAdminAccessToken, oSubsite.Url, currentSiteAccessToken, correctUserID);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logHelper.AddLogToUI($"Error processing Site Collection '{oSubsite.Url}'");
+                                _logHelper.AddLogToTxt($"Exception: {ex.Message}");
+                                _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
+
+                                AddRecordToCSV(oSubsite.Url, ex.Message);
+                            }
+                        }
+
+                        progress.SubTaskCounterIncrement();
+                    }
+
+
+                    if (_removeAdmin)
+                    {
+                        if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
+                        new RemoveSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Csom(oSiteCollection.Url, _adminUpn);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logHelper.AddLogToUI($"Error processing Site Collection '{oSiteCollection.Url}'");
+                    _logHelper.AddLogToTxt($"Exception: {ex.Message}");
+                    _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
+
+                    AddRecordToCSV(oSiteCollection.Url, ex.Message);
+                }
 
                 progress.MainCounterIncrement();
             }
+        }
+
+        private void AddRecordToCSV(string siteUrl, string remarks)
+        {
+            dynamic recordSite = new ExpandoObject();
+            recordSite.SiteUrl = siteUrl;
+            recordSite.Remarks = remarks;
+            _logHelper.AddRecordToCSV(recordSite);
         }
     }
 
@@ -198,6 +260,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
         internal readonly string AdminUpn;
         public bool RemoveAdmin { get; set; } = false;
         public bool PreventAllSites { get; set; } = false;
+        public bool ReportMode { get; set; } = false;
 
         public IdMismatchTroubleParameters(string userUpn, string siteUrl, string adminUpn)
         {

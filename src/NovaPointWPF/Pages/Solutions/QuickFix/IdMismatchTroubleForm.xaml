@@ -9,7 +9,7 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="IdMismatchTroubleForm">
 
-    <Grid Background="Transparent">
+    <Grid Background="Pink">
 
         <StackPanel>
 
@@ -22,10 +22,9 @@
                 Text="{Binding UserUpn, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
             <designmaterial:NPTextBoxField
+                x:Name="SiteUrlAffectedTextBox"
                 Title="Affected Site URL"
                 Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-            <Label Height="15"/>
             
             <designmaterial:NPTextBoxField
                 Title="Global or SharePoint Admin UPN"
@@ -36,8 +35,20 @@
 
             <Label Height="15"/>
 
-            <CheckBox Content="Prevent this issue on all Sites"
+            <CheckBox x:Name="PreventAllSitesCheckBox"
+                      Content="Prevent this issue on all Sites"
                       IsChecked="{Binding PreventAllSites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+            <Label Height="15"/>
+            
+            <CheckBox Content="Run it a Report Mode Only"
+                      IsChecked="{Binding ReportMode, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+            <designmaterial:NPTextBoxField
+                x:Name="SiteUrlCorrectCheckBox"
+                Title="Site where user has CORRECT access"
+                Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                Visibility="Collapsed"/>
 
         </StackPanel>
 

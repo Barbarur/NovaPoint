@@ -30,7 +30,27 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
         public string AdminUpn { get; set; }
         public bool RemoveAdmin { get; set; }
         public bool PreventAllSites { get; set; }
+        private bool _reportMode;
+        public bool ReportMode
+        { 
+            get { return _reportMode; }
+            set
+            {
+                _reportMode = value;
+                if (value == true)
+                {
+                    SiteUrlAffectedTextBox.Visibility = Visibility.Collapsed;
+                    SiteUrlCorrectCheckBox.Visibility = Visibility.Visible;
+                    PreventAllSitesCheckBox.IsChecked = true;
+                }
+                else if (value == false)
+                {
+                    SiteUrlAffectedTextBox.Visibility = Visibility.Visible;
+                    SiteUrlCorrectCheckBox.Visibility = Visibility.Collapsed;
+                }
 
+            }
+        }
 
         public IdMismatchTroubleForm()
         {
@@ -58,7 +78,8 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
             IdMismatchTroubleParameters parameters = new(UserUpn, SiteUrl, AdminUpn)
             {
                 RemoveAdmin = RemoveAdmin,
-                PreventAllSites = PreventAllSites
+                PreventAllSites = PreventAllSites,
+                ReportMode = ReportMode
 
             };
             await new IdMismatchTrouble(uiLog, appInfo, parameters).RunAsync();
