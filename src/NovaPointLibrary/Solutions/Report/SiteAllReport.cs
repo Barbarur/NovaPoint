@@ -154,11 +154,6 @@ namespace NovaPointLibrary.Solutions.Report
                             progress.SubTaskProgressReset(collSubsites.Count);
                             foreach (var oSubsite in collSubsites)
                             {
-                                //progress = Math.Round( progress + ( counterStep * 100 / ( collSubsites.Count + 1) ), 2);
-                                //_logHelper.AddProgressToUI(progress);
-                                //_logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}' Pregress {progress}");
-                                //_logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}' COunterStep {counterStep}");
-                                //_logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}'");
                                 progress.SubTaskReportProgress($"Processing SubSite '{oSubsite.Title}'");
 
                                 if (IncludeSiteAccess)
@@ -173,6 +168,10 @@ namespace NovaPointLibrary.Solutions.Report
                                 }
                                 progress.SubTaskCounterIncrement();
                             }
+                        }
+                        if (RemoveAdmin)
+                        {
+                            new RemoveSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Csom(oSiteCollection.Url, AdminUPN);
                         }
                     }
                     else
