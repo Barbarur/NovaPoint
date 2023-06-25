@@ -12,6 +12,8 @@ using NovaPointLibrary.Commands.Site;
 using System.Diagnostics.Metrics;
 using NovaPointLibrary.Commands.AzureAD;
 using NovaPointLibrary.Solutions.Report;
+using NovaPointLibrary.Solutions.QuickFix;
+using NovaPointLibrary.Commands.SharePoint.Site;
 
 namespace NovaPointLibrary
 {
@@ -24,8 +26,20 @@ namespace NovaPointLibrary
         public GeneralTester(Action<LogInfo> uiAddLog, AppInfo appInfo)
         {
             // Baic parameters required for all reports
-            _LogHelper = new(uiAddLog, "Reports", GetType().Name);
+            _LogHelper = new(uiAddLog, "Test", GetType().Name);
             _appInfo = appInfo;
+        }
+
+        public async Task AddAdmin(string userUpn, string siteUrl, string adminUpn)
+        {
+
+            string spoAdminAccessToken = await new GetAccessToken(_LogHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
+
+            new SetSPOSiteCollectionAdmin(_LogHelper, _appInfo, spoAdminAccessToken).CSOM(adminUpn, siteUrl);
+
+            new SetSPOSiteCollectionAdmin(_LogHelper, _appInfo, spoAdminAccessToken).CSOM(adminUpn, siteUrl);
+
+            new SetSPOSiteCollectionAdmin(_LogHelper, _appInfo, spoAdminAccessToken).CSOM(userUpn, siteUrl);
         }
     }
 }

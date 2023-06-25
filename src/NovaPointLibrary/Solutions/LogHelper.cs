@@ -1,5 +1,6 @@
 ﻿using CamlBuilder;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.SharePoint.Client;
 using Newtonsoft.Json.Linq;
 using PnP.Framework.Diagnostics;
 using PnP.Framework.Modernization.Telemetry;
@@ -117,7 +118,9 @@ namespace NovaPointLibrary.Solutions
 
         internal void AddRecordToCSV(dynamic o)
         {
-            AddLogToTxt($"[{GetType().Name}.AddRecordToCSV] - Adding Record to csv report");
+            string methodName = $"{GetType().Name}.AddRecordToCSV";
+            AddLogToTxt(methodName, $"Adding Record to csv report");
+
             StringBuilder sb = new();
             using StreamWriter csv = new(new FileStream(_csvPath, FileMode.Append, FileAccess.Write));
             {
