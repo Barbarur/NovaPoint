@@ -71,7 +71,7 @@ namespace NovaPointLibrary.Commands.User
             }
             catch
             {
-                _LogHelper.AddLogToUI($"User '{userUPN}' no found in Site '{siteUrl}'");
+                _LogHelper.AddLogToTxt($"User '{userUPN}' no found in Site '{siteUrl}'");
                 return null;
             }
 
