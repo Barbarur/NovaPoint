@@ -35,7 +35,7 @@ For more information on how the solution works, you can visit the [**ID Mismatch
 
 #### Option #2: Removing the user from the Site List
 
-1. Navigate to the Site location */_layouts/15/people.aspx?MembershipGroupId=0* to access the Site user list (i.e. *"https://<Domain>.sharepoint.com/sites/<SiteName>/_layouts/15/people.aspx?MembershipGroupId=0"*)
+1. Navigate to the Site location */_layouts/15/people.aspx?MembershipGroupId=0* to access the Site user list (i.e. *"https://\<Domain\>.sharepoint.com/sites/\<SiteName\>/_layouts/15/people.aspx?MembershipGroupId=0"*)
 2. Look for the affected users on the users list and click on the checkbox at the left of the user name.
 3. At the top of the list click on *Actions > Delete user from Site Collection*.
 4. Share again the Site/Folder with the affected user.
