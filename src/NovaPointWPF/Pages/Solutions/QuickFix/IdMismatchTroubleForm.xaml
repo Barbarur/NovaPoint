@@ -9,7 +9,7 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="IdMismatchTroubleForm">
 
-    <Grid Background="Pink">
+    <Grid Background="Transparent">
 
         <StackPanel>
 
