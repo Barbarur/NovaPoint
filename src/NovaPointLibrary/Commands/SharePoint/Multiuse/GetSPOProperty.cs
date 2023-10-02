@@ -18,7 +18,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Multiuse
 
 
 
-
+        // TO BE DEPRECATED FOR VERSION 0.4.0
         internal GetSPOProperty(LogHelper logHelper, AppInfo appInfo, string accessToken)
         {
             _logHelper = logHelper;

@@ -13,6 +13,7 @@ using NovaPointLibrary.Solutions;
 
 namespace NovaPoint.Commands.Site
 {
+    // TO BE DEPRECATED WHEN SPOSiteCollectionAdminCSOM IS STABLE
     internal class SetSiteCollectionAdmin
     {
         private LogHelper _logHelper;

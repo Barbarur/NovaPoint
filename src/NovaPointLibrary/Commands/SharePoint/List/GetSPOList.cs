@@ -1,4 +1,5 @@
-﻿using Microsoft.SharePoint.Client;
+﻿using Microsoft.Graph;
+using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Solutions;
 using System;
@@ -10,14 +11,16 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.List
 {
+
+    // TO BE DEPRECATED WHEN SPOListCSOM IS TESTED FOR PRODUCTION
     internal class GetSPOList
     {
         private readonly LogHelper _logHelper;
         private readonly AppInfo _appInfo;
         private readonly string AccessToken;
 
-        private readonly List<string> SystemLists = new() { "appdata", "appfiles", "Composed Looks", "Content type publishing error log", "Converted Forms", "List Template Gallery", "Maintenance Log Library", "Master Page Gallery", "Preservation Hold Library", "Project Policy Item List", "Solution Gallery", "TaxonomyHiddenList", "Theme Gallery", "User Information List", "Web Template Extensions", "Web Part Gallery" };
-        private readonly List<string> ResourceLists = new() { "Form Templates", "Site Assets", "Site Pages", "Style Library" };
+        internal static readonly List<string> SystemLists = new() { "appdata", "appfiles", "Composed Looks", "Content and Structure Reports", "Content type publishing error log", "Converted Forms", "List Template Gallery", "Maintenance Log Library", "Master Page Gallery", "Preservation Hold Library", "Project Policy Item List", "Reusable Content", "Solution Gallery", "TaxonomyHiddenList", "Theme Gallery", "User Information List", "Web Template Extensions", "Web Part Gallery" };
+        internal static readonly List<string> ResourceLists = new() { "Form Templates", "Site Assets", "Site Collection Documents", "Site Collection Images", "Site Pages", "Style Library" };
 
         internal GetSPOList(LogHelper logHelper, AppInfo appInfo, string accessToken)
         {
@@ -26,13 +29,11 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             AccessToken = accessToken;
         }
 
-        // Reference:
-        // https://github.com/pnp/powershell/blob/dev/src/Commands/Base/PipeBinds/ListPipeBind.cs
-        internal Microsoft.SharePoint.Client.List? CSOM_Single(string siteUrl, string listName)
+        internal Microsoft.SharePoint.Client.List CSOMSingleStandard(string siteUrl, string listTitle)
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.CSOM_Single";
-            _logHelper.AddLogToTxt(methodName, $"Start getting List '{listName}' from Site '{siteUrl}'");
+            string methodName = $"{GetType().Name}.CSOMSingleStandard";
+            _logHelper.AddLogToTxt(methodName, $"Start getting List '{listTitle}' from Site '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -40,34 +41,56 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 e.WebRequestExecutor.RequestHeaders["Authorization"] = "Bearer " + AccessToken;
             };
 
+            Microsoft.SharePoint.Client.List? oList = null;
 
-            try
+            oList = clientContext.Web.GetListByTitle(listTitle);
+
+            if (oList == null)
             {
-
-                Microsoft.SharePoint.Client.List list = clientContext.Web.Lists.GetByTitle(listName);
-
-                clientContext.Load(list);
-                clientContext.ExecuteQueryRetry();
-
-                _logHelper.AddLogToTxt(methodName, $"Finish getting List '{listName}' from Site '{siteUrl}'");
-                return list;
+                throw new Exception($"List '{listTitle}' from Site '{siteUrl}'");
             }
-            catch
+            else
             {
-                _logHelper.AddLogToTxt(methodName, $"Start getting List '{listName}' from Site '{siteUrl}'. List no found!");
-                return null;
+                _logHelper.AddLogToTxt(methodName, $"Finish getting List '{listTitle}' from Site '{siteUrl}'");
+                return oList;
             }
+        }
 
+        internal Microsoft.SharePoint.Client.List CSOMSingleWithExpresions(string siteUrl, string listTitle, params System.Linq.Expressions.Expression<Func<Microsoft.SharePoint.Client.List, object>>[] retrievals)
+        {
+            _appInfo.IsCancelled();
+            string methodName = $"{GetType().Name}.CSOMSingleWithExpresions";
+            _logHelper.AddLogToTxt(methodName, $"Start getting List '{listTitle}' from Site '{siteUrl}'");
+
+            using var clientContext = new ClientContext(siteUrl);
+            clientContext.ExecutingWebRequest += (sender, e) =>
+            {
+                e.WebRequestExecutor.RequestHeaders["Authorization"] = "Bearer " + AccessToken;
+            };
+
+            Microsoft.SharePoint.Client.List? oList = null;
+
+            oList = clientContext.Web.GetListByTitle(listTitle, retrievals);
+
+            if (oList == null)
+            {
+                throw new Exception($"List '{listTitle}' from Site '{siteUrl}'");
+            }
+            else
+            {
+                _logHelper.AddLogToTxt(methodName, $"Finish getting List '{listTitle}' from Site '{siteUrl}'");
+                return oList;
+            }
         }
 
         //References:
         //https://pnp.github.io/powershell/cmdlets/Get-PnPList.html
         //https://github.com/pnp/powershell/blob/dev/src/Commands/Lists/GetList.cs
         //https://www.sharepointdiary.com/2018/03/sharepoint-online-get-all-lists-using-powershell.html
-        internal List<Microsoft.SharePoint.Client.List> CSOM_All(string siteUrl, bool includeSystemLists = false, bool includeResourceLists = false, bool includeHidden = false)
+        internal List<Microsoft.SharePoint.Client.List> CSOMAll(string siteUrl, bool includeSystemLists = false, bool includeResourceLists = false, bool includeHidden = false)
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.CSOM_All";
+            string methodName = $"{GetType().Name}.CSOMAll";
             _logHelper.AddLogToTxt(methodName, $"Start getting all Lists for '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
@@ -76,35 +99,20 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 e.WebRequestExecutor.RequestHeaders["Authorization"] = "Bearer " + AccessToken;
             };
 
-            Web oWebSite = clientContext.Web;
-            ListCollection collList = oWebSite.Lists;
+            ListCollection collList = clientContext.Web.Lists;
 
             clientContext.Load(collList);
             clientContext.ExecuteQuery();
-            _logHelper.AddLogToTxt(methodName, $"Collected Lists for site '{siteUrl}'. Gross Total: '{collList.Count}'");
 
-            // Define potential pre-filters to the return collection of list
-            List<string> systemLists = new() { "appdata", "appfiles", "Composed Looks", "Content type publishing error log", "Converted Forms", "List Template Gallery", "Maintenance Log Library", "Master Page Gallery", "Preservation Hold Library", "Project Policy Item List", "Solution Gallery", "TaxonomyHiddenList", "Theme Gallery", "User Information List", "Web Template Extensions", "Web Part Gallery" };
-            List<string> resourceLists = new() { "Form Templates", "Site Assets", "Site Pages", "Style Library" };
-
-            // Filter the collection of Lists
-            List<Microsoft.SharePoint.Client.List> finalCollList = new();
-            foreach (Microsoft.SharePoint.Client.List oList in collList)
-            {
-
-                if (oList.Hidden == true && !includeHidden) { continue; }
-                if (systemLists.Contains(oList.Title) == true && !includeSystemLists) { continue; }
-                if (resourceLists.Contains(oList.Title) == true && !includeResourceLists) { continue; }
-
-                finalCollList.Add(oList);
-
-            }
-
-            _logHelper.AddLogToTxt(methodName, $"Finish getting all Lists for '{siteUrl}'. Final Count: {finalCollList.Count}");
-            return finalCollList;
+            _logHelper.AddLogToTxt(methodName, $"Finish getting all Lists for '{siteUrl}'. Count: {collList.Count}");
+            return CSOMFilterLists(collList, includeSystemLists, includeResourceLists, includeHidden);
         }
 
-        internal List<Microsoft.SharePoint.Client.List> CSOMAllListsWithRoles(string siteUrl, bool includeSystemLists = false, bool includeResourceLists = false, bool includeHidden = false)
+        // TO BE REMOVED IN THE FUTURE WHEN MODIFIED THE SOLUTION USING IT
+        internal List<Microsoft.SharePoint.Client.List> CSOMAllListsWithRoles(string siteUrl,
+                                                                              bool includeSystemLists = false,
+                                                                              bool includeResourceLists = false,
+                                                                              bool includeHidden = false)
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMAllListsWithRoles";
@@ -123,18 +131,21 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 w => w.Title,
             };
 
-            var collList = CSOMAllListsRetrievalExpressions(siteUrl, retrievalExpressions);
+            var collList = CSOMAllWithExpressions(siteUrl, retrievalExpressions, includeSystemLists, includeResourceLists, includeHidden);
 
             _logHelper.AddLogToTxt(methodName, $"Finish getting all Lists for '{siteUrl}' with roles");
 
-            return CSOMFilterLists(collList, includeSystemLists, includeResourceLists, includeHidden);
-
+            return collList;
         }
 
-        internal ListCollection CSOMAllListsRetrievalExpressions(string siteUrl, Expression<Func<Microsoft.SharePoint.Client.List, object>>[] retrievalExpressions)
+        internal List<Microsoft.SharePoint.Client.List> CSOMAllWithExpressions(string siteUrl,
+                                                                 Expression<Func<Microsoft.SharePoint.Client.List, object>>[] retrievalExpressions,
+                                                                 bool includeSystemLists = false,
+                                                                 bool includeResourceLists = false,
+                                                                 bool includeHidden = false)
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.CSOMAllListsRetrievalExpressions";
+            string methodName = $"{GetType().Name}.CSOMAllWithExpressions";
             _logHelper.AddLogToTxt(methodName, $"Start getting all Lists for '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
@@ -143,22 +154,21 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 e.WebRequestExecutor.RequestHeaders["Authorization"] = "Bearer " + AccessToken;
             };
 
-            Web oWebSite = clientContext.Web;
-            ListCollection collList = oWebSite.Lists;
+            ListCollection collList = clientContext.Web.Lists;
 
             clientContext.Load( collList, l => l.Include(retrievalExpressions) );
             clientContext.ExecuteQuery();
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting all Lists for '{siteUrl}' final count: {collList.Count}");
-            return collList;
+            _logHelper.AddLogToTxt(methodName, $"Finish getting all Lists for '{siteUrl}'. Count: {collList.Count}");
+            return CSOMFilterLists(collList, includeSystemLists, includeResourceLists, includeHidden); ;
         }
 
 
-        internal List<Microsoft.SharePoint.Client.List> CSOMFilterLists(ListCollection collList, bool includeSystemLists, bool includeResourceLists, bool includeHidden)
+        private List<Microsoft.SharePoint.Client.List> CSOMFilterLists(ListCollection collList, bool includeSystemLists, bool includeResourceLists, bool includeHidden)
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMFilterLists";
-            _logHelper.AddLogToTxt(methodName, $"Start filtering lists");
+            _logHelper.AddLogToTxt(methodName, $"Start filtering lists. Count: {collList.Count}");
 
             List<Microsoft.SharePoint.Client.List> finalCollList = new();
             foreach (Microsoft.SharePoint.Client.List oList in collList)
@@ -170,7 +180,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 finalCollList.Add(oList);
             }
 
-            _logHelper.AddLogToTxt(methodName, $"Finish filtering lists");
+            _logHelper.AddLogToTxt(methodName, $"Finish filtering lists. Count: {finalCollList.Count}");
             
             return finalCollList;
         }   

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {
+    // TO BE DEPRECATED ONCE SPOSiteCSOM IS ON PRODUCTION
     internal class GetSPOSite
     {
         private readonly LogHelper _logHelper;

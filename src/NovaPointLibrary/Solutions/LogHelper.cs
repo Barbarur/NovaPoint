@@ -2,6 +2,8 @@
 using Microsoft.IdentityModel.Logging;
 using Microsoft.SharePoint.Client;
 using Newtonsoft.Json.Linq;
+using NovaPointLibrary.Solutions.Automation;
+using NovaPointLibrary.Solutions.Report;
 using PnP.Framework.Diagnostics;
 using PnP.Framework.Modernization.Telemetry;
 using System;
@@ -15,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions
 {
-
+    // TO BE DEPRECATED WHEN Main IS STABLE
     internal class LogHelper
     {
         private readonly Action<LogInfo> _uiAddLog;
@@ -23,9 +25,9 @@ namespace NovaPointLibrary.Solutions
         private readonly string _txtPath;
         internal readonly string _csvPath;
 
-        private string _classMethod = "LogHelper.Constructor";
+        private readonly string _classMethod = "LogHelper.Constructor";
 
-        private Stopwatch SW = new();
+        private readonly Stopwatch SW = new();
 
         internal LogHelper(Action<LogInfo> uiAddLog, string solutionType, string solutionName)
         {
@@ -60,14 +62,6 @@ namespace NovaPointLibrary.Solutions
             _csvPath = logHelper._csvPath;
 
             _classMethod = classMethod;
-        }
-
-        // TO BE DEPRECATED
-        internal void AddLog(string classMethod,string log)
-        {
-
-            using StreamWriter txt = new(new FileStream(_txtPath, FileMode.Append, FileAccess.Write));
-            txt.WriteLine($"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} - [{classMethod}] {log}");
         }
 
 
@@ -147,12 +141,6 @@ namespace NovaPointLibrary.Solutions
 
         }
 
-        //internal void RecordsLocation()
-        //{
-        //    AddLogToUI($"Solution logs can be found at: {_txtPath}");
-        //    AddLogToUI($"Solution report can be found at: {_csvPath}");
-        //}
-
         internal void ScriptStartNotice()
         {
             AddLogToUI($"Solution has started, please wait to the end");
@@ -175,9 +163,6 @@ namespace NovaPointLibrary.Solutions
         {
             SW.Stop();
             AddProgressToUI(100);
-            //AddLogToUI($"   ");
-            //RecordsLocation();
-            //AddLogToUI($"   ");
         }
     }
 }

@@ -1,11 +1,4 @@
-﻿using CamlBuilder;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace NovaPointLibrary.Commands.Authentication
 {
     public class AppInfo
@@ -20,10 +13,11 @@ namespace NovaPointLibrary.Commands.Authentication
                 _rootSharedUrl = "https://" + value + ".sharepoint.com";
             }
         }
-        internal string _domain = string.Empty;
-        internal string _adminUrl = string.Empty;
-        internal string _rootPersonalUrl = string.Empty;
-        internal string _rootSharedUrl = string.Empty;
+        internal string _domain { get; set; } = string.Empty;
+        internal string _adminUrl { get; set; } = string.Empty;
+        internal string _rootPersonalUrl { get; set; } = string.Empty;
+        internal string _rootSharedUrl { get; set; } = string.Empty;
+        
 
         internal string _tenantId = string.Empty;
         // Added PnPManagementShellClientId as default ID
@@ -32,7 +26,6 @@ namespace NovaPointLibrary.Commands.Authentication
 
         public CancellationTokenSource CancelTokenSource { get; init; }
         public CancellationToken CancelToken { get; init; }
-
 
         public AppInfo(string domain, string tenantId, string clientId, bool cachingToken)
         {
@@ -43,16 +36,15 @@ namespace NovaPointLibrary.Commands.Authentication
 
             this.CancelTokenSource = new();
             this.CancelToken = CancelTokenSource.Token;
-
         }
         public void IsCancelled()
         {
-            if ( CancelToken.IsCancellationRequested) { CancelToken.ThrowIfCancellationRequested(); }
+            if ( CancelToken.IsCancellationRequested ) { CancelToken.ThrowIfCancellationRequested(); }
         }
         public static void RemoveTokenCache()
         {
             TokenCacheHelper.RemoveCache();
         }
-        
+
     }
 }

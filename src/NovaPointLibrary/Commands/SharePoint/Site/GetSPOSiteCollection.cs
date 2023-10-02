@@ -1,14 +1,10 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {
+    // TO BE DEPRECATED ONCE SPOSiteCollectionCSOM IS ON PRODUCTION
     internal class GetSPOSiteCollection
     {
         private readonly LogHelper _logHelper;

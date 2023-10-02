@@ -9,32 +9,43 @@ namespace NovaPointLibrary.Solutions
 {
     internal class ProgressTracker
     {
-        private LogHelper LogHelper;
-        private float MainCounter;
-        private float MainTotalCount;
-        private float CounterStep;
+        internal readonly LogHelper _logHelper;
+        private float _counter;
+        private int _totalUnits;
+        private int Total
+        {
+            get { return _totalUnits; }
+            set
+            {
+                _totalUnits = value;
+                if(value > 0 ) { _counterStep = 1 / value; }
+            }
+        }
+        private float _counterStep = 0;
+
         private float SubTaskCounter = 0;
         private float SubTotalCount = 1;
         
-        internal ProgressTracker(LogHelper logHelper, float totalCount)
+        internal ProgressTracker(LogHelper logHelper, int totalCount)
         {
-            LogHelper = logHelper;
-            MainCounter = 0;
-            MainTotalCount = totalCount;
-            CounterStep = 1 / totalCount;
+            _logHelper = logHelper;
+            _counter = 0;
+            Total = totalCount;
 
         }
 
         internal void MainReportProgress(string msg)
         {
-            double progress = Math.Round(MainCounter * 100 / MainTotalCount, 2);
-            LogHelper.AddProgressToUI(progress);
-            LogHelper.AddLogToUI(msg);
+            double progress = Math.Round(_counter * 100 / Total, 2);
+            _logHelper.AddProgressToUI(progress);
+            _logHelper.AddLogToUI(msg);
         }
 
         internal void MainCounterIncrement()
         {
-            MainCounter++;
+            double progress = Math.Round(_counter * 100 / Total, 2);
+            _logHelper.AddProgressToUI(progress);
+            _counter++;
         }
 
         internal void SubTaskProgressReset(float subTaskCount)
@@ -45,13 +56,15 @@ namespace NovaPointLibrary.Solutions
 
         internal void SubTaskReportProgress(string msg)
         {
-            var progress = Math.Round( ((MainCounter / MainTotalCount) + ( SubTaskCounter * CounterStep / SubTotalCount)) * 100, 2);
-            LogHelper.AddProgressToUI(progress);
-            LogHelper.AddLogToUI(msg);
+            var progress = Math.Round( ((_counter / Total) + ( SubTaskCounter * _counterStep / SubTotalCount)) * 100, 2);
+            _logHelper.AddProgressToUI(progress);
+            _logHelper.AddLogToUI(msg);
         }
 
         internal void SubTaskCounterIncrement()
         {
+            var progress = Math.Round(((_counter / Total) + (SubTaskCounter * _counterStep / SubTotalCount)) * 100, 2);
+            _logHelper.AddProgressToUI(progress);
             SubTaskCounter++;
         }
     }

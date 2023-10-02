@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Item
 {
+    // TO BE DEPRECATED WHEN RemoveFileVersionAuto IS STABLE
     internal class RemoveSPOItemVersion
     {
         private readonly LogHelper _logHelper;
