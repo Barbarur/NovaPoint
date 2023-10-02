@@ -17,7 +17,7 @@ namespace NovaPointLibrary.Solutions.Report
 {
     public class SiteAllReport
     {
-        public static string _solutionName = "All Site Collections and Subsites";
+        public static string _solutionName = "Site Collections & Subsites report";
         public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-SiteAllReport";
 
         private readonly LogHelper _logHelper;

@@ -32,7 +32,7 @@ namespace NovaPointLibrary.Solutions.Automation
         public RemoveUserSingleSiteAllAuto(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, RemoveUserSingleSiteAllAutoParameters parameters)
         {
             // Baic parameters required for all reports
-            _logHelper = new(uiAddLog, "Reports", GetType().Name);
+            _logHelper = new(uiAddLog, "Automation", GetType().Name);
             _appInfo = appInfo;
             // Required parameters for the current report
             _adminUPN = parameters.AdminUPN;

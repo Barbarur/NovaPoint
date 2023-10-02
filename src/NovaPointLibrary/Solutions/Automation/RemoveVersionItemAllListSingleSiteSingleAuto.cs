@@ -2,6 +2,8 @@
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.Item;
+using NovaPointLibrary.Commands.SharePoint.Item;
+using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Solutions.Reports;
 using System;
 using System.Collections.Generic;
@@ -15,26 +17,29 @@ namespace NovaPointLibrary.Solutions.Automation
 {
     public class RemoveVersionItemAllListSingleSiteSingleAuto
     {
-        // Baic parameters required for all reports
+        // TO BE DEPRECATED ONCE RemoveFileVersionAuto IS ON PRODUCTION
+
+        //public static string _solutionName = "Report of all Files/Items in all Libraries/Lists of a Site";
+        //public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ItemAllListAllSiteSingleReport";
+
         private readonly LogHelper _logHelper;
         private readonly Commands.Authentication.AppInfo AppInfo;
-        // Required parameters for the current report
+
         private readonly string _siteUrl;
         private readonly string _ListName;
-        // Optional parameters for the current report
+
         private readonly bool DeleteAll;
         private readonly int VersionsToKeep;
         private readonly bool Recycle;
 
         public RemoveVersionItemAllListSingleSiteSingleAuto(Action<LogInfo> uiAddLog, AppInfo appInfo, RemoveVersionItemAllListSingleSiteSingleAutoParameters parameters)
         {
-            // Baic parameters required for all reports
-            _logHelper = new(uiAddLog, "Reports", GetType().Name);
+            _logHelper = new(uiAddLog, "Automation", GetType().Name);
             AppInfo = appInfo;
-            // Required parameters for the current report
+            
             _siteUrl = parameters.SiteUrl;
             _ListName = parameters.ListName;
-            // Optional parameters for the current report
+            
             DeleteAll = parameters.DeleteAll;
             VersionsToKeep = parameters.VersionsToKeep;
             Recycle = parameters.Recycle;
@@ -66,81 +71,125 @@ namespace NovaPointLibrary.Solutions.Automation
         
         private async Task RunScriptAsync()
         {
-            _logHelper.ScriptStartNotice();
+            //    AppInfo.IsCancelled();
+            //    _logHelper.ScriptStartNotice();
 
-            string rootUrl = _siteUrl.Substring(0, _siteUrl.IndexOf(".com") + 4);
-            string rootSiteAccessToken = await new GetAccessToken(_logHelper, AppInfo).SpoInteractiveAsync(rootUrl);
+            //    string rootUrl = _siteUrl.Substring(0, _siteUrl.IndexOf(".com") + 4);
+            //    string rootSiteAccessToken = await new GetAccessToken(_logHelper, AppInfo).SpoInteractiveAsync(rootUrl);
 
-            if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
-            List<ListItem> collItems = new GetItem(_logHelper, rootSiteAccessToken).CsomAllItems(_siteUrl, _ListName);
-            double counter = 0;
-            foreach (ListItem oItem in collItems)
-            {
-                if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
+            //    var oList = new GetSPOList(_logHelper, AppInfo, rootSiteAccessToken).CSOMSingleStandard(_siteUrl, _ListName);
 
-                counter++;
-                double progress = Math.Round(counter * 100 / collItems.Count, 2);
-                _logHelper.AddProgressToUI(progress);
-                _logHelper.AddLogToUI($"Processing Item '{oItem["FileLeafRef"]}'");
+            //    var collItems = new GetSPOItem(_logHelper, AppInfo, rootSiteAccessToken).CSOMAllDetailReportInfo(_siteUrl, oList);
+            //    ProgressTracker progress = new(_logHelper, collItems.Count);
+            //    foreach (ListItem oItem in collItems)
+            //    {
+            //        AppInfo.IsCancelled();
 
-                dynamic recordSite = new ExpandoObject();
-                recordSite.SiteUrl = _siteUrl;
-                recordSite.ListName = _ListName;
-                
-                if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
-                if (DeleteAll)
-                {
-                    try
-                    {
-                        new RemoveItemVersion(_logHelper.AddLog, rootSiteAccessToken).Csom(_siteUrl, (string)oItem["FileRef"], DeleteAll);
-                        
-                        recordSite.Remarks = "All versions deleted";
-                    }
-                    catch (Exception ex)
-                    {
-                        _logHelper.AddLogToUI($"Error: {ex.Message}");
-                        _logHelper.AddLogToTxt($"{ex.StackTrace}");
+            //        if(oItem.TypedObject.ToString() == "Folder")
+            //        {
+            //            progress.MainCounterIncrement();
+            //            continue;
+            //        }
 
-                        recordSite.Remarks = $"{ex.Message}";
-                    }
-                }
-                else
-                {
-                    FileVersionCollection itemVersion = new GetItemVersion(_logHelper.AddLog, rootSiteAccessToken).Csom(_siteUrl, _ListName);
+            //        else if (DeleteAll)
+            //        {
+            //            try
+            //            {
+            //                new RemoveSPOItemVersion(_logHelper, AppInfo, rootSiteAccessToken).CSOM(_siteUrl, oItem["FileRef"].ToString(), DeleteAll);
 
-                    int versionToDelete = itemVersion.Count - VersionsToKeep;
+            //                int versionsDeletedCount = oItem.Versions.Count;
+            //                var itemSize = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2);
+            //                var versionsDeletedMB = itemSize * versionsDeletedCount;
 
-                    if (versionToDelete > 0)
-                    {
-                        int errorsCount = 0;
-                        for (int i = 0; i < versionToDelete; i++)
-                        {
-                            if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
+            //                AddItemRecord(oList, oItem, versionsDeletedCount.ToString(), versionsDeletedMB.ToString());
+            //            }
+            //            catch (Exception ex)
+            //            {
+            //                _logHelper.AddLogToUI($"Error processing Item '{oItem["FileRef"]}'");
+            //                _logHelper.AddLogToTxt($"Exception: {ex.Message}");
+            //                _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
 
-                            try
-                            {
-                                new RemoveItemVersion(_logHelper.AddLog, rootSiteAccessToken).Csom(_siteUrl, (string)oItem["FileRef"], DeleteAll, versionToDelete, Recycle);
-                            }
-                            catch(Exception ex)
-                            {
-                                _logHelper.AddLogToUI($"Error: {ex.Message}");
-                                _logHelper.AddLogToTxt($"{ex.StackTrace}");
+            //                AddItemRecord(oList, oItem, remarks: ex.Message);
+            //            }
+            //        }
+            //        else
+            //        {
+            //            FileVersionCollection itemVersion = new GetSPOFileVersion(_logHelper, AppInfo, rootSiteAccessToken).CSOM(_siteUrl, _ListName);
 
-                                errorsCount++;
-                            }
+            //            int versionToDelete = itemVersion.Count - VersionsToKeep;
 
-                            int versionsDeleted = versionToDelete - errorsCount;
-                            recordSite.Remarks = $"Versions deleted: {versionsDeleted}. Error while deleting versions: {errorsCount}";
-                        }
-                    }
-                    else
-                    {
-                        recordSite.Remarks = "No versions to delete";
-                    }
-                }
-                _logHelper.AddRecordToCSV(recordSite);
-            }
-            _logHelper.ScriptFinishSuccessfulNotice();
+            //            if (versionToDelete > 0)
+            //            {
+            //                int errorsCount = 0;
+            //                string remarks = String.Empty;
+            //                for (int i = 0; i < versionToDelete; i++)
+            //                {
+            //                    AppInfo.IsCancelled();
+
+            //                    try
+            //                    {
+            //                        new RemoveSPOItemVersion(_logHelper, AppInfo, rootSiteAccessToken).CSOM(_siteUrl, (string)oItem["FileRef"], versionId: versionToDelete, recycle: Recycle);
+            //                    }
+            //                    catch(Exception ex)
+            //                    {
+
+            //                        _logHelper.AddLogToUI($"Error processing Item '{oItem["FileRef"]}'");
+            //                        _logHelper.AddLogToTxt($"Exception: {ex.Message}");
+            //                        _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
+
+            //                        AddItemRecord(oList, oItem, remarks: ex.Message);
+
+            //                        errorsCount++;
+            //                    }
+            //                }
+
+            //                int versionsDeletedCount = versionToDelete - errorsCount;
+            //                var itemSize = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2);
+            //                var versionsDeletedMB = itemSize * versionsDeletedCount;
+
+            //                if (errorsCount > 0) { remarks = $"Error while deleting {errorsCount} versions"; }
+
+            //                AddItemRecord(oList, oItem, versionsDeletedCount.ToString(), versionsDeletedMB.ToString(), remarks);
+            //            }
+            //            else
+            //            {
+            //                AddItemRecord(oList, oItem, remarks: "No versions to delete");
+            //            }
+            //        }
+            //        progress.MainCounterIncrement();
+            //    }
+            //    _logHelper.ScriptFinishSuccessfulNotice();
+        }
+
+
+        private void AddItemRecord(List oList,
+                                   ListItem oItem,
+                                   string versionsDeletedCount = "NA",
+                                   string versionsDeletedMB = "NA",
+                                   string remarks = "")
+        {
+            dynamic recordItem = new ExpandoObject();
+            recordItem.SiteUrl = _siteUrl;
+            recordItem.ListTitle = oList.Title;
+            recordItem.ListType = oList.BaseType;
+
+            recordItem.ItemID = oItem["ID"];
+            recordItem.ItemName = oItem["FileLeafRef"];
+            recordItem.ItemPath = oItem["FileRef"];
+
+            recordItem.ItemVersion = oItem["_UIVersionString"];
+            recordItem.ItemVersionsCount = oItem.Versions.Count.ToString();
+
+            recordItem.ItemSizeMb = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2);
+            FieldLookupValue MTotalSize = (FieldLookupValue)oItem["SMTotalSize"];
+            recordItem.ItemSizeTotalMB = Math.Round(MTotalSize.LookupId / Math.Pow(1024, 2), 2);
+
+            recordItem.DeletedVersionsCount = versionsDeletedCount;
+            recordItem.DeletedVersionsMB = versionsDeletedMB;
+
+            recordItem.Remarks = remarks;
+
+            _logHelper.AddRecordToCSV(recordItem);
         }
     }
 

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions.Reports
 {
+    // TO BE DEPRECATED ONCE SiteAllReport IS IN PRODUCTION
     public class AdminAllSiteSingleReport
     {
         internal LogHelper _logHelper;

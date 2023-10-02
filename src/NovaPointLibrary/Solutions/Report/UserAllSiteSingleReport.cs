@@ -16,6 +16,9 @@ namespace NovaPointLibrary.Solutions.Reports
 {
     public class UserAllSiteSingleReport
     {
+        public static readonly string s_SolutionName = "Users in a single Site report";
+        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-UserAllSiteSingleReport";
+
         // Baic parameters required for all reports
         private readonly LogHelper _logHelper;
         private readonly Commands.Authentication.AppInfo AppInfo;

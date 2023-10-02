@@ -1,33 +1,54 @@
-﻿using Microsoft.SharePoint.Client;
+﻿using Microsoft.Online.SharePoint.TenantAdministration;
+using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.Item;
-using NovaPointLibrary.Commands.List;
-using PnP.Framework.Modernization.Telemetry;
+
+using NovaPointLibrary.Commands.SharePoint.Item;
+using NovaPointLibrary.Commands.SharePoint.List;
+using NovaPointLibrary.Commands.SharePoint.Multiuse;
+using NovaPointLibrary.Commands.SharePoint.Permision;
+using NovaPointLibrary.Solutions.Automation;
+using PnP.Framework.Provisioning.Model;
 using System;
-using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace NovaPointLibrary.Solutions.Reports
 {
-    public class ItemAllListAllSiteSingleReport
+    // TO BE DEPRECATED ONCE ItemReport IS ON PRODUCTION
+    public class ItemAllListAllSiteSingleReport : ISolution
     {
-        // Baic parameters required for all reports
+        public static string _solutionName = "Report of all Files/Items in all Libraries/Lists of a Site";
+        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ItemAllListAllSiteSingleReport";
+
         private readonly LogHelper _logHelper;
-        private readonly AppInfo AppInfo;
-        // Required parameters for the current report
+        private readonly Commands.Authentication.AppInfo AppInfo;
+
+        private ItemAllListAllSiteSingleReportParameters _param;
+
+        public ISolutionParameters Parameters
+        {
+            get
+            {
+                return _param;
+            }
+            set
+            {
+                _param = (ItemAllListAllSiteSingleReportParameters)value;
+            }
+        }
+
         private readonly string SiteUrl;
-        // Optional parameters for the current report
+
         private readonly bool IncludeSystemLists = false;
         private readonly bool IncludeResourceLists = false;
 
-        public ItemAllListAllSiteSingleReport(Action<LogInfo> uiAddLog, AppInfo appInfo, ItemAllListAllSiteSingleReportParameters parameters)
+        public ItemAllListAllSiteSingleReport(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, ItemAllListAllSiteSingleReportParameters parameters)
         {
             _logHelper = new(uiAddLog, "Reports", GetType().Name);
             AppInfo = appInfo;
+
             SiteUrl = parameters.SiteUrl;
+
             IncludeSystemLists = parameters.IncludeSystemLists;
             IncludeResourceLists = parameters.IncludeResourceLists;
         }
@@ -35,7 +56,7 @@ namespace NovaPointLibrary.Solutions.Reports
         {
             try
             {
-                if ( String.IsNullOrEmpty(SiteUrl) || String.IsNullOrWhiteSpace(SiteUrl) )
+                if ( String.IsNullOrWhiteSpace(SiteUrl) )
                 {
                     string message = "FORM INCOMPLETED: Site URL cannot be empty if you need to obtain the Site Collection Administrators";
                     Exception ex = new(message);
@@ -54,89 +75,132 @@ namespace NovaPointLibrary.Solutions.Reports
 
         private async Task RunScriptAsync()
         {
-            
+            AppInfo.IsCancelled();
             _logHelper.ScriptStartNotice();
+
 
             string rootUrl = SiteUrl.Substring(0, SiteUrl.IndexOf(".com") + 4);
             string rootSiteAccessToken = await new GetAccessToken(_logHelper, AppInfo).SpoInteractiveAsync(rootUrl);
 
-            double counterList = 0;
-            if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
-            List<List> collList = new GetList(_logHelper, rootSiteAccessToken).CSOM_All(SiteUrl, IncludeSystemLists, IncludeResourceLists);
+
+            List<List> collList = new GetSPOList(_logHelper, AppInfo, rootSiteAccessToken).CSOMAll(SiteUrl, IncludeSystemLists, IncludeResourceLists);
+            ProgressTracker progress = new(_logHelper, collList.Count);
             foreach (List oList in collList)
             {
-                if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
+                AppInfo.IsCancelled();
 
-                double progress = Math.Round(counterList * 100 / collList.Count, 2);
-                counterList++;
-                _logHelper.AddProgressToUI(progress);
-                _logHelper.AddLogToUI($"Processing List '{oList.Title}'");
+                progress.MainReportProgress($"Processing List '{oList.Title}'");
 
-
-                double counterItem = 0;
-                List<ListItem> collItems = new GetItem(_logHelper, rootSiteAccessToken).CsomAllItems(SiteUrl, oList.Title);
-                foreach (ListItem oItem in collItems)
+                try
                 {
-                    if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
-
-                    double subprogress = Math.Round(counterItem * (100 / collList.Count / collItems.Count) + progress, 2);
-
-                    counterItem++;
-                    _logHelper.AddProgressToUI(subprogress);
-
-                    dynamic recordItem = new ExpandoObject();
-                    recordItem.SiteUrl = SiteUrl;
-                    recordItem.Title = oList.Title;
-                    recordItem.LibraryType = oList.BaseType;
-
-                    recordItem.ItemID = oItem["ID"];
-                    recordItem.ItemName = oItem["FileLeafRef"];
-                    recordItem.ItemPath = oItem["FileRef"];
-                    recordItem.Type = oItem.FileSystemObjectType;
-
-                    recordItem.Created = oItem["Created"];
-                    FieldUserValue author = (FieldUserValue)oItem["Author"];
-                    recordItem.CreatedBy = author.Email;
-
-                    recordItem.Modified = oItem["Modified"];
-                    FieldUserValue editor = (FieldUserValue)oItem["Editor"];
-                    recordItem.ModifiedBy = editor.Email;
-
-                    if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
-
-                    if (oList.BaseType.ToString() == "DocumentLibrary")
+                    var collItems = new GetSPOItem(_logHelper, AppInfo, rootSiteAccessToken).CSOMAllDetailReportInfo(SiteUrl, oList);
+                    progress.SubTaskProgressReset(collItems.Count);
+                    foreach (ListItem oItem in collItems)
                     {
+                        AppInfo.IsCancelled();
 
-                        float fileSizeMb = oItem.FileSystemObjectType.ToString() == "Folder" ? 0 : (float)Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2);
-                        recordItem.FileSizeMB = fileSizeMb;
+                        try
+                        {
+                            if (oList.BaseType.ToString() == "DocumentLibrary")
+                            {
+                                string itemName = (string)oItem["FileLeafRef"];
 
-                        FieldLookupValue fvFileSizeTotalMb = (FieldLookupValue)oItem["SMTotalSize"];
-                        float fileSizeTotalMb = oItem.FileSystemObjectType.ToString() == "Folder" ? 0 : (float)Math.Round(fvFileSizeTotalMb.LookupId / Math.Pow(1024, 2), 2);
-                        recordItem.FileSizeTotalMB = fileSizeTotalMb;
+                                float itemSizeMb = oItem.FileSystemObjectType.ToString() == "Folder" ? 0 : (float)Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2);
 
+                                FieldLookupValue fvFileSizeTotalMb = (FieldLookupValue)oItem["SMTotalSize"];
+                                float itemSizeTotalMb = oItem.FileSystemObjectType.ToString() == "Folder" ? 0 : (float)Math.Round(fvFileSizeTotalMb.LookupId / Math.Pow(1024, 2), 2);
+
+                                AddItemRecord(oList, oItem, itemName, itemSizeMb.ToString(), itemSizeTotalMb.ToString(), "");
+                            }
+                            else if (oList.BaseType.ToString() == "GenericList")
+                            {
+                                string itemName = (string)oItem["Title"];
+
+                                if (oItem.FileSystemObjectType.ToString() == "Folder")
+                                {
+                                    string itemSizeMb = "0";
+                                
+                                    string itemSizeTotalMb = "0";
+                                
+                                    AddItemRecord(oList, oItem, itemName, itemSizeMb.ToString(), itemSizeTotalMb.ToString(), "NA");
+                                }
+                                else
+                                {
+                                    int itemSizeTotalBytes = 0;
+                                    foreach(var oAttachment in oItem.AttachmentFiles)
+                                    {
+                                        var oFileAttachment = new GetSPOItem(_logHelper, AppInfo, rootSiteAccessToken).CSOMAttachmentFile(SiteUrl, oAttachment.ServerRelativeUrl);
+
+                                        itemSizeTotalBytes += (int)oFileAttachment.Length;
+                                    }
+                                    float itemSizeTotalMb = (float)Math.Round(itemSizeTotalBytes / Math.Pow(1024, 2), 2);
+
+                                    AddItemRecord(oList, oItem, itemName, itemSizeTotalMb.ToString(), itemSizeTotalMb.ToString(), "");
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logHelper.AddLogToUI($"Error processing Item '{oItem["FileRef"]}'");
+                            _logHelper.AddLogToTxt($"Exception: {ex.Message}");
+                            _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
+
+                            AddItemRecord(oList, oItem, "", "", "", ex.Message);
+                        }
+
+                        progress.SubTaskCounterIncrement();
                     }
-                    else if (oList.BaseType.ToString() == "GenericList")
-                    {
+                }
+                catch (Exception ex)
+                {
+                    _logHelper.AddLogToUI($"Error processing List '{oList.Title}'");
+                    _logHelper.AddLogToTxt($"Exception: {ex.Message}");
+                    _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
 
-                        recordItem.FileSizeMB = $"Size for items is not yet supported";
-                        recordItem.FileSizeTotalMB = $"Size for items is not yet supported";
-
-                    }
-
-                    _logHelper.AddRecordToCSV(recordItem);
-
+                    AddItemRecord(oList, null, "", "", "", ex.Message);
                 }
 
+                progress.MainCounterIncrement();
             }
 
             _logHelper.ScriptFinishSuccessfulNotice();
-
         }
+    
+       
+        private void AddItemRecord(List oList, ListItem? oItem = null, string itemName = "", string itemSizeMb  = "", string itemSizeTotalMb = "", string remarks = "")
+        {
+            dynamic recordItem = new ExpandoObject();
+            recordItem.SiteUrl = SiteUrl;
+            recordItem.ListTitle = oList.Title;
+            recordItem.ListType = oList.BaseType;
 
+            recordItem.ItemID = oItem != null ? oItem["ID"] : string.Empty;
+            recordItem.ItemName = oItem != null ? itemName : string.Empty;
+            recordItem.ItemPath = oItem != null ? oItem["FileRef"] : string.Empty;
+            recordItem.ItemType = oItem != null ? oItem.FileSystemObjectType.ToString() : string.Empty;
+
+            recordItem.ItemCreated = oItem != null ? oItem["Created"] : string.Empty;
+            FieldUserValue? author = oItem != null ? (FieldUserValue)oItem["Author"] : null;
+            recordItem.ItemCreatedBy = author != null ? author.Email : null;
+
+            recordItem.ItemModified = oItem != null ? oItem["Modified"] : string.Empty;
+            FieldUserValue? editor = oItem != null ? (FieldUserValue)oItem["Editor"] : null;
+            recordItem.ItemModifiedBy = editor != null ? editor.Email : null;
+
+            recordItem.ItemVersion = oItem != null ? oItem["_UIVersionString"] : string.Empty;
+            recordItem.ItemVersionsCount = oItem != null ? oItem.Versions.Count.ToString() : string.Empty;
+
+            recordItem.ItemSizeMb = itemSizeMb;
+            recordItem.ItemSizeTotalMB = itemSizeTotalMb;
+
+            recordItem.Remarks = remarks;
+
+            _logHelper.AddRecordToCSV(recordItem);
+        }
     }
 
 
-    public class ItemAllListAllSiteSingleReportParameters
+    public class ItemAllListAllSiteSingleReportParameters : ISolutionParameters
     {
         // Required parameters for the current report
         internal string SiteUrl;

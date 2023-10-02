@@ -24,7 +24,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
     public class IdMismatchTrouble
     {
         public static string _solutionName = "Resolve user ID Mismatch";
-        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-ID-Match";
+        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-IdMismatchTrouble";
 
         private readonly LogHelper _logHelper;
         private readonly Commands.Authentication.AppInfo _appInfo;
@@ -157,6 +157,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 {
                     _logHelper.AddLogToUI(methodName, $"Adding user '{user.UserPrincipalName}' as OneDrive Admin for site {siteUrl}");
                     new SetSPOSiteCollectionAdmin(_logHelper, _appInfo, spoAdminAccessToken).CSOM(_userUpn, siteUrl);
+                    new RemoveSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Csom(_siteUrl, _adminUpn);
                 }
             }
             catch(Exception ex)

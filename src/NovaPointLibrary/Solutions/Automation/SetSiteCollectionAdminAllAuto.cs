@@ -88,7 +88,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     {
                         new RemoveSiteCollectionAdmin(_logHelper, accessToken, _appInfo._domain).Csom(_targetUserUPN, oSiteCollection.Url);
                     }
-                    AddSiteRecordToCSV(oSiteCollection, $"Correctly chanced Site Collection Acmin property");
+                    AddSiteRecordToCSV(oSiteCollection, $"Correctly chanced Site Collection Admin property");
                 }
                 catch (Exception ex)
                 {

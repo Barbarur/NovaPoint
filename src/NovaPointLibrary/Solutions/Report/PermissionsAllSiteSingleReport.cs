@@ -15,8 +15,8 @@ namespace NovaPointLibrary.Solutions.Report
 {
     public class PermissionsAllSiteSingleReport
     {
-        public static string _solutionName = "Report of all Permissions in a Site";
-        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PermissionSiteAccessSiteAllReport"; 
+        public static string _solutionName = "Permissions in a Site report";
+        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PermissionAllSiteSingleReport"; 
         
         private readonly LogHelper _logHelper;
         private readonly Commands.Authentication.AppInfo _appInfo;

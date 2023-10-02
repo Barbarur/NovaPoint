@@ -12,11 +12,12 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions.Reports
 {
-    //Reference:
-    //https://novacato.com/get-all-items-and-files-including-size-from-sharepoint-online-site-using-powershell/
+    // TO BE DEPRECATED ONCE ItemReport IS ON PRODUCTION
     public class ItemAllListSingleSiteSingleReport
     {
-        // Baic parameters required for all reports
+        public static string _solutionName = "Report of all Files/Items in a Library/List of a Site";
+        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ItemAllListSingleSiteSingleReport";
+
         private readonly LogHelper _logHelper;
         private readonly AppInfo AppInfo;
         // Required parameters for the current report
