@@ -53,15 +53,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             await new SetSiteCollectionAdminAllAuto(uiLog, appInfo, parameters).RunAsync();
 
         }
-        private void CheckBox_AddAdmin_Checked(object sender, RoutedEventArgs e)
-        {
-            CheckBoxRemoveAdmin.IsChecked = false;
-        }
-
-        private void CheckBox_RemoveAdmin_Checked(object sender, RoutedEventArgs e)
-        {
-            CheckBoxAddAdmin.IsChecked = false;
-        }
 
         private void CheckBox_IncludePersonalSites_Checked(object sender, RoutedEventArgs e)
         {

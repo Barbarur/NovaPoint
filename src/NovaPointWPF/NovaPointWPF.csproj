@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\NovaPoint.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="NovaPoint.ico" />
   </ItemGroup>
 
@@ -37,6 +41,10 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\NovaPoint.png" />
   </ItemGroup>
 
 </Project>

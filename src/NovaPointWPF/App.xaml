@@ -4,6 +4,465 @@
              xmlns:local="clr-namespace:NovaPointWPF"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+
+        <!--COLORS-->
+        
+        <SolidColorBrush x:Key="PrimaryBackgroudColor" Color="#252836"/>
+        <SolidColorBrush x:Key="SecondaryBackgroudColor" Color="#101214"/>
+
+        <SolidColorBrush x:Key="PrimaryTextColor" Color="GhostWhite"/>
+        <SolidColorBrush x:Key="LogoPinkColor" Color="#670134"/>
+
+        <SolidColorBrush x:Key="PrimaryButtonColor" Color="#030615"/>
+        <SolidColorBrush x:Key="HoverButtonColor" Color="#1F212E"/>
+        <SolidColorBrush x:Key="CheckedButtonColor" Color="#484D65"/>
+        <SolidColorBrush x:Key="PrimaryBorderColor" Color="#3E4852"/>
+
+        
+        
+        <!--BACKGROUND-->
+        
+        <Style x:Key="MenuBackgroudBorder" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryBackgroudColor}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+        </Style>
+
+        <Style x:Key="BackBackgroudBorder" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroudColor}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+        </Style>
+
+        
+        
+        <!--TEXT-->
+        
+        <Style x:Key="MenuMainTitleLabel" TargetType="{x:Type Label}">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="30"/>
+        </Style>
+
+        <Style x:Key="MenuSectionTitleLabel" TargetType="{x:Type Label}">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="15"/>
+        </Style>
+
+        <Style x:Key="SolutionFormLabel" TargetType="{x:Type Label}">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+
+
+        <!--WIDGETS-->
+        
+        <Style x:Key="SolutionMenuButton" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontWeight" Value="Regular"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+
+                            <Border x:Name="Border"
+                                    Background="{TemplateBinding Background}"
+                                    BorderThickness="0"
+                                    CornerRadius="8"
+                                    Height="40"/>
+
+                            <TextBlock x:Name="ButtonTitle"
+                                       Margin="10, 0, 10, 0"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left"
+                                       FontFamily="Segoe UI Variable Text"
+                                       FontSize="14"
+                                       FontWeight="Normal"
+                                       Foreground="GhostWhite"
+                                       Text="{TemplateBinding Content}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1F212E"/>
+                </Trigger>
+            </Style.Triggers>
+            
+        </Style>
+
+        
+        <Style x:Key="MainPageToggleButton" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Margin" Value="0, 2, 0, 2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <Border x:Name="Border"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="8"
+                                    Height="35"/>
+                            <TextBlock x:Name="NombreTexto"
+                                       Margin="10, 0, 10, 0"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left"
+                                       FontFamily="Segoe UI Variable Text"
+                                       FontSize="14"
+                                       FontWeight="Regular"
+                                       Foreground="GhostWhite"
+                                       Text="{TemplateBinding Content}"/>
+                        </Grid>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="True"/>
+                        <Condition Property="IsChecked" Value="False"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Background" Value="#1F212E"/>
+                </MultiTrigger>
+
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Background" Value="#484D65"/>
+                </Trigger>
+
+            </Style.Triggers>
+        </Style>
+
+        
+        <Style x:Key="SolutionFormButton" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBorderColor}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+
+                            <Border x:Name="Border"
+                                    Background="{TemplateBinding Background}"
+                                    BorderThickness="2"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    CornerRadius="8"
+                                    Width="{TemplateBinding Width}"
+                                    Height="{TemplateBinding Height}">
+
+
+                                <TextBlock x:Name="ButtonTitle"
+                                           Margin="10, 0, 10, 0"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           FontFamily="Segoe UI Variable Text"
+                                           FontSize="14"
+                                           FontWeight="{TemplateBinding FontWeight}"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           Text="{TemplateBinding Content}"/>
+
+                            </Border>
+
+                        </Grid>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource HoverButtonColor}"/>
+                </Trigger>
+
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="{DynamicResource SecondaryBackgroudColor}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+                    <Setter Property="FontWeight" Value="Light"/>
+                </Trigger>
+
+            </Style.Triggers>
+        </Style>
+
+
+        <Style x:Key="SolutionFormToggleButton" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="#030615"/>
+            <Setter Property="Margin" Value="2, 2, 2, 2"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <Border x:Name="Border"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="8"
+                                    Height="35"/>
+                            <TextBlock x:Name="NombreTexto"
+                                       Margin="10, 0, 10, 0"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left"
+                                       FontFamily="Segoe UI Variable Text"
+                                       FontSize="14"
+                                       FontWeight="Regular"
+                                       Foreground="GhostWhite"
+                                       Text="{TemplateBinding Content}"/>
+                        </Grid>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="True"/>
+                        <Condition Property="IsChecked" Value="False"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Background" Value="#1F212E"/>
+                </MultiTrigger>
+
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Background" Value="#484D65"/>
+                </Trigger>
+
+            </Style.Triggers>
+        </Style>
+
+        <!--TO BE DEPRECATED-->
+        <Style x:Key="SolutionFormTextBoxOLD" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="Margin" Value="2,2,2,2"/>
+            <Setter Property="Text" Value=""/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid
+                            Height="35">
+
+                            <Border
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="2"
+                                CornerRadius="8"/>
+
+                            <TextBox
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="0"
+                                CaretBrush="White"
+                                FontFamily="Segoe UI Variable Text"
+                                FontSize="14"
+                                FontWeight="Regular"
+                                Foreground="{DynamicResource PrimaryTextColor}"
+                                HorizontalAlignment="Stretch"
+                                Margin="10,0,10,0"
+                                SelectionBrush="Transparent"
+                                Text ="{Binding ElementName=Text, Path=SelectedItem.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                VerticalAlignment="Center"
+                                SelectionTextBrush="Transparent"
+                                />
+
+                        </Grid>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource HoverButtonColor}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource HoverButtonColor}"/>
+                </Trigger>
+
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource LogoPinkColor}"/>
+                </Trigger>
+
+            </Style.Triggers>
+        </Style>
+
+
+        <Style x:Key="SolutionFormTextBox" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Margin" Value="2,2,2,2"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Regular"/>
+            <Setter Property="FontFamily" Value="Segoe UI Variable Text"/>
+            <Setter Property="SelectionBrush" Value="#484D65"/>
+            <Setter Property="SelectionTextBrush" Value="#030615"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            Height="35">
+
+                            <ScrollViewer
+                                x:Name="PART_ContentHost"
+                                Margin="10,0"
+                                Focusable="false"
+                                HorizontalScrollBarVisibility="Hidden" 
+                                VerticalScrollBarVisibility="Hidden"
+                                VerticalContentAlignment="Center"/>
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource HoverButtonColor}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource HoverButtonColor}"/>
+                            </Trigger>
+
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource LogoPinkColor}"/>
+                            </Trigger>
+                            
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        
+
+
+
+
+
+
+        <Style x:Key="LeftScrollViewer" TargetType="{x:Type ScrollViewer}">
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                        <Grid>
+                            
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="4"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            
+                            <Border Grid.Column="0">
+                                <!--<Border.BorderBrush>
+                                    <SolidColorBrush Color="Pink" />
+                                </Border.BorderBrush>-->
+                                <ScrollContentPresenter CanContentScroll="{TemplateBinding CanContentScroll}" />
+                            </Border>
+                            
+                            <ScrollBar
+                                x:Name="PART_VerticalScrollBar"
+                                Template="{DynamicResource VerticalScrollBar}"
+                                Grid.Column="1"
+                                Value="{TemplateBinding VerticalOffset}"
+                                Maximum="{TemplateBinding ScrollableHeight}"
+                                ViewportSize="{TemplateBinding ViewportHeight}"
+                                Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+                            
+                            <ScrollBar
+                                x:Name="PART_HorizontalScrollBar"
+                                Orientation="Horizontal"
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Value="{TemplateBinding HorizontalOffset}"
+                                Maximum="{TemplateBinding ScrollableWidth}"
+                                ViewportSize="{TemplateBinding ViewportWidth}"
+                                Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
+
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
+            <Grid
+                Width="10">
+                
+                <Border
+                    CornerRadius="4"
+                    Background="#424242" />
+
+                <Track
+                    x:Name="PART_Track"
+                    IsDirectionReversed="true">
+                    
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton
+                            Style="{DynamicResource ScrollBarPageButton}"
+                            Command="ScrollBar.PageUpCommand" />
+                    </Track.DecreaseRepeatButton>
+                    
+                    <Track.Thumb>
+                        <Thumb Style="{DynamicResource ScrollBarThumb}"
+                               Background="#686868"/>
+                    </Track.Thumb>
+                    
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton Style="{DynamicResource ScrollBarPageButton}"
+                      Command="ScrollBar.PageDownCommand" />
+                    </Track.IncreaseRepeatButton>
+                    
+                </Track>
+
+            </Grid>
+        </ControlTemplate>
+
+        <Style x:Key="ScrollBarPageButton" TargetType="{x:Type RepeatButton}">
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                        <Border Background="Transparent" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        
+        <Style x:Key="ScrollBarThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border CornerRadius="4"
+                            Background="{TemplateBinding Background}"
+                            BorderThickness="0" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
     </Application.Resources>
 </Application>

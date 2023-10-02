@@ -9,13 +9,102 @@
       Title="SetSiteCollectionAdminAllAutoForm">
 
     <Grid Background="Transparent">
+        
         <StackPanel>
 
-            <Label Content="Set user Site Collection Admin property fo all Site Collections"
+            <Label
+                Style="{DynamicResource MenuMainTitleLabel}"
+                Content="Set user as Site Collection Admin"
                    FontWeight="Bold"/>
             <Label Height="15"/>
 
-            <designmaterial:NPTextBoxField
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Target user"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="User UPN"/>
+
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding TargetUserUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Margin="0, 9, 0, 0">
+
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Add Site Admin"
+                            IsChecked="{Binding AddAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Remove Site Admin"
+                            IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                    </StackPanel>
+
+                </StackPanel>
+
+            </Grid>
+
+
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Sites to Include"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12"
+                    Orientation="Horizontal">
+
+                    <ToggleButton
+                        x:Name="CheckBoxIncludePersonalSites"
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Include OneDrive"
+                        IsChecked="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Checked="CheckBox_IncludePersonalSites_Checked"/>
+
+                    <ToggleButton
+                        x:Name="CheckBoxIncludeShareSites"
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Include Sites"
+                        IsChecked="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Unchecked="CheckBox_IncludeShareSites_Unchecked"/>
+
+
+                    <ToggleButton
+                        x:Name="CheckBoxIncludeGroupIdDefined"
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Only Teams Sites"
+                        IsChecked="{Binding GroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Checked="CheckBox_IncludeGroupIdDefined_Checked"/>
+
+                </StackPanel>
+
+            </Grid>
+
+
+
+
+
+            <!--<designmaterial:NPTextBoxField
                 Title="Target User UPN"
                 Text="{Binding Path=TargetUserUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
@@ -30,9 +119,9 @@
                       IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                       Checked="CheckBox_RemoveAdmin_Checked"/>
 
-            <Label Height="15"/>
+            <Label Height="15"/>-->
 
-            <Label Content="Sites Filter"/>
+            <!--<Label Content="Sites Filter"/>
             <CheckBox x:Name="CheckBoxIncludePersonalSites"
                       Content="Include Personal Sites"
                       IsChecked="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
@@ -46,7 +135,7 @@
             <CheckBox x:Name="CheckBoxIncludeGroupIdDefined"
                       Content="Only MS365 Group Connected Sites"
                       IsChecked="{Binding GroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                      Checked="CheckBox_IncludeGroupIdDefined_Checked"/>
+                      Checked="CheckBox_IncludeGroupIdDefined_Checked"/>-->
 
         </StackPanel>
 

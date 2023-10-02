@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report"
-      xmlns:designmaterial="clr-namespace:NovaPointWPF.Pages.DesignMaterial"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="PermissionsAllSiteSingleReportForm">
@@ -13,11 +13,113 @@
 
         <StackPanel>
 
-            <designmaterial:NPSolutionFormHeader
+            <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            
-            <Label Height="15"/>
+
+            <StackPanel>
+
+                <Label
+                    Style="{DynamicResource MenuSectionTitleLabel}"
+                    Content="Permission Filter"/>
+
+
+                <Grid
+                    Margin="0, 0, 0, 15">
+
+                    <Border
+                        Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                    <StackPanel
+                    Margin="12">
+
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Site URL"/>
+
+                        <TextBox
+                            Style="{DynamicResource SolutionFormTextBox}"
+                            Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                    </StackPanel>
+
+                </Grid>
+                
+                
+                <Grid>
+
+                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                    <StackPanel
+                        Margin="12"
+                        HorizontalAlignment="Left">
+
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Margin="0,0,0,9">
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Site Admins"
+                                IsChecked="{Binding IncludeAdmins, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Site Access"
+                                IsChecked="{Binding IncludeSiteAccess, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Unique Permissions"
+                                IsChecked="{Binding IncludeUniquePermissions, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                        </StackPanel>
+                        
+                        <ToggleButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Include Subsites"
+                            IsChecked="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                        
+                    </StackPanel>
+                </Grid>
+
+
+                <Label
+                    Style="{DynamicResource MenuSectionTitleLabel}"
+                    Content="Site Content Filter"/>
+
+                <Grid>
+
+                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                    <StackPanel
+                        Margin="12">
+
+                        <StackPanel
+                            Orientation="Horizontal">
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Include System Lists"
+                                IsChecked="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Include Resource Lists"
+                                IsChecked="{Binding IncludeResourceLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+                
+            </StackPanel>
+
+
+
+            <!--<Label Height="15"/>
 
             <Label Content="Permission Filter"/>
 
@@ -33,14 +135,14 @@
             <CheckBox Content="Include Subsites"
                       IsChecked="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-            <Label Height="15"/>
+            <Label Height="15"/>-->
             
-            <Label Content="Site Content Filter"/>
+            <!--<Label Content="Site Content Filter"/>
             <CheckBox Content="Include System Lists"
                       IsChecked="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
             <CheckBox Content="Include Resource Lists"
-                      IsChecked="{Binding IncludeResourceLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                      IsChecked="{Binding IncludeResourceLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
 
         </StackPanel>
     </Grid>

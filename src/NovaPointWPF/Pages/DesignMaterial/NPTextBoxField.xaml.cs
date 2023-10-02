@@ -31,7 +31,7 @@ namespace NovaPointWPF.Pages.DesignMaterial
         public static readonly DependencyProperty TitleProperty =
             DependencyProperty.Register("Title", typeof(string), typeof(NPTextBoxField), new PropertyMetadata(string.Empty));
 
-
+        
 
 
         public string Text

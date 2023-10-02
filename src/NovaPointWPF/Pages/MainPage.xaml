@@ -7,45 +7,74 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="MainPage">
-    <Page.Resources>
-        <Style TargetType="Button">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Margin" Value="12"/>
-            <Setter Property="Width" Value="120"/>
-            <Setter Property="Height" Value="80"/>
-        </Style>
-    </Page.Resources>
     
     <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="200"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Background="Transparent"
-                    Margin="0,0,6,0">
-            <Button Content="Reports"
-                    Background="GhostWhite"
-                Click="Reports_Click"/>
-            <Button Content="Automation"
-                    Background="GhostWhite"
-                Click="Automation_Click"/>
-            <Button Content="Quick Fix"
-                    Background="GhostWhite"
-                    Click="QuickFix_Click"/>
-            <Button x:Name="SettingsButton"
-                    Content="Settings"
-                    Background="DarkRed"
-                    Click="Settings_Click"/>
-        </StackPanel>
 
-        <Frame x:Name="SolutionListFrame"
-               Source="/Pages/AboutPage.xaml"
-               MaxWidth="600"
-               MinWidth="300"
-               Margin="6,0,0,0"
-               Grid.Column="1"
-               NavigationUIVisibility="Hidden"/>
+        <Grid Margin="0,0,4,0">
+
+            <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+            <DockPanel
+                Background="Transparent"
+                Margin="6">
+
+                <RadioButton
+                    Style="{DynamicResource MainPageToggleButton}"
+                    Content="Reports"
+                    Click="Reports_Click"
+                    DockPanel.Dock="Top"/>
+
+                <RadioButton
+                    Style="{DynamicResource MainPageToggleButton}"
+                    Content="Automation"
+                    Click="Automation_Click"
+                    DockPanel.Dock="Top"/>
+
+                <RadioButton
+                    Style="{DynamicResource MainPageToggleButton}"
+                    Content="Quick Fix"
+                    Click="QuickFix_Click"
+                    DockPanel.Dock="Top"/>
+
+                <RadioButton
+                    Style="{DynamicResource MainPageToggleButton}"
+                    Content="About"
+                    Click="AboutClick"
+                    DockPanel.Dock="Bottom"/>
+
+                <RadioButton
+                    Style="{DynamicResource MainPageToggleButton}"
+                    x:Name="SettingsButton"
+                    Content="Settings"
+                    Click="Settings_Click"
+                    DockPanel.Dock="Bottom"/>
+
+                <TextBlock
+                    DockPanel.Dock="Top"
+                    Height="Auto"/>
+
+            </DockPanel>
+            
+        </Grid>
+
+        <Grid Grid.Column="1">
+            
+            <Border
+                Background="#101214"
+                CornerRadius="10"/>
+
+            <Frame x:Name="SolutionListFrame"
+                   Source="/Pages/AboutPage.xaml"
+                   Width="600"
+                   Margin="6,6,6,6"
+                   NavigationUIVisibility="Hidden"/>
+
+        </Grid>
+
     </Grid>
 </Page>

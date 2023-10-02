@@ -44,12 +44,12 @@ namespace NovaPointWPF.Pages.Solutions.Report
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
         {
 
-            ListAllSiteSingleReportParameters parameters = new(SiteUrl)
-            {
-                IncludeSystemLists = IncludeSystemLists,
-                IncludeResourceLists = IncludeResourceLists
-            };
-            await new ListAllSiteSingleReport(uiLog, appInfo, parameters).RunAsync();
+            //ListAllSiteSingleReportParameters parameters = new(SiteUrl)
+            //{
+            //    IncludeSystemLists = IncludeSystemLists,
+            //    IncludeResourceLists = IncludeResourceLists
+            //};
+            //await new ListAllSiteSingleReport(uiLog, appInfo, parameters).RunAsync();
 
         }
     }

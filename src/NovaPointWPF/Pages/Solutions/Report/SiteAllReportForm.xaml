@@ -3,75 +3,122 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report" xmlns:designmaterial="clr-namespace:NovaPointWPF.Pages.DesignMaterial"
+      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="SiteAllReportForm">
 
     <Grid Background="Transparent">
+        
         <StackPanel>
 
-            <designmaterial:NPSolutionFormHeader
+            <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
-            
-            <!--<StackPanel Orientation="Horizontal">
-                <Label x:Name="SolutionName"
-                       FontWeight="Bold"/>
 
-                <TextBlock Margin="6">
-                    <Hyperlink Click="GoToDocumentation">
-                        Learn more
-                    </Hyperlink>
-                </TextBlock>
-            </StackPanel>
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Admin Account"/>
 
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Solution Code:"
-                       FontWeight="Bold"/>
-                <Label x:Name="SolutionCodeName"
-                       FontStyle="Italic"
-                       Content=""/>
-            </StackPanel>-->
+            <Grid
+                Margin="0, 0, 0, 15">
 
-            <Label Content="Sites Filter"/>
-            <CheckBox x:Name="CheckBoxIncludePersonalSites"
-                      Content="Include Personal Sites"
-                      IsChecked="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                      Checked="CheckBoxIncludePersonalSites_Checked"/>
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
-            <CheckBox x:Name="CheckBoxIncludeShareSites"
-                      Content="Include Share Sites"
-                      IsChecked="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                      Unchecked="CheckBoxIncludeShareSites_Unchecked"/>
+                <StackPanel
+                    Margin="12">
 
-            <CheckBox x:Name="CheckBoxIncludeGroupIdDefined"
-                      Content="Only MS365 Group Connected Sites"
-                      IsChecked="{Binding GroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                      Checked="CheckBoxIncludeGroupIdDefined_Checked"/>
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Admin UPN"/>
 
-            
-            <Label Height="15"/>
-            
-            <designmaterial:NPTextBoxField Title="Global or SharePoint Admin UPN"
-                                           Text="{Binding SPOAdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding AdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-            <CheckBox Content="Remove Admin after finish solution"
-                      IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-           
+                    <ToggleButton
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Remove Admin"
+                        IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        HorizontalAlignment="Left"/>
 
-            <Label Height="20"/>
-            <Label Content="Report Optional Informaiton"/>
+                </StackPanel>
 
-            <CheckBox Content="Include Site Collection Admins"
-                      IsChecked="{Binding IncludeAdmins, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+            </Grid>
 
-            <CheckBox Content="Include Site Access"
-                      IsChecked="{Binding IncludeSiteAccess, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-            
-            <CheckBox Content="Include Subsites"
-                      IsChecked="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Sites to Include"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12"
+                    Orientation="Horizontal">
+
+                    <ToggleButton
+                        x:Name="CheckBoxIncludePersonalSites"
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Include OneDrive"
+                        IsChecked="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Checked="CheckBoxIncludePersonalSites_Checked"/>
+                    
+                    <ToggleButton
+                        x:Name="CheckBoxIncludeShareSites"
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Include Sites"
+                        IsChecked="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Unchecked="CheckBoxIncludeShareSites_Unchecked"/>
 
 
+                    <ToggleButton
+                        x:Name="CheckBoxIncludeGroupIdDefined"
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Only Teams Sites"
+                        IsChecked="{Binding GroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Checked="CheckBoxIncludeGroupIdDefined_Checked"/>
+
+                </StackPanel>
+
+            </Grid>
+
+
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Optional Information"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12"
+                    Orientation="Horizontal">
+
+                    <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Include Site Admins"
+                                IsChecked="{Binding IncludeAdmins, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                    <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Include Site Access"
+                                IsChecked="{Binding IncludeSiteAccess, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+
+                    <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Include Subsites"
+                                IsChecked="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                </StackPanel>
+
+            </Grid>
         </StackPanel>
     </Grid>
 </Page>

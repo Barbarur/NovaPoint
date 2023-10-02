@@ -4,51 +4,159 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.QuickFix"
-      xmlns:designmaterial="clr-namespace:NovaPointWPF.Pages.DesignMaterial"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="900" d:DesignWidth="800"
       Title="IdMismatchTroubleForm">
 
     <Grid Background="Transparent">
 
         <StackPanel>
 
-            <designmaterial:NPSolutionFormHeader
+            <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            
-            <designmaterial:NPTextBoxField
-                Title="Affected user UPN"
-                Text="{Binding UserUpn, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-            <designmaterial:NPTextBoxField
+            <ToggleButton
+                Style="{DynamicResource SolutionFormToggleButton}"
+                Content="Remove Mode"
+                IsChecked="{Binding ReportMode, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                Margin="0, 0, 0, 15"
+                HorizontalAlignment="Left"/>
+            
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Admin Account"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Admin UPN"/>
+
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding AdminUpn, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                    <ToggleButton
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Remove Admin"
+                        IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        HorizontalAlignment="Left"/>
+
+                </StackPanel>
+
+            </Grid>
+
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Solution Scope"/>
+
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Affected User UPN"/>
+
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding UserUpn, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                    <StackPanel
+                        x:Name="SiteUrlAffectedTextBox">
+                        
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Affected Site URL"/>
+
+                        <TextBox
+                            Style="{DynamicResource SolutionFormTextBox}"
+                            Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                        
+                    </StackPanel>
+
+                    <StackPanel
+                        x:Name="SiteUrlCorrectCheckBox"
+                        Visibility="Collapsed">
+
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Site where user has CORRECT access"/>
+
+                        <TextBox
+                            Style="{DynamicResource SolutionFormTextBox}"
+                            Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                    </StackPanel>
+
+                    <ToggleButton
+                        x:Name="PreventAllSitesCheckBox"
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Prevent this issue on all Sites"
+                        IsChecked="{Binding PreventAllSites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        HorizontalAlignment="Left"
+                        Width="200"/>
+                    
+                </StackPanel>
+            </Grid>
+
+
+
+
+
+
+            
+
+            
+            
+
+            <!--<designmaterial:NPTextBoxField
+                Title="Affected user UPN"
+                Text="{Binding UserUpn, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
+
+            <!--<designmaterial:NPTextBoxField
                 x:Name="SiteUrlAffectedTextBox"
                 Title="Affected Site URL"
-                Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
             
-            <designmaterial:NPTextBoxField
+            <!--<designmaterial:NPTextBoxField
                 Title="Global or SharePoint Admin UPN"
-                Text="{Binding AdminUpn, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                Text="{Binding AdminUpn, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
 
-            <CheckBox Content="Remove Admin after finish solution"
+            <!--<CheckBox Content="Remove Admin after finish solution"
                       IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-            <Label Height="15"/>
+            <Label Height="15"/>-->
 
-            <CheckBox x:Name="PreventAllSitesCheckBox"
+            <!--<CheckBox x:Name="PreventAllSitesCheckBox"
                       Content="Prevent this issue on all Sites"
                       IsChecked="{Binding PreventAllSites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-            <Label Height="15"/>
+            <Label Height="15"/>-->
             
-            <CheckBox Content="Run it a Report Mode Only"
-                      IsChecked="{Binding ReportMode, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+            <!--<CheckBox Content="Run it a Report Mode Only"
+                      IsChecked="{Binding ReportMode, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
 
-            <designmaterial:NPTextBoxField
+            <!--<designmaterial:NPTextBoxField
                 x:Name="SiteUrlCorrectCheckBox"
                 Title="Site where user has CORRECT access"
                 Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                Visibility="Collapsed"/>
+                Visibility="Collapsed"/>-->
 
         </StackPanel>
 

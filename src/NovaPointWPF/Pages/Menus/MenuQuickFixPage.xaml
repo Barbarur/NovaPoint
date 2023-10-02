@@ -25,35 +25,33 @@
     <Grid Background="Transparent">
 
         <StackPanel>
-            <!--<StackPanel Margin="0, 0, 0, 12">
-                <Label Content="Site Collection / Subsite"/>
 
-                <Button Content="TBD"/>
+            <Label
+                Style="{DynamicResource MenuMainTitleLabel}"
+                Content="Quick Fix"
+                Margin="0,0,0,15"/>
+            
+            
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Users"/>
 
-            </StackPanel>
+            <Grid Margin="0,0,0,15">
 
-            <StackPanel Margin="0, 0, 0, 12">
-                <Label Content="Document Library / Item List"/>
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
-                <Button Content="TBD"/>
+                <StackPanel>
 
-            </StackPanel>
-
-            <StackPanel Margin="0, 0, 0, 12">
-                <Label Content="File / Item"/>
-
-                <Button Content="TBD"/>
-
-            </StackPanel>-->
-
-            <StackPanel Margin="0, 0, 0, 12">
-                <Label Content="User"/>
-
-                <Button Content="ID Mismatch"
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="ID Mismatch"
                         Click="GoIdMismatchTroubleForm"/>
 
-            </StackPanel>
+                </StackPanel>
 
+            </Grid>
+
+            
         </StackPanel>
 
     </Grid>

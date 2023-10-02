@@ -54,17 +54,17 @@ namespace NovaPointWPF.Pages.Solutions.Report
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
         {
 
-            ListAllSiteAllReportParameters parameters = new(SiteAdminUPN)
-            {
-                RemoveAdmin = RemoveAdmin,
-                IncludePersonalSite = IncludePersonalSite,
-                IncludeShareSite = IncludeShareSite,
-                GroupIdDefined = GroupIdDefined,
+            //ListAllSiteAllReportParameters parameters = new(SiteAdminUPN)
+            //{
+            //    RemoveAdmin = RemoveAdmin,
+            //    IncludePersonalSite = IncludePersonalSite,
+            //    IncludeShareSite = IncludeShareSite,
+            //    GroupIdDefined = GroupIdDefined,
 
-                IncludeSystemLists = IncludeSystemLists,
-                IncludeResourceLists = IncludeResourceLists
-            };
-            await new ListAllSiteAllReport(uiLog, appInfo, parameters).RunAsync();
+            //    IncludeSystemLists = IncludeSystemLists,
+            //    IncludeResourceLists = IncludeResourceLists
+            //};
+            //await new ListAllSiteAllReport(uiLog, appInfo, parameters).RunAsync();
 
         }
 

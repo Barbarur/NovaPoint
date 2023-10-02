@@ -3,21 +3,46 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report" xmlns:designmaterial="clr-namespace:NovaPointWPF.Pages.DesignMaterial"
+      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="UserAllSiteSingleReportForm">
 
     <Grid Background="Transparent">
+        
         <StackPanel>
 
-            <Label Content="All Users in a Site"
+            <designmaterial:FormHeader
+                x:Name="SolutionHeader"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Site URL"/>
+
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                </StackPanel>
+
+            </Grid>
+
+                <!--<Label Content="All Users in a Site"
                    FontWeight="Bold"/>
             <Label Height="15"/>
 
             <designmaterial:NPTextBoxField
                 Title="Site URL"
-                Text="{Binding Path=SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                Text="{Binding Path=SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
 
         </StackPanel>
 

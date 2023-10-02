@@ -12,41 +12,138 @@
     <Grid Background="Transparent">
         <StackPanel>
 
-            <Label Content="Set/Remove a User as Site Collection Admin from all Site Collections"
-                   FontWeight="Bold"/>
+            <Label
+                Style="{DynamicResource MenuMainTitleLabel}"
+                Content="Remove a User from all Site Collections"
+                FontWeight="Bold"/>
             <Label Height="15"/>
 
-            <designmaterial:NPTextBoxField
-                Title="User to remove UPN"
-                Text="{Binding Path=DeleteUserUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-            <designmaterial:NPTextBoxField
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Target user UPN"/>
+
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding DeleteUserUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                </StackPanel>
+
+            </Grid>
+
+
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Admin Account"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Admin UPN"/>
+
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding AdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                    <ToggleButton
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Remove Admin"
+                        IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        HorizontalAlignment="Left"/>
+
+                </StackPanel>
+
+            </Grid>
+
+
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Sites Filter"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12"
+                    Orientation="Horizontal">
+
+                    <ToggleButton
+                        x:Name="CheckBoxIncludePersonalSites"
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Include OneDrive"
+                        IsChecked="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Checked="CheckBoxIncludePersonalSites_Checked"/>
+
+                    <ToggleButton
+                        x:Name="CheckBoxIncludeShareSites"
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Include Sites"
+                        IsChecked="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Unchecked="CheckBoxIncludeShareSites_Unchecked"/>
+
+
+                    <ToggleButton
+                        x:Name="CheckBoxIncludeGroupIdDefined"
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Only Teams Sites"
+                        IsChecked="{Binding GroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Checked="CheckBoxIncludeGroupIdDefined_Checked"/>
+
+                </StackPanel>
+
+            </Grid>
+
+
+
+            <!--<designmaterial:NPTextBoxField
+                Title="User to remove UPN"
+                Text="{Binding Path=DeleteUserUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
+
+            <!--<designmaterial:NPTextBoxField
                 Title="Admin UPN"
                 Text="{Binding Path=AdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
             <Label Height="9"/>
             <CheckBox Content="Remove Admin after finish solution"
-                      IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                      IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
 
-            <Label Height="15"/>
+            <!--<Label Height="15"/>
 
             <Label Content="Sites Filter"/>
             <CheckBox x:Name="CheckBoxIncludePersonalSites"
                       Content="Include Personal Sites"
                       IsChecked="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                      Checked="CheckBoxIncludePersonalSites_Checked"/>
+                      Checked="CheckBoxIncludePersonalSites_Checked"/>-->
 
-            <CheckBox x:Name="CheckBoxIncludeShareSites"
+            <!--<CheckBox x:Name="CheckBoxIncludeShareSites"
                       Content="Include Share Sites"
                       IsChecked="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                      Unchecked="CheckBoxIncludeShareSites_Unchecked"/>
+                      Unchecked="CheckBoxIncludeShareSites_Unchecked"/>-->
 
-            <CheckBox x:Name="CheckBoxIncludeGroupIdDefined"
+            <!--<CheckBox x:Name="CheckBoxIncludeGroupIdDefined"
                       Content="Only MS365 Group Connected Sites"
                       IsChecked="{Binding GroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                      Checked="CheckBoxIncludeGroupIdDefined_Checked"/>
+                      Checked="CheckBoxIncludeGroupIdDefined_Checked"/>-->
 
         </StackPanel>
-
     </Grid>
 </Page>

@@ -3,17 +3,72 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:NovaPointWPF.Pages.Menus" xmlns:designmaterial="clr-namespace:NovaPointWPF.Pages.DesignMaterial"
+      xmlns:local="clr-namespace:NovaPointWPF.Pages.Menus"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="600" d:DesignWidth="800"
       Title="MenuSettingsPage">
 
 
     <Grid>
-        <StackPanel Background="Transparent"
-                    MaxWidth="600"
-                    MinWidth="300">
-            <designmaterial:NPTextBoxField
+        
+        <StackPanel Background="Transparent">
+
+            <Label
+                Style="{DynamicResource MenuMainTitleLabel}"
+                Content="Settings"
+                Margin="0,0,0,15"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="SharePoint Domain"/>
+
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding Domain, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Margin="0,0,0,8"/>
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Tenant ID"/>
+
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding TenantId, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Margin="0,0,0,8"/>
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Client ID"/>
+
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding ClientId, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Margin="0,0,0,8"/>
+
+                    <ToggleButton
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Save Access Token"
+                        IsChecked="{Binding CachingToken, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Margin="0, 8, 0, 8"
+                        HorizontalAlignment="Left"/>
+
+
+                </StackPanel>
+
+            </Grid>
+
+
+
+            <!--<designmaterial:NPTextBoxField
                 Title="SharePoint Domain"
                 Text="{Binding Domain, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
@@ -27,9 +82,11 @@
 
             <Label Height="15"/>
             
-            <CheckBox Content="Save Access Token"
-                      IsChecked="{Binding CachingToken, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+            <checkbox content="save access token"
+                      ischecked="{binding cachingtoken, mode=twoway, notifyonsourceupdated=true, notifyontargetupdated=true}"/>-->
 
+            
+            
             <Label Height="15"/>
             <Grid Background="Transparent"
                   Grid.Row="1">
@@ -38,35 +95,34 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <Button Content="Save Settings"
-                        Click="Save_Click"
-                        Grid.Column="0"
-                        Height="60"
-                        Width="120"/>
+                <Button
+                    Style="{DynamicResource SolutionFormButton}"
+                    Content="Save Settings"
+                    Click="Save_Click"
+                    Grid.Column="0"
+                    Height="60"
+                    Width="120"/>
 
-                <Button Content="Delete Cache"
-                        Click="Delete_Click"
-                        Grid.Column="1"
-                        Height="60"
-                        Width="120"/>
+                <Button
+                    Style="{DynamicResource SolutionFormButton}"
+                    Content="Delete Cache"
+                    Click="Delete_Click"
+                    Grid.Column="1"
+                    Height="60"
+                    Width="120"/>
 
             </Grid>
             
-            <Button Content="About"
-                    Click="About_Click"
-                    Height="60"
-                    Width="120"
-                    Margin="0, 42, 0, 0"/>
-
-            <Button x:Name="UpdateButton"
-                    Content="Update"
-                    Click="Update_Click"
-                    Background="DarkRed"
-                    FontWeight="Bold"
-                    Height="60"
-                    Width="120"
-                    Margin="0, 42, 0, 0"
-                    Visibility="Collapsed"/>
+            <Button
+                Style="{DynamicResource SolutionFormButton}"
+                x:Name="UpdateButton"
+                Content="Update"
+                Click="Update_Click"
+                Background="DarkRed"
+                Height="60"
+                Width="120"
+                Margin="0, 42, 0, 0"
+                Visibility="Collapsed"/>
 
 
         </StackPanel>

@@ -7,54 +7,94 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="MenuAutomationPage">
-    <Page.Resources>
-        <Style TargetType="Button">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Margin" Value="6"/>
-            <Setter Property="Height" Value="39"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        </Style>
-        <Style TargetType="Label">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        </Style>
-    </Page.Resources>
 
     <Grid Background="Transparent">
 
         <StackPanel>
-            <StackPanel Margin="0, 0, 0, 12">
-                <Label Content="Site Collection / Subsite"/>
 
-                <Button Content="Set/Remove a User as Site Collection Admin from all Site Collections"
+            <Label
+                Style="{DynamicResource MenuMainTitleLabel}"
+                Content="Automation"
+                Margin="0,0,0,15"/>
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Site Collections and Subsites"/>
+
+            <Grid Margin="0,0,0,15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Set or Remove a User as Site Collection Admin"
                         Click="GoSetSiteCollectionAdminAllAutoForm"/>
 
-            </StackPanel>
+                </StackPanel>
 
-            <!--<StackPanel Margin="0, 0, 0, 12">
-                <Label Content="Document Library / Item List"/>
+            </Grid>
 
-                <Button Content="TBD"/>
-                
-            </StackPanel>-->
 
-            <StackPanel Margin="0, 0, 0, 12">
-                <Label Content="File / Item"/>
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Document Libraries and Item Lists"/>
 
-                <Button Content="Remove Versions of all Items/Files in a single List/Library of a Site"
-                        Click="GoRemoveVersionItemAllListSingleSiteSingleAutoForm"/>
+            <Grid Margin="0,0,0,15">
 
-            </StackPanel>
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
-            <StackPanel Margin="0, 0, 0, 12">
-                <Label Content="User"/>
+                <StackPanel>
 
-                <Button Content="Remove a User from All Site Collections"
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Set versioning limit"
+                        Click="SetVersioningLimitAutoClick"/>
+
+                </StackPanel>
+
+            </Grid>
+
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Files and Items"/>
+
+            <Grid Margin="0,0,0,15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Delete file versions"
+                        Click="RemoveFileVersionAutoClick"/>
+
+                </StackPanel>
+
+            </Grid>
+
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Users"/>
+
+            <Grid Margin="0,0,0,15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Remove a User from All Site Collections"
                         Click="GoRemoveUserSingleSiteAllAutoForm"/>
+                    
+                </StackPanel>
 
-            </StackPanel>
+            </Grid>
 
         </StackPanel>
 

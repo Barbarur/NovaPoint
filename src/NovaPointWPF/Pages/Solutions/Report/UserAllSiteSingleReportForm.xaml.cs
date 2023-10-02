@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Solutions.Report;
 
 namespace NovaPointWPF.Pages.Solutions.Report
 {
@@ -29,6 +30,10 @@ namespace NovaPointWPF.Pages.Solutions.Report
             InitializeComponent();
 
             DataContext = this;
+
+            SolutionHeader.SolutionTitle = UserAllSiteSingleReport.s_SolutionName;
+            SolutionHeader.SolutionCode = nameof(UserAllSiteSingleReport);
+            SolutionHeader.SolutionDocs = UserAllSiteSingleReport.s_SolutionDocs;
 
             SiteUrl = string.Empty;
         }

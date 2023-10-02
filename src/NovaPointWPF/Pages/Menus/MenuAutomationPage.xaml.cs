@@ -1,4 +1,5 @@
-﻿using NovaPointWPF.Pages.Solutions;
+﻿using NovaPointLibrary.Solutions.Automation;
+using NovaPointWPF.Pages.Solutions;
 using NovaPointWPF.Pages.Solutions.Automation;
 using NovaPointWPF.Pages.Solutions.Report;
 using System;
@@ -42,11 +43,21 @@ namespace NovaPointWPF.Pages.Menus
             GoToSolutionForm(new SetSiteCollectionAdminAllAutoForm());
         }
 
-
-        // FILES AND ITEMS
-        private void GoRemoveVersionItemAllListSingleSiteSingleAutoForm(object sender, RoutedEventArgs e)
+        // LISTS
+        private void SetVersioningLimitAutoClick(object sender, RoutedEventArgs e)
         {
-            GoToSolutionForm(new RemoveVersionItemAllListSingleSiteSingleAutoForm());
+            GoToSolutionForm(new SetVersioningLimitAutoForm());
+        }
+
+        // ITEMS
+        //private void GoRemoveVersionItemSelectListSelectSiteSingleAutoForm(object sender, RoutedEventArgs e)
+        //{
+        //    GoToSolutionForm(new RemoveVersionItemAutoForm());
+        //}
+
+        private void RemoveFileVersionAutoClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new RemoveFileVersionAutoForm());
         }
 
 

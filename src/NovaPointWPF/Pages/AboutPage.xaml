@@ -9,21 +9,26 @@
       Title="AboutPage">
 
     <Grid Background="Transparent">
-        <StackPanel Margin="60">
-            <Image Source="C:\Users\ax_zi\MEGA\Coding Projects\NovaPoint Project\NovaPoint\NovaPointWPF\images\NovaPoint_Icon_300x300.png"
-                   Width="150"/>
+        
+        <StackPanel
+            VerticalAlignment="Center">
 
-            <Label Content="NovaPoint"
-                   HorizontalAlignment="Center"
-                   FontWeight="Heavy"
-                   FontSize="30"
-                   Margin="12"/>
+            <Image Source="\Resources\NovaPoint.png"
+                   Width="150"
+                   Height="200"/>
 
-            <Label Content="Please find all the information on how to use this app in the link below"
-                   HorizontalAlignment="Center"
-                   FontWeight="Light"
-                   FontSize="12"
-                   Margin="0"/>
+            <Label
+                Style="{DynamicResource MenuMainTitleLabel}"
+                Content="NovaPoint"
+                HorizontalAlignment="Center"
+                FontWeight="Heavy"
+                Margin="0,0,0,15"/>
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Open source app for SharePoint Admins"
+                HorizontalAlignment="Center"
+                FontWeight="Light"/>
 
             <TextBlock Margin="6"
                        HorizontalAlignment="Center">
@@ -31,6 +36,8 @@
                     Go to Documentation
                 </Hyperlink>
             </TextBlock>
+
+            <TextBlock Height="100"/>
 
         </StackPanel>
 

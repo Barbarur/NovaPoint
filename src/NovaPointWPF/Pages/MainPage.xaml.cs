@@ -29,8 +29,7 @@ namespace NovaPointWPF.Pages
 
         private void CheckUpdate()
         {
-            if (Properties.Settings.Default.IsUpdated) { SettingsButton.Background = Brushes.GhostWhite; }
-            else { SettingsButton.Background = Brushes.DarkRed; }
+            if (!Properties.Settings.Default.IsUpdated) { SettingsButton.Background = Brushes.DarkRed; }
         }
 
         private void Reports_Click(object sender, RoutedEventArgs e)
@@ -52,6 +51,11 @@ namespace NovaPointWPF.Pages
         {
             CheckUpdate();
             SolutionListFrame.Content = new Pages.Menus.MenuSettingsPage();
+        }
+
+        private void AboutClick(object sender, RoutedEventArgs e)
+        {
+            SolutionListFrame.Content = new AboutPage();
         }
     }
 }

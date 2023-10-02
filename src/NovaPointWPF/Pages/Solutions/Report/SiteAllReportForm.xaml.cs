@@ -29,7 +29,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
         public bool IncludeShareSite { get; set; }
         public bool GroupIdDefined { get; set; }
 
-        public string SPOAdminUPN { get; set; }
+        public string AdminUPN { get; set; }
         public bool RemoveAdmin { get; set; }
 
         public bool IncludeAdmins { get; set; }
@@ -44,27 +44,21 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
             DataContext = this;
 
-
-            IncludePersonalSite = false;
-            IncludeShareSite = true;
-            GroupIdDefined = false;
-
-            SPOAdminUPN = string.Empty;
-            RemoveAdmin = false;
-
-            IncludeAdmins = false;
-            IncludeSiteAccess = false;
-            IncludeSubsites = false;
-
-
             SolutionHeader.SolutionTitle = SiteAllReport._solutionName;
             SolutionHeader.SolutionCode = nameof(SiteAllReport);
             SolutionHeader.SolutionDocs = SiteAllReport._solutionDocs;
 
+            this.IncludePersonalSite = false;
+            this.IncludeShareSite = true;
+            this.GroupIdDefined = false;
 
-            //SolutionName.Content = SiteAllReport._solutionName;
-            //SolutionCodeName.Content = nameof(SiteAllReport);
-            //SolutionDocs = SiteAllReport._solutionDocs;
+            this.AdminUPN = String.Empty;
+            this.RemoveAdmin = false;
+
+            this.IncludeAdmins = false;
+            this.IncludeSiteAccess = false;
+            this.IncludeSubsites = false;
+
         }
 
 
@@ -72,16 +66,16 @@ namespace NovaPointWPF.Pages.Solutions.Report
         {
             SiteAllReportParameters parameters = new()
             {
-                AdminUPN = SPOAdminUPN,
-                RemoveAdmin = RemoveAdmin,
+                AdminUPN = this.AdminUPN,
+                RemoveAdmin = this.RemoveAdmin,
 
-                IncludePersonalSite = IncludePersonalSite,
-                IncludeShareSite = IncludeShareSite,
-                GroupIdDefined = GroupIdDefined,
+                IncludePersonalSite = this.IncludePersonalSite,
+                IncludeShareSite = this.IncludeShareSite,
+                GroupIdDefined = this.GroupIdDefined,
 
-                IncludeAdmins = IncludeAdmins,
-                IncludeSiteAccess = IncludeSiteAccess,
-                IncludeSubsites = IncludeSubsites
+                IncludeAdmins = this.IncludeAdmins,
+                IncludeSiteAccess = this.IncludeSiteAccess,
+                IncludeSubsites = this.IncludeSubsites
 
             };
             await new SiteAllReport(uiLog, appInfo, parameters).RunAsync();
@@ -103,10 +97,5 @@ namespace NovaPointWPF.Pages.Solutions.Report
             CheckBoxIncludeShareSites.IsChecked = true;
         }
 
-        //private void GoToDocumentation(object sender, RoutedEventArgs e)
-        //{
-        //    var url = SolutionDocs.Replace("&", "^&");
-        //    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-        //}
     }
 }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace NovaPointWPF.Pages.Solutions
     {
         private readonly ISolutionForm _solutionForm;
 
-        private string _solutionFolder;
+        private string _solutionFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         private string SolutionFolder
         {
             get
@@ -67,7 +68,15 @@ namespace NovaPointWPF.Pages.Solutions
 
             _solutionForm = solutionForm;
 
+            ResetProgress();
+        }
+
+        private void ResetProgress()
+        {
             Progress.Value = 0;
+            PercentageCompleted.Content = "Percentage completed";
+            PendingTime.Content = "Pending time to complete";
+            BoxText.Text = String.Empty;
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
@@ -86,8 +95,12 @@ namespace NovaPointWPF.Pages.Solutions
             RunButton.IsEnabled = false;
             CancelButton.IsEnabled = true;
 
-            BoxText.Text = "";
-            Progress.Value = 0;
+            ResetProgress();
+            //Progress.Value = 0;
+            //PercentageCompleted.Content = String.Empty;
+            //PendingTime.Content = String.Empty;
+            //BoxText.Text = "";
+
 
             if (string.IsNullOrWhiteSpace(Properties.Settings.Default.Domain) ||
                 string.IsNullOrWhiteSpace(Properties.Settings.Default.TenantId) ||
@@ -157,7 +170,7 @@ namespace NovaPointWPF.Pages.Solutions
                     PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
                     if ( !string.IsNullOrWhiteSpace(logInfo.PendingTime))
                     {
-                        PendingTime.Content = $" - {logInfo.PendingTime}";
+                        PendingTime.Content = $"{logInfo.PendingTime}";
                     }
                 }
             }
@@ -174,7 +187,7 @@ namespace NovaPointWPF.Pages.Solutions
                         PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
                         if (!string.IsNullOrWhiteSpace(logInfo.PendingTime))
                         {
-                            PendingTime.Content = $" - {logInfo.PendingTime}";
+                            PendingTime.Content = $"{logInfo.PendingTime}";
                         }
                     }
                 }));

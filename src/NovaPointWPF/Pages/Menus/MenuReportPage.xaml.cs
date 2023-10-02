@@ -33,58 +33,36 @@ namespace NovaPointWPF.Pages.Menus
             if (mainFrame is not null) { mainFrame.Content = new SolutionBasePage(solutionForm); }
         }
 
-        
 
-
-        //private void GoSiteCollAllReportForm(object sender, RoutedEventArgs e)
-        //{
-            
-        //    GoToSolutionForm(new SiteCollAllReportForm());
-        //}
-
-        private void GoSiteAllReportForm(object sender, RoutedEventArgs e)
+        private void SiteAllReportFormClick(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new SiteAllReportForm());
         }
 
-        //private void GoAdminAllSiteSingleReportForm(object sender, RoutedEventArgs e)
-        //{
-        //    GoToSolutionForm(new AdminAllSiteSingleReportForm());
-        //}
 
-        private void GoPermissionsAllSiteSingleReportForm(object sender, RoutedEventArgs e)
+
+        private void ListReportClick(object sender, RoutedEventArgs e)
         {
-            GoToSolutionForm(new PermissionsAllSiteSingleReportForm());
+            GoToSolutionForm(new ListReportForm());
         }
 
 
 
-        private void GoListAllSiteSingleReportForm(object sender, RoutedEventArgs e)
+        private void ItemReportClick(object sender, RoutedEventArgs e)
         {
-            GoToSolutionForm(new ListAllSiteSingleReportForm());
-        }
-
-        private void GoListAllSiteAllReportForm(object sender, RoutedEventArgs e)
-        {
-            GoToSolutionForm(new ListAllSiteAllReportForm());
+            GoToSolutionForm(new ItemReportForm());
         }
 
 
 
-        private void GoItemAllListSingleSiteSingleReportForm(object sender, RoutedEventArgs e)
-        {
-            GoToSolutionForm(new ItemAllListSingleSiteSingleReportForm());
-        }
-        private void GoItemAllListAllSiteSingleReportForm(object sender, RoutedEventArgs e)
-        {
-            GoToSolutionForm(new ItemAllListAllSiteSingleReportForm());
-        }
-
-
-
-        private void GoUserAllSiteSingleReportForm(object sender, RoutedEventArgs e)
+        private void UserAllSiteSingleReportFormClick(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new UserAllSiteSingleReportForm());
+        }
+
+        private void PermissionsAllSiteSingleReportFormClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new PermissionsAllSiteSingleReportForm());
         }
 
     }

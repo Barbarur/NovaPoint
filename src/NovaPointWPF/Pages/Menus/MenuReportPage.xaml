@@ -5,76 +5,101 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Menus"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="800" d:DesignWidth="600"
       Title="MenuReportPage">
-    <Page.Resources>
-        <Style TargetType="Button">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Margin" Value="6"/>
-            <Setter Property="Height" Value="39"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        </Style>
-        <Style TargetType="Label">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        </Style>
-    </Page.Resources>
 
     <Grid Background="Transparent">
 
         <StackPanel>
-            <StackPanel Margin="0, 0, 0, 12">
-                <Label Content="Site Collection / Subsite"/>
 
-                <!--To be deprecated-->
-                <!--<Button Content="All Site Collections"
-                        Click="GoSiteCollAllReportForm"
-                        Visibility="Collapsed"/>-->
+            <Label
+                Style="{DynamicResource MenuMainTitleLabel}"
+                Content="Reports"
+                Margin="0,0,0,15"/>
 
-                <Button Content="All Site Collections and Subsites"
-                        Click="GoSiteAllReportForm"/>
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Site Collections and Subsites"/>
+            
+            <Grid Margin="0,0,0,15">
 
-                <!--TO BE DEPRECATED-->
-                <!--<Button Content="All Site Collection Admins in a single Site Collection"
-                        Click="GoAdminAllSiteSingleReportForm"
-                        Visibility="Collapsed"/>-->
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
-                <Button Content="Report of all Permissions in a Site"
-                        Click="GoPermissionsAllSiteSingleReportForm"/>
+                <StackPanel>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="All Site Collections and Subsites"
+                        Click="SiteAllReportFormClick"/>
+
+                </StackPanel>
+                                
+            </Grid>
 
 
-            </StackPanel>
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Document Libraries and Item Lists"/>
 
-            <StackPanel Margin="0, 0, 0, 12">
-                <Label Content="Document Library / Item List"/>
+            <Grid Margin="0,0,0,15">
 
-                <Button Content="All Libraries/List for a Site"
-                        Click="GoListAllSiteSingleReportForm"/>
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
-                <Button Content="All Libraries/List for all Site Collections"
-                        Click="GoListAllSiteAllReportForm"/>
-            </StackPanel>
+                <StackPanel>
 
-            <StackPanel Margin="0, 0, 0, 12">
-                <Label Content="File / Item"/>
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Libraries and Lists Report"
+                        Click="ListReportClick"/>
 
-                <Button Content="All Files/Items in a single Library/List of a Site"
-                        Click="GoItemAllListSingleSiteSingleReportForm"/>
+                </StackPanel>
 
-                <Button Content="All Files/Items in all Libraries/Lists of a Site"
-                        Click="GoItemAllListAllSiteSingleReportForm"/>
+            </Grid>
 
-            </StackPanel>
 
-            <StackPanel Margin="0, 0, 0, 12">
-                <Label Content="User"/>
-                
-                <Button Content="All Users in a single Site"
-                        Click="GoUserAllSiteSingleReportForm"/>
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Files and Items"/>
 
-            </StackPanel>
+            <Grid Margin="0,0,0,15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Files and Items Report"
+                        Click="ItemReportClick"/>
+
+                </StackPanel>
+
+            </Grid>
+
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Users"/>
+
+            <Grid Margin="0,0,0,15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Users in a single Site report"
+                        Click="UserAllSiteSingleReportFormClick"/>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Permissions in a Site report"
+                        Click="PermissionsAllSiteSingleReportFormClick"/>
+
+                </StackPanel>
+
+            </Grid>
 
         </StackPanel>
 
