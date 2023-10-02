@@ -43,5 +43,9 @@ For more information on how the solution works, you can visit the [**ID Mismatch
 ### Option #3: Using SharePoint Self Diagnosis
 
 Navigate to MS365 Admin Center as *Global Admin* or *SharePoint Admin* and run the diagnosis [Site User ID Mismatch](https://aka.ms/PillarSiteUserIDMismatch).
+
 It perform the same actions as the previous option, but automatically. It also resolves the issue only on a single Site per run and got some performance issues before, though Microsoft has implemented some improvements recently.
+
 After running the diagnosis you can share again the Site/Folder with the affected user.
+
+[Fix site user ID mismatch in SharePoint or OneDrive](https://learn.microsoft.com/en-us/sharepoint/troubleshoot/sharing-and-permissions/fix-site-user-id-mismatch)
