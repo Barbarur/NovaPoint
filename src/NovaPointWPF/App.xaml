@@ -401,11 +401,11 @@
 
         <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
             <Grid
-                Width="10">
+                Width="3">
                 
                 <Border
-                    CornerRadius="4"
-                    Background="#424242" />
+                    CornerRadius="1"
+                    Background="{DynamicResource PrimaryBorderColor}" />
 
                 <Track
                     x:Name="PART_Track"
@@ -419,7 +419,7 @@
                     
                     <Track.Thumb>
                         <Thumb Style="{DynamicResource ScrollBarThumb}"
-                               Background="#686868"/>
+                               Background="{DynamicResource PrimaryTextColor}"/>
                     </Track.Thumb>
                     
                     <Track.IncreaseRepeatButton>
