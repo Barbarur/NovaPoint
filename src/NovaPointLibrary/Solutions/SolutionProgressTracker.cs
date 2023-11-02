@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CamlBuilder;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace NovaPointLibrary.Solutions
     internal class SolutionProgressTracker
     {
         internal readonly Main _main;
-        private float _counter;
+        private int _counter;
         private int _totalUnits;
         private int Total
         {
@@ -18,22 +19,22 @@ namespace NovaPointLibrary.Solutions
             set
             {
                 _totalUnits = value;
-                if (value > 0) { _counterStep = 1 / value; }
+                if (value > 0)
+                { 
+                    _counterStep = 1 / (double)value;
+                }
             }
         }
-        private float _counterStep = 0;
+
+        private double _counterStep = 0;
         private readonly SolutionProgressTracker? _parentProgress = null;
 
-
-        private float SubTaskCounter = 0;
-        private float SubTotalCount = 1;
 
         internal SolutionProgressTracker(Main main, int totalCount)
         {
             _main = main;
             _counter = 0;
             Total = totalCount;
-
         }
 
         internal SolutionProgressTracker(SolutionProgressTracker parentProgress, int totalCount)
@@ -47,33 +48,37 @@ namespace NovaPointLibrary.Solutions
         internal void IncreaseTotalCount(int addUnits)
         {
             Total += addUnits;
-            ProgressUpdateReport(_counter);
+            float progressValue = (float)Math.Round(_counter * _counterStep, 2);
+            ProgressUpdateReport(progressValue);
         }
 
         internal void ProgressUpdateReport()
         {
             _counter++;
-            ProgressUpdateReport(_counter);
+            double progressValue = Math.Round(_counter * _counterStep, 2);
+            
+            ProgressUpdateReport(progressValue);
         }
         
-        private void ProgressUpdateReport(double counter)
+        private void ProgressUpdateReport(double progressvalue)
         {
             if (_parentProgress == null)
             {
-                double progress = Math.Round(counter * 100 / Total, 2);
+                double progress = Math.Round(progressvalue * 100, 2);
+                
                 _main.AddProgressToUI(progress);
             }
             else
             {
-                double progress = Math.Round(counter / Total, 2);
-                _parentProgress.ProgressUpdateFromChild(progress);
+                _parentProgress.ProgressUpdateFromChild(progressvalue);
             }
         }
 
-        private void ProgressUpdateFromChild(double childProgress)
+        private void ProgressUpdateFromChild(double childProgressvalue)
         {
-            var counter = _counter + _counterStep * childProgress;
-            ProgressUpdateReport(counter);
+            double progressValue = Math.Round((_counter + childProgressvalue) * _counterStep, 2);
+            
+            ProgressUpdateReport(progressValue);
         }
     }
 }
