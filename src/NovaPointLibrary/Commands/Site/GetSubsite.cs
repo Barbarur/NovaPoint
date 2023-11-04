@@ -12,12 +12,12 @@ namespace NovaPointLibrary.Commands.Site
 {
     internal class GetSubsite
     {
-        private LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
         private readonly string AccessToken;
-        internal GetSubsite(LogHelper logHelper, AppInfo appInfo, string accessToken)
+        internal GetSubsite(NPLogger logger, AppInfo appInfo, string accessToken)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             _appInfo = appInfo;
             AccessToken = accessToken;
         }
@@ -25,7 +25,7 @@ namespace NovaPointLibrary.Commands.Site
         internal List<Web> CsomAllSubsitesBasicExpressions(string siteUrl)
         {
             _appInfo.IsCancelled();
-            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesBasicExpressions - Start getting all Subsites with basic expresions");
+            _logger.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesBasicExpressions - Start getting all Subsites with basic expresions");
 
             var retrievalExpressions = new Expression<Func<Web, object>>[]
             {
@@ -39,14 +39,14 @@ namespace NovaPointLibrary.Commands.Site
 
             var results = CsomAllSubsites(siteUrl, retrievalExpressions);
 
-            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesBasicExpressions - Finish getting all Subsites with basic expresions");
+            _logger.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesBasicExpressions - Finish getting all Subsites with basic expresions");
             return results;
         }
 
         internal List<Web> CsomAllSubsitesWithRoles(string siteUrl)
         {
             _appInfo.IsCancelled();
-            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRoles - Start getting all Subsites with roles");
+            _logger.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRoles - Start getting all Subsites with roles");
 
             var retrievalExpressions = new Expression<Func<Web, object>>[]
             {
@@ -62,7 +62,7 @@ namespace NovaPointLibrary.Commands.Site
 
             var results = CsomAllSubsites(siteUrl, retrievalExpressions);
 
-            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRoles - Finish getting all Subsites with roles");
+            _logger.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRoles - Finish getting all Subsites with roles");
             return results;
 
         }
@@ -70,7 +70,7 @@ namespace NovaPointLibrary.Commands.Site
         internal List<Web> CsomAllSubsitesWithRolesAndSiteDetails(string siteUrl)
         {
             _appInfo.IsCancelled();
-            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRolesAndSiteDetails - Start getting all Subsites with roles");
+            _logger.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRolesAndSiteDetails - Start getting all Subsites with roles");
 
             var retrievalExpressions = new Expression<Func<Web, object>>[]
             {
@@ -88,7 +88,7 @@ namespace NovaPointLibrary.Commands.Site
 
             var results = CsomAllSubsites(siteUrl, retrievalExpressions);
 
-            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRolesAndSiteDetails - Finish getting all Subsites with roles");
+            _logger.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRolesAndSiteDetails - Finish getting all Subsites with roles");
             return results;
 
         }
@@ -96,7 +96,7 @@ namespace NovaPointLibrary.Commands.Site
         private List<Web> CsomAllSubsites(string siteUrl, Expression<Func<Web, object>>[] retrievalExpressions)
         {
             _appInfo.IsCancelled();
-            _logHelper.AddLogToTxt( $"{GetType().Name}.CsomAllSubsites - Start getting all Subsites");
+            _logger.AddLogToTxt( $"{GetType().Name}.CsomAllSubsites - Start getting all Subsites");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -113,7 +113,7 @@ namespace NovaPointLibrary.Commands.Site
 
             results.AddRange(GetSubWebsInternal(subsites, retrievalExpressions));
 
-            _logHelper.AddLogToTxt($"{GetType().Name}.CsomAllSubsites - Finish getting all Subsites");
+            _logger.AddLogToTxt($"{GetType().Name}.CsomAllSubsites - Finish getting all Subsites");
             return results;
 
         }
@@ -121,7 +121,7 @@ namespace NovaPointLibrary.Commands.Site
         private List<Web> GetSubWebsInternal(WebCollection subsites, Expression<Func<Web, object>>[] retrievalExpressions)
         {
             _appInfo.IsCancelled();
-            _logHelper.AddLogToTxt($"{GetType().Name}.GetSubWebsInternal - Start getting Subsites internals");
+            _logger.AddLogToTxt($"{GetType().Name}.GetSubWebsInternal - Start getting Subsites internals");
 
             var subwebs = new List<Web>();
 
@@ -138,7 +138,7 @@ namespace NovaPointLibrary.Commands.Site
 
             }
 
-            _logHelper.AddLogToTxt($"{GetType().Name}.GetSubWebsInternal - Finish getting Subsites internals");
+            _logger.AddLogToTxt($"{GetType().Name}.GetSubWebsInternal - Finish getting Subsites internals");
             return subwebs;
         }
     }

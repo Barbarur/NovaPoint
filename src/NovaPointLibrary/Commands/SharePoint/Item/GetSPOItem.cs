@@ -16,13 +16,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
     // TO BE DEPRECATED WHEN SPOItemCSOM IS ON PRODUCTION
     internal class GetSPOItem
     {
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
         private readonly string AccessToken;
         private readonly int PageSize = 3000;
-        internal GetSPOItem(LogHelper logHelper, AppInfo appInfo, string accessToken)
+        internal GetSPOItem(NPLogger logger, AppInfo appInfo, string accessToken)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             _appInfo = appInfo;
             AccessToken = accessToken;
         }
@@ -31,7 +31,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMAllItems";
-            _logHelper.AddLogToTxt(methodName, $"Start getting attachment file '{attachmentServerRelativeUrl}'");
+            _logger.LogTxt(methodName, $"Start getting attachment file '{attachmentServerRelativeUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -43,7 +43,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             clientContext.Load(file);
             clientContext.ExecuteQuery();
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting attachment file '{attachmentServerRelativeUrl}'");
+            _logger.LogTxt(methodName, $"Finish getting attachment file '{attachmentServerRelativeUrl}'");
             return file;
         }
 
@@ -58,7 +58,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMAllItems";
-            _logHelper.AddLogToTxt(methodName, $"Start getting all items in List '{listName}' at Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start getting all items in List '{listName}' at Site '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -99,12 +99,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 clientContext.ExecuteQuery();
 
                 collListItem.AddRange(subcollListItem);
-                _logHelper.AddLogToUI(methodName, $"Subtotal number of items collected: {collListItem.Count}");
+                _logger.LogUI(methodName, $"Subtotal number of items collected: {collListItem.Count}");
                 query.ListItemCollectionPosition = subcollListItem.ListItemCollectionPosition;
             }
             while (query.ListItemCollectionPosition != null);
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting all items in List '{listName}' at Site '{siteUrl}'. Total: {collListItem.Count} items");
+            _logger.LogTxt(methodName, $"Finish getting all items in List '{listName}' at Site '{siteUrl}'. Total: {collListItem.Count} items");
             return collListItem;
         }
 
@@ -118,7 +118,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMAllDetailReportInfo";
-            _logHelper.AddLogToTxt(methodName, $"Start getting all items in List '{list.Title}' at Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start getting all items in List '{list.Title}' at Site '{siteUrl}'");
 
 
             Expression<Func<ListItem, object>>[] retrievalExpressions;
@@ -170,7 +170,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
             var collList = CSOM(siteUrl, list.Title, retrievalExpressions);
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting all items in List '{list.Title}' at Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Finish getting all items in List '{list.Title}' at Site '{siteUrl}'");
 
             return collList;
         }
@@ -180,7 +180,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMAllItemsWithRoles";
-            _logHelper.AddLogToTxt(methodName, $"Start getting all items in List '{listName}' at Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start getting all items in List '{listName}' at Site '{siteUrl}'");
 
             var retrievalExpressions = new Expression<Func<ListItem, object>>[]
             {
@@ -195,7 +195,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
             var collList = CSOM(siteUrl, listName, retrievalExpressions);
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting all items in List '{listName}' at Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Finish getting all items in List '{listName}' at Site '{siteUrl}'");
 
             return collList;
         }
@@ -205,7 +205,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMAllItemsWithRetrievalExpressions";
-            _logHelper.AddLogToTxt(methodName, $"Start getting all items in List '{listTitle}' at Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start getting all items in List '{listTitle}' at Site '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -246,12 +246,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 clientContext.ExecuteQuery();
 
                 collListItem.AddRange(subcollListItem);
-                _logHelper.AddLogToTxt(methodName, $"getting items: {collListItem.Count}");
+                _logger.LogTxt(methodName, $"getting items: {collListItem.Count}");
                 camlQuery.ListItemCollectionPosition = subcollListItem.ListItemCollectionPosition;
             }
             while (camlQuery.ListItemCollectionPosition != null);
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting all items in List '{listTitle}' at Site '{siteUrl}'. Total: {collListItem.Count} items");
+            _logger.LogTxt(methodName, $"Finish getting all items in List '{listTitle}' at Site '{siteUrl}'. Total: {collListItem.Count} items");
 
             return collListItem;
         }
@@ -260,7 +260,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMAllWithExpressions";
-            _logHelper.AddLogToTxt(methodName, $"Start getting all items in List '{list.Title}' at Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start getting all items in List '{list.Title}' at Site '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -301,12 +301,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 clientContext.ExecuteQuery();
 
                 collListItem.AddRange(subcollListItem);
-                _logHelper.AddLogToTxt(methodName, $"getting items: {collListItem.Count}");
+                _logger.LogTxt(methodName, $"getting items: {collListItem.Count}");
                 camlQuery.ListItemCollectionPosition = subcollListItem.ListItemCollectionPosition;
             }
             while (camlQuery.ListItemCollectionPosition != null);
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting all items in List '{list.Title}' at Site '{siteUrl}'. Total: {collListItem.Count} items");
+            _logger.LogTxt(methodName, $"Finish getting all items in List '{list.Title}' at Site '{siteUrl}'. Total: {collListItem.Count} items");
 
             return collListItem;
         }

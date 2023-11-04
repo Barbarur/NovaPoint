@@ -10,12 +10,12 @@ namespace NovaPointLibrary.Commands.SharePoint.User
 {
     internal class GetSPOGroup
     {
-        private LogHelper _LogHelper;
+        private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
         private readonly string AccessToken;
-        internal GetSPOGroup(LogHelper logHelper, AppInfo appInfo, string accessToken)
+        internal GetSPOGroup(NPLogger logger, AppInfo appInfo, string accessToken)
         {
-            _LogHelper = logHelper;
+            _logger = logger;
             _appInfo = appInfo;
             AccessToken = accessToken;
         }

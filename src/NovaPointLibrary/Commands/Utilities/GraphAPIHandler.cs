@@ -18,16 +18,16 @@ namespace NovaPointLibrary.Commands.Utilities
 {
     internal class GraphAPIHandler
     {
-        private LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private AppInfo _appInfo;
         private readonly string _accessToken;
         private readonly HttpClient HttpsClient;
         private readonly string _graphUrl = "https://graph.microsoft.com/v1.0/";
 
 
-        internal GraphAPIHandler(LogHelper logHelper, AppInfo appInfo, string accessToken)
+        internal GraphAPIHandler(NPLogger logger, AppInfo appInfo, string accessToken)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             _appInfo = appInfo;
             _accessToken = accessToken;
             HttpsClient = new();
@@ -115,7 +115,7 @@ namespace NovaPointLibrary.Commands.Utilities
             message.RequestUri = !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? new Uri($"{_graphUrl}/{url}") : new Uri(url);
             message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _accessToken);
 
-            _logHelper.AddLogToTxt($"Request Message Uir {message.RequestUri}");
+            _logger.AddLogToTxt($"Request Message Uir {message.RequestUri}");
 
             return message;
         }
@@ -135,16 +135,16 @@ namespace NovaPointLibrary.Commands.Utilities
 
             if (response.IsSuccessStatusCode)
             {
-                _logHelper.AddLogToTxt($"Successful response");
+                _logger.AddLogToTxt($"Successful response");
                 var responseContent = await response.Content.ReadAsStringAsync();
                 return responseContent;
             }
             else
             {
-                _logHelper.AddLogToTxt($"Error response");
+                _logger.AddLogToTxt($"Error response");
 
                 string content = await response.Content.ReadAsStringAsync();
-                _logHelper.AddLogToTxt($"Error Content:{content}");
+                _logger.AddLogToTxt($"Error Content:{content}");
 
                 var oErrorContent = JsonConvert.DeserializeObject<GraphErrorContent>(content);
                 string errorMessage = oErrorContent.Error.Message.ToString();

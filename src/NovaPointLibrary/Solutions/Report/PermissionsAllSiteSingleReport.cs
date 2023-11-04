@@ -16,7 +16,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static string _solutionName = "Permissions in a Site report";
         public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PermissionAllSiteSingleReport"; 
         
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
         private readonly string SiteUrl;
@@ -41,7 +41,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         public PermissionsAllSiteSingleReport(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, PermissionsAllSiteSingleParameters parameters)
         {
-            _logHelper = new(uiAddLog, "Reports", GetType().Name);
+            _logger = new(uiAddLog, "Reports", GetType().Name);
             _appInfo = appInfo;
 
             SiteUrl = parameters.SiteUrl;
@@ -78,37 +78,37 @@ namespace NovaPointLibrary.Solutions.Report
             }
             catch (Exception ex)
             {
-                _logHelper.ScriptFinishErrorNotice(ex);
+                _logger.ScriptFinish(ex);
             }
         }
 
         private async Task RunScriptAsyncNEW()
         {
             _appInfo.IsCancelled();
-            _logHelper.ScriptStartNotice();
+            _logger.ScriptStartNotice();
 
 
             string rootUrl = SiteUrl.Substring(0, SiteUrl.IndexOf(".com") + 4);
-            string spoSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(rootUrl);
-            string aadAccessToken = await new GetAccessToken(_logHelper, _appInfo).GraphInteractiveAsync();
+            string spoSiteAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(rootUrl);
+            string aadAccessToken = await new GetAccessToken(_logger, _appInfo).GraphInteractiveAsync();
 
-            GetSPOSitePermissions getPermissions = new(_logHelper, _appInfo, spoSiteAccessToken, aadAccessToken, KnownGroups);
+            GetSPOSitePermissions getPermissions = new(_logger, _appInfo, spoSiteAccessToken, aadAccessToken, KnownGroups);
 
-            Web oSite = new GetSPOSite(_logHelper, _appInfo, spoSiteAccessToken).CSOMWithRoles(SiteUrl);
+            Web oSite = new GetSPOSite(_logger, _appInfo, spoSiteAccessToken).CSOMWithRoles(SiteUrl);
 
             //double counter = 0;
             //double progress = Math.Round(counter * 100 / 1, 2);
             //counter++;
             //_logHelper.AddProgressToUI(progress);
             //_logHelper.AddLogToUI($"Processing Site '{oSite.Title}'");
-            ProgressTracker progress = new(_logHelper, 1);
+            ProgressTracker progress = new(_logger, 1);
             progress.MainReportProgress($"Processing Site '{oSite.Title}'");
 
             AddRecordToCSV( await getPermissions.CSOMSiteAsync(oSite, IncludeAdmins, IncludeSiteAccess, IncludeUniquePermissions, IncludeSystemLists, IncludeResourceLists) );
 
             if (IncludeSubsites)
             {
-                var collSubsites = new GetSubsite(_logHelper, _appInfo, spoSiteAccessToken).CsomAllSubsitesWithRolesAndSiteDetails(SiteUrl);
+                var collSubsites = new GetSubsite(_logger, _appInfo, spoSiteAccessToken).CsomAllSubsitesWithRolesAndSiteDetails(SiteUrl);
                 progress.SubTaskProgressReset(collSubsites.Count);
                 foreach (var oSubsite in collSubsites)
                 {
@@ -125,13 +125,13 @@ namespace NovaPointLibrary.Solutions.Report
             }
             progress.MainCounterIncrement();
 
-            _logHelper.ScriptFinishSuccessfulNotice();
+            _logger.ScriptFinish();
         }
 
         private void AddRecordToCSV(List<SPOLocationPermissionsRecord> recordsList)
         {
             _appInfo.IsCancelled();
-            _logHelper.AddLogToTxt($"[{GetType().Name}.AddRecordToCSV] - Adding record");
+            _logger.AddLogToTxt($"[{GetType().Name}.AddRecordToCSV] - Adding record");
             
             foreach (var record in recordsList)
             {
@@ -150,7 +150,7 @@ namespace NovaPointLibrary.Solutions.Report
 
                     dynamicRecord.Remarks = roleAssigmentUser.Remarks;
 
-                    _logHelper.AddRecordToCSV(dynamicRecord);
+                    _logger.RecordCSV(dynamicRecord);
                 }
             }
         }

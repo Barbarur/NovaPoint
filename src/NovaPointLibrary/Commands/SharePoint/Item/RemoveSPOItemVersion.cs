@@ -13,13 +13,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
     // TO BE DEPRECATED WHEN RemoveFileVersionAuto IS STABLE
     internal class RemoveSPOItemVersion
     {
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
         private readonly string AccessToken;
 
-        internal RemoveSPOItemVersion(LogHelper logHelper, AppInfo appInfo, string accessToken)
+        internal RemoveSPOItemVersion(NPLogger logger, AppInfo appInfo, string accessToken)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             _appInfo = appInfo;
             AccessToken = accessToken;
         }
@@ -31,7 +31,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOM";
-            _logHelper.AddLogToTxt(methodName, $"Start removing versions of the item '{fileUrl}'");
+            _logger.LogTxt(methodName, $"Start removing versions of the item '{fileUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -65,25 +65,25 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
                 if (deleteAll)
                 {
-                    _logHelper.AddLogToTxt(methodName, $"Start deleting all the versions from '{fileUrl}'");
+                    _logger.LogTxt(methodName, $"Start deleting all the versions from '{fileUrl}'");
                     versions.DeleteAll();
                     clientContext.ExecuteQueryRetry();
-                    _logHelper.AddLogToTxt(methodName, $"Finish deleting all the versions from '{fileUrl}'");
+                    _logger.LogTxt(methodName, $"Finish deleting all the versions from '{fileUrl}'");
                 }
                 else if (versionId != -1)
                 {
                     if (recycle)
                     {
-                        _logHelper.AddLogToTxt(methodName, $"Start recycling version {versionId} from '{fileUrl}'");
+                        _logger.LogTxt(methodName, $"Start recycling version {versionId} from '{fileUrl}'");
                         versions.RecycleByID(versionId);
                     }
                     else
                     {
-                        _logHelper.AddLogToTxt(methodName, $"Start deleting version {versionId} from '{fileUrl}'");
+                        _logger.LogTxt(methodName, $"Start deleting version {versionId} from '{fileUrl}'");
                         versions.DeleteByID(versionId);
                     }
                     clientContext.ExecuteQueryRetry();
-                    _logHelper.AddLogToTxt(methodName, $"FInish removing versions of the item '{fileUrl}'");
+                    _logger.LogTxt(methodName, $"FInish removing versions of the item '{fileUrl}'");
                 }
             }
             else

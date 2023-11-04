@@ -2,7 +2,6 @@
 using Microsoft.SharePoint.Client;
 using NovaPoint.Commands.Site;
 using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.List;
 using NovaPointLibrary.Commands.Site;
 using NovaPointLibrary.Commands.User;
 using NovaPointLibrary.Solutions.Reports;
@@ -18,7 +17,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class RemoveUserSingleSiteAllAuto
     {
         // Baic parameters required for all reports
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
         // Required parameters for the current report
         private readonly string _adminUPN;
@@ -32,7 +31,7 @@ namespace NovaPointLibrary.Solutions.Automation
         public RemoveUserSingleSiteAllAuto(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, RemoveUserSingleSiteAllAutoParameters parameters)
         {
             // Baic parameters required for all reports
-            _logHelper = new(uiAddLog, "Automation", GetType().Name);
+            _logger = new(uiAddLog, "Automation", GetType().Name);
             _appInfo = appInfo;
             // Required parameters for the current report
             _adminUPN = parameters.AdminUPN;
@@ -78,20 +77,20 @@ namespace NovaPointLibrary.Solutions.Automation
             }
             catch (Exception ex)
             {
-                _logHelper.ScriptFinishErrorNotice(ex);
+                _logger.ScriptFinish(ex);
             }
         }
 
         private async Task RunScriptAsync()
         {
-            _logHelper.ScriptStartNotice();
+            _logger.ScriptStartNotice();
 
-            string adminAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
-            string rootPersonalSiteAccessToken = _includePersonalSite ? await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl) : "";
-            string rootShareSiteAccessToken = _includeShareSite ? await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl) : "";
+            string adminAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(_appInfo.AdminUrl);
+            string rootPersonalSiteAccessToken = _includePersonalSite ? await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(_appInfo.RootPersonalUrl) : "";
+            string rootShareSiteAccessToken = _includeShareSite ? await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(_appInfo.RootSharedUrl) : "";
 
             if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-            var collSiteCollections = new GetSiteCollection(_logHelper, adminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, _includePersonalSite, _groupIdDefined);
+            var collSiteCollections = new GetSiteCollection(_logger, adminAccessToken).CSOM_AdminAll(_appInfo.AdminUrl, _includePersonalSite, _groupIdDefined);
             collSiteCollections.RemoveAll(s => s.Title == "" || s.Template.Contains("Redirect"));
             if (!_includePersonalSite) { collSiteCollections.RemoveAll(s => s.Template.Contains("SPSPERS")); }
             if (!_includeShareSite) { collSiteCollections.RemoveAll(s => !s.Template.Contains("SPSPERS")); }
@@ -104,8 +103,8 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
                 counter++;
-                _logHelper.AddProgressToUI(progress);
-                _logHelper.AddLogToUI($"Processing Site Collection '{oSiteCollection.Title}'");
+                _logger.ProgressUI(progress);
+                _logger.AddLogToUI($"Processing Site Collection '{oSiteCollection.Title}'");
 
                 string currentSiteAccessToken = oSiteCollection.Url.Contains("-my.sharepoint.com") ? rootPersonalSiteAccessToken : rootShareSiteAccessToken;
                 
@@ -114,7 +113,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     
                     if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
                     
-                    new SetSiteCollectionAdmin(_logHelper, adminAccessToken, _appInfo._domain).Add(_adminUPN, oSiteCollection.Url);
+                    new SetSiteCollectionAdmin(_logger, adminAccessToken, _appInfo.Domain).Add(_adminUPN, oSiteCollection.Url);
 
                 }
                 catch (Exception ex)
@@ -149,7 +148,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     
                     try
                     {
-                        new RemoveSiteCollectionAdmin(_logHelper, currentSiteAccessToken, _appInfo._domain).Csom(_adminUPN, oSiteCollection.Url);
+                        new RemoveSiteCollectionAdmin(_logger, currentSiteAccessToken, _appInfo.Domain).Csom(_adminUPN, oSiteCollection.Url);
                     }
                     catch (Exception ex)
                     {
@@ -157,20 +156,20 @@ namespace NovaPointLibrary.Solutions.Automation
                     }
                 }
             }
-            _logHelper.ScriptFinishSuccessfulNotice();
+            _logger.ScriptFinish();
         }
 
 
         private void RemoveSiteUser(string accessToken, string siteUrl)
         {
-            User? user = new GetUser(_logHelper, accessToken).CsomSingle(siteUrl, _deleteUserUpn);
+            User? user = new GetUser(_logger, accessToken).CsomSingle(siteUrl, _deleteUserUpn);
 
             if (user != null)
             {
                 
-                if (user.IsSiteAdmin) { new RemoveSiteCollectionAdmin(_logHelper, accessToken, _appInfo._domain).Csom(siteUrl, _deleteUserUpn); }
+                if (user.IsSiteAdmin) { new RemoveSiteCollectionAdmin(_logger, accessToken, _appInfo.Domain).Csom(siteUrl, _deleteUserUpn); }
             
-                new RemoveUser(_logHelper, accessToken).Csom(siteUrl, _deleteUserUpn);
+                new RemoveUser(_logger, accessToken).Csom(siteUrl, _deleteUserUpn);
             
             }
         }
@@ -178,9 +177,9 @@ namespace NovaPointLibrary.Solutions.Automation
         private void ManageCatchedError(SiteProperties site, string message, Exception ex)
         {
             AddSiteRecordToCSV(site, message);
-            _logHelper.AddLogToUI(message);
-            _logHelper.AddLogToTxt($"Exception Message: {ex.Message}");
-            _logHelper.AddLogToTxt($"Exception Trace: {ex.StackTrace}");
+            _logger.AddLogToUI(message);
+            _logger.AddLogToTxt($"Exception Message: {ex.Message}");
+            _logger.AddLogToTxt($"Exception Trace: {ex.StackTrace}");
         }
 
         private void AddSiteRecordToCSV(SiteProperties site, string remarks)
@@ -192,7 +191,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             recordList.Remarks = remarks;
 
-            _logHelper.AddRecordToCSV(recordList);
+            _logger.RecordCSV(recordList);
         }
 
     }

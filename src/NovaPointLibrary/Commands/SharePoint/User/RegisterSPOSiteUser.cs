@@ -10,12 +10,12 @@ namespace NovaPointLibrary.Commands.SharePoint.User
 {
     internal class RegisterSPOSiteUser
     {
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly string AccessToken;
-        internal RegisterSPOSiteUser(LogHelper logHelper, Authentication.AppInfo appInfo, string accessToken)
+        internal RegisterSPOSiteUser(NPLogger logger, Authentication.AppInfo appInfo, string accessToken)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             _appInfo = appInfo;
             AccessToken = accessToken;
         }
@@ -24,7 +24,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOM";
-            _logHelper.AddLogToTxt(methodName, $"Start registering user '{userUpn}' in site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start registering user '{userUpn}' in site '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -42,7 +42,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
                 user.Update();
                 clientContext.Load(user);
                 clientContext.ExecuteQueryRetry();
-                _logHelper.AddLogToTxt(methodName, $"Finish registering user '{userUpn}' in site '{siteUrl}'");
+                _logger.LogTxt(methodName, $"Finish registering user '{userUpn}' in site '{siteUrl}'");
             }
         }
     }

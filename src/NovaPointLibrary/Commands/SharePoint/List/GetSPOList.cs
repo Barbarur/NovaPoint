@@ -15,16 +15,16 @@ namespace NovaPointLibrary.Commands.SharePoint.List
     // TO BE DEPRECATED WHEN SPOListCSOM IS TESTED FOR PRODUCTION
     internal class GetSPOList
     {
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
         private readonly string AccessToken;
 
         internal static readonly List<string> SystemLists = new() { "appdata", "appfiles", "Composed Looks", "Content and Structure Reports", "Content type publishing error log", "Converted Forms", "List Template Gallery", "Maintenance Log Library", "Master Page Gallery", "Preservation Hold Library", "Project Policy Item List", "Reusable Content", "Solution Gallery", "TaxonomyHiddenList", "Theme Gallery", "User Information List", "Web Template Extensions", "Web Part Gallery" };
         internal static readonly List<string> ResourceLists = new() { "Form Templates", "Site Assets", "Site Collection Documents", "Site Collection Images", "Site Pages", "Style Library" };
 
-        internal GetSPOList(LogHelper logHelper, AppInfo appInfo, string accessToken)
+        internal GetSPOList(NPLogger logger, AppInfo appInfo, string accessToken)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             _appInfo = appInfo;
             AccessToken = accessToken;
         }
@@ -33,7 +33,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMSingleStandard";
-            _logHelper.AddLogToTxt(methodName, $"Start getting List '{listTitle}' from Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start getting List '{listTitle}' from Site '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -51,7 +51,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             }
             else
             {
-                _logHelper.AddLogToTxt(methodName, $"Finish getting List '{listTitle}' from Site '{siteUrl}'");
+                _logger.LogTxt(methodName, $"Finish getting List '{listTitle}' from Site '{siteUrl}'");
                 return oList;
             }
         }
@@ -60,7 +60,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMSingleWithExpresions";
-            _logHelper.AddLogToTxt(methodName, $"Start getting List '{listTitle}' from Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start getting List '{listTitle}' from Site '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -78,7 +78,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             }
             else
             {
-                _logHelper.AddLogToTxt(methodName, $"Finish getting List '{listTitle}' from Site '{siteUrl}'");
+                _logger.LogTxt(methodName, $"Finish getting List '{listTitle}' from Site '{siteUrl}'");
                 return oList;
             }
         }
@@ -91,7 +91,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMAll";
-            _logHelper.AddLogToTxt(methodName, $"Start getting all Lists for '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start getting all Lists for '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -104,7 +104,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             clientContext.Load(collList);
             clientContext.ExecuteQuery();
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting all Lists for '{siteUrl}'. Count: {collList.Count}");
+            _logger.LogTxt(methodName, $"Finish getting all Lists for '{siteUrl}'. Count: {collList.Count}");
             return CSOMFilterLists(collList, includeSystemLists, includeResourceLists, includeHidden);
         }
 
@@ -116,7 +116,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMAllListsWithRoles";
-            _logHelper.AddLogToTxt(methodName, $"Start getting all Lists for '{siteUrl}' with roles");
+            _logger.LogTxt(methodName, $"Start getting all Lists for '{siteUrl}' with roles");
 
             var retrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
             {
@@ -133,7 +133,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
             var collList = CSOMAllWithExpressions(siteUrl, retrievalExpressions, includeSystemLists, includeResourceLists, includeHidden);
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting all Lists for '{siteUrl}' with roles");
+            _logger.LogTxt(methodName, $"Finish getting all Lists for '{siteUrl}' with roles");
 
             return collList;
         }
@@ -146,7 +146,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMAllWithExpressions";
-            _logHelper.AddLogToTxt(methodName, $"Start getting all Lists for '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start getting all Lists for '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -159,7 +159,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             clientContext.Load( collList, l => l.Include(retrievalExpressions) );
             clientContext.ExecuteQuery();
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting all Lists for '{siteUrl}'. Count: {collList.Count}");
+            _logger.LogTxt(methodName, $"Finish getting all Lists for '{siteUrl}'. Count: {collList.Count}");
             return CSOMFilterLists(collList, includeSystemLists, includeResourceLists, includeHidden); ;
         }
 
@@ -168,7 +168,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMFilterLists";
-            _logHelper.AddLogToTxt(methodName, $"Start filtering lists. Count: {collList.Count}");
+            _logger.LogTxt(methodName, $"Start filtering lists. Count: {collList.Count}");
 
             List<Microsoft.SharePoint.Client.List> finalCollList = new();
             foreach (Microsoft.SharePoint.Client.List oList in collList)
@@ -180,7 +180,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 finalCollList.Add(oList);
             }
 
-            _logHelper.AddLogToTxt(methodName, $"Finish filtering lists. Count: {finalCollList.Count}");
+            _logger.LogTxt(methodName, $"Finish filtering lists. Count: {finalCollList.Count}");
             
             return finalCollList;
         }   

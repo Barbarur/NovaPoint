@@ -7,12 +7,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
     // TO BE DEPRECATED ONCE SPOSiteCollectionCSOM IS ON PRODUCTION
     internal class GetSPOSiteCollection
     {
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly string AccessToken;
-        internal GetSPOSiteCollection(LogHelper logHelper, Authentication.AppInfo appInfo, string accessToken)
+        internal GetSPOSiteCollection(NPLogger logger, Authentication.AppInfo appInfo, string accessToken)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             _appInfo = appInfo;
             AccessToken = accessToken;
         }
@@ -21,7 +21,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOM_AdminAll";
-            _logHelper.AddLogToTxt(methodName, $"Start getting Site Collections; IncludePersonalSite '{includePersonalSite}', Group ID Defined '{groupIdDefined}'");
+            _logger.LogTxt(methodName, $"Start getting Site Collections; IncludePersonalSite '{includePersonalSite}', Group ID Defined '{groupIdDefined}'");
 
             using var clientContext = new ClientContext(adminUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -46,11 +46,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 clientContext.ExecuteQuery();
                 collSites.AddRange(subcollSiteCollections);
                 filter.StartIndex = subcollSiteCollections.NextStartIndexFromSharePoint;
-                _logHelper.AddLogToUI(methodName,$"getting Site Collections... {collSites.Count}");
+                _logger.LogUI(methodName,$"getting Site Collections... {collSites.Count}");
 
             } while (!string.IsNullOrWhiteSpace(filter.StartIndex));
 
-            _logHelper.AddLogToTxt(methodName,$"Finish getting Site Collections. Total: {collSites.Count}");
+            _logger.LogTxt(methodName,$"Finish getting Site Collections. Total: {collSites.Count}");
             return collSites;
         }
     }

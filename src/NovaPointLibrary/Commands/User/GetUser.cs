@@ -12,11 +12,11 @@ namespace NovaPointLibrary.Commands.User
 {
     internal class GetUser
     {
-        private LogHelper _LogHelper;
+        private readonly NPLogger _logger;
         private readonly string AccessToken;
-        internal GetUser(LogHelper logHelper, string accessToken)
+        internal GetUser(NPLogger logger, string accessToken)
         {
-            _LogHelper = logHelper;
+            _logger = logger;
             AccessToken = accessToken;
         }
 
@@ -24,8 +24,7 @@ namespace NovaPointLibrary.Commands.User
         // https://github.com/pnp/powershell/blob/dev/src/Commands/Base/PipeBinds/UserPipeBind.cs
         internal Microsoft.SharePoint.Client.User? CsomSingle(string siteUrl, string userUPN)
         {
-            _LogHelper = new(_LogHelper, $"{GetType().Name}.CsomSingle");
-            _LogHelper.AddLogToTxt($"Start obtaining User '{userUPN}' from Site '{siteUrl}'");
+            _logger.AddLogToTxt($"Start obtaining User '{userUPN}' from Site '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -55,7 +54,7 @@ namespace NovaPointLibrary.Commands.User
             };
 
             string userLoginName = "i:0#.f|membership|" + userUPN;
-            _LogHelper.AddLogToTxt($"User LoginName '{userLoginName}'");
+            _logger.AddLogToTxt($"User LoginName '{userLoginName}'");
 
             try
             {
@@ -65,13 +64,13 @@ namespace NovaPointLibrary.Commands.User
                 clientContext.Load(user, retrievalExpressions);
                 clientContext.ExecuteQueryRetry();
 
-                _LogHelper.AddLogToTxt($"User '{userUPN}' found in Site '{siteUrl}'");
+                _logger.AddLogToTxt($"User '{userUPN}' found in Site '{siteUrl}'");
                 return user;
             
             }
             catch
             {
-                _LogHelper.AddLogToTxt($"User '{userUPN}' no found in Site '{siteUrl}'");
+                _logger.AddLogToTxt($"User '{userUPN}' no found in Site '{siteUrl}'");
                 return null;
             }
 
@@ -85,8 +84,7 @@ namespace NovaPointLibrary.Commands.User
         internal List<Microsoft.SharePoint.Client.User> CsomAll(string siteUrl, bool WithRightsAssigned = false, bool WithRightsAssignedDetailed = false)
         {
             //WriteWarning("Using the -WithRightsAssignedDetailed parameter will cause the script to take longer than normal because of the all enumerations that take place");
-            _LogHelper = new(_LogHelper, $"{GetType().Name}.CsomAll");
-            _LogHelper.AddLogToTxt($"Start obtaining Users for '{siteUrl}'");
+            _logger.AddLogToTxt($"Start obtaining Users for '{siteUrl}'");
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
             {
@@ -159,8 +157,8 @@ namespace NovaPointLibrary.Commands.User
                             Url = clientContext.Web.ServerRelativeUrl
                         });
                     }
-                    _LogHelper.AddLogToTxt($"Successfully obtained Users for '{siteUrl}'");
-                    _LogHelper.AddLogToTxt($"Currently 'WithRightsAssignedDetailed' is not supported");
+                    _logger.AddLogToTxt($"Successfully obtained Users for '{siteUrl}'");
+                    _logger.AddLogToTxt($"Currently 'WithRightsAssignedDetailed' is not supported");
 
                     // Section to be changed once 'WithRightsAssignedDetailed' is included
                     // Filter out the users that have been given rights at both places so they will only be returned once
@@ -171,7 +169,7 @@ namespace NovaPointLibrary.Commands.User
                 }
                 else
                 {
-                    _LogHelper.AddLogToTxt($"Successfully obtained Users for '{siteUrl}'");
+                    _logger.AddLogToTxt($"Successfully obtained Users for '{siteUrl}'");
                     
                     // Filter out the users that have been given rights at both places so they will only be returned once
                     listUsersReturned.AddRange(allUsersWithPermissions.GroupBy(u => u.Id).Select(u => u.First()));
@@ -187,7 +185,7 @@ namespace NovaPointLibrary.Commands.User
                 
                 clientContext.ExecuteQuery();
 
-                _LogHelper.AddLogToTxt($"Successfully obtained Users for '{siteUrl}'");
+                _logger.AddLogToTxt($"Successfully obtained Users for '{siteUrl}'");
                 listUsersReturned.AddRange(clientContext.Web.SiteUsers);
                 listUsersReturned.RemoveAll(u => u.Title == "System Account" || u.Title == "SharePoint App" || u.Title == "NT Service\\spsearch");
                 return listUsersReturned;

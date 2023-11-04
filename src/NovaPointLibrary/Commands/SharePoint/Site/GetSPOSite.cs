@@ -13,11 +13,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
     // TO BE DEPRECATED ONCE SPOSiteCSOM IS ON PRODUCTION
     internal class GetSPOSite
     {
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logHelper;
         private readonly AppInfo _appInfo;
         private readonly string AccessToken;
 
-        internal GetSPOSite(LogHelper logHelper, AppInfo appInfo, string accessToken)
+        internal GetSPOSite(NPLogger logHelper, AppInfo appInfo, string accessToken)
         {
             _logHelper = logHelper;
             _appInfo = appInfo;

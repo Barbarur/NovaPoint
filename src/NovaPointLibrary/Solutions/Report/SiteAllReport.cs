@@ -20,7 +20,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static string _solutionName = "Site Collections & Subsites report";
         public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-SiteAllReport";
 
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
         private readonly string AdminUPN = "";
@@ -38,7 +38,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         public SiteAllReport(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, SiteAllReportParameters parameters)
         {
-            _logHelper = new(uiAddLog, "Reports", GetType().Name);
+            _logger = new(uiAddLog, "Reports", GetType().Name);
             _appInfo = appInfo;
 
             IncludeShareSite = parameters.IncludeShareSite;
@@ -83,7 +83,7 @@ namespace NovaPointLibrary.Solutions.Report
             }
             catch (Exception ex)
             {
-                _logHelper.ScriptFinishErrorNotice(ex);
+                _logger.ScriptFinish(ex);
             }
         }
 
@@ -93,28 +93,28 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
-            _logHelper.ScriptStartNotice();
+            _logger.ScriptStartNotice();
 
-            string spoAdminAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
+            string spoAdminAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(_appInfo.AdminUrl);
             string aadAccessToken = String.Empty;
             string? spoRootPersonalSiteAccessToken = String.Empty;
             string? spoRootShareSiteAccessToken = String.Empty;
             if (IncludeAdmins || IncludeSiteAccess || IncludeSubsites)
             {
-                aadAccessToken = await new GetAccessToken(_logHelper, _appInfo).GraphInteractiveAsync();
-                if (IncludePersonalSite) { spoRootPersonalSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl); }
-                if (IncludeShareSite) { spoRootShareSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl); }
+                aadAccessToken = await new GetAccessToken(_logger, _appInfo).GraphInteractiveAsync();
+                if (IncludePersonalSite) { spoRootPersonalSiteAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(_appInfo.RootPersonalUrl); }
+                if (IncludeShareSite) { spoRootShareSiteAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(_appInfo.RootSharedUrl); }
 
             }
 
-            List<SiteProperties> collSiteCollections = new GetSiteCollection(_logHelper, spoAdminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, IncludePersonalSite, GroupIdDefined);
+            List<SiteProperties> collSiteCollections = new GetSiteCollection(_logger, spoAdminAccessToken).CSOM_AdminAll(_appInfo.AdminUrl, IncludePersonalSite, GroupIdDefined);
             collSiteCollections.RemoveAll(s => s.Title == "" || s.Template.Contains("Redirect"));
             if (!IncludePersonalSite) { collSiteCollections.RemoveAll(s => s.Template.Contains("SPSPERS")); }
             if (!IncludeShareSite) { collSiteCollections.RemoveAll(s => !s.Template.Contains("SPSPERS")); }
 
             //double counter = 0;
             //float counterStep = 1 / collSiteCollections.Count;
-            ProgressTracker progress = new(_logHelper, collSiteCollections.Count);
+            ProgressTracker progress = new(_logger, collSiteCollections.Count);
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
                 _appInfo.IsCancelled();
@@ -132,13 +132,13 @@ namespace NovaPointLibrary.Solutions.Report
 
                     if (IncludeAdmins || IncludeSiteAccess || IncludeSubsites)
                     {
-                        new SetSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Add(AdminUPN, oSiteCollection.Url);
+                        new SetSiteCollectionAdmin(_logger, spoAdminAccessToken, _appInfo.Domain).Add(AdminUPN, oSiteCollection.Url);
 
-                        GetSPOSitePermissions getPermissions = new(_logHelper, _appInfo, currentSiteAccessToken, aadAccessToken, KnownGroups);
+                        GetSPOSitePermissions getPermissions = new(_logger, _appInfo, currentSiteAccessToken, aadAccessToken, KnownGroups);
 
                         if (IncludeAdmins || IncludeSiteAccess)
                         {
-                            Web oSite = new GetSPOSite(_logHelper, _appInfo, currentSiteAccessToken).CSOMWithRoles(oSiteCollection.Url);
+                            Web oSite = new GetSPOSite(_logger, _appInfo, currentSiteAccessToken).CSOMWithRoles(oSiteCollection.Url);
 
                             AddSiteListRecordToCSVWITHPERMISSIONS(oSiteCollection, null, await getPermissions.CSOMSiteAsync(oSite, IncludeAdmins, IncludeSiteAccess, false, false, false));
                         }
@@ -150,7 +150,7 @@ namespace NovaPointLibrary.Solutions.Report
 
                         if (IncludeSubsites)
                         {
-                            var collSubsites = new GetSubsite(_logHelper, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRolesAndSiteDetails(oSiteCollection.Url);
+                            var collSubsites = new GetSubsite(_logger, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRolesAndSiteDetails(oSiteCollection.Url);
                             progress.SubTaskProgressReset(collSubsites.Count);
                             foreach (var oSubsite in collSubsites)
                             {
@@ -171,7 +171,7 @@ namespace NovaPointLibrary.Solutions.Report
                         }
                         if (RemoveAdmin)
                         {
-                            new RemoveSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Csom(oSiteCollection.Url, AdminUPN);
+                            new RemoveSiteCollectionAdmin(_logger, spoAdminAccessToken, _appInfo.Domain).Csom(oSiteCollection.Url, AdminUPN);
                         }
                     }
                     else
@@ -182,9 +182,9 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logHelper.AddLogToUI($"Error processing Site Collection '{oSiteCollection.Url}'");
-                    _logHelper.AddLogToTxt($"Exception: {ex.Message}");
-                    _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
+                    _logger.AddLogToUI($"Error processing Site Collection '{oSiteCollection.Url}'");
+                    _logger.AddLogToTxt($"Exception: {ex.Message}");
+                    _logger.AddLogToTxt($"Trace: {ex.StackTrace}");
 
                     SPORoleAssignmentRecord blankPermissions = new("", "", "", "", ex.Message);
                     AddSiteRecordToCSVWITHPERMISSIONS(oSiteCollection, null, blankPermissions);
@@ -192,7 +192,7 @@ namespace NovaPointLibrary.Solutions.Report
                 progress.MainCounterIncrement();
             }
 
-            _logHelper.ScriptFinishSuccessfulNotice();
+            _logger.ScriptFinish();
         }
 
 
@@ -437,7 +437,7 @@ namespace NovaPointLibrary.Solutions.Report
         private void AddSiteListRecordToCSVWITHPERMISSIONS(SiteProperties? siteCollection, Web? subsiteWeb, List<SPOLocationPermissionsRecord> recordsList)
         {
             _appInfo.IsCancelled();
-            _logHelper.AddLogToTxt($"[{GetType().Name}.AddSiteListRecordToCSVWITHPERMISSIONS] - Adding Site record");
+            _logger.AddLogToTxt($"[{GetType().Name}.AddSiteListRecordToCSVWITHPERMISSIONS] - Adding Site record");
 
             foreach (var record in recordsList)
             {
@@ -451,7 +451,7 @@ namespace NovaPointLibrary.Solutions.Report
         private void AddSiteRecordToCSVWITHPERMISSIONS(SiteProperties? siteCollection, Web? subsiteWeb, SPORoleAssignmentRecord permissionRecord)
         {
             _appInfo.IsCancelled();
-            _logHelper.AddLogToTxt($"[{GetType().Name}.AddSiteRecordToCSV] - Adding Site record");
+            _logger.AddLogToTxt($"[{GetType().Name}.AddSiteRecordToCSV] - Adding Site record");
 
             dynamic record = new ExpandoObject();
             record.Title = siteCollection != null ? siteCollection?.Title : subsiteWeb?.Title;
@@ -474,7 +474,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             record.Remarks = permissionRecord.Remarks;
 
-            _logHelper.AddRecordToCSV(record);
+            _logger.RecordCSV(record);
         }
     }
 

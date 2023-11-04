@@ -12,19 +12,19 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
 {
     internal class GetSPOPermissionUsers
     {
-        private Solutions.LogHelper _logHelper { get; set; }
+        private Solutions.NPLogger _logger { get; set; }
         private Authentication.AppInfo AppInfo { get; set; }
         private string SPOAccessToken { get; set; }
         private string AADAccessToken { get; set; }
         private List<SPORoleAssignmentKnownGroup> KnownGroups { get; set; } = new() { };
         private List<SPORoleAssignmentRecord> RoleAssignmentUsers { get; set; } = new() { };
-        internal GetSPOPermissionUsers(Solutions.LogHelper logHelper,
+        internal GetSPOPermissionUsers(Solutions.NPLogger logger,
                                        Authentication.AppInfo appInfo,
                                        string spoAccessToken,
                                        string aadAccessToken,
                                        List<SPORoleAssignmentKnownGroup> knownGroups)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             AppInfo = appInfo;
             SPOAccessToken = spoAccessToken;
             AADAccessToken = aadAccessToken;
@@ -36,18 +36,18 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         {
             AppInfo.IsCancelled();
             string methodName = $"{GetType().Name}.GetRoleAssigmentUsersAsync";
-            _logHelper.AddLogToTxt(methodName, $"Start getting Site Permissions for Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start getting Site Permissions for Site '{siteUrl}'");
 
             foreach (var role in roleAssignmentCollection)
             {
-                _logHelper.AddLogToTxt(methodName, $"Gettig Site Permissions for '{role.Member.PrincipalType}' '{role.Member.Title}'");
+                _logger.LogTxt(methodName, $"Gettig Site Permissions for '{role.Member.PrincipalType}' '{role.Member.Title}'");
 
                 string accessType = "Direct Permissions";
                 var permissionLevels = GetPermissionLevels(role.RoleDefinitionBindings);
 
                 if (String.IsNullOrWhiteSpace(permissionLevels))
                 {
-                    _logHelper.AddLogToTxt(methodName, $"No permissions found, skipping group");
+                    _logger.LogTxt(methodName, $"No permissions found, skipping group");
                     continue;
                 }
                 else if ( IsSystemGroup(accessType, role.Member.Title.ToString(), permissionLevels) )
@@ -70,7 +70,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 }
             }
 
-            _logHelper.AddLogToTxt(methodName, $"Finish Site Permissions for Site '{siteUrl}'. Total {RoleAssignmentUsers.Count}");
+            _logger.LogTxt(methodName, $"Finish Site Permissions for Site '{siteUrl}'. Total {RoleAssignmentUsers.Count}");
 
             return ReturnValues();
         }
@@ -79,7 +79,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         {
             AppInfo.IsCancelled();
             string methodName = $"{GetType().Name}.GetSharePointGroupUsers";
-            _logHelper.AddLogToTxt(methodName, $"Start getting users from SharePoint Group '{groupName}'");
+            _logger.LogTxt(methodName, $"Start getting users from SharePoint Group '{groupName}'");
 
             string accessType = $"SharePoint Group '{groupName}'";
 
@@ -87,10 +87,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             collKnownGroups = KnownGroups.Where(kg => kg.PrincipalType == "SharePointGroup" && kg.GroupName == groupName && siteUrl.Contains(kg.SiteURL)).ToList();
             if (collKnownGroups.Count > 0)
             {
-                _logHelper.AddLogToTxt(methodName, $"SharePoint Group found in Known Groups");
+                _logger.LogTxt(methodName, $"SharePoint Group found in Known Groups");
                 foreach (var oKnowngroup in collKnownGroups)
                 {
-                    _logHelper.AddLogToTxt(methodName, $"Adding Assigment Users {oKnowngroup.AccountType}, {oKnowngroup.Users}, {permissionLevels}");
+                    _logger.LogTxt(methodName, $"Adding Assigment Users {oKnowngroup.AccountType}, {oKnowngroup.Users}, {permissionLevels}");
                     SPORoleAssignmentRecord knownPermissionsRecord = new(accessType, oKnowngroup.AccountType, oKnowngroup.Users, permissionLevels, oKnowngroup.Remarks);
                     RoleAssignmentUsers.Add(knownPermissionsRecord);
                 }
@@ -101,13 +101,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             UserCollection groupMembers;
             try
             {
-                groupMembers = new GetSPOGroupMember(_logHelper, AppInfo, SPOAccessToken).CSOMAllMembers(siteUrl, groupName);
+                groupMembers = new GetSPOGroupMember(_logger, AppInfo, SPOAccessToken).CSOMAllMembers(siteUrl, groupName);
             }
             catch (Exception ex)
             {
-                _logHelper.AddLogToUI(methodName, $"Error processing SharePoint Group '{groupName}'");
-                _logHelper.AddLogToTxt(methodName, $"Exception: {ex.Message}");
-                _logHelper.AddLogToTxt(methodName, $"Trace: {ex.StackTrace}");
+                _logger.LogUI(methodName, $"Error processing SharePoint Group '{groupName}'");
+                _logger.LogTxt(methodName, $"Exception: {ex.Message}");
+                _logger.LogTxt(methodName, $"Trace: {ex.StackTrace}");
 
                 SPORoleAssignmentRecord errorPermissions = new(accessType, "", "", permissionLevels, ex.Message);
                 RoleAssignmentUsers.Add(errorPermissions);
@@ -146,32 +146,32 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                     new("SharePointGroup", groupName, "", siteUrl, "")
                 };
 
-                _logHelper.AddLogToTxt(methodName, $"Processing Security Group '{securityGroup.Title}'");
+                _logger.LogTxt(methodName, $"Processing Security Group '{securityGroup.Title}'");
 
                 await GetSecurityGroupUsersAsync(siteUrl, securityGroup.Title, securityGroup.AadObjectId.NameId, accessType, "", permissionLevels, collHeaders);
 
             }
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting users from SharePoint Group {groupName}");
+            _logger.LogTxt(methodName, $"Finish getting users from SharePoint Group {groupName}");
         }
 
         internal bool IsSystemGroup(string accessType, string groupName, string permissionLevels)
         {
             AppInfo.IsCancelled();
             string methodName = $"{GetType().Name}.IsSystemGroup";
-            _logHelper.AddLogToTxt(methodName, $"Start checking if it is a Security Group");
+            _logger.LogTxt(methodName, $"Start checking if it is a Security Group");
 
             if (groupName.ToString() == "Everyone" || groupName.ToString() == "Everyone except external users")
             {
                 SPORoleAssignmentRecord usersPermissionsRecord = new(accessType, groupName, "All Users", permissionLevels, "");
                 RoleAssignmentUsers.Add(usersPermissionsRecord);
 
-                _logHelper.AddLogToTxt(methodName, $"Finish checking if it is a Security Group: '{true}'");
+                _logger.LogTxt(methodName, $"Finish checking if it is a Security Group: '{true}'");
                 return true;
             }
             else
             {
-                _logHelper.AddLogToTxt(methodName, $"Finish checking if it is a Security Group: '{false}'");
+                _logger.LogTxt(methodName, $"Finish checking if it is a Security Group: '{false}'");
                 return false;
             }
         }
@@ -180,7 +180,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         {
             AppInfo.IsCancelled();
             string methodName = $"{GetType().Name}.GetSecurityGroupUsersAsync";
-            _logHelper.AddLogToTxt(methodName, $"Finish getting users from List of Security Groups");
+            _logger.LogTxt(methodName, $"Finish getting users from List of Security Groups");
 
             foreach (var securityGroup in listSecurityGroup)
             {
@@ -191,7 +191,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 await GetSecurityGroupUsersAsync(siteUrl, securityGroup.Title, securityGroup.AadObjectId.NameId, accessType, "", permissionLevels, collHeaders);                
             }
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting users from List of Security Groups");
+            _logger.LogTxt(methodName, $"Finish getting users from List of Security Groups");
             return ReturnValues();
         }
 
@@ -199,7 +199,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         {
             AppInfo.IsCancelled();
             string methodName = $"{GetType().Name}.GetSecurityGroupUsersAsync";
-            _logHelper.AddLogToTxt(methodName, $"Start getting users from Security Group '{groupName}' with ID '{groupID}'");
+            _logger.LogTxt(methodName, $"Start getting users from Security Group '{groupName}' with ID '{groupID}'");
 
             string thisAccountType = $"Security Group '{groupName}' holds ";
             accountType += thisAccountType;
@@ -227,10 +227,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             collKnownGroups = KnownGroups.Where(kg => kg.PrincipalType == "SecurityGroup" && kg.GroupName == groupName && kg.GroupID == groupID).ToList();
             if (collKnownGroups.Count > 0)
             {
-                _logHelper.AddLogToTxt(methodName, $"SecurityGroup fround in Known Groups");
+                _logger.LogTxt(methodName, $"SecurityGroup fround in Known Groups");
                 foreach (var oKnowngroup in collKnownGroups)
                 {
-                    _logHelper.AddLogToTxt(methodName, $"Adding Role Assignment Users {oKnowngroup.AccountType}, {oKnowngroup.Users}, {permissionLevels}");
+                    _logger.LogTxt(methodName, $"Adding Role Assignment Users {oKnowngroup.AccountType}, {oKnowngroup.Users}, {permissionLevels}");
                     SPORoleAssignmentRecord knownPermissionsRecord = new(accessType, oKnowngroup.AccountType, oKnowngroup.Users, permissionLevels, oKnowngroup.Remarks);
                     RoleAssignmentUsers.Add(knownPermissionsRecord);
                 }
@@ -241,14 +241,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             IEnumerable<Microsoft365User> collOwnersMembers;
             try
             {
-                if (groupToCollect == "Owners") { collOwnersMembers = await new GetAzureADGroup(_logHelper, AppInfo, AADAccessToken).GraphOwnersAsync(groupID); }
-                else { collOwnersMembers = await new GetAzureADGroup(_logHelper, AppInfo, AADAccessToken).GraphOwnersAndMembersAsync(groupID); }
+                if (groupToCollect == "Owners") { collOwnersMembers = await new GetAzureADGroup(_logger, AppInfo, AADAccessToken).GraphOwnersAsync(groupID); }
+                else { collOwnersMembers = await new GetAzureADGroup(_logger, AppInfo, AADAccessToken).GraphOwnersAndMembersAsync(groupID); }
             }
             catch (Exception ex)
             {
-                _logHelper.AddLogToTxt(methodName, $"Error processing Security Group '{groupName}' with ID '{groupID}'");
-                _logHelper.AddLogToTxt(methodName, $"Exception: {ex.Message}");
-                _logHelper.AddLogToTxt(methodName, $"Trace: {ex.StackTrace}");
+                _logger.LogTxt(methodName, $"Error processing Security Group '{groupName}' with ID '{groupID}'");
+                _logger.LogTxt(methodName, $"Exception: {ex.Message}");
+                _logger.LogTxt(methodName, $"Trace: {ex.StackTrace}");
 
                 SPORoleAssignmentRecord errorPermissions = new(accessType, accountType, "", permissionLevels, ex.Message);
                 RoleAssignmentUsers.Add(errorPermissions);
@@ -293,14 +293,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 }
             }
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting users from Security Group {groupName}with ID {groupID}");
+            _logger.LogTxt(methodName, $"Finish getting users from Security Group {groupName}with ID {groupID}");
         }
 
         private string GetPermissionLevels(RoleDefinitionBindingCollection roleDefinitionsCollection)
         {
             AppInfo.IsCancelled();
             string methodName = $"{GetType().Name}.GetSecurityGroupUsersAsync";
-            _logHelper.AddLogToTxt(methodName, $"Start getting Permission Levels");
+            _logger.LogTxt(methodName, $"Start getting Permission Levels");
 
             StringBuilder sb = new();
             foreach (var roleDefinition in roleDefinitionsCollection)
@@ -315,7 +315,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             string permissionLevels = "";
             if (sb.Length > 0) { permissionLevels = sb.ToString().Remove(sb.Length - 3); }
 
-            _logHelper.AddLogToTxt(methodName, $"Finish getting Permission Levels: {permissionLevels}");
+            _logger.LogTxt(methodName, $"Finish getting Permission Levels: {permissionLevels}");
             return permissionLevels;
 
         }

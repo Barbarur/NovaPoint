@@ -13,13 +13,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     internal class SetSPOSiteCollectionAdmin
     {
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly string AccessToken;
 
-        internal SetSPOSiteCollectionAdmin(LogHelper logHelper, Authentication.AppInfo appInfo, string accessToken)
+        internal SetSPOSiteCollectionAdmin(NPLogger logger, Authentication.AppInfo appInfo, string accessToken)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             _appInfo = appInfo;
             AccessToken = accessToken;
         }
@@ -28,10 +28,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOM";
-            _logHelper.AddLogToTxt(methodName, $"Start setting '{userAdmin}' as Site Admin for '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start setting '{userAdmin}' as Site Admin for '{siteUrl}'");
 
             //string adminUrl = "https://" + Domain + "-admin.sharepoint.com";
-            using var clientContext = new ClientContext(_appInfo._adminUrl);
+            using var clientContext = new ClientContext(_appInfo.AdminUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
             {
                 e.WebRequestExecutor.RequestHeaders["Authorization"] = "Bearer " + AccessToken;
@@ -48,15 +48,15 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 try
                 {
                     _appInfo.IsCancelled();
-                    _logHelper.AddLogToTxt(methodName, $"Using Tenant context");
+                    _logger.LogTxt(methodName, $"Using Tenant context");
                     tenant.SetSiteAdmin(siteUrl, userAdmin, true);
                     tenant.Context.ExecuteQueryRetry();
                 }
                 catch (Exception)
                 {
                     _appInfo.IsCancelled();
-                    _logHelper.AddLogToTxt(methodName, "Using Tenant context failed");
-                    _logHelper.AddLogToTxt(methodName, "Using Site context");
+                    _logger.LogTxt(methodName, "Using Tenant context failed");
+                    _logger.LogTxt(methodName, "Using Site context");
 
                     using var site = tenant.Context.Clone(siteUrl);
                     var user = site.Web.EnsureUser(userAdmin);
@@ -65,7 +65,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                     site.Load(user);
                     site.ExecuteQueryRetry();
                 }
-                _logHelper.AddLogToTxt(methodName, $"Finish setting '{userAdmin}' as Site Admin for '{siteUrl}'");
+                _logger.LogTxt(methodName, $"Finish setting '{userAdmin}' as Site Admin for '{siteUrl}'");
             }
         }
     }

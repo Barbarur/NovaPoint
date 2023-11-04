@@ -16,7 +16,7 @@ namespace NovaPointLibrary.Solutions.Automation
 {
     public class SetSiteCollectionAdminAllAuto
     {
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
         
         private readonly string _targetUserUPN;
@@ -28,7 +28,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public SetSiteCollectionAdminAllAuto(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, SetSiteCollectionAdminAllAutoParameters parameters)
         {
-            _logHelper = new(uiAddLog, "Reports", GetType().Name);
+            _logger = new(uiAddLog, "Reports", GetType().Name);
             _appInfo = appInfo;
             
             _targetUserUPN = parameters.TargetUserUPN;
@@ -47,18 +47,18 @@ namespace NovaPointLibrary.Solutions.Automation
             }
             catch (Exception ex)
             {
-                _logHelper.ScriptFinishErrorNotice(ex);
+                _logger.ScriptFinish(ex);
             }
         }
 
         private async Task RunScriptAsync()
         {
-            _logHelper.ScriptStartNotice();
+            _logger.ScriptStartNotice();
 
-            string accessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
+            string accessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(_appInfo.AdminUrl);
 
             if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-            var collSiteCollections = new GetSiteCollection(_logHelper, accessToken).CSOM_AdminAll(_appInfo._adminUrl, _includePersonalSite, _groupIdDefined);
+            var collSiteCollections = new GetSiteCollection(_logger, accessToken).CSOM_AdminAll(_appInfo.AdminUrl, _includePersonalSite, _groupIdDefined);
             collSiteCollections.RemoveAll(s => s.Title == "" || s.Template.Contains("Redirect"));
             if (!_includePersonalSite) { collSiteCollections.RemoveAll(s => s.Template.Contains("SPSPERS")); }
             if (!_includeShareSite) { collSiteCollections.RemoveAll(s => !s.Template.Contains("SPSPERS")); }
@@ -75,30 +75,30 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 double progress = Math.Round(counter * 100 / collSiteCollections.Count, 2);
                 counter++;
-                _logHelper.AddProgressToUI(progress);
-                _logHelper.AddLogToUI($"Processing Site Collection '{oSiteCollection.Title}'");
+                _logger.ProgressUI(progress);
+                _logger.AddLogToUI($"Processing Site Collection '{oSiteCollection.Title}'");
 
                 try
                 {
                     if (_isSiteAdmin)
                     {
-                        new SetSiteCollectionAdmin(_logHelper, accessToken, _appInfo._domain).Add(_targetUserUPN, oSiteCollection.Url);
+                        new SetSiteCollectionAdmin(_logger, accessToken, _appInfo.Domain).Add(_targetUserUPN, oSiteCollection.Url);
                     }
                     else
                     {
-                        new RemoveSiteCollectionAdmin(_logHelper, accessToken, _appInfo._domain).Csom(_targetUserUPN, oSiteCollection.Url);
+                        new RemoveSiteCollectionAdmin(_logger, accessToken, _appInfo.Domain).Csom(_targetUserUPN, oSiteCollection.Url);
                     }
                     AddSiteRecordToCSV(oSiteCollection, $"Correctly chanced Site Collection Admin property");
                 }
                 catch (Exception ex)
                 {
                     AddSiteRecordToCSV(oSiteCollection, $"Error processing Site Collection: {ex.Message}");
-                    _logHelper.AddLogToUI($"Error processing Site Collection: {ex.Message}");
-                    _logHelper.AddLogToTxt($"Exception Message: {ex.Message}");
-                    _logHelper.AddLogToTxt($"Exception Trace: {ex.StackTrace}");
+                    _logger.AddLogToUI($"Error processing Site Collection: {ex.Message}");
+                    _logger.AddLogToTxt($"Exception Message: {ex.Message}");
+                    _logger.AddLogToTxt($"Exception Trace: {ex.StackTrace}");
                 }
             }
-            _logHelper.ScriptFinishSuccessfulNotice();
+            _logger.ScriptFinish();
         }
 
         private void AddSiteRecordToCSV(SiteProperties site, string remarks)
@@ -110,7 +110,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             recordList.Remarks = remarks;
 
-            _logHelper.AddRecordToCSV(recordList);
+            _logger.RecordCSV(recordList);
         }
     }
 

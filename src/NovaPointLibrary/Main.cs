@@ -2,13 +2,9 @@
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary
 {
@@ -41,7 +37,7 @@ namespace NovaPointLibrary
         {
             string methodName = $"{GetType().Name}.Main";
 
-            Domain = appInfo._domain;
+            Domain = appInfo.Domain;
             _tenantId = appInfo._tenantId;
             _clientId = appInfo._clientId;
 

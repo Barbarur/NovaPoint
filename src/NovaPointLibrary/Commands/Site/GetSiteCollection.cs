@@ -15,11 +15,11 @@ namespace NovaPoint.Commands.Site
 {
     internal class GetSiteCollection
     {
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly string AccessToken;
-        internal GetSiteCollection(LogHelper logHelper, string accessToken)
+        internal GetSiteCollection(NPLogger logger, string accessToken)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             AccessToken = accessToken;
         }
 
@@ -102,7 +102,7 @@ namespace NovaPoint.Commands.Site
 
         internal List<SiteProperties> CSOM_AdminAll(string adminUrl, bool includePersonalSite = false, bool groupIdDefined = false)
         {
-            _logHelper.AddLogToTxt($"[{GetType().Name}.CSOM_AdminAll] - Start getting Site Collections; IncludePersonalSite '{includePersonalSite}', Group ID Defined '{groupIdDefined}'");
+            _logger.AddLogToTxt($"[{GetType().Name}.CSOM_AdminAll] - Start getting Site Collections; IncludePersonalSite '{includePersonalSite}', Group ID Defined '{groupIdDefined}'");
             
             using var clientContext = new ClientContext(adminUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -127,11 +127,11 @@ namespace NovaPoint.Commands.Site
                 clientContext.ExecuteQuery();
                 collSites.AddRange(subcollSiteCollections);
                 filter.StartIndex = subcollSiteCollections.NextStartIndexFromSharePoint;
-                _logHelper.AddLogToTxt($"[{GetType().Name}.CSOM_AdminAll] - getting Site Collections... {collSites.Count}");
+                _logger.AddLogToTxt($"[{GetType().Name}.CSOM_AdminAll] - getting Site Collections... {collSites.Count}");
 
             } while (!string.IsNullOrWhiteSpace(filter.StartIndex));
 
-            _logHelper.AddLogToTxt($"({GetType().Name}.CSOM_AdminAll] - Finish getting Site Collections. Total: {collSites.Count}");
+            _logger.AddLogToTxt($"({GetType().Name}.CSOM_AdminAll] - Finish getting Site Collections. Total: {collSites.Count}");
             return collSites;
         }
 
@@ -145,7 +145,7 @@ namespace NovaPoint.Commands.Site
         {
             string message = "https://m365x29094319.sharepoint.com/_api/search/query?querytext='contentclass:STS_Site'&rowlimit=50";
 
-            HttpHandler httpHandler = new(_logHelper, AccessToken);
+            HttpHandler httpHandler = new(_logger, AccessToken);
             try
             {
                 var jsonResponse = await httpHandler.SPO_Get(message);

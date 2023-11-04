@@ -13,12 +13,12 @@ namespace NovaPointLibrary.Commands.SharePoint.User
 {
     internal class GetSPOUser
     {
-        private LogHelper _LogHelper;
+        private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
         private readonly string AccessToken;
-        internal GetSPOUser(LogHelper logHelper, AppInfo appInfo, string accessToken)
+        internal GetSPOUser(NPLogger logger, AppInfo appInfo, string accessToken)
         {
-            _LogHelper = logHelper;
+            _logger = logger;
             _appInfo = appInfo;
             AccessToken = accessToken;
         }
@@ -28,7 +28,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMSingle";
-            _LogHelper.AddLogToTxt(methodName, $"Start obtaining User '{userUPN}' from Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start obtaining User '{userUPN}' from Site '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -58,7 +58,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             };
 
             string userLoginName = "i:0#.f|membership|" + userUPN;
-            _LogHelper.AddLogToTxt(methodName, $"User LoginName '{userLoginName}'");
+            _logger.LogTxt(methodName, $"User LoginName '{userLoginName}'");
 
             try
             {
@@ -68,13 +68,13 @@ namespace NovaPointLibrary.Commands.SharePoint.User
                 clientContext.Load(user, retrievalExpressions);
                 clientContext.ExecuteQueryRetry();
 
-                _LogHelper.AddLogToTxt(methodName, $"User '{userUPN}' found in Site '{siteUrl}'");
+                _logger.LogTxt(methodName, $"User '{userUPN}' found in Site '{siteUrl}'");
                 return user;
 
             }
             catch
             {
-                _LogHelper.AddLogToTxt(methodName, $"User '{userUPN}' no found in Site '{siteUrl}'");
+                _logger.LogTxt(methodName, $"User '{userUPN}' no found in Site '{siteUrl}'");
                 return null;
             }
 
@@ -89,7 +89,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.CSOMAll";
-            _LogHelper.AddLogToTxt(methodName, $"Start getting Users for Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start getting Users for Site '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -127,7 +127,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             listUsersReturned.AddRange(clientContext.Web.SiteUsers);
             listUsersReturned.RemoveAll(u => u.Title == "System Account" || u.Title == "SharePoint App" || u.Title == "NT Service\\spsearch");
             
-            _LogHelper.AddLogToTxt(methodName, $"Finish getting Users for Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Finish getting Users for Site '{siteUrl}'");
             return listUsersReturned;
         }
     }

@@ -18,19 +18,17 @@ namespace NovaPointLibrary.Commands.Site
     //https://www.sharepointdiary.com/2016/06/sharepoint-online-powershell-get-site-collection-administrators.html
     internal class GetSiteCollectionAdmin
     {
-        private LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly string AccessToken;
 
-        internal GetSiteCollectionAdmin(LogHelper logHelper, string accessToken)
+        internal GetSiteCollectionAdmin(NPLogger logger, string accessToken)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             AccessToken = accessToken;
         }
         internal IEnumerable<Microsoft.SharePoint.Client.User> Csom(string siteUrl)
         {
-            _logHelper = new(_logHelper, $"{GetType().Name}.Csom");
-
-            _logHelper.AddLogToTxt($"Start obtaining Site Collection Administrators for '{siteUrl}'");
+            _logger.AddLogToTxt($"Start obtaining Site Collection Administrators for '{siteUrl}'");
 
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
@@ -62,7 +60,7 @@ namespace NovaPointLibrary.Commands.Site
             var siteCollectionAdminUsers = clientContext.LoadQuery(query.Include(retrievalExpressions));
             clientContext.ExecuteQueryRetry();
 
-            _logHelper.AddLogToTxt($"Successfully obtained Site Collection Administrators for '{siteUrl}'");
+            _logger.AddLogToTxt($"Successfully obtained Site Collection Administrators for '{siteUrl}'");
             return siteCollectionAdminUsers;
         }
     }

@@ -13,12 +13,12 @@ namespace NovaPointLibrary.Commands
 {
     internal class HttpHandler
     {
-        private LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly HttpClient HttpsClient;
         private readonly string AccessToken;
-        internal HttpHandler(LogHelper logHelper, string accessToken)
+        internal HttpHandler(NPLogger logger, string accessToken)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             HttpsClient = new();
             AccessToken = accessToken;
         }
@@ -50,25 +50,24 @@ namespace NovaPointLibrary.Commands
 
         public async Task<string> SPO_Get(string message)
         {
-            _logHelper = new(_logHelper, $"{GetType().Name}.SPO_Get");
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get,
                 message);
             httpRequest.Headers.Add("Accept", "application/json;odata=nometadata");
             httpRequest.Headers.Add("Authorization", "Bearer " + AccessToken);
 
-            _logHelper.AddLogToTxt($"SendingAsync");
+            _logger.AddLogToTxt($"SendingAsync");
             HttpResponseMessage response = await HttpsClient.SendAsync(httpRequest);
             string jsonResponse = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
-                _logHelper.AddLogToTxt($"Successful response");
+                _logger.AddLogToTxt($"Successful response");
                 return jsonResponse;
             }
             else
             {
-                _logHelper.AddLogToTxt($"Error response");
+                _logger.AddLogToTxt($"Error response");
                 SharePointException? responseContent = JsonConvert.DeserializeObject<SharePointException>(jsonResponse);
                 string exception = responseContent.ErrorData.Message.Value;
                 throw new Exception(exception);

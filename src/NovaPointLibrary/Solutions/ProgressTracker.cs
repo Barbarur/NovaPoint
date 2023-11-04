@@ -9,7 +9,7 @@ namespace NovaPointLibrary.Solutions
 {
     internal class ProgressTracker
     {
-        internal readonly LogHelper _logHelper;
+        internal readonly NPLogger _logger;
         private float _counter;
         private int _totalUnits;
         private int Total
@@ -26,9 +26,9 @@ namespace NovaPointLibrary.Solutions
         private float SubTaskCounter = 0;
         private float SubTotalCount = 1;
         
-        internal ProgressTracker(LogHelper logHelper, int totalCount)
+        internal ProgressTracker(NPLogger logHelper, int totalCount)
         {
-            _logHelper = logHelper;
+            _logger = logHelper;
             _counter = 0;
             Total = totalCount;
 
@@ -37,14 +37,14 @@ namespace NovaPointLibrary.Solutions
         internal void MainReportProgress(string msg)
         {
             double progress = Math.Round(_counter * 100 / Total, 2);
-            _logHelper.AddProgressToUI(progress);
-            _logHelper.AddLogToUI(msg);
+            _logger.ProgressUI(progress);
+            _logger.AddLogToUI(msg);
         }
 
         internal void MainCounterIncrement()
         {
             double progress = Math.Round(_counter * 100 / Total, 2);
-            _logHelper.AddProgressToUI(progress);
+            _logger.ProgressUI(progress);
             _counter++;
         }
 
@@ -57,14 +57,14 @@ namespace NovaPointLibrary.Solutions
         internal void SubTaskReportProgress(string msg)
         {
             var progress = Math.Round( ((_counter / Total) + ( SubTaskCounter * _counterStep / SubTotalCount)) * 100, 2);
-            _logHelper.AddProgressToUI(progress);
-            _logHelper.AddLogToUI(msg);
+            _logger.ProgressUI(progress);
+            _logger.AddLogToUI(msg);
         }
 
         internal void SubTaskCounterIncrement()
         {
             var progress = Math.Round(((_counter / Total) + (SubTaskCounter * _counterStep / SubTotalCount)) * 100, 2);
-            _logHelper.AddProgressToUI(progress);
+            _logger.ProgressUI(progress);
             SubTaskCounter++;
         }
     }

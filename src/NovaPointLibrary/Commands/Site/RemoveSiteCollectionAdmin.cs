@@ -12,22 +12,20 @@ namespace NovaPointLibrary.Commands.Site
 {
     internal class RemoveSiteCollectionAdmin
     {
-        private LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly string AccessToken;
         private readonly string Domain;
 
-        internal RemoveSiteCollectionAdmin(LogHelper logHelper, string accessToken, string domain)
+        internal RemoveSiteCollectionAdmin(NPLogger logger, string accessToken, string domain)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             AccessToken = accessToken;
             Domain = domain;
         }
 
         internal void Csom(string siteUrl, string targetAdminUPN)
         {
-            _logHelper = new(_logHelper, $"{GetType().Name}.Csom");
-
-            _logHelper.AddLogToTxt($"Removing '{targetAdminUPN}' as Site Collection Admin for '{siteUrl}'");
+            _logger.AddLogToTxt($"Removing '{targetAdminUPN}' as Site Collection Admin for '{siteUrl}'");
 
             string adminUrl = "https://" + Domain + "-admin.sharepoint.com";
             using var clientContext = new ClientContext(adminUrl);
@@ -42,14 +40,14 @@ namespace NovaPointLibrary.Commands.Site
             {
                 try
                 {
-                    _logHelper.AddLogToTxt("Using Tenant context");
+                    _logger.AddLogToTxt("Using Tenant context");
                     tenant.SetSiteAdmin(siteUrl, targetAdminUPN, false);
                     tenant.Context.ExecuteQueryRetry();
                 }
                 catch
                 {
-                    _logHelper.AddLogToTxt("Using Tenant context failed");
-                    _logHelper.AddLogToTxt("Using Site context");
+                    _logger.AddLogToTxt("Using Tenant context failed");
+                    _logger.AddLogToTxt("Using Site context");
 
                     using var site = tenant.Context.Clone(siteUrl);
                     var user = site.Web.EnsureUser(targetAdminUPN);
@@ -62,7 +60,7 @@ namespace NovaPointLibrary.Commands.Site
             catch
             {
 
-                _logHelper.AddLogToTxt($"You cannot remove '{targetAdminUPN}' from the site collection administrators of Site collection '{siteUrl}'");
+                _logger.AddLogToTxt($"You cannot remove '{targetAdminUPN}' from the site collection administrators of Site collection '{siteUrl}'");
                     
                 string message = $"You cannot remove '{targetAdminUPN}' from the site collection administrators list.";
                 Exception exception = new(message);

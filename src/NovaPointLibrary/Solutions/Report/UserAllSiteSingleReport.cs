@@ -19,14 +19,14 @@ namespace NovaPointLibrary.Solutions.Reports
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-UserAllSiteSingleReport";
 
         // Baic parameters required for all reports
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo AppInfo;
         // Required parameters for the current report
         private readonly string SiteUrl;
 
         public UserAllSiteSingleReport(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, UserAllSiteSingleReportParameters parameters)
         {
-            _logHelper = new(uiAddLog, "Reports", GetType().Name); ;
+            _logger = new(uiAddLog, "Reports", GetType().Name); ;
             AppInfo = appInfo;
             SiteUrl = parameters.SiteUrl;
         }
@@ -48,18 +48,18 @@ namespace NovaPointLibrary.Solutions.Reports
             }
             catch (Exception ex)
             {
-                _logHelper.ScriptFinishErrorNotice(ex);
+                _logger.ScriptFinish(ex);
             }
         }
         private async Task RunScriptAsync()
         {
-            _logHelper.ScriptStartNotice();
+            _logger.ScriptStartNotice();
 
             string rootUrl = SiteUrl.Substring(0, SiteUrl.IndexOf(".com") + 4);
-            string rootSiteAccessToken = await new GetAccessToken(_logHelper, AppInfo).SpoInteractiveAsync(rootUrl);
+            string rootSiteAccessToken = await new GetAccessToken(_logger, AppInfo).SpoInteractiveAsync(rootUrl);
             
             if (AppInfo.CancelToken.IsCancellationRequested) { AppInfo.CancelToken.ThrowIfCancellationRequested(); };
-            List<Microsoft.SharePoint.Client.User> collUsers = new GetUser(_logHelper, rootSiteAccessToken).CsomAll(SiteUrl, false);
+            List<Microsoft.SharePoint.Client.User> collUsers = new GetUser(_logger, rootSiteAccessToken).CsomAll(SiteUrl, false);
             foreach (Microsoft.SharePoint.Client.User oUser in collUsers)
             {
                 if (AppInfo.CancelToken.IsCancellationRequested) { AppInfo.CancelToken.ThrowIfCancellationRequested(); };
@@ -72,11 +72,11 @@ namespace NovaPointLibrary.Solutions.Reports
                 recordUser.IsSiteAdmin = oUser.IsSiteAdmin;
                 recordUser.UserSPOID = GetUserId(oUser.UserId);
 
-                _logHelper.AddRecordToCSV(recordUser);
+                _logger.RecordCSV(recordUser);
 
             }
 
-            _logHelper.ScriptFinishSuccessfulNotice();
+            _logger.ScriptFinish();
         }
         private static string GetUserId(UserIdInfo userIdInfo)
         {

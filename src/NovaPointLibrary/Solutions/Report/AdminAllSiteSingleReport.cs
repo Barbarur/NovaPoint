@@ -13,12 +13,12 @@ namespace NovaPointLibrary.Solutions.Reports
     // TO BE DEPRECATED ONCE SiteAllReport IS IN PRODUCTION
     public class AdminAllSiteSingleReport
     {
-        internal LogHelper _logHelper;
-        internal AppInfo AppInfo;
+        internal readonly NPLogger _logger;
+        internal readonly AppInfo AppInfo;
         internal string SiteUrl;
         public AdminAllSiteSingleReport(Action<LogInfo> uiAddLog, AppInfo appInfo, AdminAllSiteSingleReportParameters parameters)
         {
-            _logHelper = new(uiAddLog, "Reports", GetType().Name);
+            _logger = new(uiAddLog, "Reports", GetType().Name);
             AppInfo = appInfo;
             SiteUrl = parameters.SiteUrl;
         }
@@ -39,18 +39,18 @@ namespace NovaPointLibrary.Solutions.Reports
             }
             catch (Exception ex)
             {
-                _logHelper.ScriptFinishErrorNotice(ex);
+                _logger.ScriptFinish(ex);
             }
         }
         private async Task RunScriptAsync()
         {
-            _logHelper.ScriptStartNotice();
+            _logger.ScriptStartNotice();
 
             string rootUrl = SiteUrl.Substring(0, SiteUrl.IndexOf(".com") + 4);
-            string rootAccessToken = await new GetAccessToken(_logHelper, AppInfo).SpoInteractiveAsync(rootUrl);
+            string rootAccessToken = await new GetAccessToken(_logger, AppInfo).SpoInteractiveAsync(rootUrl);
 
             if (this.AppInfo.CancelToken.IsCancellationRequested) { this.AppInfo.CancelToken.ThrowIfCancellationRequested(); };
-            var collSiteCollAdmins = new GetSiteCollectionAdmin(_logHelper, rootAccessToken).Csom(SiteUrl);
+            var collSiteCollAdmins = new GetSiteCollectionAdmin(_logger, rootAccessToken).Csom(SiteUrl);
 
             foreach (User oAdmin in collSiteCollAdmins)
             {
@@ -65,11 +65,11 @@ namespace NovaPointLibrary.Solutions.Reports
                 string userId = oAdmin.UserId != null ? oAdmin.UserId.NameId : "";
                 recordAdmin.SPOUserID = userId;
 
-                _logHelper.AddRecordToCSV(recordAdmin);
+                _logger.RecordCSV(recordAdmin);
 
             }
 
-            _logHelper.ScriptFinishSuccessfulNotice();
+            _logger.ScriptFinish();
 
         }
 

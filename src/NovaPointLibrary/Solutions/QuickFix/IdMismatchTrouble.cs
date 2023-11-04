@@ -26,7 +26,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
         public static string _solutionName = "Resolve user ID Mismatch";
         public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-IdMismatchTrouble";
 
-        private readonly LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
         
         private readonly string _userUpn;
@@ -42,7 +42,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
                                  Commands.Authentication.AppInfo appInfo,
                                  IdMismatchTroubleParameters parameters)
         {
-            _logHelper = new(uiAddLog, "QuickFix", GetType().Name);
+            _logger = new(uiAddLog, "QuickFix", GetType().Name);
             _appInfo = appInfo;
             
             _userUpn = parameters.UserUpn;
@@ -72,20 +72,20 @@ namespace NovaPointLibrary.Solutions.QuickFix
             }
             catch (Exception ex)
             {
-                _logHelper.ScriptFinishErrorNotice(ex);
+                _logger.ScriptFinish(ex);
             }
         }
 
 
         private async Task RunScriptAsync()
         {
-            _logHelper.ScriptStartNotice();
+            _logger.ScriptStartNotice();
 
-            string spoAdminAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._adminUrl);
+            string spoAdminAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(_appInfo.AdminUrl);
             string rootUrl = _siteUrl.Substring(0, _siteUrl.IndexOf(".com") + 4);
-            string rootSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(rootUrl);
+            string rootSiteAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(rootUrl);
 
-            new SetSPOSiteCollectionAdmin(_logHelper, _appInfo, spoAdminAccessToken).CSOM(_adminUpn, _siteUrl);
+            new SetSPOSiteCollectionAdmin(_logger, _appInfo, spoAdminAccessToken).CSOM(_adminUpn, _siteUrl);
             if (!_reportMode)
             {
                 SingleSiteAsync(spoAdminAccessToken, _siteUrl, rootSiteAccessToken, "abcdefghijk");
@@ -94,9 +94,9 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
             if (_preventAllSites) 
             {
-                new RegisterSPOSiteUser(_logHelper, _appInfo, rootSiteAccessToken).CSOM(_siteUrl, _userUpn);
+                new RegisterSPOSiteUser(_logger, _appInfo, rootSiteAccessToken).CSOM(_siteUrl, _userUpn);
 
-                User? user = new GetUser(_logHelper, rootSiteAccessToken).CsomSingle(_siteUrl, _userUpn);
+                User? user = new GetUser(_logger, rootSiteAccessToken).CsomSingle(_siteUrl, _userUpn);
                 if (user == null) { throw new Exception("User couldn't be found to obtain correct user ID"); }
 
                 UserIdInfo userIdInfo = user.UserId;
@@ -108,21 +108,21 @@ namespace NovaPointLibrary.Solutions.QuickFix
             if (!_reportMode && _removeAdmin)
             {
                 if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-                new RemoveSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Csom(_siteUrl, _adminUpn);
+                new RemoveSiteCollectionAdmin(_logger, spoAdminAccessToken, _appInfo.Domain).Csom(_siteUrl, _adminUpn);
             }
 
-            _logHelper.ScriptFinishSuccessfulNotice();
+            _logger.ScriptFinish();
         }
 
         private void SingleSiteAsync(string spoAdminAccessToken, string siteUrl, string siteAccessToken, string correctUserID)
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.SingleSiteAsync";
-            _logHelper.AddLogToTxt(methodName, $"Start processing Site '{siteUrl}'");
+            _logger.LogTxt(methodName, $"Start processing Site '{siteUrl}'");
 
             try
             {
-                User? user = new GetUser(_logHelper, siteAccessToken).CsomSingle(siteUrl, _userUpn);
+                User? user = new GetUser(_logger, siteAccessToken).CsomSingle(siteUrl, _userUpn);
 
                 if (user == null) { return; }
 
@@ -134,30 +134,26 @@ namespace NovaPointLibrary.Solutions.QuickFix
                         if (user.IsSiteAdmin)
                         {
                             if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-                            new RemoveSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Csom(siteUrl, user.UserPrincipalName);
+                            new RemoveSiteCollectionAdmin(_logger, spoAdminAccessToken, _appInfo.Domain).Csom(siteUrl, user.UserPrincipalName);
                         }
 
                         if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-                        new RemoveUser(_logHelper, siteAccessToken).Csom(siteUrl, user.UserPrincipalName);
+                        new RemoveUser(_logger, siteAccessToken).Csom(siteUrl, user.UserPrincipalName);
                     }
 
                     string remarks = "User with incorrect ID found on Site and Removed";
 
                     AddRecordToCSV(siteUrl, remarks);
-                    //dynamic recordSite = new ExpandoObject();
-                    //recordSite.SiteUrl = siteUrl;
-                    //recordSite.Remarks = remarks;
-                    //_logHelper.AddRecordToCSV(recordSite);
 
-                    _logHelper.AddLogToTxt(remarks);
+                    _logger.AddLogToTxt(remarks);
                 }
 
                 string urlOwnerODBCheckUp = _userUpn.Replace("@", "_").Replace(".", "_");
                 if (siteUrl.Contains(urlOwnerODBCheckUp, StringComparison.OrdinalIgnoreCase) && siteUrl.Contains("-my.sharepoint.com") && !_reportMode)
                 {
-                    _logHelper.AddLogToUI(methodName, $"Adding user '{user.UserPrincipalName}' as OneDrive Admin for site {siteUrl}");
-                    new SetSPOSiteCollectionAdmin(_logHelper, _appInfo, spoAdminAccessToken).CSOM(_userUpn, siteUrl);
-                    new RemoveSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Csom(_siteUrl, _adminUpn);
+                    _logger.LogUI(methodName, $"Adding user '{user.UserPrincipalName}' as OneDrive Admin for site {siteUrl}");
+                    new SetSPOSiteCollectionAdmin(_logger, _appInfo, spoAdminAccessToken).CSOM(_userUpn, siteUrl);
+                    new RemoveSiteCollectionAdmin(_logger, spoAdminAccessToken, _appInfo.Domain).Csom(_siteUrl, _adminUpn);
                 }
             }
             catch(Exception ex)
@@ -167,9 +163,9 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 dynamic recordError = new ExpandoObject();
                 recordError.SiteUrl = siteUrl;
                 recordError.Remarks = remarks;
-                _logHelper.AddRecordToCSV(recordError);
+                _logger.RecordCSV(recordError);
 
-                _logHelper.AddLogToUI(remarks);
+                _logger.AddLogToUI(remarks);
             }
 
         }
@@ -179,13 +175,13 @@ namespace NovaPointLibrary.Solutions.QuickFix
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.AllSitesAsync";
-            _logHelper.AddLogToTxt(methodName, $"Start fixing ID Mismatch for all Sites");
+            _logger.LogTxt(methodName, $"Start fixing ID Mismatch for all Sites");
 
-            string rootPersonalSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootPersonalUrl);
-            string rootShareSiteAccessToken = await new GetAccessToken(_logHelper, _appInfo).SpoInteractiveAsync(_appInfo._rootSharedUrl);
+            string rootPersonalSiteAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(_appInfo.RootPersonalUrl);
+            string rootShareSiteAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(_appInfo.RootSharedUrl);
 
-            List<SiteProperties> collSiteCollections = new GetSPOSiteCollection(_logHelper, _appInfo, spoAdminAccessToken).CSOM_AdminAll(_appInfo._adminUrl, true);
-            ProgressTracker progress = new(_logHelper, collSiteCollections.Count);
+            List<SiteProperties> collSiteCollections = new GetSPOSiteCollection(_logger, _appInfo, spoAdminAccessToken).CSOM_AdminAll(_appInfo.AdminUrl, true);
+            ProgressTracker progress = new(_logger, collSiteCollections.Count);
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
                 _appInfo.IsCancelled();
@@ -196,11 +192,11 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 
                 try
                 {
-                    new SetSPOSiteCollectionAdmin(_logHelper, _appInfo, spoAdminAccessToken).CSOM(_adminUpn, oSiteCollection.Url);
+                    new SetSPOSiteCollectionAdmin(_logger, _appInfo, spoAdminAccessToken).CSOM(_adminUpn, oSiteCollection.Url);
 
                     SingleSiteAsync(spoAdminAccessToken, oSiteCollection.Url, currentSiteAccessToken, correctUserID);
 
-                    var collSubsites = new GetSubsite(_logHelper, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRoles(oSiteCollection.Url);
+                    var collSubsites = new GetSubsite(_logger, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRoles(oSiteCollection.Url);
                     progress.SubTaskProgressReset(collSubsites.Count);
                     foreach (var oSubsite in collSubsites)
                     {
@@ -214,9 +210,9 @@ namespace NovaPointLibrary.Solutions.QuickFix
                             }
                             catch (Exception ex)
                             {
-                                _logHelper.AddLogToUI($"Error processing Site Collection '{oSubsite.Url}'");
-                                _logHelper.AddLogToTxt($"Exception: {ex.Message}");
-                                _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
+                                _logger.AddLogToUI($"Error processing Site Collection '{oSubsite.Url}'");
+                                _logger.AddLogToTxt($"Exception: {ex.Message}");
+                                _logger.AddLogToTxt($"Trace: {ex.StackTrace}");
 
                                 AddRecordToCSV(oSubsite.Url, ex.Message);
                             }
@@ -229,14 +225,14 @@ namespace NovaPointLibrary.Solutions.QuickFix
                     if (_removeAdmin)
                     {
                         if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };
-                        new RemoveSiteCollectionAdmin(_logHelper, spoAdminAccessToken, _appInfo._domain).Csom(oSiteCollection.Url, _adminUpn);
+                        new RemoveSiteCollectionAdmin(_logger, spoAdminAccessToken, _appInfo.Domain).Csom(oSiteCollection.Url, _adminUpn);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logHelper.AddLogToUI($"Error processing Site Collection '{oSiteCollection.Url}'");
-                    _logHelper.AddLogToTxt($"Exception: {ex.Message}");
-                    _logHelper.AddLogToTxt($"Trace: {ex.StackTrace}");
+                    _logger.AddLogToUI($"Error processing Site Collection '{oSiteCollection.Url}'");
+                    _logger.AddLogToTxt($"Exception: {ex.Message}");
+                    _logger.AddLogToTxt($"Trace: {ex.StackTrace}");
 
                     AddRecordToCSV(oSiteCollection.Url, ex.Message);
                 }
@@ -250,7 +246,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             dynamic recordSite = new ExpandoObject();
             recordSite.SiteUrl = siteUrl;
             recordSite.Remarks = remarks;
-            _logHelper.AddRecordToCSV(recordSite);
+            _logger.RecordCSV(recordSite);
         }
     }
 

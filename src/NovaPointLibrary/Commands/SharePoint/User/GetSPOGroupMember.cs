@@ -14,21 +14,21 @@ namespace NovaPointLibrary.Commands.SharePoint.User
 {
     internal class GetSPOGroupMember
     {
-        private LogHelper _LogHelper;
+        private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
         private readonly string AccessToken;
-        internal GetSPOGroupMember(LogHelper logHelper, AppInfo appInfo, string accessToken)
+        internal GetSPOGroupMember(NPLogger logger, AppInfo appInfo, string accessToken)
         {
-            _LogHelper = logHelper;
+            _logger = logger;
             _appInfo = appInfo;
             AccessToken = accessToken;
         }
 
         internal UserCollection CSOMAllMembers(string siteUrl, string groupName)
         {
-            if (_appInfo.CancelToken.IsCancellationRequested) { _appInfo.CancelToken.ThrowIfCancellationRequested(); };
-            _LogHelper = new(_LogHelper, $"{GetType().Name}.CSOMAllMembers");
-            _LogHelper.AddLogToTxt($"Start obtaining Group Members from Group'{groupName}'in site '{siteUrl}'");
+            _appInfo.IsCancelled();
+            string methodName = $"{GetType().Name}.CSOMAllMembers";
+            _logger.LogTxt(methodName, $"Start obtaining Group Members from Group'{groupName}'in site '{siteUrl}'");
 
 
             using var clientContext = new ClientContext(siteUrl);
@@ -66,7 +66,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             clientContext.Load(members, m => m.Include(retrievalExpressions));
             clientContext.ExecuteQuery();
 
-            _LogHelper.AddLogToTxt($"Finish obtaining Group Members from Group'{groupName}'");
+            _logger.LogTxt(methodName, $"Finish obtaining Group Members from Group'{groupName}'in site '{siteUrl}'");
             return members;
         }
     }

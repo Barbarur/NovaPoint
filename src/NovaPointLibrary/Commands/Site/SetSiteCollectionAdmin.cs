@@ -16,13 +16,13 @@ namespace NovaPoint.Commands.Site
     // TO BE DEPRECATED WHEN SPOSiteCollectionAdminCSOM IS STABLE
     internal class SetSiteCollectionAdmin
     {
-        private LogHelper _logHelper;
+        private readonly NPLogger _logger;
         private readonly string AccessToken;
         private readonly string Domain;
 
-        internal SetSiteCollectionAdmin(LogHelper logHelper, string accessToken, string domain)
+        internal SetSiteCollectionAdmin(NPLogger logger, string accessToken, string domain)
         {
-            _logHelper = logHelper;
+            _logger = logger;
             AccessToken = accessToken;
             Domain = domain;
         }
@@ -41,9 +41,8 @@ namespace NovaPoint.Commands.Site
 
         private void Run(string userAdmin, string siteUrl, bool isSiteAdmin)
         {
-            _logHelper = new(_logHelper, $"{GetType().Name}.Run");
 
-            _logHelper.AddLogToTxt($"Setting '{userAdmin}' IsSiteAdmin '{isSiteAdmin}' for '{siteUrl}'");
+            _logger.AddLogToTxt($"Setting '{userAdmin}' IsSiteAdmin '{isSiteAdmin}' for '{siteUrl}'");
 
             string adminUrl = "https://" + Domain + "-admin.sharepoint.com";
             using var clientContext = new ClientContext(adminUrl);
@@ -62,14 +61,14 @@ namespace NovaPoint.Commands.Site
             {
                 try
                 {
-                    _logHelper.AddLogToTxt("Using Tenant context");
+                    _logger.AddLogToTxt("Using Tenant context");
                     tenant.SetSiteAdmin(siteUrl, userAdmin, isSiteAdmin);
                     tenant.Context.ExecuteQueryRetry();
                 }
                 catch (Exception)
                 {
-                    _logHelper.AddLogToTxt("Using Tenant context failed");
-                    _logHelper.AddLogToTxt("Using Site context");
+                    _logger.AddLogToTxt("Using Tenant context failed");
+                    _logger.AddLogToTxt("Using Site context");
 
                     using var site = tenant.Context.Clone(siteUrl);
                     var user = site.Web.EnsureUser(userAdmin);
@@ -78,7 +77,7 @@ namespace NovaPoint.Commands.Site
                     site.Load(user);
                     site.ExecuteQueryRetry();
                 }
-                _logHelper.AddLogToTxt($"Setting '{userAdmin}' IsSiteAdmin '{isSiteAdmin}' for '{siteUrl}' COMPLETED");
+                _logger.AddLogToTxt($"Setting '{userAdmin}' IsSiteAdmin '{isSiteAdmin}' for '{siteUrl}' COMPLETED");
             }
         }
     }

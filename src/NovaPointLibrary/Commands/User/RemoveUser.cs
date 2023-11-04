@@ -11,11 +11,11 @@ namespace NovaPointLibrary.Commands.User
 {
     internal class RemoveUser
     {
-        private LogHelper _LogHelper;
+        private readonly NPLogger _logger;
         private readonly string AccessToken;
-        internal RemoveUser(LogHelper logHelper, string accessToken)
+        internal RemoveUser(NPLogger logger, string accessToken)
         {
-            _LogHelper = logHelper;
+            _logger = logger;
             AccessToken = accessToken;
         }
 
@@ -24,8 +24,7 @@ namespace NovaPointLibrary.Commands.User
         // https://github.com/pnp/powershell/blob/dev/src/Commands/Principals/RemoveUser.cs
         internal void Csom(string siteUrl, string userUPN)
         {
-            _LogHelper = new(_LogHelper, $"{GetType().Name}.Csom");
-            _LogHelper.AddLogToTxt($"Start obtaining Users for '{siteUrl}'");
+            _logger.AddLogToTxt($"Start obtaining Users for '{siteUrl}'");
             using var clientContext = new ClientContext(siteUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
             {
@@ -40,11 +39,11 @@ namespace NovaPointLibrary.Commands.User
             };
 
             string userLoginName = "i:0#.f|membership|" + userUPN;
-            _LogHelper.AddLogToTxt($"User LoginName '{userLoginName}'");
+            _logger.AddLogToTxt($"User LoginName '{userLoginName}'");
 
             try
             {
-                _LogHelper.AddLogToTxt($"Removing user '{userUPN}' from Site '{siteUrl}'");
+                _logger.AddLogToTxt($"Removing user '{userUPN}' from Site '{siteUrl}'");
                 clientContext.Web.SiteUsers.RemoveByLoginName(userLoginName);
                 clientContext.ExecuteQueryRetry();
             }
@@ -52,7 +51,7 @@ namespace NovaPointLibrary.Commands.User
             {
 
                 string message = $"You cannot remove '{userUPN}' from the site '{siteUrl}'";
-                _LogHelper.AddLogToTxt(message);
+                _logger.AddLogToTxt(message);
                 Exception exception = new(message);
                 throw exception;
             }
