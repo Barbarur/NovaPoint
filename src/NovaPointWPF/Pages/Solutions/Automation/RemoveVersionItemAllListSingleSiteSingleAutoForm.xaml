@@ -9,7 +9,7 @@
       Title="RemoveVersionItemAllListSingleSiteSingleAutoForm">
 
     <Grid Background="Transparent">
-        <StackPanel>
+        <!--<StackPanel>
 
             <Label Content="Remove versions from Files/Items from a single Library/list in a Site"
                    FontWeight="Bold"/>
@@ -44,7 +44,8 @@
                       Content="Send deleted versions to the recycle bin"
                       IsChecked="{Binding Recycle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-        </StackPanel>
+        </StackPanel>-->
 
     </Grid>
+    
 </Page>

@@ -15,7 +15,7 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_43D9FF8DC23E4AE6A60907A583C75BE9"
+        "MsmKey" = "8:_1AFB1E1E55694F3F8DABDE7CA23AA1E7"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -43,6 +43,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -59,6 +67,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -76,13 +92,23 @@
         {
             "LaunchCondition"
             {
+                "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_B0D2CBD3205D4CE6A9492CCC7DFD57B3"
+                {
+                "Name" = "8:.NET Core"
+                "Message" = "8:[VSDNETCOREMSG]"
+                "AllowLaterVersions" = "11:FALSE"
+                "InstallUrl" = "8:https://dotnet.microsoft.com/download/dotnet-core/[NetCoreVerMajorDotMinor]"
+                "IsNETCore" = "11:TRUE"
+                "Architecture" = "2:0"
+                "Runtime" = "2:0"
+                }
             }
         }
         "File"
         {
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_43D9FF8DC23E4AE6A60907A583C75BE9"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1AFB1E1E55694F3F8DABDE7CA23AA1E7"
             {
-            "SourcePath" = "8:..\\NovaPointWPF\\NovaPoint.ico"
+            "SourcePath" = "8:..\\..\\res\\images\\NovaPoint.ico"
             "TargetName" = "8:NovaPoint.ico"
             "Tag" = "8:"
             "Folder" = "8:_D59EA6F12D844DF18DFB825D31680F27"
@@ -288,7 +314,7 @@
             "Target" = "8:_AB684BA8FD6948D69C63B49CCF5785B2"
             "Folder" = "8:_9494A405F3A24EB48457FFEFC4BDF2E8"
             "WorkingFolder" = "8:_D59EA6F12D844DF18DFB825D31680F27"
-            "Icon" = "8:_43D9FF8DC23E4AE6A60907A583C75BE9"
+            "Icon" = "8:_1AFB1E1E55694F3F8DABDE7CA23AA1E7"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_8BF1466F795242F79B09099DB7EFCF90"
@@ -302,7 +328,7 @@
             "Target" = "8:_AB684BA8FD6948D69C63B49CCF5785B2"
             "Folder" = "8:_05E623684DE140B5A905016BE499DCA1"
             "WorkingFolder" = "8:_D59EA6F12D844DF18DFB825D31680F27"
-            "Icon" = "8:_43D9FF8DC23E4AE6A60907A583C75BE9"
+            "Icon" = "8:_1AFB1E1E55694F3F8DABDE7CA23AA1E7"
             "Feature" = "8:"
             }
         }

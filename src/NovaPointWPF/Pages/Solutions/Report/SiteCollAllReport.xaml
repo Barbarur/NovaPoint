@@ -10,7 +10,7 @@
 
     <Grid Background="Transparent">
 
-        <StackPanel>
+        <!--<StackPanel>
 
             <StackPanel>
                 <Label Content="All Site Collections"
@@ -58,7 +58,7 @@
                       IsChecked="{Binding GroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                       Checked="CheckBoxIncludeGroupIdDefined_Checked"/>
 
-        </StackPanel>
+        </StackPanel>-->
         
     </Grid>
 </Page>

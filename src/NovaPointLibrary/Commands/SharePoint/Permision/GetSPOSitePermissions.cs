@@ -4,8 +4,6 @@ using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.News.DataModel;
 using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.Item;
-using NovaPointLibrary.Commands.List;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Permision;
