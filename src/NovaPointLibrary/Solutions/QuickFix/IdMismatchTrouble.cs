@@ -23,8 +23,8 @@ namespace NovaPointLibrary.Solutions.QuickFix
 {
     public class IdMismatchTrouble
     {
-        public static string _solutionName = "Resolve user ID Mismatch";
-        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-IdMismatchTrouble";
+        public readonly static string _solutionName = "Resolve user ID Mismatch";
+        public readonly static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-IdMismatchTrouble";
 
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
@@ -54,7 +54,6 @@ namespace NovaPointLibrary.Solutions.QuickFix
             _reportMode = parameters.ReportMode;
         }
 
-
         public async Task RunAsync()
         {
             try
@@ -75,7 +74,6 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 _logger.ScriptFinish(ex);
             }
         }
-
 
         private async Task RunScriptAsync()
         {
@@ -185,8 +183,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             foreach (SiteProperties oSiteCollection in collSiteCollections)
             {
                 _appInfo.IsCancelled();
-
-                progress.MainReportProgress($"Processing Site '{oSiteCollection.Title}'");
+                _logger.LogTxt(methodName, $"Processing Site '{oSiteCollection.Title}'");
                 
                 string currentSiteAccessToken = oSiteCollection.Url.Contains("-my.sharepoint.com") ? rootPersonalSiteAccessToken : rootShareSiteAccessToken;
                 
@@ -196,30 +193,32 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
                     SingleSiteAsync(spoAdminAccessToken, oSiteCollection.Url, currentSiteAccessToken, correctUserID);
 
-                    var collSubsites = new GetSubsite(_logger, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRoles(oSiteCollection.Url);
-                    progress.SubTaskProgressReset(collSubsites.Count);
-                    foreach (var oSubsite in collSubsites)
-                    {
-                        progress.SubTaskReportProgress($"Processing SubSite '{oSubsite.Title}'");
+                    // REMOVING USER FROM SITE COLLECTION USER LIST, IT REMOVES THE USER FORM ALL SUBSITES
+                    //var collSubsites = new GetSubsite(_logger, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRoles(oSiteCollection.Url);
 
-                        if (oSubsite.HasUniqueRoleAssignments)
-                        {
-                            try
-                            {
-                                SingleSiteAsync(spoAdminAccessToken, oSubsite.Url, currentSiteAccessToken, correctUserID);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.AddLogToUI($"Error processing Site Collection '{oSubsite.Url}'");
-                                _logger.AddLogToTxt($"Exception: {ex.Message}");
-                                _logger.AddLogToTxt($"Trace: {ex.StackTrace}");
+                    //ProgressTracker progressSubsite = new(progress, collSubsites.Count);
+                    //foreach (var oSubsite in collSubsites)
+                    //{
+                    //    _logger.LogTxt(methodName, $"Processing Subsite '{oSubsite.Title}'");
 
-                                AddRecordToCSV(oSubsite.Url, ex.Message);
-                            }
-                        }
+                    //    if (oSubsite.HasUniqueRoleAssignments)
+                    //    {
+                    //        try
+                    //        {
+                    //            SingleSiteAsync(spoAdminAccessToken, oSubsite.Url, currentSiteAccessToken, correctUserID);
+                    //        }
+                    //        catch (Exception ex)
+                    //        {
+                    //            _logger.AddLogToUI($"Error processing Site Collection '{oSubsite.Url}'");
+                    //            _logger.AddLogToTxt($"Exception: {ex.Message}");
+                    //            _logger.AddLogToTxt($"Trace: {ex.StackTrace}");
 
-                        progress.SubTaskCounterIncrement();
-                    }
+                    //            AddRecordToCSV(oSubsite.Url, ex.Message);
+                    //        }
+                    //    }
+
+                    //    progressSubsite.ProgressUpdateReport();
+                    //}
 
 
                     if (_removeAdmin)
@@ -237,7 +236,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
                     AddRecordToCSV(oSiteCollection.Url, ex.Message);
                 }
 
-                progress.MainCounterIncrement();
+                progress.ProgressUpdateReport();
             }
         }
 

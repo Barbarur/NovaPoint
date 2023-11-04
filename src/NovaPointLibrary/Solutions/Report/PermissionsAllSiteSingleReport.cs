@@ -85,6 +85,7 @@ namespace NovaPointLibrary.Solutions.Report
         private async Task RunScriptAsyncNEW()
         {
             _appInfo.IsCancelled();
+            string methodName = $"{GetType().Name}.SingleSiteAsync";
             _logger.ScriptStartNotice();
 
 
@@ -102,28 +103,28 @@ namespace NovaPointLibrary.Solutions.Report
             //_logHelper.AddProgressToUI(progress);
             //_logHelper.AddLogToUI($"Processing Site '{oSite.Title}'");
             ProgressTracker progress = new(_logger, 1);
-            progress.MainReportProgress($"Processing Site '{oSite.Title}'");
+            _logger.LogTxt(methodName, $"Processing Site '{oSite.Title}'");
 
             AddRecordToCSV( await getPermissions.CSOMSiteAsync(oSite, IncludeAdmins, IncludeSiteAccess, IncludeUniquePermissions, IncludeSystemLists, IncludeResourceLists) );
 
             if (IncludeSubsites)
             {
                 var collSubsites = new GetSubsite(_logger, _appInfo, spoSiteAccessToken).CsomAllSubsitesWithRolesAndSiteDetails(SiteUrl);
-                progress.SubTaskProgressReset(collSubsites.Count);
+                ProgressTracker progressSubsite = new(progress, collSubsites.Count);
                 foreach (var oSubsite in collSubsites)
                 {
                     //progress = Math.Round(counter * 100 / (collSubsites.Count + 1), 2);
                     //counter++;
                     //_logHelper.AddProgressToUI(progress);
                     //_logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}'");
-                    progress.SubTaskReportProgress($"Processing SubSite '{oSubsite.Title}'");
-                    
+                    _logger.LogTxt(methodName, $"Processing Subsite '{oSubsite.Title}'");
+
                     AddRecordToCSV( await getPermissions.CSOMSubsiteAsync(oSubsite, IncludeSiteAccess, IncludeUniquePermissions, IncludeSystemLists, IncludeResourceLists) );
 
-                    progress.SubTaskCounterIncrement();
+                    progressSubsite.ProgressUpdateReport();
                 }
             }
-            progress.MainCounterIncrement();
+            progress.ProgressUpdateReport();
 
             _logger.ScriptFinish();
         }

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -92,7 +93,7 @@ namespace NovaPointLibrary.Solutions.Report
         private async Task RunScriptAsyncUSINGSITEPERMISIONS()
         {
             _appInfo.IsCancelled();
-
+            string methodName = $"{GetType().Name}.AllSitesAsync";
             _logger.ScriptStartNotice();
 
             string spoAdminAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(_appInfo.AdminUrl);
@@ -123,7 +124,7 @@ namespace NovaPointLibrary.Solutions.Report
                 //counter++;
                 //_logHelper.AddProgressToUI(progress);
                 //_logHelper.AddLogToUI($"Processing Site Collection '{oSiteCollection.Title}'");
-                progress.MainReportProgress($"Processing Site Collection '{oSiteCollection.Title}'");
+                _logger.LogTxt(methodName, $"Processing Site '{oSiteCollection.Title}'");
 
                 string? currentSiteAccessToken = oSiteCollection.Url.Contains("-my.sharepoint.com") ? spoRootPersonalSiteAccessToken : spoRootShareSiteAccessToken;
 
@@ -151,10 +152,10 @@ namespace NovaPointLibrary.Solutions.Report
                         if (IncludeSubsites)
                         {
                             var collSubsites = new GetSubsite(_logger, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRolesAndSiteDetails(oSiteCollection.Url);
-                            progress.SubTaskProgressReset(collSubsites.Count);
+                            ProgressTracker progressSubsite = new(progress, collSubsites.Count);
                             foreach (var oSubsite in collSubsites)
                             {
-                                progress.SubTaskReportProgress($"Processing SubSite '{oSubsite.Title}'");
+                                _logger.LogTxt(methodName, $"Processing Subsite '{oSubsite.Title}'");
 
                                 if (IncludeSiteAccess)
                                 {
@@ -166,7 +167,7 @@ namespace NovaPointLibrary.Solutions.Report
                                     SPORoleAssignmentRecord blankPermissions = new();
                                     AddSiteRecordToCSVWITHPERMISSIONS(null, oSubsite, blankPermissions);
                                 }
-                                progress.SubTaskCounterIncrement();
+                                progressSubsite.ProgressUpdateReport();
                             }
                         }
                         if (RemoveAdmin)
@@ -189,7 +190,7 @@ namespace NovaPointLibrary.Solutions.Report
                     SPORoleAssignmentRecord blankPermissions = new("", "", "", "", ex.Message);
                     AddSiteRecordToCSVWITHPERMISSIONS(oSiteCollection, null, blankPermissions);
                 }
-                progress.MainCounterIncrement();
+                progress.ProgressUpdateReport();
             }
 
             _logger.ScriptFinish();

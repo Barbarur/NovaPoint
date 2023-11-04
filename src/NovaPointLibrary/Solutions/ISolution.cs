@@ -9,8 +9,8 @@ namespace NovaPointLibrary.Solutions
 {
     public interface ISolution
     {
-        public static string s_SolutionName = "Solution";
-        public static string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/";
+        public static readonly string s_SolutionName = "Solution";
+        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/";
 
         public ISolutionParameters Parameters { get; set; }
 

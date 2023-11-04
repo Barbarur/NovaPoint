@@ -41,16 +41,16 @@ namespace NovaPointWPF.Pages.Solutions.Report
             IncludeResourceLists = false;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
-        {
+        //public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
+        //{
 
-            ItemAllListAllSiteSingleReportParameters parameters = new(SiteUrl)
-            {
-                IncludeSystemLists = IncludeSystemLists,
-                IncludeResourceLists = IncludeResourceLists
-            };
-            await new ItemAllListAllSiteSingleReport(uiLog, appInfo, parameters).RunAsync();
+        //    ItemAllListAllSiteSingleReportParameters parameters = new(SiteUrl)
+        //    {
+        //        IncludeSystemLists = IncludeSystemLists,
+        //        IncludeResourceLists = IncludeResourceLists
+        //    };
+        //    await new ItemAllListAllSiteSingleReport(uiLog, appInfo, parameters).RunAsync();
 
-        }
+        //}
     }
 }

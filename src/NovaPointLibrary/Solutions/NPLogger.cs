@@ -22,7 +22,7 @@ namespace NovaPointLibrary.Solutions
         private readonly Action<LogInfo> _uiAddLog;
 
         private readonly string _txtPath;
-        internal readonly string _csvPath;
+        private readonly string _csvPath;
 
         private readonly Stopwatch SW = new();
 

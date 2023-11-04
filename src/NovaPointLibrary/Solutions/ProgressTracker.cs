@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CamlBuilder;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
@@ -9,8 +10,8 @@ namespace NovaPointLibrary.Solutions
 {
     internal class ProgressTracker
     {
-        internal readonly NPLogger _logger;
-        private float _counter;
+        //internal readonly NPLogger _logger;
+        private int _counter;
         private int _totalUnits;
         private int Total
         {
@@ -18,54 +19,76 @@ namespace NovaPointLibrary.Solutions
             set
             {
                 _totalUnits = value;
-                if(value > 0 ) { _counterStep = 1 / value; }
+                if (value > 0)
+                { 
+                    _counterStep = 1 / (double)value;
+                }
             }
         }
-        private float _counterStep = 0;
 
-        private float SubTaskCounter = 0;
-        private float SubTotalCount = 1;
-        
-        internal ProgressTracker(NPLogger logHelper, int totalCount)
+        private double _counterStep = 0;
+        private readonly ProgressTracker? _parentProgress = null;
+
+        // TO BE REMOVED WHEN Main IS DEPRECATED
+        private readonly Action<double> _progressUI;
+
+
+        internal ProgressTracker(Main main, int totalCount)
         {
-            _logger = logHelper;
+            _progressUI = main.AddProgressToUI;
             _counter = 0;
             Total = totalCount;
-
         }
 
-        internal void MainReportProgress(string msg)
+        internal ProgressTracker(NPLogger logger, int totalCount)
         {
-            double progress = Math.Round(_counter * 100 / Total, 2);
-            _logger.ProgressUI(progress);
-            _logger.AddLogToUI(msg);
+            _progressUI = logger.ProgressUI;
+            _counter = 0;
+            Total = totalCount;
         }
 
-        internal void MainCounterIncrement()
+        internal ProgressTracker(ProgressTracker parentProgress, int totalCount)
         {
-            double progress = Math.Round(_counter * 100 / Total, 2);
-            _logger.ProgressUI(progress);
+            _progressUI = parentProgress._progressUI;
+            _parentProgress = parentProgress;
+            _counter = 0;
+            Total = totalCount;
+        }
+
+        internal void IncreaseTotalCount(int addUnits)
+        {
+            Total += addUnits;
+            float progressValue = (float)Math.Round(_counter * _counterStep, 2);
+            ProgressUpdateReport(progressValue);
+        }
+
+        internal void ProgressUpdateReport()
+        {
             _counter++;
+            double progressValue = Math.Round(_counter * _counterStep, 2);
+            
+            ProgressUpdateReport(progressValue);
+        }
+        
+        private void ProgressUpdateReport(double progressvalue)
+        {
+            if (_parentProgress == null)
+            {
+                double progress = Math.Round(progressvalue * 100, 2);
+
+                _progressUI(progress);
+            }
+            else
+            {
+                _parentProgress.ProgressUpdateFromChild(progressvalue);
+            }
         }
 
-        internal void SubTaskProgressReset(float subTaskCount)
+        private void ProgressUpdateFromChild(double childProgressvalue)
         {
-            SubTotalCount = 1 + subTaskCount;
-            SubTaskCounter = 0;
-        }
-
-        internal void SubTaskReportProgress(string msg)
-        {
-            var progress = Math.Round( ((_counter / Total) + ( SubTaskCounter * _counterStep / SubTotalCount)) * 100, 2);
-            _logger.ProgressUI(progress);
-            _logger.AddLogToUI(msg);
-        }
-
-        internal void SubTaskCounterIncrement()
-        {
-            var progress = Math.Round(((_counter / Total) + (SubTaskCounter * _counterStep / SubTotalCount)) * 100, 2);
-            _logger.ProgressUI(progress);
-            SubTaskCounter++;
+            double progressValue = Math.Round((_counter + childProgressvalue) * _counterStep, 2);
+            
+            ProgressUpdateReport(progressValue);
         }
     }
 }

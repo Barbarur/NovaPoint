@@ -13,20 +13,9 @@ namespace NovaPointConsoleTester
         {
             Console.WriteLine("Hello, World!");
 
-            await new SolutionsTester(UILog).TestSolution();
+            await new SolutionsTester().TestSolution();
 
             Console.WriteLine("Byebye, World!");
-
-        }
-
-        static void UILog(LogInfo logInfo)
-        {
-            if (!string.IsNullOrEmpty(logInfo.MainClassInfo)) { Console.WriteLine($"{logInfo.MainClassInfo}\n"); }
-            if (logInfo.PercentageProgress != -1)
-            {
-                Console.WriteLine($"Progress: {logInfo.PercentageProgress}\n");
-                Console.WriteLine($"{logInfo.PendingTime}\n");
-            }
 
         }
     }

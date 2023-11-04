@@ -72,7 +72,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _main.IsCancelled();
 
-            SolutionProgressTracker progress;
+            ProgressTracker progress;
             if (!String.IsNullOrWhiteSpace(_param.SiteUrl))
             {
                 Web oSite = await new SPOSiteCSOM(_main).Get(_param.SiteUrl);
@@ -95,7 +95,7 @@ namespace NovaPointLibrary.Solutions.Report
             _main.ScriptFinish();
         }
 
-        private async Task ProcessSite(string siteUrl, SolutionProgressTracker progress)
+        private async Task ProcessSite(string siteUrl, ProgressTracker progress)
         {
             _main.IsCancelled(); 
             string methodName = $"{GetType().Name}.ProcessSite";
@@ -123,7 +123,7 @@ namespace NovaPointLibrary.Solutions.Report
             }
         }
 
-        private async Task ProcessSubsites(string siteUrl, SolutionProgressTracker progress)
+        private async Task ProcessSubsites(string siteUrl, ProgressTracker progress)
         {
             _main.IsCancelled();
             string methodName = $"{GetType().Name}.ProcessSubsites";
@@ -152,14 +152,14 @@ namespace NovaPointLibrary.Solutions.Report
             }
         }
 
-        private async Task ProcessLists(string siteUrl, SolutionProgressTracker parentPprogress)
+        private async Task ProcessLists(string siteUrl, ProgressTracker parentPprogress)
         {
             _main.IsCancelled();
             string methodName = $"{GetType().Name}.ProcessLists";
 
             var collList = await new SPOListCSOM(_main).Get(siteUrl, _param.ListTitle, _param.IncludeHiddenLists, _param.IncludeSystemLists);
 
-            SolutionProgressTracker progress = new(parentPprogress, collList.Count);
+            ProgressTracker progress = new(parentPprogress, collList.Count);
             foreach (var oList in collList)
             {
                 _main.IsCancelled(); 
@@ -217,7 +217,7 @@ namespace NovaPointLibrary.Solutions.Report
                     i => i["_UIVersionString"],
         };
 
-        private async Task ProcessItems(string siteUrl, List oList, SolutionProgressTracker parentProgress)
+        private async Task ProcessItems(string siteUrl, List oList, ProgressTracker parentProgress)
         {
             _main.IsCancelled();
             string methodName = $"{GetType().Name}.ProcessItems";
@@ -239,7 +239,7 @@ namespace NovaPointLibrary.Solutions.Report
                 return;
             }
 
-            SolutionProgressTracker progress = new(parentProgress, oList.ItemCount);
+            ProgressTracker progress = new(parentProgress, oList.ItemCount);
 
             var spoItem = new SPOItemCSOM(_main);
             await foreach (ListItem oItem in spoItem.Get(siteUrl, oList.Title, currentExpressions))
