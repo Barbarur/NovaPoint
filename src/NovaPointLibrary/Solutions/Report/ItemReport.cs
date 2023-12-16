@@ -75,14 +75,14 @@ namespace NovaPointLibrary.Solutions.Report
             ProgressTracker progress;
             if (!String.IsNullOrWhiteSpace(_param.SiteUrl))
             {
-                Web oSite = await new SPOSiteCSOM(_main).Get(_param.SiteUrl);
+                Web oSite = await new SPOSiteCSOM(_main).GetToDeprecate(_param.SiteUrl);
 
                 progress = new(_main, 1);
                 await ProcessSite(oSite.Url, progress);
             }
             else
             {
-                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_main).Get(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
+                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_main).GetDeprecated(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
 
                 progress = new(_main, collSiteCollections.Count);
                 foreach (var oSiteCollection in collSiteCollections)
@@ -104,7 +104,7 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 _main.AddLogToUI(methodName, $"Processing Site '{siteUrl}'");
 
-                await new SPOSiteCollectionAdminCSOM(_main).Set(siteUrl, _param.AdminUPN);
+                await new SPOSiteCollectionAdminCSOM(_main).SetDEPRECATED(siteUrl, _param.AdminUPN);
 
                 await ProcessLists(siteUrl, progress);
 
@@ -112,7 +112,7 @@ namespace NovaPointLibrary.Solutions.Report
 
                 if (_param.RemoveAdmin)
                 {
-                    await new SPOSiteCollectionAdminCSOM(_main).Remove(siteUrl, _param.AdminUPN);
+                    await new SPOSiteCollectionAdminCSOM(_main).RemoveDEPRECATED(siteUrl, _param.AdminUPN);
                 }
             }
             catch (Exception ex)
@@ -127,10 +127,11 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _main.IsCancelled();
             string methodName = $"{GetType().Name}.ProcessSubsites";
+            _main.AddLogToUI(methodName, $"CHECK");
 
             if (!_param.IncludeSubsites) { return; }
 
-            var collSubsites = await new SPOSubsiteCSOM(_main).Get(siteUrl);
+            var collSubsites = await new SPOSubsiteCSOM(_main).GetDEPRECATED(siteUrl);
 
             progress.IncreaseTotalCount(collSubsites.Count);
             foreach (var oSubsite in collSubsites)
@@ -157,7 +158,7 @@ namespace NovaPointLibrary.Solutions.Report
             _main.IsCancelled();
             string methodName = $"{GetType().Name}.ProcessLists";
 
-            var collList = await new SPOListCSOM(_main).Get(siteUrl, _param.ListTitle, _param.IncludeHiddenLists, _param.IncludeSystemLists);
+            var collList = await new SPOListCSOM(_main).GetDEPRECATED(siteUrl, _param.ListTitle, _param.IncludeHiddenLists, _param.IncludeSystemLists);
 
             ProgressTracker progress = new(parentPprogress, collList.Count);
             foreach (var oList in collList)
@@ -241,8 +242,8 @@ namespace NovaPointLibrary.Solutions.Report
 
             ProgressTracker progress = new(parentProgress, oList.ItemCount);
 
-            var spoItem = new SPOItemCSOM(_main);
-            await foreach (ListItem oItem in spoItem.Get(siteUrl, oList.Title, currentExpressions))
+            var spoItem = new SPOListItemCSOM(_main);
+            await foreach (ListItem oItem in spoItem.GetDEPRECATED(siteUrl, oList.Title, currentExpressions))
             {
                 _main.IsCancelled();
 
@@ -274,7 +275,7 @@ namespace NovaPointLibrary.Solutions.Report
                         int itemSizeTotalBytes = 0;
                         foreach (var oAttachment in oItem.AttachmentFiles)
                         {
-                            var oFileAttachment = await spoItem.GetAttachmentFile(siteUrl, oAttachment.ServerRelativeUrl);
+                            var oFileAttachment = await spoItem.GetAttachmentFileDEPRECATED(siteUrl, oAttachment.ServerRelativeUrl);
 
                             itemSizeTotalBytes += (int)oFileAttachment.Length;
                         }
