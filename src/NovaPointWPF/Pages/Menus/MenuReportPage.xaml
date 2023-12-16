@@ -49,7 +49,7 @@
 
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"
-                        Content="Libraries and Lists Report"
+                        Content="Libraries and Lists"
                         Click="ListReportClick"/>
 
                 </StackPanel>
@@ -69,14 +69,39 @@
 
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"
-                        Content="Files and Items Report"
+                        Content="Files and Items"
                         Click="ItemReportClick"/>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="OneDrive Shortcuts"
+                        Click="ShortcutODReportClick"/>
 
                 </StackPanel>
 
             </Grid>
 
+            
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Recycle bin"/>
 
+            <Grid Margin="0,0,0,15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Recycle bin"
+                        Click="RecycleBinReportClick"/>
+
+                </StackPanel>
+
+            </Grid>
+
+            
             <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
                 Content="Users"/>
@@ -89,12 +114,12 @@
 
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"
-                        Content="Users in a single Site report"
+                        Content="Users in a single Site"
                         Click="UserAllSiteSingleReportFormClick"/>
 
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"
-                        Content="Permissions in a Site report"
+                        Content="Permissions in a Site"
                         Click="PermissionsAllSiteSingleReportFormClick"/>
 
                 </StackPanel>

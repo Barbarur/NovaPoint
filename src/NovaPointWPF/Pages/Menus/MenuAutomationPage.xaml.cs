@@ -50,14 +50,19 @@ namespace NovaPointWPF.Pages.Menus
         }
 
         // ITEMS
-        //private void GoRemoveVersionItemSelectListSelectSiteSingleAutoForm(object sender, RoutedEventArgs e)
-        //{
-        //    GoToSolutionForm(new RemoveVersionItemAutoForm());
-        //}
-
         private void RemoveFileVersionAutoClick(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new RemoveFileVersionAutoForm());
+        }
+
+        // RECYCLE BIN
+        private void ClearRecycleBinAutoClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new ClearRecycleBinAutoForm());
+        }
+        private void RestoreRecycleBinAutoClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new RestoreRecycleBinAutoForm());
         }
 
 

@@ -36,7 +36,7 @@
 
                         <RadioButton
                             Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Relative Path"
+                            Content="Specific location"
                             IsChecked="{Binding RelativeUrl, ElementName=root}"/>
 
                     </StackPanel>
@@ -48,7 +48,7 @@
 
                         <Label
                             Style="{DynamicResource SolutionFormLabel}"
-                            Content="Relative Url"/>
+                            Content="Server relative path"/>
 
                         <TextBox
                             x:Name="SiteUrlTextBox"

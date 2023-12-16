@@ -1,0 +1,45 @@
+﻿<UserControl x:Class="NovaPointWPF.UserControls.ComboBoxTesting"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NovaPointWPF.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <StackPanel>
+            <!--<ComboBox
+                ItemsSource="{Binding listData, Mode=Default, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                Loaded="ComboBox_Loaded"/>
+            <ComboBox
+                x:Name="CMB"/>-->
+
+            <ComboBox
+                x:Name="CBAfterDates"
+                SelectionChanged="CBAfter_SelectionChanged"/>
+
+            <ComboBox
+                x:Name="CBAfterHour"
+                SelectionChanged="CBAfter_SelectionChanged"/>
+
+            <Label
+                x:Name="CBALabel"
+                Style="{DynamicResource SolutionFormLabel}"
+                Content="Deleted before"/>
+
+            <Label
+                x:Name="CBALabelFullTime"
+                Style="{DynamicResource SolutionFormLabel}"
+                Content="Deleted before"/>
+
+            <ComboBox
+                x:Name="CBBefore"
+                SelectionChanged="CBBefore_SelectionChanged"/>
+            
+            <TextBlock
+                x:Name="CBBText"/>
+
+        </StackPanel>
+        
+    </Grid>
+</UserControl>

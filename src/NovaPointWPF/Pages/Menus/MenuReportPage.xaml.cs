@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NovaPointWPF.UserControls;
 
 namespace NovaPointWPF.Pages.Menus
 {
@@ -53,8 +54,17 @@ namespace NovaPointWPF.Pages.Menus
             GoToSolutionForm(new ItemReportForm());
         }
 
+        private void ShortcutODReportClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new ShortcutODReportForm());
+        }
 
+        private void RecycleBinReportClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new RecycleBinReportForm());
+        }
 
+               
         private void UserAllSiteSingleReportFormClick(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new UserAllSiteSingleReportForm());

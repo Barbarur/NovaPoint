@@ -1,0 +1,160 @@
+﻿<UserControl x:Class="NovaPointWPF.UserControls.RecycleBinForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NovaPointWPF.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             x:Name="root">
+    
+    <Grid Background="Transparent"
+          Margin="0, 0, 0, 15">
+
+        <StackPanel>
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Recycle bin filter"/>
+
+            <Grid>
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <DockPanel
+                        Margin="0,0,0,9">
+
+                        <ToggleButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="First stage"
+                            IsChecked="{Binding FirstStage, ElementName=root}"
+                            DockPanel.Dock="Left"/>
+
+                        <ToggleButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Second stage"
+                            IsChecked="{Binding SecondStage, ElementName=root}"
+                            DockPanel.Dock="Left"/>
+
+                        <TextBlock
+                            DockPanel.Dock="Left"
+                            Height="Auto"/>
+
+                    </DockPanel>
+
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Margin="0,0,0,9">
+
+                        <StackPanel>
+
+                            <Label
+                                Style="{DynamicResource SolutionFormLabel}"
+                                Content="Deleted after"/>
+
+                            <Label
+                                x:Name="TestAfter"
+                                Style="{DynamicResource SolutionFormLabel}"
+                                Content="Deleted after"/>
+
+                            <StackPanel
+                                Orientation="Horizontal">
+
+                                <ComboBox
+                                    x:Name="CBAfterDates"
+                                    SelectionChanged="DateTimeAfterSelectionChanged"/>
+
+                                <ComboBox
+                                    x:Name="CBAfterHour"
+                                    SelectionChanged="DateTimeAfterSelectionChanged"/>
+
+                            </StackPanel>
+                            
+                        </StackPanel>
+
+                        <StackPanel>
+
+                            <Label
+                                Style="{DynamicResource SolutionFormLabel}"
+                                Content="Deleted after"/>
+
+                            <Label
+                                x:Name="TestBefore"
+                                Style="{DynamicResource SolutionFormLabel}"
+                                Content="Deleted after"/>
+
+                            <StackPanel
+                                Orientation="Horizontal">
+
+                                <ComboBox
+                                    x:Name="CBBeforeDates"
+                                    SelectionChanged="DateTimeBeforeSelectionChanged"/>
+
+                                <ComboBox
+                                    x:Name="CBBeforeHour"
+                                    SelectionChanged="DateTimeBeforeSelectionChanged"/>
+
+                            </StackPanel>
+
+                        </StackPanel>
+
+                    </StackPanel>
+
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Deleted by"/>
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding DeletedByEmail, ElementName=root}"
+                        Margin="0,0,0,9"/>
+
+                    
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Original location"/>
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding OriginalLocation, ElementName=root}"
+                        Margin="0,0,0,9"/>
+
+                    
+                    <StackPanel
+                        Orientation="Vertical"
+                        Margin="0,0,0,9">
+                        
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="File size Mb"/>
+
+                        <StackPanel
+                            Orientation="Horizontal">
+
+                            <TextBox
+                                Width="150"
+                                Style="{DynamicResource SolutionFormTextBox}"
+                                Text="{Binding FileSizeMb, ElementName=root}"/>
+                            
+                            <RadioButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Above target size"
+                                IsChecked="{Binding FileSizeAbove, ElementName=root}"/>
+
+                            <RadioButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Below target size"/>
+
+                        </StackPanel>
+
+                    </StackPanel>
+
+                </StackPanel>
+
+            </Grid>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

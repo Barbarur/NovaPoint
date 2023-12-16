@@ -1,0 +1,116 @@
+﻿<Page x:Class="NovaPointWPF.Pages.Solutions.Report.ShortcutODReportForm"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
+      mc:Ignorable="d" 
+      d:DesignHeight="900" d:DesignWidth="800"
+      Title="ShortcutODReportForm">
+
+    <Grid>
+
+
+        <StackPanel>
+
+            <designmaterial:FormHeader
+                x:Name="SolutionHeader"/>
+
+            <StackPanel>
+
+                <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Admin Account"/>
+
+                <Grid
+                Margin="0, 0, 0, 15">
+
+                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                    <StackPanel
+                    Margin="12">
+
+                        <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Admin UPN"/>
+
+                        <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding AdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        Margin="0,0,0,8"/>
+
+                        <ToggleButton
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Remove Admin"
+                        IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                        HorizontalAlignment="Left"/>
+
+                    </StackPanel>
+
+                </Grid>
+
+
+                <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Sites filter"/>
+
+                <Grid>
+
+                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                    <StackPanel
+                    Margin="12">
+
+                        <DockPanel
+                        Margin="0,0,0,9">
+
+                            <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="All Sites"
+                            IsChecked="{Binding SiteAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                            DockPanel.Dock="Left"/>
+
+                            <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Single Site"
+                            DockPanel.Dock="Left"/>
+
+                            <TextBlock
+                            DockPanel.Dock="Left"
+                            Height="Auto"/>
+
+                        </DockPanel>
+
+                        <StackPanel
+                        x:Name="SingleSiteUrl"
+                        Visibility="Collapsed"
+                        Margin="9, 0, 0, 0">
+
+                            <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Site URL"/>
+
+                            <TextBox
+                            x:Name="SiteUrlTextBox"
+                            Style="{DynamicResource SolutionFormTextBox}"
+                            Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                        </StackPanel>
+
+                    </StackPanel>
+
+                </Grid>
+
+            </StackPanel>
+
+            <designmaterial:ItemForm
+                ItemsAll="{Binding ItemsAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+        </StackPanel>
+
+        
+    </Grid>
+</Page>
