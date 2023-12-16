@@ -35,7 +35,6 @@ namespace NovaPointLibrary.Solutions.Report
 
         public PermissionSiteAccessSiteAll(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, PermissionSiteAccessSiteAllParameters parameters)
         {
-            // Baic parameters required for all reports
             _logger = new(uiAddLog, "Reports", GetType().Name);
             _appInfo = appInfo;
             
@@ -130,7 +129,6 @@ namespace NovaPointLibrary.Solutions.Report
                     
                     if (IncludeSiteAccess)
                     {
-                        //Web siteWeb = new GetSite(_logHelper, _appInfo, currentSiteAccessToken).CSOMWithRoles(oSiteCollection.Url); // Adjust requirements 
                         Web siteWeb = new Commands.SharePoint.Site.GetSPOSite(_logger,_appInfo, currentSiteAccessToken).CSOMWithRoles(oSiteCollection.Url);
                         await GetSitePermissions(currentSiteAccessToken, aadAccessToken, siteWeb, siteCollRecord);
                     }
@@ -164,8 +162,6 @@ namespace NovaPointLibrary.Solutions.Report
                     _logger.AddLogToUI($"Error processing Site Collection '{oSiteCollection.Url}'");
                     _logger.AddLogToTxt($"Exception: {ex.Message}");
                     _logger.AddLogToTxt($"Trace: {ex.StackTrace}");
-                    //PermissionSiteAccessSiteAllRecord record = new(oSiteCollection, ex.Message);
-                    //record.AddToCSV(_logHelper);
 
                     AddNEWRecordToCSV(siteCollRecord, remarks: ex.Message);
                 }
@@ -281,13 +277,6 @@ namespace NovaPointLibrary.Solutions.Report
 
             accountType += $"Security Group {groupName}";
 
-            //foreach (var member in collOwnersMembers ) 
-            //{
-            //    _logHelper.AddLogToUI($"User Type: {member.Type} {member.UserPrincipalName} from {groupName}");
-            //    //_logHelper.AddLogToUI($"User UPN: {member.UserPrincipalName}");
-            //}
-
-            //var users = String.Join(" ", collSiteCollAdmins.Where(sca => sca.PrincipalType.ToString() == "User").Select(sca => sca.Title).ToList());
             var users = String.Join(" ", collOwnersMembers.Where(com => com.Type.ToString() == "user").Select(com => com.UserPrincipalName).ToList());
             PermissionSiteAccessSiteAllPermission usersPermissionsRecord = new(accessType, accountType, users, permissionLevels);
             AddNEWRecordToCSV(siteRecord, usersPermissionsRecord);
@@ -298,80 +287,11 @@ namespace NovaPointLibrary.Solutions.Report
             _logger.AddLogToTxt($"Finish getting members of Security Group {groupName}with ID {groupId}");
         }
 
-
-        //private async void GetSecurityGroupUsers(string aadAccessToken, string objectId, string accessType, string accountType, PermissionSiteAccessSiteAllRecord record)
-        //{
-        //    var groupUsers = await new GetAzureADGroup(_logHelper, _appInfo, aadAccessToken).GraphOwnersAndMembersAsync(objectId);
-
-        //    StringBuilder sb = new();
-        //    foreach (var oUser in groupUsers)
-        //    {
-        //        sb.Append(oUser.UserPrincipalName);
-        //    }
-
-        //    var permissionsRecord = new PermissionSiteAccessSiteAllPermission(accessType, accountType, sb.ToString(), "Site Collection Administrator");
-        //    //AddRecordToCSV(true, siteCollection, subsiteWeb, permissionsRecord);
-
-        //}
-
-        //private void AddSiteRecordToCSV(SiteProperties? siteCollection, PermissionSiteAccessSiteAllPermission permissionRecord = null, string remarks = "")
-        //{
-        //    AddRecordToCSV(siteCollection: siteCollection, permissionRecord: permissionRecord, remarks: remarks);
-        //}
-
-        //private void AddSiteRecordToCSV(Web subsiteWeb, PermissionSiteAccessSiteAllPermission permissionRecord = null, string remarks = "")
-        //{
-        //    AddRecordToCSV(subsiteWeb: subsiteWeb, permissionRecord: permissionRecord, remarks: remarks);
-        //}
-
-        //private void AddRecordToCSV(SiteProperties? siteCollection = null, Web? subsiteWeb = null, PermissionSiteAccessSiteAllPermission permissionRecord = null, string remarks = "")
-        //{
-
-        //    dynamic record = new ExpandoObject();
-        //    record.Title = siteCollection != null ? siteCollection?.Title : subsiteWeb?.Title;
-        //    record.SiteUrl = siteCollection != null ? siteCollection?.Url : subsiteWeb?.Url;
-        //    record.GroupId = siteCollection != null ? siteCollection?.GroupId.ToString() : string.Empty;
-        //    record.Tempalte = siteCollection != null ? siteCollection?.Template : subsiteWeb.WebTemplate;
-
-
-        //    record.StorageQuotaGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageMaximumLevel / Math.Pow(1024, 3), 2)) : string.Empty;
-        //    record.StorageUsedGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageUsage / Math.Pow(1024, 3), 2)) : string.Empty; // ADD CONSUMPTION FOR SUBSITES
-        //    record.storageWarningLevelGB = siteCollection != null ? string.Format("{0:N2}", Math.Round(siteCollection.StorageWarningLevel / Math.Pow(1024, 3), 2)) : string.Empty;
-
-        //    record.IsHubSite = siteCollection != null ? siteCollection?.IsHubSite.ToString() : string.Empty;
-        //    record.LastContentModifiedDate = siteCollection != null ? siteCollection?.LastContentModifiedDate.ToString() : subsiteWeb?.LastItemModifiedDate.ToString();
-        //    record.LockState = siteCollection != null ? siteCollection?.LockState.ToString() : string.Empty;
-
-        //    if (IncludeAdmins && IncludeSiteAccess)
-        //    {
-        //        record.AccessType = permissionRecord != null ? permissionRecord._accessType : string.Empty;
-        //        record.AccountType = permissionRecord != null ? permissionRecord._accounteType : string.Empty;
-        //        record.User = permissionRecord != null ? permissionRecord._user : string.Empty;
-        //        record.PermissionsLevel = permissionRecord != null ? permissionRecord._permissionLevel : string.Empty;
-        //    }
-
-        //    record.Remarks = remarks;
-
-        //    _logHelper.AddRecordToCSV(record);
-        //}
-
         private void AddNEWRecordToCSV(PermissionSiteAccessSiteAllRecordNEW site, PermissionSiteAccessSiteAllPermission? permissionRecord = null, string remarks = "")
         {
 
             dynamic record = new ExpandoObject();
             record.Title = site.Title;
-            //record.SiteUrl = site.Url;
-            //record.GroupId = site.GroupId;
-            //record.Tempalte = site.Tempalte;
-
-
-            //record.StorageQuotaGB = site.StorageQuotaGB;
-            //record.StorageUsedGB = site.StorageUsedGB;
-            //record.storageWarningLevelGB = site.StorageWarningLevelGB;
-
-            //record.IsHubSite = site.IsHubSite;
-            //record.LastContentModifiedDate = site.LastContentModifiedDate;
-            //record.LockState = site.LockState;
 
             if (IncludeAdmins || IncludeSiteAccess)
             {

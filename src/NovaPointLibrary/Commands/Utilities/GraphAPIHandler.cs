@@ -80,8 +80,6 @@ namespace NovaPointLibrary.Commands.Utilities
             
             HttpRequestMessage requestMessage = GetMessage(url, HttpMethod.Get);
 
-            //var responseContent = await SendMessageAsync(requestMessage);
-
             var sendMessage = SendMessageAsync(requestMessage);
 
             TaskCompletionSource taskCompletionSource = new();

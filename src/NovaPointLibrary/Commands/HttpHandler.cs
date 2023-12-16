@@ -22,31 +22,6 @@ namespace NovaPointLibrary.Commands
             HttpsClient = new();
             AccessToken = accessToken;
         }
-        public static async Task<string> Graph_Get(string message, string accessToken)
-        {
-            HttpResponseMessage? response;
-
-            var httpClient = new HttpClient();
-            var httpRequest = new HttpRequestMessage(HttpMethod.Get,
-                message);
-
-            httpRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
-                "Bearer", accessToken);
-
-            response = await httpClient.SendAsync(httpRequest);
-
-            if (response.IsSuccessStatusCode)
-            {
-                Console.WriteLine("HTTPHandler Successful response");
-                return await response.Content.ReadAsStringAsync();
-            }
-            else
-            {
-                Console.WriteLine("Error at HTTPHandler");
-                string exception = await response.Content.ReadAsStringAsync();
-                throw new Exception(exception);
-            }
-        }
 
         public async Task<string> SPO_Get(string message)
         {
@@ -70,63 +45,6 @@ namespace NovaPointLibrary.Commands
                 _logger.AddLogToTxt($"Error response");
                 SharePointException? responseContent = JsonConvert.DeserializeObject<SharePointException>(jsonResponse);
                 string exception = responseContent.ErrorData.Message.Value;
-                throw new Exception(exception);
-            }
-        }
-
-        public static async Task SPO_Merge(string accessToken)
-        {
-            //url: "<app web url>/_api/SP.AppContextSite(@target)/web/siteusers(@v)? @v = 'i%3A0%23.f%7Cmembership%7Cuser%40domain.onmicrosoft.com'&@target='<host web url>'";
-            //i: 0#.f|membership|user@domain.com
-            //…/ users(@v) ? @v = 'i%3A0%23.f%7Cmembership%7Cuser%40domain.onmicrosoft.com'
-            //alexw@M365x29094319.onmicrosoft.com
-            //i%3A0%23.f%7Cmembership%7Calexw%40M365x29094319.onmicrosoft.com'
-
-
-            //string apiUrl = "https://m365x29094319-admin.sharepoint.com/_api/SP.AppContextSite(@target)/web/siteusers(@v)?@v='i%3A0%23.f%7Cmembership%7Calexw%40M365x29094319.onmicrosoft.com'&@target='https://m365x29094319.sharepoint.com/sites/SiteN1'";
-            string apiUrl = "https://m365x29094319-admin.sharepoint.com/_api/SP.AppContextSite(@target)/web/siteusers(@v)?@v='i%3A0%23.f%7Cmembership%7Calexw%40M365x29094319.onmicrosoft.com'&@target='https://m365x29094319.sharepoint.com/sites/AllanSite'";
-
-            string message = "{ '__metadata': { 'type': 'SP.User' }, 'Email':'alexw@M365x29094319.onmicrosoft.com', 'IsSiteAdmin':true }";
-
-            Console.WriteLine("HTTPHandler SPO_Merge Start");
-
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, message);
-            //httpRequest.Headers.Add("Authorization", "Bearer " + accessToken);
-            //httpRequest.Headers.Add("content-type", "application/json; odata=verbose");
-            //httpRequest.Headers.Add("X-HTTP-Method", "MERGE");
-
-            HttpClientHandler handler = new();
-
-            //HttpContent httpContent = new("{ '__metadata': { 'type': 'SP.User' }, 'Email':'user2@domain.com', 'IsSiteAdmin':false, 'Title':'User 2' }");
-            StringContent stringContent = new(message);
-            //stringContent.Headers.Add("Authorization", "Bearer " + accessToken);
-            stringContent.Headers.Clear();
-            stringContent.Headers.Add("content-type", "application/json; odata=verbose");
-            stringContent.Headers.Add("X-HTTP-Method", "MERGE");
-
-            //JsonContent jsonContent = new("{ '__metadata': { 'type': 'SP.User' }, 'Email':'user2@domain.com', 'IsSiteAdmin':false, 'Title':'User 2' }");
-            JsonContent jsonContent = JsonContent.Create("{ '__metadata': { 'type': 'SP.User' }, 'Email':'alexw@M365x29094319.onmicrosoft.com', 'IsSiteAdmin':false}");
-            //jsonContent.headers  .Add("Authorization", "Bearer " + accessToken);
-            jsonContent.Headers.Clear();
-            jsonContent.Headers.Add("content-type", "application/json; odata=verbose");
-            jsonContent.Headers.Add("X-HTTP-Method", "MERGE");
-
-            HttpClient httpClient = new();
-            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
-            //httpClient.DefaultRequestHeaders.Add("content-type", "application/json; odata=verbose");
-            //httpClient.DefaultRequestHeaders.Add("X-HTTP-Method", "MERGE");
-
-            HttpResponseMessage response = await httpClient.PostAsync(apiUrl, stringContent);
-
-            if (response.IsSuccessStatusCode)
-            {
-                Console.WriteLine("HTTPHandler SPO_Merge Successful response");
-                return;
-            }
-            else
-            {
-                Console.WriteLine("HTTPHandler SPO_Merge Error response");
-                string exception = await response.Content.ReadAsStringAsync();
                 throw new Exception(exception);
             }
         }

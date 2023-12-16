@@ -193,34 +193,6 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
                     SingleSiteAsync(spoAdminAccessToken, oSiteCollection.Url, currentSiteAccessToken, correctUserID);
 
-                    // REMOVING USER FROM SITE COLLECTION USER LIST, IT REMOVES THE USER FORM ALL SUBSITES
-                    //var collSubsites = new GetSubsite(_logger, _appInfo, currentSiteAccessToken).CsomAllSubsitesWithRoles(oSiteCollection.Url);
-
-                    //ProgressTracker progressSubsite = new(progress, collSubsites.Count);
-                    //foreach (var oSubsite in collSubsites)
-                    //{
-                    //    _logger.LogTxt(methodName, $"Processing Subsite '{oSubsite.Title}'");
-
-                    //    if (oSubsite.HasUniqueRoleAssignments)
-                    //    {
-                    //        try
-                    //        {
-                    //            SingleSiteAsync(spoAdminAccessToken, oSubsite.Url, currentSiteAccessToken, correctUserID);
-                    //        }
-                    //        catch (Exception ex)
-                    //        {
-                    //            _logger.AddLogToUI($"Error processing Site Collection '{oSubsite.Url}'");
-                    //            _logger.AddLogToTxt($"Exception: {ex.Message}");
-                    //            _logger.AddLogToTxt($"Trace: {ex.StackTrace}");
-
-                    //            AddRecordToCSV(oSubsite.Url, ex.Message);
-                    //        }
-                    //    }
-
-                    //    progressSubsite.ProgressUpdateReport();
-                    //}
-
-
                     if (_removeAdmin)
                     {
                         if (this._appInfo.CancelToken.IsCancellationRequested) { this._appInfo.CancelToken.ThrowIfCancellationRequested(); };

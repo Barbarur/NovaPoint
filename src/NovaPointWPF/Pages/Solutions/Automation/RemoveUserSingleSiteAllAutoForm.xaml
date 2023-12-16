@@ -111,39 +111,6 @@
                 </StackPanel>
 
             </Grid>
-
-
-
-            <!--<designmaterial:NPTextBoxField
-                Title="User to remove UPN"
-                Text="{Binding Path=DeleteUserUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
-
-            <!--<designmaterial:NPTextBoxField
-                Title="Admin UPN"
-                Text="{Binding Path=AdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-            <Label Height="9"/>
-            <CheckBox Content="Remove Admin after finish solution"
-                      IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
-
-            <!--<Label Height="15"/>
-
-            <Label Content="Sites Filter"/>
-            <CheckBox x:Name="CheckBoxIncludePersonalSites"
-                      Content="Include Personal Sites"
-                      IsChecked="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                      Checked="CheckBoxIncludePersonalSites_Checked"/>-->
-
-            <!--<CheckBox x:Name="CheckBoxIncludeShareSites"
-                      Content="Include Share Sites"
-                      IsChecked="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                      Unchecked="CheckBoxIncludeShareSites_Unchecked"/>-->
-
-            <!--<CheckBox x:Name="CheckBoxIncludeGroupIdDefined"
-                      Content="Only MS365 Group Connected Sites"
-                      IsChecked="{Binding GroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                      Checked="CheckBoxIncludeGroupIdDefined_Checked"/>-->
-
         </StackPanel>
     </Grid>
 </Page>

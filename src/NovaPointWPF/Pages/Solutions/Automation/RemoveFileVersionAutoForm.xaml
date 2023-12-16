@@ -106,46 +106,6 @@
                 </StackPanel>
             </Grid>
 
-
-
-
-            <!--<Label
-                Content="Versions to Delete"/>
-            <RadioButton
-                Content="Delete all versions"
-                IsChecked="{Binding DeleteAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
-            <RadioButton
-                Content="Keep few versions"
-                IsChecked="{Binding KeepVersions, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />-->
-            
-            <!--<StackPanel
-                x:Name="KeepVersionsForm">
-                <Label
-                    Content="Number of versions to Keep"/>
-                <TextBox
-                    Text="{Binding VersionsToKeep, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                    />
-
-                <StackPanel
-                    Orientation="Horizontal">
-                    <RadioButton
-                        Content="Recycle"
-                        IsChecked="{Binding Recycle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                        />
-                    <RadioButton
-                        Content="Delete"/>
-                </StackPanel>-->
-
-
-            <!--</StackPanel>-->
-
-            <!--<ToggleButton
-                Content="Remove Mode"
-                IsChecked="{Binding ReportMode, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />-->
-
         </StackPanel>
 
     </Grid>

@@ -30,7 +30,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             string methodName = $"{GetType().Name}.CSOM";
             _logger.LogTxt(methodName, $"Start setting '{userAdmin}' as Site Admin for '{siteUrl}'");
 
-            //string adminUrl = "https://" + Domain + "-admin.sharepoint.com";
             using var clientContext = new ClientContext(_appInfo.AdminUrl);
             clientContext.ExecutingWebRequest += (sender, e) =>
             {

@@ -34,10 +34,6 @@ namespace NovaPointLibrary.Commands.Authentication
 
         internal async Task<string> GraphInteractiveAsync()
         {
-            //_appInfo.IsCancelled();
-            //_logHelper.AddLogToTxt($"{GetType().Name}.GraphInteractiveAsync - Start getting Graph Access Token");
-
-            //return await GraphTest();
 
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.GraphInteractiveAsync";

@@ -21,25 +21,5 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         {
             return this;
         }
-        //internal SPOSiteURLsEnumarableParameters GetSiteParameters()
-        //{
-        //    SPOSiteURLsEnumarableParameters p = new()
-        //    {
-        //        AdminUPN = AdminUPN,
-        //        RemoveAdmin = RemoveAdmin,
-
-        //        SiteAll = SiteAll,
-        //        IncludePersonalSite = IncludePersonalSite,
-        //        IncludeShareSite = IncludeShareSite,
-        //        OnlyGroupIdDefined = OnlyGroupIdDefined,
-        //        SiteUrl = SiteUrl,
-        //        IncludeSubsites = IncludeSubsites,
-        //    };
-
-        //    SPOSiteURLsEnumarableParameters x = (SPOSiteURLsEnumarableParameters)this;
-
-
-        //    return p;
-        //}
     }
 }

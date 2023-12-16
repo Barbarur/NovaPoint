@@ -22,7 +22,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
 {
     public partial class UserAllSiteSingleReportForm : Page, ISolutionForm
     {
-        // Required parameters for the current report
         public string SiteUrl { get; set; }
 
         public UserAllSiteSingleReportForm()

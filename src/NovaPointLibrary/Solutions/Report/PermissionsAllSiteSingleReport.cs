@@ -29,15 +29,7 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly bool IncludeSystemLists;
         private readonly bool IncludeResourceLists;
 
-
         List<SPORoleAssignmentKnownGroup> KnownGroups { get; set; } = new() { };
-
-        //private List<SPORoleAssignmentRecord> AssignmentUsers { get; set; } = new() { };
-
-        //private string LocationName { get; set; } = String.Empty;
-        //private string LocationURL { get; set; } = String.Empty;
-        //private string LocationType { get; set; } = String.Empty;
-
 
         public PermissionsAllSiteSingleReport(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, PermissionsAllSiteSingleParameters parameters)
         {
@@ -97,11 +89,6 @@ namespace NovaPointLibrary.Solutions.Report
 
             Web oSite = new GetSPOSite(_logger, _appInfo, spoSiteAccessToken).CSOMWithRoles(SiteUrl);
 
-            //double counter = 0;
-            //double progress = Math.Round(counter * 100 / 1, 2);
-            //counter++;
-            //_logHelper.AddProgressToUI(progress);
-            //_logHelper.AddLogToUI($"Processing Site '{oSite.Title}'");
             ProgressTracker progress = new(_logger, 1);
             _logger.LogTxt(methodName, $"Processing Site '{oSite.Title}'");
 
@@ -113,10 +100,6 @@ namespace NovaPointLibrary.Solutions.Report
                 ProgressTracker progressSubsite = new(progress, collSubsites.Count);
                 foreach (var oSubsite in collSubsites)
                 {
-                    //progress = Math.Round(counter * 100 / (collSubsites.Count + 1), 2);
-                    //counter++;
-                    //_logHelper.AddProgressToUI(progress);
-                    //_logHelper.AddLogToUI($"Processing SubSite '{oSubsite.Title}'");
                     _logger.LogTxt(methodName, $"Processing Subsite '{oSubsite.Title}'");
 
                     AddRecordToCSV( await getPermissions.CSOMSubsiteAsync(oSubsite, IncludeSiteAccess, IncludeUniquePermissions, IncludeSystemLists, IncludeResourceLists) );

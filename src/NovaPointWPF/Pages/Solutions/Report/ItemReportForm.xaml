@@ -10,9 +10,7 @@
       Title="ItemReportForm">
 
     <Grid Background="Transparent">
-        
-        <!--<Border Style="{DynamicResource MenuBackgroudBorder}"/>-->
-        
+                
         <StackPanel>
 
             <designmaterial:FormHeader

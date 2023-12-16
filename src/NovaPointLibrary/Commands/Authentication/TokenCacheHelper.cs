@@ -28,7 +28,6 @@ namespace NovaPointLibrary.Commands.Authentication
         {
             var storageProperties =
 
-                // new StorageCreationPropertiesBuilder();
                 new StorageCreationPropertiesBuilder(CacheFileName, CacheDir)
                 .WithLinuxKeyring(
                     LinuxKeyRingSchema,

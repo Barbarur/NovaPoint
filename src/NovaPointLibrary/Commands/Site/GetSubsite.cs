@@ -22,51 +22,6 @@ namespace NovaPointLibrary.Commands.Site
             AccessToken = accessToken;
         }
 
-        internal List<Web> CsomAllSubsitesBasicExpressions(string siteUrl)
-        {
-            _appInfo.IsCancelled();
-            _logger.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesBasicExpressions - Start getting all Subsites with basic expresions");
-
-            var retrievalExpressions = new Expression<Func<Web, object>>[]
-            {
-                w => w.Id,
-                w => w.Url,
-                w => w.Title,
-                w => w.ServerRelativeUrl,
-                w => w.WebTemplate,
-                w => w.LastItemModifiedDate,
-            };
-
-            var results = CsomAllSubsites(siteUrl, retrievalExpressions);
-
-            _logger.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesBasicExpressions - Finish getting all Subsites with basic expresions");
-            return results;
-        }
-
-        internal List<Web> CsomAllSubsitesWithRoles(string siteUrl)
-        {
-            _appInfo.IsCancelled();
-            _logger.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRoles - Start getting all Subsites with roles");
-
-            var retrievalExpressions = new Expression<Func<Web, object>>[]
-            {
-                w => w.HasUniqueRoleAssignments,
-                w => w.Id,
-                w => w.RoleAssignments.Include(
-                    ra => ra.RoleDefinitionBindings,
-                    ra => ra.Member),
-                w => w.ServerRelativeUrl,
-                w => w.Title,
-                w => w.Url,
-            };
-
-            var results = CsomAllSubsites(siteUrl, retrievalExpressions);
-
-            _logger.AddLogToTxt($"{GetType().Name}.CsomAllSubsitesWithRoles - Finish getting all Subsites with roles");
-            return results;
-
-        }
-
         internal List<Web> CsomAllSubsitesWithRolesAndSiteDetails(string siteUrl)
         {
             _appInfo.IsCancelled();

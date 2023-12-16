@@ -36,14 +36,6 @@
 
             </Grid>
 
-                <!--<Label Content="All Users in a Site"
-                   FontWeight="Bold"/>
-            <Label Height="15"/>
-
-            <designmaterial:NPTextBoxField
-                Title="Site URL"
-                Text="{Binding Path=SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
-
         </StackPanel>
 
     </Grid>

@@ -203,14 +203,6 @@ namespace NovaPointLibrary.Solutions
         }
 
         // TO BE DEPRECATED
-        internal NPLogger(NPLogger logHelper, string classMethod)
-        {
-            _uiAddLog = logHelper._uiAddLog;
-            _txtPath = logHelper._txtPath;
-            _csvPath = logHelper._csvPath;
-        }
-
-        // TO BE DEPRECATED
         internal void AddLogToUI(string log)
         {
             AddLogToTxt(log);

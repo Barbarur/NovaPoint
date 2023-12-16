@@ -80,22 +80,6 @@
 
             </Grid>
 
-
-            <!--<Label
-                Content="Library major versioning limit"/>
-            <TextBox
-                Text="{Binding LibraryMajorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-            <Label
-                Content="Library minor versioning limit"/>
-            <TextBox
-                Text="{Binding LibraryMinorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-            <Label
-                Content="List major versioning limit"/>
-            <TextBox
-                Text="{Binding ListMajorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
-
         </StackPanel>
 
     </Grid>

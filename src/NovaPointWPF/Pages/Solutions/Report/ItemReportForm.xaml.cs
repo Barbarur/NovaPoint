@@ -73,20 +73,8 @@ namespace NovaPointWPF.Pages.Solutions.Report
             this.FolderRelativeUrl = String.Empty;
         }
 
-        //public int counter { get; set; } = 0;
-
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
         {
-            //LogInfo logInfo = new($"Start the RUN");
-            //uiLog(logInfo);
-
-            //logInfo = new($"COUNTER: {counter}");
-            //uiLog(logInfo);
-            //counter += 1;
-
-            //AdminUPN = "888";
-            //logInfo = new($"{AdminUPN}");
-            //uiLog(logInfo);
 
             ItemReportParameters parameters = new()
             {
@@ -109,27 +97,9 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 FolderRelativeUrl = this.FolderRelativeUrl,
             };
 
-            //AdminUPN = "777";
-            //logInfo = new($"{AdminUPN}");
-            //uiLog(logInfo);
-
-            //logInfo = new($"Finish setting parameters");
-            //uiLog(logInfo);
-
             await new ItemReport(appInfo, uiLog, parameters).RunAsync();
-            //SolutionProperties(uiLog, parameters);
+
         }
 
-        //private void SolutionProperties(Action<LogInfo> uiLog, ISolutionParameters parameters)
-        //{
-        //    Type solutiontype = parameters.GetType();
-        //    PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-        //    foreach (var propertyInfo in properties)
-        //    {
-        //        LogInfo logInfo = new($"{propertyInfo.Name}: {propertyInfo.GetValue(parameters)}");
-        //        uiLog(logInfo);
-        //    }
-        //}
     }
 }
