@@ -22,7 +22,7 @@ namespace NovaPointWPF.Pages.Menus
     /// </summary>
     public partial class MenuSettingsPage : Page
     {
-
+        public AppSettings AppSettings;
         public string Domain { get; set; } = string.Empty;
         public string TenantId { get; set; } = string.Empty;
         public string ClientId { get; set; } = string.Empty;
@@ -34,21 +34,24 @@ namespace NovaPointWPF.Pages.Menus
 
             DataContext = this;
 
-            Domain = Properties.Settings.Default.Domain;
-            TenantId = Properties.Settings.Default.TenantId;
-            ClientId = Properties.Settings.Default.ClientId;
-            CachingToken = Properties.Settings.Default.CachingToken;
+            AppSettings = AppSettings.GetSettings();
+            Domain = AppSettings.Domain;
+            TenantId = AppSettings.TenantID;
+            ClientId = AppSettings.ClientId;
+            CachingToken = AppSettings.CachingToken;
 
-            if (Properties.Settings.Default.IsUpdated) { UpdateButton.Visibility = Visibility.Collapsed; }
+            if (AppSettings.IsUpdated) { UpdateButton.Visibility = Visibility.Collapsed; }
             else { UpdateButton.Visibility = Visibility.Visible; }
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.Domain = Domain;
-            Properties.Settings.Default.TenantId = TenantId;
-            Properties.Settings.Default.ClientId = ClientId;
-            Properties.Settings.Default.CachingToken = CachingToken;
+            AppSettings.Domain = Domain;
+            AppSettings.TenantID = TenantId;
+            AppSettings.ClientId = ClientId;
+            AppSettings.CachingToken = CachingToken;
+
+            AppSettings.SaveSettings();
 
             Properties.Settings.Default.Save();
 
@@ -68,8 +71,6 @@ namespace NovaPointWPF.Pages.Menus
         private void Update_Click(object sender, RoutedEventArgs e)
         {
             string NavigateUri = "https://github.com/Barbarur/NovaPoint/releases/latest";
-            //var url = NavigateUri.Replace("&", "^&");
-            //Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
             Process.Start(new ProcessStartInfo("cmd", $"/c start {NavigateUri}") { CreateNoWindow = true });
         }
 

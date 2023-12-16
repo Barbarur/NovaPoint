@@ -1,13 +1,18 @@
-﻿using Microsoft.Identity.Client;
+﻿using Microsoft.Graph.ExternalConnectors;
+using Microsoft.Identity.Client;
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
+using PnP.Framework.Modernization.Functions;
 
 namespace NovaPointLibrary.Commands.Authentication
 {
     public class AppInfo
     {
         internal string _domain = String.Empty;
-        internal string Domain
+        internal string AdminUrl { get; set; } = String.Empty;
+        internal string RootPersonalUrl { get; set; } = String.Empty;
+        internal string RootSharedUrl { get; set; } = String.Empty;
+        public string Domain
         {
             get { return _domain; }
             set
@@ -16,17 +21,13 @@ namespace NovaPointLibrary.Commands.Authentication
                 AdminUrl = "https://" + value + "-admin.sharepoint.com";
                 RootPersonalUrl = "https://" + value + "-my.sharepoint.com";
                 RootSharedUrl = "https://" + value + ".sharepoint.com";
-            } 
+            }
         }
-        internal string AdminUrl { get; set; } = String.Empty;
-        internal string RootPersonalUrl { get; set; } = String.Empty;
-        internal string RootSharedUrl { get; set; } = String.Empty;
-
 
         internal string _tenantId { get; set; } = string.Empty;
-        // Added PnPManagementShellClientId as default ID
-        internal string _clientId { get; set; } = "31359c7f-bd7e-475c-86db-fdb8c937548e";
-
+        
+        internal string _clientId { get; set; } = string.Empty;
+        
         internal bool _cachingToken { get; set; } = false;
 
         public CancellationTokenSource CancelTokenSource { get; init; }
@@ -37,6 +38,7 @@ namespace NovaPointLibrary.Commands.Authentication
         private AuthenticationResult? _rootPersonalAuthenticationResult = null;
         private AuthenticationResult? _rootSharedAuthenticationResult = null;
 
+        // KEEP FOR TESTING EASY SWITCH BETWEEN TENANTS
         public AppInfo(string domain, string tenantId, string clientId, bool cachingToken)
         {
             Domain = domain;
@@ -50,28 +52,32 @@ namespace NovaPointLibrary.Commands.Authentication
 
             Uri authority = new($"https://login.microsoftonline.com/{_tenantId}");
             _app = PublicClientApplicationBuilder.Create(_clientId)
-                                                    .WithAuthority(authority)
-                                                    .WithDefaultRedirectUri()
-                                                    .Build();
+                                                 .WithAuthority(authority)
+                                                 .WithDefaultRedirectUri()
+                                                 .Build();
         }
 
-        // NOT READY TO USE YET
         public AppInfo()
         {
-            //Domain = domain;
-            //_tenantId = tenantId;
-            //_clientId = clientId;
-            //_cachingToken = cachingToken;
+            var appSettings = AppSettings.GetSettings();
+            Domain = appSettings.Domain;
+            _tenantId = appSettings.TenantID;
+            _clientId = appSettings.ClientId;
+            _cachingToken = appSettings.CachingToken;
 
+            if(string.IsNullOrWhiteSpace(Domain) || string.IsNullOrWhiteSpace(_tenantId) || string.IsNullOrWhiteSpace(_clientId))
+            {
+                throw new Exception("Please go to Settings and fill the App Information");
+            }
 
             this.CancelTokenSource = new();
             this.CancelToken = CancelTokenSource.Token;
 
             Uri authority = new($"https://login.microsoftonline.com/{_tenantId}");
             _app = PublicClientApplicationBuilder.Create(_clientId)
-                                                    .WithAuthority(authority)
-                                                    .WithDefaultRedirectUri()
-                                                    .Build();
+                                                 .WithAuthority(authority)
+                                                 .WithDefaultRedirectUri()
+                                                 .Build();
         }
 
         public void IsCancelled()
@@ -96,7 +102,7 @@ namespace NovaPointLibrary.Commands.Authentication
             return clientContext;
         }
 
-        private async Task<string> GetSPOAccessToken(NPLogger logger, string siteUrl)
+        internal async Task<string> GetSPOAccessToken(NPLogger logger, string siteUrl)
         {
             this.IsCancelled();
             string methodName = $"{GetType().Name}.GetSPOAccessToken";

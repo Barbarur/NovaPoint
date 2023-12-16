@@ -66,26 +66,6 @@
 
             </Grid>
 
-
-
-            <!--<designmaterial:NPTextBoxField
-                Title="SharePoint Domain"
-                Text="{Binding Domain, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-            <designmaterial:NPTextBoxField
-                Title="Tenant ID"
-                Text="{Binding TenantId, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-            <designmaterial:NPTextBoxField
-                Title="Client ID"
-                Text="{Binding ClientId, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-            <Label Height="15"/>
-            
-            <checkbox content="save access token"
-                      ischecked="{binding cachingtoken, mode=twoway, notifyonsourceupdated=true, notifyontargetupdated=true}"/>-->
-
-            
             
             <Label Height="15"/>
             <Grid Background="Transparent"
@@ -112,6 +92,7 @@
                     Width="120"/>
 
             </Grid>
+            
             
             <Button
                 Style="{DynamicResource SolutionFormButton}"

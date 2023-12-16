@@ -1,4 +1,5 @@
-﻿using NovaPointLibrary.Commands.Utilities;
+﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.Utilities;
 using NovaPointWPF.Pages;
 using System;
 using System.Collections.Generic;
@@ -31,18 +32,10 @@ namespace NovaPointWPF
 
             MainWindowMainFrame.Content = MainPage;
 
-
-            IsUpdated().
-                ContinueWith(t => Console.WriteLine(t.Exception),TaskContinuationOptions.OnlyOnFaulted);
+            AppSettings.CheckForUpdates();
         }
 
-        private static async Task IsUpdated()
-        {
-            await Task.Run(async() =>
-            {
-                Properties.Settings.Default.IsUpdated = await VersionControl.IsUpdated();
-                Properties.Settings.Default.Save();
-            });
-        }
+
+
     }
 }

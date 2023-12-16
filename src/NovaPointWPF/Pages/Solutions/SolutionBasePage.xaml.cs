@@ -1,28 +1,13 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Solutions;
-using PnP.Framework.Diagnostics.Tree;
-using PnP.Framework.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
-using System.Xml.Linq;
 
 namespace NovaPointWPF.Pages.Solutions
 {
@@ -51,11 +36,6 @@ namespace NovaPointWPF.Pages.Solutions
         }
         private string SolutionFolder2 = "C:\\Users\\ax_zi\\MEGA\\Coding Projects\\NovaPoint Project\\NovaPoint.wiki"; //string.Empty;
 
-
-
-        //public string Notification { get; set; } = string.Empty;
-        //public string PercentageCompleted { get; set; } = string.Empty;
-        //public string PendingTime { get; set; } = string.Empty;
         public CancellationTokenSource CancelTokenSource { get; set; } = new();
 
         public SolutionBasePage(ISolutionForm solutionForm)
@@ -96,30 +76,19 @@ namespace NovaPointWPF.Pages.Solutions
             CancelButton.IsEnabled = true;
 
             ResetProgress();
-            //Progress.Value = 0;
-            //PercentageCompleted.Content = String.Empty;
-            //PendingTime.Content = String.Empty;
-            //BoxText.Text = "";
 
-
-            if (string.IsNullOrWhiteSpace(Properties.Settings.Default.Domain) ||
-                string.IsNullOrWhiteSpace(Properties.Settings.Default.TenantId) ||
-                string.IsNullOrWhiteSpace(Properties.Settings.Default.ClientId))
+            try
             {
-                LogInfo logInfo = new("Please go to Settings and fill the App Information");
-                UILog(logInfo);
-            }
-            else
-            {
-                AppInfo appInfo = new(Properties.Settings.Default.Domain,
-                    Properties.Settings.Default.TenantId,
-                    Properties.Settings.Default.ClientId,
-                    Properties.Settings.Default.CachingToken);
+                AppInfo appInfo = new();
 
                 this.CancelTokenSource = appInfo.CancelTokenSource;
 
                 await RunSolutionSecondThreadAsync(appInfo);
-                
+            }
+            catch (Exception ex)
+            {
+                LogInfo log = new(ex.Message);
+                UILog(log);
             }
 
             BackButton.IsEnabled = true;
@@ -156,7 +125,6 @@ namespace NovaPointWPF.Pages.Solutions
                 }
             };
         }
-
 
         private void UILog(LogInfo logInfo)
         {

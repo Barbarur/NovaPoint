@@ -1,4 +1,5 @@
-﻿using NovaPointLibrary.Commands.Utilities;
+﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,9 @@ namespace NovaPointWPF.Pages
 
         private void CheckUpdate()
         {
-            if (!Properties.Settings.Default.IsUpdated) { SettingsButton.Background = Brushes.DarkRed; }
+            var appSettings = AppSettings.GetSettings();
+            if (!appSettings.IsUpdated) { SettingsButton.Background = Brushes.DarkRed; }
+            else { SettingsButton.Background = Brushes.Transparent; }
         }
 
         private void Reports_Click(object sender, RoutedEventArgs e)

@@ -9,7 +9,7 @@ namespace NovaPointLibrary.Commands.Authentication
 {
     internal class TokenCacheHelper
     {
-        private static readonly string s_cacheFilePath = Path.Combine(MsalCacheHelper.UserRootDirectory, "NovaPoint/msal.cache");
+        private static readonly string s_cacheFilePath = Path.Combine(AppSettings.GetLocalAppPath(), "msal.cache");
 
         private static readonly string CacheFileName = Path.GetFileName(s_cacheFilePath);
         private static readonly string CacheDir = Path.GetDirectoryName(s_cacheFilePath);
