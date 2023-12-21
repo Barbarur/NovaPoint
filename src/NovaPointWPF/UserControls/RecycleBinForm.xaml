@@ -26,7 +26,7 @@
 
                     <DockPanel
                         Margin="0,0,0,9">
-
+                        
                         <ToggleButton
                             Style="{DynamicResource SolutionFormToggleButton}"
                             Content="First stage"
@@ -55,20 +55,18 @@
                                 Style="{DynamicResource SolutionFormLabel}"
                                 Content="Deleted after"/>
 
-                            <Label
-                                x:Name="TestAfter"
-                                Style="{DynamicResource SolutionFormLabel}"
-                                Content="Deleted after"/>
-
                             <StackPanel
                                 Orientation="Horizontal">
 
                                 <ComboBox
                                     x:Name="CBAfterDates"
+                                    Style="{DynamicResource SolutionFormComboBox}"
                                     SelectionChanged="DateTimeAfterSelectionChanged"/>
 
                                 <ComboBox
                                     x:Name="CBAfterHour"
+                                    Style="{DynamicResource SolutionFormComboBox}"
+                                    Width="90"
                                     SelectionChanged="DateTimeAfterSelectionChanged"/>
 
                             </StackPanel>
@@ -81,20 +79,18 @@
                                 Style="{DynamicResource SolutionFormLabel}"
                                 Content="Deleted after"/>
 
-                            <Label
-                                x:Name="TestBefore"
-                                Style="{DynamicResource SolutionFormLabel}"
-                                Content="Deleted after"/>
-
                             <StackPanel
                                 Orientation="Horizontal">
 
                                 <ComboBox
                                     x:Name="CBBeforeDates"
+                                    Style="{DynamicResource SolutionFormComboBox}"
                                     SelectionChanged="DateTimeBeforeSelectionChanged"/>
 
                                 <ComboBox
                                     x:Name="CBBeforeHour"
+                                    Style="{DynamicResource SolutionFormComboBox}"
+                                    Width="90"
                                     SelectionChanged="DateTimeBeforeSelectionChanged"/>
 
                             </StackPanel>

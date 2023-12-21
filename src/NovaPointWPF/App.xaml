@@ -54,8 +54,25 @@
         </Style>
 
 
+        <Style x:Key="SolutionFormControlText" TargetType="{x:Type Label}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="FontFamily" Value="Segoe UI Variable Text"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Regular"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+        </Style>
 
-        <!--WIDGETS-->
+
+        <Style x:Key="SolutionFormControlBorder" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Height" Value="35"/>
+        </Style>
+
+
+
+        <!--CONTROL-->
         
         <Style x:Key="SolutionMenuButton" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="Transparent"/>
@@ -194,46 +211,204 @@
 
 
         <Style x:Key="SolutionFormToggleButton" TargetType="{x:Type ToggleButton}">
-            <Setter Property="Background" Value="#030615"/>
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
             <Setter Property="Margin" Value="2, 2, 2, 2"/>
             <Setter Property="Width" Value="150"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
                         <Grid>
-                            <Border x:Name="Border"
-                                    Background="{TemplateBinding Background}"
-                                    CornerRadius="8"
-                                    Height="35"/>
-                            <TextBlock x:Name="NombreTexto"
-                                       Margin="10, 0, 10, 0"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Left"
-                                       FontFamily="Segoe UI Variable Text"
-                                       FontSize="14"
-                                       FontWeight="Regular"
-                                       Foreground="GhostWhite"
-                                       Text="{TemplateBinding Content}"/>
-                        </Grid>
+                            <Border
+                                Name="Border"
+                                Style="{DynamicResource SolutionFormControlBorder}"/>
 
+                            <Label
+                                x:Name="NombreTexto"
+                                Margin="10, 0, 10, 0"
+                                Style="{DynamicResource SolutionFormControlText}"
+                                Content="{TemplateBinding Content}"/>
+                            
+                        </Grid>
+                        <ControlTemplate.Triggers>
+
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsChecked" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource HoverButtonColor}"/>
+                            </MultiTrigger>
+
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Style.Triggers>
-                <MultiTrigger>
-                    <MultiTrigger.Conditions>
-                        <Condition Property="IsMouseOver" Value="True"/>
-                        <Condition Property="IsChecked" Value="False"/>
-                    </MultiTrigger.Conditions>
-                    <Setter Property="Background" Value="#1F212E"/>
-                </MultiTrigger>
 
-                <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Background" Value="#484D65"/>
-                </Trigger>
-
-            </Style.Triggers>
         </Style>
+
+        <!--Reference:-->
+        <!--https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/combobox-styles-and-templates?view=netframeworkdesktop-4.8-->
+        <Style x:Key="SolutionFormComboBox" TargetType="{x:Type ComboBox}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="Margin" Value="2, 2, 2, 2"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton
+                                Margin="0"
+                                Width="{TemplateBinding Width}"
+                                Content="{TemplateBinding SelectionBoxItem}"
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
+
+                            <Popup
+                                x:Name="PART_Popup"
+                                Placement="Bottom"
+                                IsOpen="{TemplateBinding IsDropDownOpen}"
+                                AllowsTransparency="True"
+                                Focusable="False"
+                                PopupAnimation="Slide">
+
+                                <Grid Name="DropDown"
+                                    MinWidth="{TemplateBinding FrameworkElement.ActualWidth}"
+                                    MaxHeight="{TemplateBinding ComboBox.MaxDropDownHeight}"
+                                    SnapsToDevicePixels="True">
+
+                                    <Border
+                                        Name="DropDownBorder"
+                                        CornerRadius="8"
+                                        Background="{TemplateBinding ComboBox.Background}">
+
+                                        <ScrollViewer
+                                            Style="{DynamicResource LeftScrollViewer}">
+
+                                            <StackPanel IsItemsHost="True"
+                                                KeyboardNavigation.DirectionalNavigation="Contained" />
+
+                                        </ScrollViewer>
+
+                                    </Border>
+
+                                </Grid>
+
+                            </Popup>
+                        </Grid>
+                        <!--<ControlTemplate.Triggers>
+                            <Trigger SourceName="PART_Popup" Property="Window.AllowsTransparency" Value="True">
+                                <Setter TargetName="DropDownBorder" Property="FrameworkElement.Margin" Value="0,2,0,0" />
+                                
+                            </Trigger>
+                        </ControlTemplate.Triggers>-->
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <!--<Style x:Key="CBCustomToggleButton" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Margin" Value="2, 2, 2, 2"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <Border
+                                Name="Border"
+                                Style="{DynamicResource SolutionFormControlBorder}"/>
+
+                            <DockPanel>
+
+                                <Label
+                                    x:Name="NombreTexto"
+                                    Margin="10, 0, 10, 0"
+                                    Style="{DynamicResource SolutionFormControlText}"
+                                    Content="{TemplateBinding Content}"
+                                    DockPanel.Dock="Left"/>
+
+                                <Path
+                                    x:Name="Arrow"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Data="M 0 0 L 4 4 L 8 0 Z"
+                                    Fill="Red"
+                                    DockPanel.Dock="Right"/>
+
+                                <TextBlock
+                                    DockPanel.Dock="Right"
+                                    Height="Auto"/>
+
+                            </DockPanel>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsChecked" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource HoverButtonColor}"/>
+                            </MultiTrigger>
+
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
+                            </Trigger>
+                            
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+        </Style>-->
+
+
+        <Style x:Key="{x:Type ComboBoxItem}" TargetType="{x:Type ComboBoxItem}">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                        <Grid
+                            Margin="3, 1">
+
+                            <Border
+                                Name="Border"
+                                Style="{DynamicResource SolutionFormControlBorder}"
+                                Padding="18"/>
+
+                            <Label
+                                x:Name="Label"
+                                Margin="10, 0, 10, 0"
+                                Style="{DynamicResource SolutionFormControlText}"
+                                Content="{Binding}"
+                                DockPanel.Dock="Left"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource HoverButtonColor}"/>
+                            </MultiTrigger>
+
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
 
         <!--TO BE DEPRECATED-->
         <Style x:Key="SolutionFormTextBoxOLD" TargetType="{x:Type TextBox}">
@@ -365,11 +540,8 @@
                                 <RowDefinition />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            
+
                             <Border Grid.Column="0">
-                                <!--<Border.BorderBrush>
-                                    <SolidColorBrush Color="Pink" />
-                                </Border.BorderBrush>-->
                                 <ScrollContentPresenter CanContentScroll="{TemplateBinding CanContentScroll}" />
                             </Border>
                             
@@ -401,7 +573,7 @@
 
         <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
             <Grid
-                Width="3">
+                Width="5">
                 
                 <Border
                     CornerRadius="1"

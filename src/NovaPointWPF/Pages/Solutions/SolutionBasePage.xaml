@@ -10,11 +10,11 @@
     
     <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="600"/>
             <ColumnDefinition Width="30"/>
-            <ColumnDefinition Width="600"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition MinWidth="600"/>
+            <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
 
         <Grid Background="Transparent"

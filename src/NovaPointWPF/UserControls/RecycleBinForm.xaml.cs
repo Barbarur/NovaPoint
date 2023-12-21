@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NovaPointLibrary;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -39,8 +40,8 @@ namespace NovaPointWPF.UserControls
             CBAfterHour.SelectedIndex = 0;
             CBBeforeDates.SelectedIndex = 95;
             CBBeforeHour.SelectedIndex = 47;
-
         }
+
 
         private void AddDatesHours()
         {
@@ -73,11 +74,8 @@ namespace NovaPointWPF.UserControls
                 DateTime dateTime = DateTime.ParseExact(value, "MMM dd, yyyy HH:mm",
                                     System.Globalization.CultureInfo.InvariantCulture);
 
-                TestAfter.Content = dateTime.ToString("yyyyMMddHHmm");
-
                 DeletedAfter = dateTime;
             }
-
         }
 
         private void DateTimeBeforeSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -92,10 +90,8 @@ namespace NovaPointWPF.UserControls
                 DateTime dateTime = DateTime.ParseExact(value, "MMM dd, yyyy HH:mm",
                                     System.Globalization.CultureInfo.InvariantCulture);
 
-                TestBefore.Content = dateTime.ToString("yyyyMMddHHmm");
                 DeletedBefore = dateTime;
             }
-
         }
 
         public bool FirstStage
