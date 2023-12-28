@@ -53,7 +53,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
         {
             _appInfo.IsCancelled();
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param.GetSiteParameters()).GetAsync())
+            await foreach (var siteResults in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param).GetAsync())
             {
 
                 if (!String.IsNullOrWhiteSpace(siteResults.Remarks))

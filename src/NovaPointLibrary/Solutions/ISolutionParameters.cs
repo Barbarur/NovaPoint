@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.SharePoint.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,8 @@ namespace NovaPointLibrary.Solutions
 {
     public interface ISolutionParameters
     {
+        internal void ParametersCheck()
+        {
+        }
     }
 }

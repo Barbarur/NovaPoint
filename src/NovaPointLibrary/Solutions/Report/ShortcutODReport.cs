@@ -41,19 +41,12 @@ namespace NovaPointLibrary.Solutions.Report
         {
             try
             {
-                if (String.IsNullOrWhiteSpace(_param.AdminUPN))
-                {
-                    throw new Exception("FORM INCOMPLETED: Admin UPN cannot be empty.");
-                }
-                else if (string.IsNullOrWhiteSpace(_param.SiteUrl) && !_param.SiteAll)
-                {
-                    throw new Exception($"FORM INCOMPLETED: Site URL cannot be empty when no processing all sites");
-                }
-                else
-                {
-                    await RunScriptAsync();
-                    _logger.ScriptFinish();
-                }
+                _param.ParametersCheck();
+
+                await RunScriptAsync();
+
+                _logger.ScriptFinish();
+
             }
             catch (Exception ex)
             {
@@ -65,7 +58,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.GetListParameters()).GetListsAsync())
+            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
             {
                 _appInfo.IsCancelled();
 

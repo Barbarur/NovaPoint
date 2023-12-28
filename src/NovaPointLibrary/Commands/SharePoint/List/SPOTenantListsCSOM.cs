@@ -27,7 +27,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.GetLists";
 
-            await foreach (SPOTenantResults siteResults in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param.GetSiteParameters()).GetAsync())
+            await foreach (SPOTenantResults siteResults in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param).GetAsync())
             {
                 _logger.LogUI(GetType().Name, $"Processing Site '{siteResults.SiteUrl}'");
 
