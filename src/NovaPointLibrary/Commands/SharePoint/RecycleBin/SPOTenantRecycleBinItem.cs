@@ -93,47 +93,10 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
                 if(_clear)
                 {
                     remarks = await DeleteRecycleBinItemAsync(siteUrl, oRecycleBinItem);
-                    //if (!HasViewThreshold)
-                    //{
-                    //    remarks = await spoRecycleBinItem.RemoveAsync(siteUrl, oRecycleBinItem);
-                    //    if (remarks.Contains("The attempted operation is prohibited because it exceeds the list view threshold."))
-                    //    {
-                    //        HasViewThreshold = true;
-
-                    //    }
-                    //}
-                    //if (HasViewThreshold)
-                    //{
-                    //    remarks = await spoRecycleBinItem.RemoveRESTAPIAsync(siteUrl, oRecycleBinItem);
-                    //}
-
-                    //if (!remarks.Contains("restored from Recycle bin correctly"))
-                    //{
-                    //    Exception ex = new(remarks);
-                    //    _logger.ReportError("Recycle bin item", oRecycleBinItem.Title, ex);
-                    //}
                 }
                 if (_restore)
                 {
                     remarks = await RestoreRecycleBinItemAsync(siteUrl, oRecycleBinItem);
-                    //if (!HasViewThreshold)
-                    //{
-                    //    remarks = await spoRecycleBinItem.RestoreAsync(siteUrl, oRecycleBinItem, _param.RenameFile);
-                    //    if (remarks.Contains("The attempted operation is prohibited because it exceeds the list view threshold."))
-                    //    {
-                    //        HasViewThreshold = true;
-                    //    }
-                    //}
-                    //if (HasViewThreshold)
-                    //{
-                    //    remarks = await spoRecycleBinItem.RestoreRESTAPIAsync(siteUrl, oRecycleBinItem, _param.RenameFile);
-                    //}
-
-                    //if (!remarks.Contains("restored from Recycle bin correctly"))
-                    //{
-                    //    Exception ex = new(remarks);
-                    //    _logger.ReportError("Recycle bin item", oRecycleBinItem.Title, ex);
-                    //}
                 }
 
                 AddRecord(siteUrl, oRecycleBinItem, remarks);

@@ -17,9 +17,6 @@ using System.Windows.Shapes;
 
 namespace NovaPointWPF.UserControls
 {
-    /// <summary>
-    /// Interaction logic for RecycleBinForm.xaml
-    /// </summary>
     public partial class RecycleBinForm : UserControl
     {
         public List<string> listDates = new();
@@ -40,8 +37,9 @@ namespace NovaPointWPF.UserControls
             CBAfterHour.SelectedIndex = 0;
             CBBeforeDates.SelectedIndex = 95;
             CBBeforeHour.SelectedIndex = 47;
+            AllItems = true;
+            FilterItems = false;
         }
-
 
         private void AddDatesHours()
         {
@@ -94,11 +92,47 @@ namespace NovaPointWPF.UserControls
             }
         }
 
+        public bool AllItems
+        {
+            get { return (bool)GetValue(AllItemsProperty); }
+            set { SetValue(AllItemsProperty, value); }
+        }
+        public static readonly DependencyProperty AllItemsProperty =
+            DependencyProperty.Register("AllItems", typeof(bool), typeof(RecycleBinForm), new FrameworkPropertyMetadata(defaultValue: false));
+
+        private bool _filterItems;
+        public bool FilterItems
+        {
+            get { return _filterItems; }
+            set
+            {
+                _filterItems = value;
+                if (value) { FilterPanel.Visibility = Visibility.Visible; }
+                else
+                {
+                    FilterPanel.Visibility = Visibility.Collapsed;
+
+                    FirstStage = true;
+                    SecondStage = true;
+
+                    CBAfterDates.SelectedIndex = 0;
+                    CBAfterHour.SelectedIndex = 0;
+                    CBBeforeDates.SelectedIndex = 95;
+                    CBBeforeHour.SelectedIndex = 47;
+
+                    DeletedByEmail = string.Empty;
+                    OriginalLocation = string.Empty;
+                    FileSizeMb = 0;
+                }
+            }
+        }
+
         public bool FirstStage
         {
             get { return (bool)GetValue(FirstStageProperty); }
             set { SetValue(FirstStageProperty, value); }
         }
+
         public static readonly DependencyProperty FirstStageProperty =
             DependencyProperty.Register("FirstStage", typeof(bool), typeof(RecycleBinForm), new FrameworkPropertyMetadata(defaultValue: true));
 

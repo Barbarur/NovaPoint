@@ -15,7 +15,7 @@
 
             <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Recycle bin filter"/>
+                Content="Recycle bin items"/>
 
             <Grid>
 
@@ -26,17 +26,17 @@
 
                     <DockPanel
                         Margin="0,0,0,9">
-                        
-                        <ToggleButton
+
+                        <RadioButton
                             Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="First stage"
-                            IsChecked="{Binding FirstStage, ElementName=root}"
+                            Content="All items"
+                            IsChecked="{Binding AllItems, ElementName=root}"
                             DockPanel.Dock="Left"/>
 
-                        <ToggleButton
+                        <RadioButton
                             Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Second stage"
-                            IsChecked="{Binding SecondStage, ElementName=root}"
+                            Content="Filter items"
+                            IsChecked="{Binding FilterItems, ElementName=root}"
                             DockPanel.Dock="Left"/>
 
                         <TextBlock
@@ -46,102 +46,132 @@
                     </DockPanel>
 
                     <StackPanel
-                        Orientation="Horizontal"
-                        Margin="0,0,0,9">
+                        x:Name="FilterPanel">
 
-                        <StackPanel>
-
-                            <Label
-                                Style="{DynamicResource SolutionFormLabel}"
-                                Content="Deleted after"/>
-
-                            <StackPanel
-                                Orientation="Horizontal">
-
-                                <ComboBox
-                                    x:Name="CBAfterDates"
-                                    Style="{DynamicResource SolutionFormComboBox}"
-                                    SelectionChanged="DateTimeAfterSelectionChanged"/>
-
-                                <ComboBox
-                                    x:Name="CBAfterHour"
-                                    Style="{DynamicResource SolutionFormComboBox}"
-                                    Width="90"
-                                    SelectionChanged="DateTimeAfterSelectionChanged"/>
-
-                            </StackPanel>
-                            
-                        </StackPanel>
-
-                        <StackPanel>
-
-                            <Label
-                                Style="{DynamicResource SolutionFormLabel}"
-                                Content="Deleted after"/>
-
-                            <StackPanel
-                                Orientation="Horizontal">
-
-                                <ComboBox
-                                    x:Name="CBBeforeDates"
-                                    Style="{DynamicResource SolutionFormComboBox}"
-                                    SelectionChanged="DateTimeBeforeSelectionChanged"/>
-
-                                <ComboBox
-                                    x:Name="CBBeforeHour"
-                                    Style="{DynamicResource SolutionFormComboBox}"
-                                    Width="90"
-                                    SelectionChanged="DateTimeBeforeSelectionChanged"/>
-
-                            </StackPanel>
-
-                        </StackPanel>
-
-                    </StackPanel>
-
-
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="Deleted by"/>
-                    <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding DeletedByEmail, ElementName=root}"
-                        Margin="0,0,0,9"/>
-
-                    
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="Original location"/>
-                    <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding OriginalLocation, ElementName=root}"
-                        Margin="0,0,0,9"/>
-
-                    
-                    <StackPanel
-                        Orientation="Vertical"
-                        Margin="0,0,0,9">
-                        
                         <Label
                             Style="{DynamicResource SolutionFormLabel}"
-                            Content="File size Mb"/>
+                            Content="Filter by"/>
+
+
+                        <DockPanel
+                            Margin="0,0,0,9">
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="First stage"
+                                IsChecked="{Binding FirstStage, ElementName=root}"
+                                DockPanel.Dock="Left"/>
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Second stage"
+                                IsChecked="{Binding SecondStage, ElementName=root}"
+                                DockPanel.Dock="Left"/>
+
+                            <TextBlock
+                                DockPanel.Dock="Left"
+                                Height="Auto"/>
+
+                        </DockPanel>
 
                         <StackPanel
-                            Orientation="Horizontal">
+                            Orientation="Horizontal"
+                            Margin="0,0,0,9">
 
-                            <TextBox
-                                Width="150"
-                                Style="{DynamicResource SolutionFormTextBox}"
-                                Text="{Binding FileSizeMb, ElementName=root}"/>
-                            
-                            <RadioButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Above target size"
-                                IsChecked="{Binding FileSizeAbove, ElementName=root}"/>
+                            <StackPanel>
 
-                            <RadioButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Below target size"/>
+                                <Label
+                                    Style="{DynamicResource SolutionFormLabel}"
+                                    Content="Deleted after"/>
+
+                                <StackPanel
+                                    Orientation="Horizontal">
+
+                                    <ComboBox
+                                        x:Name="CBAfterDates"
+                                        Style="{DynamicResource SolutionFormComboBox}"
+                                        SelectionChanged="DateTimeAfterSelectionChanged"/>
+
+                                    <ComboBox
+                                        x:Name="CBAfterHour"
+                                        Style="{DynamicResource SolutionFormComboBox}"
+                                        Width="90"
+                                        SelectionChanged="DateTimeAfterSelectionChanged"/>
+
+                                </StackPanel>
+
+                            </StackPanel>
+
+                            <StackPanel>
+
+                                <Label
+                                    Style="{DynamicResource SolutionFormLabel}"
+                                    Content="Deleted after"/>
+
+                                <StackPanel
+                                    Orientation="Horizontal">
+
+                                    <ComboBox
+                                        x:Name="CBBeforeDates"
+                                        Style="{DynamicResource SolutionFormComboBox}"
+                                        SelectionChanged="DateTimeBeforeSelectionChanged"/>
+
+                                    <ComboBox
+                                        x:Name="CBBeforeHour"
+                                        Style="{DynamicResource SolutionFormComboBox}"
+                                        Width="90"
+                                        SelectionChanged="DateTimeBeforeSelectionChanged"/>
+
+                                </StackPanel>
+
+                            </StackPanel>
+
+                        </StackPanel>
+
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Deleted by"/>
+                        <TextBox
+                            Style="{DynamicResource SolutionFormTextBox}"
+                            Text="{Binding DeletedByEmail, ElementName=root}"
+                            Margin="0,0,0,9"/>
+
+
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Original location"/>
+                        <TextBox
+                            Style="{DynamicResource SolutionFormTextBox}"
+                            Text="{Binding OriginalLocation, ElementName=root}"
+                            Margin="0,0,0,9"/>
+
+
+                        <StackPanel
+                            Orientation="Vertical"
+                            Margin="0,0,0,9">
+
+                            <Label
+                                Style="{DynamicResource SolutionFormLabel}"
+                                Content="File size Mb"/>
+
+                            <StackPanel
+                                Orientation="Horizontal">
+
+                                <TextBox
+                                    Width="150"
+                                    Style="{DynamicResource SolutionFormTextBox}"
+                                    Text="{Binding FileSizeMb, ElementName=root}"/>
+
+                                <RadioButton
+                                    Style="{DynamicResource SolutionFormToggleButton}"
+                                    Content="Above target size"
+                                    IsChecked="{Binding FileSizeAbove, ElementName=root}"/>
+
+                                <RadioButton
+                                    Style="{DynamicResource SolutionFormToggleButton}"
+                                    Content="Below target size"/>
+
+                            </StackPanel>
 
                         </StackPanel>
 

@@ -30,6 +30,8 @@
                 />
 
             <designmaterial:RecycleBinForm
+                AllItems="{Binding AllItems, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                
                 FirstStage="{Binding FirstStage, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 SecondStage="{Binding SecondStage, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 

@@ -18,9 +18,6 @@ using System.Windows.Shapes;
 
 namespace NovaPointWPF.Pages.Solutions.Report
 {
-    /// <summary>
-    /// Interaction logic for RecycleBinReportForm.xaml
-    /// </summary>
     public partial class RecycleBinReportForm : Page, ISolutionForm
     {
         public string AdminUPN { get; set; }
@@ -33,6 +30,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
         public string SiteUrl { get; set; }
         public bool IncludeSubsites { get; set; }
 
+        public bool AllItems { get; set; }
         public bool FirstStage { get; set; }
         public bool SecondStage { get; set; }
         public DateTime DeletedAfter { get; set; }
@@ -62,6 +60,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
             this.SiteUrl = String.Empty;
             this.IncludeSubsites = false;
 
+            this.AllItems = true;
             this.FirstStage = true;
             this.SecondStage = true;
             this.DeletedAfter = DateTime.UtcNow.AddDays(-94);
@@ -87,6 +86,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 SiteUrl = this.SiteUrl,
                 IncludeSubsites = this.IncludeSubsites,
 
+                AllItems = this.AllItems,
                 FirstStage = this.FirstStage,
                 SecondStage = this.SecondStage,
                 DeletedAfter = this.DeletedAfter,

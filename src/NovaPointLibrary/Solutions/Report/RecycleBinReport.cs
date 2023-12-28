@@ -63,12 +63,86 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task RunScriptAsync()
         {
+            //_appInfo.IsCancelled();
+
+            //await new SPOTenantRecycleBinItem(_logger, _appInfo, _param.GetRecycleBinParameters()).ReportAsync();
+
             _appInfo.IsCancelled();
 
-            await new SPOTenantRecycleBinItem(_logger, _appInfo, _param.GetRecycleBinParameters()).ReportAsync();
+            await foreach (var siteResults in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param.GetSiteParameters()).GetAsync())
+            {
 
+                if (!String.IsNullOrWhiteSpace(siteResults.Remarks))
+                {
+                    AddRecord(siteResults.SiteUrl, remarks: siteResults.Remarks);
+                    continue;
+                }
+
+                try
+                {
+                    await ProcessRecycleBinItemsAsync(siteResults.SiteUrl, siteResults.Progress);
+                }
+                catch (Exception ex)
+                {
+                    _logger.ReportError("Site", siteResults.SiteUrl, ex);
+                    AddRecord(siteResults.SiteUrl, remarks: ex.Message);
+                }
+            }
         }
 
+        private async Task ProcessRecycleBinItemsAsync(string siteUrl, ProgressTracker parentProgress)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogUI(GetType().Name, $"Start processing recycle bin items for '{siteUrl}'");
+
+            ProgressTracker progress = new(parentProgress, 5000);
+            int itemCounter = 0;
+            int itemExpectedCount = 5000;
+            var spoRecycleBinItem = new SPORecycleBinItemCSOM(_logger, _appInfo);
+            await foreach (RecycleBinItem oRecycleBinItem in spoRecycleBinItem.GetAsync(siteUrl, _param))
+            {
+                _appInfo.IsCancelled();
+
+                AddRecord(siteUrl, oRecycleBinItem);
+
+                progress.ProgressUpdateReport();
+                itemCounter++;
+                if (itemCounter == itemExpectedCount)
+                {
+                    progress.IncreaseTotalCount(6000);
+                    itemExpectedCount += 5000;
+                }
+            }
+
+            _logger.LogTxt(GetType().Name, $"Finish processing recycle bin items for '{siteUrl}'");
+        }
+
+        private void AddRecord(string siteUrl,
+                               RecycleBinItem? oRecycleBinItem = null,
+                               string remarks = "")
+        {
+            dynamic recordItem = new ExpandoObject();
+            recordItem.SiteUrl = siteUrl;
+
+            recordItem.ItemId = oRecycleBinItem != null ? oRecycleBinItem.Id.ToString() : string.Empty;
+            recordItem.ItemTitle = oRecycleBinItem != null ? oRecycleBinItem.Title : String.Empty;
+            recordItem.ItemType = oRecycleBinItem != null ? oRecycleBinItem.ItemType.ToString() : String.Empty;
+            recordItem.ItemState = oRecycleBinItem != null ? oRecycleBinItem.ItemState.ToString() : String.Empty;
+
+            recordItem.DateDeleted = oRecycleBinItem != null ? oRecycleBinItem.DeletedDate.ToString() : String.Empty;
+            recordItem.DeletedByName = oRecycleBinItem != null ? oRecycleBinItem.DeletedByName : String.Empty;
+            recordItem.DeletedByEmail = oRecycleBinItem != null ? oRecycleBinItem.DeletedByEmail : String.Empty;
+
+            recordItem.CreatedByName = oRecycleBinItem != null ? oRecycleBinItem.AuthorName : String.Empty;
+            recordItem.CreatedByEmail = oRecycleBinItem != null ? oRecycleBinItem.AuthorEmail : String.Empty;
+            recordItem.OriginalLocation = oRecycleBinItem != null ? oRecycleBinItem.DirName : String.Empty;
+
+            recordItem.SizeMB = oRecycleBinItem != null ? Math.Round(oRecycleBinItem.Size / Math.Pow(1024, 2), 2).ToString() : String.Empty;
+
+            recordItem.Remarks = remarks;
+
+            _logger.RecordCSV(recordItem);
+        }
     }
 
     public class RecycleBinReportParameters : SPORecycleBinItemParameters, ISolutionParameters

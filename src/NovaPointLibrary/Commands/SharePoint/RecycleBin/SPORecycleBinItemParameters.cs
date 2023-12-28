@@ -9,6 +9,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
 {
     public class SPORecycleBinItemParameters : SPOTenantSiteUrlsParameters
     {
+        public bool AllItems { get; set; } = false;
         public bool FirstStage { get; set; } = true;
         public bool SecondStage { get; set; } = true;
         public DateTime DeletedAfter { get; set; } = DateTime.MinValue;

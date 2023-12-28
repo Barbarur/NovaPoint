@@ -177,12 +177,17 @@ namespace NovaPointLibrary.Solutions
 
         internal void ReportError(string type, string URL, Exception ex)
         {
-            LogUI($"{GetType().Name}.ScriptFinish", $"Error processing {type} '{URL}'");
-            LogTxt($"{GetType().Name}.ScriptFinish", $"Exception: {ex.Message}");
-            LogTxt($"{GetType().Name}.ScriptFinish", $"Trace: {ex.StackTrace}");
+            LogUI(GetType().Name, $"Error processing {type} '{URL}'");
+            LogTxt(GetType().Name, $"Exception: {ex.Message}");
+            LogTxt(GetType().Name, $"Trace: {ex.StackTrace}");
         }
 
-
+        internal void ReportError(string type, string URL, string exceptionMessage)
+        {
+            LogUI(GetType().Name, $"Error processing {type} '{URL}'");
+            LogTxt(GetType().Name, $"Exception: {exceptionMessage}");
+            LogTxt(GetType().Name, $"Trace: {exceptionMessage}");
+        }
 
 
 
