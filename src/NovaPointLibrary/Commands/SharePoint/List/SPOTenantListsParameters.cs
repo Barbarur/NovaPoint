@@ -17,9 +17,14 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         internal bool IncludeSystemLists { get; set; } = false;
         internal string ListTitle { get; set; } = String.Empty;
 
-        internal SPOTenantSiteUrlsParameters GetSiteParameters()
+        internal new void ParametersCheck()
         {
-            return this;
+            base.ParametersCheck();
+
+            if (!ListAll && String.IsNullOrWhiteSpace(ListTitle))
+            {
+                throw new Exception($"FORM INCOMPLETED: Library name cannot be empty when not processing all Libraries");
+            }
         }
     }
 }

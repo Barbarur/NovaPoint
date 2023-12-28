@@ -73,7 +73,7 @@ namespace NovaPointLibrary.Solutions.Report
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.RunScriptAsync";
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.GetListParameters()).GetListsAsync())
+            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
             {
                 _appInfo.IsCancelled();
 

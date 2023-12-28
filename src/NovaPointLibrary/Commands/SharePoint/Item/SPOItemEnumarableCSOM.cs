@@ -29,7 +29,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.GetLists";
 
-            await foreach (SPOTenantResults listResult in new SPOTenantListsCSOM(_logger, _appInfo, _param.GetListParameters()).GetListsAsync())
+            await foreach (SPOTenantResults listResult in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
             {
                 if (!String.IsNullOrWhiteSpace(listResult.Remarks))
                 {

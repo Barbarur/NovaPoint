@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NovaPointLibrary.Solutions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {
-    public class SPOTenantSiteUrlsParameters
+    public class SPOTenantSiteUrlsParameters : ISolutionParameters
     {
         public string AdminUPN { get; set; } = String.Empty;
         public bool RemoveAdmin { get; set; } = false;
@@ -17,5 +18,17 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         public bool OnlyGroupIdDefined { get; set; } = false;
         public string SiteUrl { get; set; } = String.Empty;
         public bool IncludeSubsites { get; set; } = false;
+
+        internal void ParametersCheck()
+        {
+            if (String.IsNullOrWhiteSpace(AdminUPN))
+            {
+                throw new Exception("FORM INCOMPLETED: Admin UPN cannot be empty.");
+            }
+            else if (string.IsNullOrWhiteSpace(SiteUrl) && !SiteAll)
+            {
+                throw new Exception($"FORM INCOMPLETED: Site URL cannot be empty when no processing all sites");
+            }
+        }
     }
 }

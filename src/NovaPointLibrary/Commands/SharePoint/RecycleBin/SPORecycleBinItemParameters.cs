@@ -20,9 +20,9 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
         public bool FileSizeAbove { get; set; } = true;
         public bool RenameFile { get; set; } = false;
 
-        internal SPOTenantSiteUrlsParameters GetSiteParameters()
+        internal new void ParametersCheck()
         {
-            return this;
+            base.ParametersCheck();
         }
     }
 }
