@@ -30,19 +30,17 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
 
-        public RecycleBinReport(AppInfo appInfo, Action<LogInfo> uiAddLog, RecycleBinReportParameters parameters)
+        public RecycleBinReport(RecycleBinReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
             Parameters = parameters;
-            _appInfo = appInfo;
-            _logger = new(uiAddLog, this);
+            _logger = new(uiAddLog, this.GetType().Name, parameters);
+            _appInfo = new(_logger, cancelTokenSource);
         }
 
         public async Task RunAsync()
         {
             try
             {
-                _param.ParametersCheck();
-
                 await RunScriptAsync();
                 
                 _logger.ScriptFinish();
@@ -55,13 +53,9 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task RunScriptAsync()
         {
-            //_appInfo.IsCancelled();
-
-            //await new SPOTenantRecycleBinItem(_logger, _appInfo, _param.GetRecycleBinParameters()).ReportAsync();
-
             _appInfo.IsCancelled();
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param).GetAsync())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
             {
 
                 if (!String.IsNullOrWhiteSpace(siteResults.Remarks))
@@ -85,7 +79,6 @@ namespace NovaPointLibrary.Solutions.Report
         private async Task ProcessRecycleBinItemsAsync(string siteUrl, ProgressTracker parentProgress)
         {
             _appInfo.IsCancelled();
-            _logger.LogUI(GetType().Name, $"Start processing recycle bin items for '{siteUrl}'");
 
             ProgressTracker progress = new(parentProgress, 5000);
             int itemCounter = 0;
@@ -105,8 +98,6 @@ namespace NovaPointLibrary.Solutions.Report
                     itemExpectedCount += 5000;
                 }
             }
-
-            _logger.LogTxt(GetType().Name, $"Finish processing recycle bin items for '{siteUrl}'");
         }
 
         private void AddRecord(string siteUrl,
@@ -139,9 +130,5 @@ namespace NovaPointLibrary.Solutions.Report
 
     public class RecycleBinReportParameters : SPORecycleBinItemParameters, ISolutionParameters
     {
-        internal SPORecycleBinItemParameters GetRecycleBinParameters()
-        {
-            return this;
-        }
     }
 }

@@ -39,7 +39,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
             RecycleBinItemCollection recycleBinItemCollection;
             do
             {
-                ClientContext clientContext = await _appInfo.GetContext(_logger, siteUrl);
+                ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
                 recycleBinItemCollection = clientContext.Site.GetRecycleBinItems(pagingInfo, 5000, false, RecycleBinOrderBy.DefaultOrderBy, recycleBinStage);
                 clientContext.Load(recycleBinItemCollection);
@@ -71,7 +71,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
                 await foreach (var recycleBinItemCollection in GetBatchAsync(siteUrl, RecycleBinItemState.FirstStageRecycleBin))
                 {
                     counter += recycleBinItemCollection.Count;
-                    _logger.LogUI(GetType().Name, $"Collected {counter} items from the recycle bin");
+                    _logger.LogUI(GetType().Name, $"Collected {counter} items from first-stage recycle bin");
                     foreach (var oRecycleBinItem in recycleBinItemCollection)
                     {
                         if (MatchParameters(oRecycleBinItem, parameters)) { yield return oRecycleBinItem; }
@@ -79,12 +79,13 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
                 }
             }
 
+            counter = 0;
             if (parameters.SecondStage)
             {
                 await foreach (var recycleBinItemCollection in GetBatchAsync(siteUrl, RecycleBinItemState.SecondStageRecycleBin))
                 {
                     counter += recycleBinItemCollection.Count;
-                    _logger.LogUI(GetType().Name, $"Collected {counter} items from the recycle bin");
+                    _logger.LogUI(GetType().Name, $"Collected {counter} items from second-stage the recycle bin");
                     foreach (var oRecycleBinItem in recycleBinItemCollection)
                     {
                         if (MatchParameters(oRecycleBinItem, parameters)) { yield return oRecycleBinItem; }
@@ -143,7 +144,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
             string methodName = $"{GetType().Name}.RemoveAsync";
             _logger.LogTxt(methodName, $"Removing item {oRecycleBinItem.Title}");
 
-            ClientContext clientContext = await _appInfo.GetContext(_logger, siteUrl);
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
             var ItemToDelete = clientContext.Site.RecycleBin.GetById(oRecycleBinItem.Id);
 
@@ -156,7 +157,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
             _appInfo.IsCancelled();
             _logger.LogTxt(GetType().Name, $"Restoring item {oRecycleBinItem.Title} with id {oRecycleBinItem.Id} using CSOM");
 
-            ClientContext clientContext = await _appInfo.GetContext(_logger, siteUrl);
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
             var ItemToDelete = clientContext.Site.RecycleBin.GetById(oRecycleBinItem.Id);
             ItemToDelete.Restore();

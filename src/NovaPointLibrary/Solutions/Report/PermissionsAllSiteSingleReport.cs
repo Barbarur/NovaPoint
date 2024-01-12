@@ -6,6 +6,7 @@ using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Permision;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.Site;
+using NovaPointLibrary.Solutions.Automation;
 using System.Diagnostics.Metrics;
 using System.Dynamic;
 
@@ -14,10 +15,37 @@ namespace NovaPointLibrary.Solutions.Report
     public class PermissionsAllSiteSingleReport
     {
         public static string _solutionName = "Permissions in a Site report";
-        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PermissionAllSiteSingleReport"; 
-        
+        public static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PermissionAllSiteSingleReport";
+
+        private PermissionsAllSiteSingleParameters _param = new();
+        public ISolutionParameters Parameters
+        {
+            get { return _param; }
+            set { _param = (PermissionsAllSiteSingleParameters)value; }
+        }
+
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
+
+        public PermissionsAllSiteSingleReport(PermissionsAllSiteSingleParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        {
+            Parameters = parameters;
+            _logger = new(uiAddLog, this.GetType().Name, parameters);
+            _appInfo = new(_logger, cancelTokenSource);
+
+            SiteUrl = parameters.SiteUrl;
+
+            IncludeAdmins = parameters.IncludeAdmins;
+            IncludeSiteAccess = parameters.IncludeSiteAccess;
+            IncludeUniquePermissions = parameters.IncludeUniquePermissions;
+            IncludeSubsites = parameters.IncludeSubsites;
+
+            IncludeSystemLists = parameters.IncludeSystemLists;
+            IncludeResourceLists = parameters.IncludeResourceLists;
+        }
+
+        //private readonly NPLogger _logger;
+        //private readonly Commands.Authentication.AppInfo _appInfo;
 
         private readonly string SiteUrl;
         
@@ -31,21 +59,21 @@ namespace NovaPointLibrary.Solutions.Report
 
         List<SPORoleAssignmentKnownGroup> KnownGroups { get; set; } = new() { };
 
-        public PermissionsAllSiteSingleReport(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, PermissionsAllSiteSingleParameters parameters)
-        {
-            _logger = new(uiAddLog, "Reports", GetType().Name);
-            _appInfo = appInfo;
+        //public PermissionsAllSiteSingleReport(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, PermissionsAllSiteSingleParameters parameters)
+        //{
+        //    _logger = new(uiAddLog, "Reports", GetType().Name);
+        //    _appInfo = appInfo;
 
-            SiteUrl = parameters.SiteUrl;
+        //    SiteUrl = parameters.SiteUrl;
 
-            IncludeAdmins = parameters.IncludeAdmins;
-            IncludeSiteAccess = parameters.IncludeSiteAccess;
-            IncludeUniquePermissions = parameters.IncludeUniquePermissions;
-            IncludeSubsites = parameters.IncludeSubsites;
+        //    IncludeAdmins = parameters.IncludeAdmins;
+        //    IncludeSiteAccess = parameters.IncludeSiteAccess;
+        //    IncludeUniquePermissions = parameters.IncludeUniquePermissions;
+        //    IncludeSubsites = parameters.IncludeSubsites;
 
-            IncludeSystemLists = parameters.IncludeSystemLists;
-            IncludeResourceLists = parameters.IncludeResourceLists;
-        }
+        //    IncludeSystemLists = parameters.IncludeSystemLists;
+        //    IncludeResourceLists = parameters.IncludeResourceLists;
+        //}
 
         public async Task RunAsync()
         {
@@ -78,12 +106,13 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.SingleSiteAsync";
-            _logger.ScriptStartNotice();
 
 
             string rootUrl = SiteUrl.Substring(0, SiteUrl.IndexOf(".com") + 4);
-            string spoSiteAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(rootUrl);
-            string aadAccessToken = await new GetAccessToken(_logger, _appInfo).GraphInteractiveAsync();
+            string spoSiteAccessToken = await _appInfo.GetSPOAccessToken(rootUrl);
+            //string spoSiteAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(rootUrl);
+            string aadAccessToken = await _appInfo.GetGraphAccessToken();
+            //string aadAccessToken = await new GetAccessToken(_logger, _appInfo).GraphInteractiveAsync();
 
             GetSPOSitePermissions getPermissions = new(_logger, _appInfo, spoSiteAccessToken, aadAccessToken, KnownGroups);
 
@@ -115,7 +144,6 @@ namespace NovaPointLibrary.Solutions.Report
         private void AddRecordToCSV(List<SPOLocationPermissionsRecord> recordsList)
         {
             _appInfo.IsCancelled();
-            _logger.AddLogToTxt($"[{GetType().Name}.AddRecordToCSV] - Adding record");
             
             foreach (var record in recordsList)
             {
@@ -140,9 +168,9 @@ namespace NovaPointLibrary.Solutions.Report
         }
     }
 
-    public class PermissionsAllSiteSingleParameters
+    public class PermissionsAllSiteSingleParameters : ISolutionParameters
     {
-        internal string SiteUrl;
+        public string SiteUrl { get; set; } = string.Empty;
 
         public bool IncludeAdmins { get; set; } = true;
         public bool IncludeSiteAccess { get; set; } = true;
@@ -152,9 +180,5 @@ namespace NovaPointLibrary.Solutions.Report
         public bool IncludeSystemLists { get; set; } = false;
         public bool IncludeResourceLists { get; set; } = false;
 
-        public PermissionsAllSiteSingleParameters(string siteUrl)
-        {
-            SiteUrl = siteUrl;
-        }
     }
 }

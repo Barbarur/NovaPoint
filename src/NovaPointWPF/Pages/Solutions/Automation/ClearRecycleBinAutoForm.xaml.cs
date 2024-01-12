@@ -2,6 +2,7 @@
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
@@ -62,10 +63,9 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             this.OriginalLocation = string.Empty;
             this.FileSizeMb = 0;
             this.FileSizeAbove = true;
-
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
+        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
             ClearRecycleBinAutoParameters parameters = new()
             {
@@ -90,7 +90,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 FileSizeAbove = this.FileSizeAbove,
             };
 
-            await new ClearRecycleBinAuto(appInfo, uiLog, parameters).RunAsync();
+            await new ClearRecycleBinAuto(parameters, uiLog, cancelTokenSource).RunAsync();
 
         }
     }

@@ -22,7 +22,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             string methodName = $"{GetType().Name}";
             _logger.LogTxt(methodName, $"Start getting Item '{folderServerRelativeUrl}' from '{siteUrl}'");
 
-            ClientContext clientContext = await _appInfo.GetContext(_logger, siteUrl);
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
             return GetFolderAsync(clientContext, folderServerRelativeUrl);
         }
@@ -56,7 +56,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             _appInfo.IsCancelled();
             _logger.LogTxt(GetType().Name, $"Start renaming folder '{fileServerRelativeUrl}' to '{newName}'");
 
-            ClientContext clientContext = await _appInfo.GetContext(_logger, siteUrl);
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
             
             Folder oFolder = GetFolderAsync(clientContext, fileServerRelativeUrl);
 

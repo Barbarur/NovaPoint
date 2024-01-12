@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -70,7 +71,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
             this.FolderRelativeUrl = String.Empty;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
+        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
 
             ShortcutODReportParameters parameters = new()
@@ -84,7 +85,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 FolderRelativeUrl = this.FolderRelativeUrl,
             };
 
-            await new ShortcutODReport(appInfo, uiLog, parameters).RunAsync();
+            await new ShortcutODReport(parameters, uiLog, cancelTokenSource).RunAsync();
         }
     }
 }

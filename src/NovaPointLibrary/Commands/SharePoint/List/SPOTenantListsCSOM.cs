@@ -25,11 +25,9 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         internal async IAsyncEnumerable<SPOTenantResults> GetListsAsync()
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.GetLists";
 
-            await foreach (SPOTenantResults siteResults in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param).GetAsync())
+            await foreach (SPOTenantResults siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
             {
-                _logger.LogUI(GetType().Name, $"Processing Site '{siteResults.SiteUrl}'");
 
                 if (!String.IsNullOrWhiteSpace(siteResults.Remarks))
                 {
@@ -41,7 +39,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 List<Microsoft.SharePoint.Client.List>? collList = null;
                 try
                 {
-                    collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.ListTitle, _param.IncludeHiddenLists, _param.IncludeSystemLists);
+                    collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param);
                 }
                 catch (Exception ex)
                 {
@@ -60,6 +58,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                     ProgressTracker progress = new(siteResults.Progress, collList.Count);
                     foreach (var oList in collList)
                     {
+                        _logger.LogTxt(GetType().Name, $"Processing {oList.BaseType} '{oList.Title}'");
                         SPOTenantResults results = new(progress, siteResults.SiteUrl, oList);
                         yield return results;
 

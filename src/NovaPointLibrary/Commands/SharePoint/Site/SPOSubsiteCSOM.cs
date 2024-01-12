@@ -16,14 +16,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
     internal class SPOSubsiteCSOM
     {
-        private readonly Main _main;
+        //private readonly Main _main;
         private readonly NPLogger _logger;
         private readonly Authentication.AppInfo _appInfo;
 
-        internal SPOSubsiteCSOM(Main main)
-        {
-            _main = main;
-        }
+        //internal SPOSubsiteCSOM(Main main)
+        //{
+        //    _main = main;
+        //}
 
         internal SPOSubsiteCSOM(NPLogger logger, Authentication.AppInfo appInfo)
         {
@@ -31,80 +31,80 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _appInfo = appInfo;
         }
 
-        internal async Task<List<Web>> GetDEPRECATED(string siteUrl)
-        {
-            _main.IsCancelled();
+        //internal async Task<List<Web>> GetDEPRECATED(string siteUrl)
+        //{
+        //    _main.IsCancelled();
 
-            var expresions = new Expression<Func<Web, object>>[]
-            {
-            };
+        //    var expresions = new Expression<Func<Web, object>>[]
+        //    {
+        //    };
 
-            return await GetDEPRECATED(siteUrl, expresions);
-        }
+        //    return await GetDEPRECATED(siteUrl, expresions);
+        //}
                 
 
-        internal async Task<List<Web>> GetDEPRECATED(string siteUrl, Expression<Func<Web, object>>[] retrievalExpressions)
-        {
-            _main.IsCancelled();
-            string methodName = $"{GetType().Name}.Get";
-            _main.AddLogToTxt(methodName, $"Start getting all Subsites");
+        //internal async Task<List<Web>> GetDEPRECATED(string siteUrl, Expression<Func<Web, object>>[] retrievalExpressions)
+        //{
+        //    _main.IsCancelled();
+        //    string methodName = $"{GetType().Name}.Get";
+        //    _main.AddLogToTxt(methodName, $"Start getting all Subsites");
 
-            var defaultExpressions = new Expression<Func<Web, object>>[]
-            {
-                w => w.Id,
-                w => w.Title,
-                w => w.Url,
-            };
+        //    var defaultExpressions = new Expression<Func<Web, object>>[]
+        //    {
+        //        w => w.Id,
+        //        w => w.Title,
+        //        w => w.Url,
+        //    };
 
-            var expressions = retrievalExpressions.Union(defaultExpressions).ToArray();
+        //    var expressions = retrievalExpressions.Union(defaultExpressions).ToArray();
 
-            ClientContext clientContext = await _main.GetContext(siteUrl);
+        //    ClientContext clientContext = await _main.GetContext(siteUrl);
 
-            var subsites = clientContext.Web.Webs;
+        //    var subsites = clientContext.Web.Webs;
 
-            clientContext.Load(subsites);
-            clientContext.ExecuteQueryRetry();
+        //    clientContext.Load(subsites);
+        //    clientContext.ExecuteQueryRetry();
 
-            List<Web> collSubsites = new();
-            collSubsites.AddRange(GetSubWebsInternalDEPRECATED(subsites, retrievalExpressions));
+        //    List<Web> collSubsites = new();
+        //    collSubsites.AddRange(GetSubWebsInternalDEPRECATED(subsites, retrievalExpressions));
 
-            _main.AddLogToTxt(methodName, $"Start getting all Subsites");
+        //    _main.AddLogToTxt(methodName, $"Start getting all Subsites");
 
-            return FilterAddInSitesDEPRECATED( collSubsites );
-        }
+        //    return FilterAddInSitesDEPRECATED( collSubsites );
+        //}
 
-        private List<Web> FilterAddInSitesDEPRECATED(List<Web> collSubsites)
-        {
-            collSubsites.RemoveAll(w => (!w.Url.Contains(_main._rootPersonalUrl, StringComparison.OrdinalIgnoreCase) && !w.Url.Contains(_main._rootSharedUrl, StringComparison.OrdinalIgnoreCase)));
-            string methodName = $"{GetType().Name}.FilterAddInSites";
-            _main.AddLogToTxt(methodName, $"Subsites count: {collSubsites.Count}");
-            return collSubsites;
-        }
+        //private List<Web> FilterAddInSitesDEPRECATED(List<Web> collSubsites)
+        //{
+        //    collSubsites.RemoveAll(w => (!w.Url.Contains(_main._rootPersonalUrl, StringComparison.OrdinalIgnoreCase) && !w.Url.Contains(_main._rootSharedUrl, StringComparison.OrdinalIgnoreCase)));
+        //    string methodName = $"{GetType().Name}.FilterAddInSites";
+        //    _main.AddLogToTxt(methodName, $"Subsites count: {collSubsites.Count}");
+        //    return collSubsites;
+        //}
 
-        private List<Web> GetSubWebsInternalDEPRECATED(WebCollection subsites, Expression<Func<Web, object>>[] retrievalExpressions)
-        {
-            _main.IsCancelled();
-            string methodName = $"{GetType().Name}.Get";
-            _main.AddLogToTxt(methodName, $"Start getting Subsites internals");
+        //private List<Web> GetSubWebsInternalDEPRECATED(WebCollection subsites, Expression<Func<Web, object>>[] retrievalExpressions)
+        //{
+        //    _main.IsCancelled();
+        //    string methodName = $"{GetType().Name}.Get";
+        //    _main.AddLogToTxt(methodName, $"Start getting Subsites internals");
 
-            var collSubsites = new List<Web>();
+        //    var collSubsites = new List<Web>();
 
-            subsites.EnsureProperties(new Expression<Func<WebCollection, object>>[] { wc => wc.Include(w => w.Id) });
+        //    subsites.EnsureProperties(new Expression<Func<WebCollection, object>>[] { wc => wc.Include(w => w.Id) });
 
-            foreach (var subsite in subsites)
-            {
-                subsite.EnsureProperties(retrievalExpressions);
-                collSubsites.Add(subsite);
+        //    foreach (var subsite in subsites)
+        //    {
+        //        subsite.EnsureProperties(retrievalExpressions);
+        //        collSubsites.Add(subsite);
 
-                collSubsites.AddRange(GetSubWebsInternalDEPRECATED(subsite.Webs, retrievalExpressions));
-            }
+        //        collSubsites.AddRange(GetSubWebsInternalDEPRECATED(subsite.Webs, retrievalExpressions));
+        //    }
 
-            _main.AddLogToTxt(methodName, $"Finish getting Subsites internals");
-            return collSubsites;
-        }
+        //    _main.AddLogToTxt(methodName, $"Finish getting Subsites internals");
+        //    return collSubsites;
+        //}
 
 
-        internal async Task<List<Web>> Get(string siteUrl)
+        internal async Task<List<Web>> GetAsync(string siteUrl)
         {
             _appInfo.IsCancelled();
 
@@ -112,11 +112,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             {
             };
 
-            return await Get(siteUrl, expresions);
+            return await GetAsync(siteUrl, expresions);
         }
 
 
-        internal async Task<List<Web>> Get(string siteUrl, Expression<Func<Web, object>>[] retrievalExpressions)
+        internal async Task<List<Web>> GetAsync(string siteUrl, Expression<Func<Web, object>>[] retrievalExpressions)
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.Get";
@@ -131,7 +131,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
             var expressions = retrievalExpressions.Union(defaultExpressions).ToArray();
 
-            ClientContext clientContext = await _appInfo.GetContext(_logger, siteUrl);
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
             var subsites = clientContext.Web.Webs;
 

@@ -41,7 +41,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 List<Microsoft.SharePoint.Client.List>? collList = null;
                 try
                 {
-                    collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(listResult.SiteUrl, _param.ListTitle, _param.IncludeHiddenLists, _param.IncludeSystemLists);
+                    collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(listResult.SiteUrl, _param);
                 }
                 catch (Exception ex)
                 {

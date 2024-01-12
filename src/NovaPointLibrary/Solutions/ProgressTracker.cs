@@ -1,4 +1,5 @@
 ﻿using CamlBuilder;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
@@ -10,7 +11,8 @@ namespace NovaPointLibrary.Solutions
 {
     internal class ProgressTracker
     {
-        //internal readonly NPLogger _logger;
+        internal readonly NPLogger _logger;
+
         private int _counter;
         private int _totalUnits;
         private int Total
@@ -30,26 +32,28 @@ namespace NovaPointLibrary.Solutions
         private readonly ProgressTracker? _parentProgress = null;
 
         // TO BE REMOVED WHEN Main IS DEPRECATED
-        private readonly Action<double> _progressUI;
+        //private readonly Action<double> _progressUI;
 
 
-        internal ProgressTracker(Main main, int totalCount)
-        {
-            _progressUI = main.AddProgressToUI;
-            _counter = 0;
-            Total = totalCount;
-        }
+        //internal ProgressTracker(Main main, int totalCount)
+        //{
+        //    _progressUI = main.AddProgressToUI;
+        //    _counter = 0;
+        //    Total = totalCount;
+        //}
 
         internal ProgressTracker(NPLogger logger, int totalCount)
         {
-            _progressUI = logger.ProgressUI;
+            _logger = logger;
+            //_progressUI = logger.ProgressUI;
             _counter = 0;
             Total = totalCount;
         }
 
         internal ProgressTracker(ProgressTracker parentProgress, int totalCount)
         {
-            _progressUI = parentProgress._progressUI;
+            _logger = parentProgress._logger;
+            //_progressUI = parentProgress._progressUI;
             _parentProgress = parentProgress;
             _counter = 0;
             Total = totalCount;
@@ -76,7 +80,8 @@ namespace NovaPointLibrary.Solutions
             {
                 double progress = Math.Round(progressvalue * 100, 2);
 
-                _progressUI(progress);
+                _logger.ProgressUI(progress);
+                //_progressUI(progress);
             }
             else
             {

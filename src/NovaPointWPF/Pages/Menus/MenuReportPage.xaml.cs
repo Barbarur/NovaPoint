@@ -35,9 +35,14 @@ namespace NovaPointWPF.Pages.Menus
         }
 
 
-        private void SiteAllReportFormClick(object sender, RoutedEventArgs e)
+        //private void SiteAllReportFormClick(object sender, RoutedEventArgs e)
+        //{
+        //    GoToSolutionForm(new SiteAllReportForm());
+        //}
+
+        private void SiteReportFormClick(object sender, RoutedEventArgs e)
         {
-            GoToSolutionForm(new SiteAllReportForm());
+            GoToSolutionForm(new SiteReportForm());
         }
 
 
@@ -65,11 +70,6 @@ namespace NovaPointWPF.Pages.Menus
         }
 
                
-        private void UserAllSiteSingleReportFormClick(object sender, RoutedEventArgs e)
-        {
-            GoToSolutionForm(new UserAllSiteSingleReportForm());
-        }
-
         private void PermissionsAllSiteSingleReportFormClick(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new PermissionsAllSiteSingleReportForm());

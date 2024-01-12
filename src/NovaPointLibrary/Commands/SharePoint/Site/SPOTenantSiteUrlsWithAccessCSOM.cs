@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {
-    internal class SPOTenantSiteUrlsCSOM
+    internal class SPOTenantSiteUrlsWithAccessCSOM
     {
         private readonly NPLogger _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly SPOTenantSiteUrlsParameters _param;
 
-        internal SPOTenantSiteUrlsCSOM(NPLogger logger, Authentication.AppInfo appInfo, SPOTenantSiteUrlsParameters parameters)
+        internal SPOTenantSiteUrlsWithAccessCSOM(NPLogger logger, Authentication.AppInfo appInfo, SPOTenantSiteUrlsParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -44,7 +44,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             }
             else
             {
-                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).Get(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
+                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
 
                 progress = new(_logger, collSiteCollections.Count);
                 _logger.LogTxt(methodName, $"Finish getting Site Collections'");
@@ -67,7 +67,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             List<Web>? collSubsites = null;
             try
             {
-                collSubsites = await new SPOSubsiteCSOM(_logger, _appInfo).Get(siteCollectionResult.SiteUrl);
+                collSubsites = await new SPOSubsiteCSOM(_logger, _appInfo).GetAsync(siteCollectionResult.SiteUrl);
             }
             catch (Exception ex)
             {
@@ -126,12 +126,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 }
                 else
                 {
+                    _logger.LogUI(GetType().Name, $"Processing Site '{SiteCollection.SiteUrl}'");
                     yield return SiteCollection;
 
                     if (_param.IncludeSubsites)
                     {
                         await foreach (SPOTenantResults subsite in GetSubsitesAsync(SiteCollection))
                         {
+                            _logger.LogUI(GetType().Name, $"Processing Site '{subsite.SiteUrl}'");
                             yield return subsite;
                         }
                     }

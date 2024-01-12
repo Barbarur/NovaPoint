@@ -27,10 +27,15 @@
 
                 <StackPanel>
 
+                    <!--<Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="All Site Collections and Subsites (Legacy)"
+                        Click="SiteAllReportFormClick"/>-->
+
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"
                         Content="All Site Collections and Subsites"
-                        Click="SiteAllReportFormClick"/>
+                        Click="SiteReportFormClick"/>
 
                 </StackPanel>
                                 
@@ -111,11 +116,6 @@
                 <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
                 <StackPanel>
-
-                    <Button
-                        Style="{DynamicResource SolutionMenuButton}"
-                        Content="Users in a single Site"
-                        Click="UserAllSiteSingleReportFormClick"/>
 
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"

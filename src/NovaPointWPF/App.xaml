@@ -213,7 +213,7 @@
         <Style x:Key="SolutionFormToggleButton" TargetType="{x:Type ToggleButton}">
             <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
             <Setter Property="Margin" Value="2, 2, 2, 2"/>
-            <Setter Property="Width" Value="150"/>
+            <Setter Property="Width" Value="159"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
@@ -299,73 +299,11 @@
 
                             </Popup>
                         </Grid>
-                        <!--<ControlTemplate.Triggers>
-                            <Trigger SourceName="PART_Popup" Property="Window.AllowsTransparency" Value="True">
-                                <Setter TargetName="DropDownBorder" Property="FrameworkElement.Margin" Value="0,2,0,0" />
-                                
-                            </Trigger>
-                        </ControlTemplate.Triggers>-->
+
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-
-
-        <!--<Style x:Key="CBCustomToggleButton" TargetType="{x:Type ToggleButton}">
-            <Setter Property="Margin" Value="2, 2, 2, 2"/>
-            <Setter Property="Width" Value="150"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ToggleButton">
-                        <Grid>
-                            <Border
-                                Name="Border"
-                                Style="{DynamicResource SolutionFormControlBorder}"/>
-
-                            <DockPanel>
-
-                                <Label
-                                    x:Name="NombreTexto"
-                                    Margin="10, 0, 10, 0"
-                                    Style="{DynamicResource SolutionFormControlText}"
-                                    Content="{TemplateBinding Content}"
-                                    DockPanel.Dock="Left"/>
-
-                                <Path
-                                    x:Name="Arrow"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Data="M 0 0 L 4 4 L 8 0 Z"
-                                    Fill="Red"
-                                    DockPanel.Dock="Right"/>
-
-                                <TextBlock
-                                    DockPanel.Dock="Right"
-                                    Height="Auto"/>
-
-                            </DockPanel>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="IsMouseOver" Value="True"/>
-                                    <Condition Property="IsChecked" Value="False"/>
-                                </MultiTrigger.Conditions>
-                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource HoverButtonColor}"/>
-                            </MultiTrigger>
-
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
-                            </Trigger>
-                            
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-
-        </Style>-->
-
 
         <Style x:Key="{x:Type ComboBoxItem}" TargetType="{x:Type ComboBoxItem}">
             <Setter Property="SnapsToDevicePixels" Value="true" />
@@ -573,7 +511,7 @@
 
         <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
             <Grid
-                Width="5">
+                Width="6">
                 
                 <Border
                     CornerRadius="1"
@@ -627,9 +565,10 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Thumb}">
-                        <Border CornerRadius="4"
+                        <Border
+                            CornerRadius="4"
                             Background="{TemplateBinding Background}"
-                            BorderThickness="0" />
+                            BorderThickness="0"/>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>

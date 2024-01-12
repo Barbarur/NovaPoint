@@ -51,49 +51,42 @@ namespace NovaPointLibrary.Solutions
             LogUI(methodName, $"Solution has started, please wait to the end");
         }
 
-        public NPLogger(Action<LogInfo> uiAddLog, ISolution solution)
+        public NPLogger(Action<LogInfo> uiAddLog, string solutionName, ISolutionParameters parameters)
         {
-            string methodName = $"{GetType().Name}.Main";
-
             _uiAddLog = uiAddLog;
-
-            string solutionName = solution.GetType().Name;
 
             string userDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string folderName = solutionName + "_" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
             string folderPath = Path.Combine(userDocumentsFolder, "NovaPoint", solutionName, folderName);
-            System.IO.Directory.CreateDirectory(folderPath);
+            Directory.CreateDirectory(folderPath);
 
-            _txtPath = System.IO.Path.Combine(folderPath, folderName + "_Logs.txt");
-            _csvPath = System.IO.Path.Combine(folderPath, folderName + "_Report.csv");
+            _txtPath = Path.Combine(folderPath, folderName + "_Logs.txt");
+            _csvPath = Path.Combine(folderPath, folderName + "_Report.csv");
 
-            LogTxt(methodName, $"Solution logs can be found at: {_txtPath}");
-            LogTxt(methodName, $"Solution report can be found at: {_csvPath}");
+            LogTxt(GetType().Name, $"Logs: {_txtPath}");
+            LogTxt(GetType().Name, $"Report: {_csvPath}");
             _uiAddLog(LogInfo.FolderInfo(folderPath));
 
-            SolutionProperties(solution.Parameters);
+            SolutionProperties(parameters);
 
             SW.Start();
 
-            LogUI(methodName, $"Solution has started, please wait to the end");
-
+            LogUI(GetType().Name, $"Solution has started, please wait to the end");
         }
 
         private void SolutionProperties(ISolutionParameters parameters)
         {
-            string methodName = $"{GetType().Name}.SolutionProperties";
-            LogTxt(methodName, $"Start adding Solution properties");
+            LogTxt(GetType().Name, $"Solution properties");
 
+            parameters.ParametersCheck();
 
             Type solutiontype = parameters.GetType();
             PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             foreach (var propertyInfo in properties)
             {
-                LogTxt(methodName, $"{propertyInfo.Name}: {propertyInfo.GetValue(parameters)}");
+                LogTxt(GetType().Name, $"{propertyInfo.Name}: {propertyInfo.GetValue(parameters)}");
             }
-
-            LogTxt(methodName, $"Finish adding Solution properties");
         }
 
         
@@ -128,9 +121,6 @@ namespace NovaPointLibrary.Solutions
 
         internal void RecordCSV(dynamic o)
         {
-            string methodName = $"{GetType().Name}.AddRecordToCSV";
-            LogTxt(methodName, $"Adding Record to csv report");
-
             StringBuilder sb = new();
             using StreamWriter csv = new(new FileStream(_csvPath, FileMode.Append, FileAccess.Write));
             {
@@ -159,7 +149,7 @@ namespace NovaPointLibrary.Solutions
         internal void ScriptFinish()
         {
             ScriptFinishNotice();
-            LogUI($"{GetType().Name}.ScriptFinish", $"COMPLETED: Solution has finished correctly!");
+            LogUI(GetType().Name, $"COMPLETED: Solution has finished correctly!");
         }
 
         internal void ScriptFinish(Exception ex)
@@ -177,8 +167,8 @@ namespace NovaPointLibrary.Solutions
 
         internal void ReportError(string type, string URL, Exception ex)
         {
-            LogUI(GetType().Name, $"Error processing {type} '{URL}'");
-            LogTxt(GetType().Name, $"Exception: {ex.Message}");
+            LogUI(GetType().Name, $"ERROR for {type} '{URL}'");
+            LogTxt(GetType().Name, $"Exception message: {ex.Message}");
             LogTxt(GetType().Name, $"Trace: {ex.StackTrace}");
         }
 
@@ -194,11 +184,6 @@ namespace NovaPointLibrary.Solutions
 
 
 
-        // TO BE DEPRECATED
-        internal void ScriptStartNotice()
-        {
-            AddLogToUI($"Solution has started, please wait to the end");
-        }
 
         // TO BE DEPRECATED
         internal void AddLogToTxt(string log)
@@ -210,7 +195,7 @@ namespace NovaPointLibrary.Solutions
         // TO BE DEPRECATED
         internal void AddLogToUI(string log)
         {
-            AddLogToTxt(log);
+            LogTxt(GetType().Name, log);
 
             LogInfo logInfo = new(log);
             _uiAddLog(logInfo);

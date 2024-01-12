@@ -59,7 +59,7 @@ namespace NovaPointLibrary.Commands.Utilities
 
             HttpRequestMessage request = new();
 
-            string spoAccessToken = await _appInfo.GetSPOAccessToken(_logger, apiUrl);
+            string spoAccessToken = await _appInfo.GetSPOAccessToken(apiUrl);
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", spoAccessToken);
             
             request.Method = method;

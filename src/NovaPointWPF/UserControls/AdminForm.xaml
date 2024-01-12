@@ -1,0 +1,49 @@
+﻿<UserControl x:Class="NovaPointWPF.UserControls.AdminForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NovaPointWPF.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             x:Name="root">
+    
+    <Grid Background="Transparent"
+          Margin="0, 0, 0, 15">
+
+        <StackPanel>
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Admin Account"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Admin UPN"/>
+
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding AdminUPN, ElementName=root}"
+                        Margin="0,0,0,8"/>
+
+                    <ToggleButton
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Remove Admin"
+                        IsChecked="{Binding RemoveAdmin, ElementName=root}"
+                        HorizontalAlignment="Left"/>
+
+                </StackPanel>
+
+            </Grid>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

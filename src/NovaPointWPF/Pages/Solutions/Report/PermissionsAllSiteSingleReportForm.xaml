@@ -103,12 +103,14 @@
                             <ToggleButton
                                 Style="{DynamicResource SolutionFormToggleButton}"
                                 Content="Include System Lists"
+                                Width="175"
                                 IsChecked="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
 
                             <ToggleButton
                                 Style="{DynamicResource SolutionFormToggleButton}"
                                 Content="Include Resource Lists"
+                                Width="175"
                                 IsChecked="{Binding IncludeResourceLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
                         </StackPanel>

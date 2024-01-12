@@ -33,20 +33,27 @@ namespace NovaPointLibrary.Commands.Utilities
             HttpsClient = new();
         }
 
+        internal GraphAPIHandler(NPLogger logger, AppInfo appInfo)
+        {
+            _logger = logger;
+            _appInfo = appInfo;
+            HttpsClient = new();
+        }
+
         internal async Task<IEnumerable<T>> GetCollectionAsync<T>(string url)
         {
             _appInfo.IsCancelled();
 
             List<T> results = new();
 
-            var request = await GetResultsContentAsync<GraphtResultContent<T>>(url);
+            var request = await GetObjectAsync<GraphtResultCollection<T>>(url);
 
             if (request !=null && request.Items.Any())
             {
                 results.AddRange(request.Items);
                 while (!string.IsNullOrEmpty(request.NextLink))
                 {
-                    request = await GetResultsContentAsync<GraphtResultContent<T>>(request.NextLink);
+                    request = await GetObjectAsync<GraphtResultCollection<T>>(request.NextLink);
                     if (request != null && request.Items.Any())
                     {
                         results.AddRange(request.Items);
@@ -57,11 +64,11 @@ namespace NovaPointLibrary.Commands.Utilities
             return results;
         }
 
-        private async Task<T?> GetResultsContentAsync<T>(string url)
+        internal async Task<T> GetObjectAsync<T>(string url)
         {
             _appInfo.IsCancelled();
 
-            string responseContent = await GetResultsJSONAsync(url);
+            string responseContent = await GetResponseJSONAsync(url);
 
             if (responseContent != null)
             {
@@ -69,12 +76,13 @@ namespace NovaPointLibrary.Commands.Utilities
                 
                 return response;
             }
-
-            return default;
-
+            else
+            {
+                throw new Exception("Response is null");
+            }
         }
 
-        internal async Task<string> GetResultsJSONAsync(string url)
+        private async Task<string> GetResponseJSONAsync(string url)
         {
             _appInfo.IsCancelled(); 
             
@@ -91,7 +99,7 @@ namespace NovaPointLibrary.Commands.Utilities
             if (completedTask != sendMessage || _appInfo.CancelToken.IsCancellationRequested)
             {
                 _appInfo.CancelToken.ThrowIfCancellationRequested();
-                return null;
+                throw new Exception("Operation canceled.");
             }
             else
             {
@@ -113,7 +121,7 @@ namespace NovaPointLibrary.Commands.Utilities
             message.RequestUri = !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? new Uri($"{_graphUrl}/{url}") : new Uri(url);
             message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _accessToken);
 
-            _logger.AddLogToTxt($"Request Message Uir {message.RequestUri}");
+            _logger.LogTxt(GetType().Name, $"Request Message Uir {message.RequestUri}");
 
             return message;
         }
@@ -133,16 +141,16 @@ namespace NovaPointLibrary.Commands.Utilities
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.AddLogToTxt($"Successful response");
+                _logger.LogTxt(GetType().Name, $"Successful response");
                 var responseContent = await response.Content.ReadAsStringAsync();
                 return responseContent;
             }
             else
             {
-                _logger.AddLogToTxt($"Error response");
+                _logger.LogTxt(GetType().Name, $"Error response");
 
                 string content = await response.Content.ReadAsStringAsync();
-                _logger.AddLogToTxt($"Error Content:{content}");
+                _logger.LogTxt(GetType().Name,$"Error Content:{content}");
 
                 var oErrorContent = JsonConvert.DeserializeObject<GraphErrorContent>(content);
                 string errorMessage = oErrorContent.Error.Message.ToString();

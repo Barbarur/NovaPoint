@@ -14,7 +14,7 @@
        
         <StackPanel>
 
-            <Label
+            <!--<Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
                 Content="Admin Account"/>
             
@@ -43,7 +43,7 @@
 
                 </StackPanel>
 
-            </Grid>
+            </Grid>-->
 
 
             <Label

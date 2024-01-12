@@ -53,8 +53,6 @@ namespace NovaPointWPF.Pages.Menus
 
             AppSettings.SaveSettings();
 
-            Properties.Settings.Default.Save();
-
             if (!CachingToken) { AppInfo.RemoveTokenCache(); }
         }
 

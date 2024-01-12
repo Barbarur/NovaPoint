@@ -1,9 +1,7 @@
-﻿using NovaPointLibrary.Commands.Authentication;
+﻿using NovaPointLibrary.Solutions.Report;
 using NovaPointLibrary.Solutions;
-using NovaPointLibrary.Solutions.Report;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -21,13 +19,10 @@ using System.Windows.Shapes;
 namespace NovaPointWPF.Pages.Solutions.Report
 {
     /// <summary>
-    /// Interaction logic for ListReportForm.xaml
+    /// Interaction logic for SiteReportForm.xaml
     /// </summary>
-    public partial class ListReportForm : Page, ISolutionForm
+    public partial class SiteReportForm : Page, ISolutionForm
     {
-        public string AdminUPN { get; set; }
-        public bool RemoveAdmin { get; set; }
-
         public bool SiteAll { get; set; }
         public bool IncludePersonalSite { get; set; }
         public bool IncludeShareSite { get; set; }
@@ -35,24 +30,15 @@ namespace NovaPointWPF.Pages.Solutions.Report
         public string SiteUrl { get; set; }
         public bool IncludeSubsites { get; set; }
 
-        public bool ListAll { get; set; }
-        public bool IncludeHiddenLists { get; set; }
-        public bool IncludeSystemLists { get; set; }
-        public string ListTitle { get; set; }
-
-
-        public ListReportForm()
+        public SiteReportForm()
         {
             InitializeComponent();
 
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = ListReport.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(ListReport);
-            SolutionHeader.SolutionDocs = ListReport.s_SolutionDocs;
-
-            this.AdminUPN = String.Empty;
-            this.RemoveAdmin = true;
+            SolutionHeader.SolutionTitle = SiteReport.s_SolutionName;
+            SolutionHeader.SolutionCode = nameof(SiteReport);
+            SolutionHeader.SolutionDocs = SiteReport.s_SolutionDocs;
 
             this.SiteAll = true;
             this.IncludePersonalSite = false;
@@ -60,34 +46,21 @@ namespace NovaPointWPF.Pages.Solutions.Report
             this.OnlyGroupIdDefined = false;
             this.SiteUrl = String.Empty;
             this.IncludeSubsites = false;
-
-            this.ListAll = true;
-            this.IncludeHiddenLists = false;
-            this.IncludeSystemLists = false;
-            this.ListTitle = String.Empty;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            ListReportParameters parameters = new()
+            SiteReporttParameters parameters = new()
             {
-                AdminUPN = this.AdminUPN,
-                RemoveAdmin = this.RemoveAdmin,
-
                 SiteAll = this.SiteAll,
                 IncludePersonalSite = this.IncludePersonalSite,
                 IncludeShareSite = this.IncludeShareSite,
                 OnlyGroupIdDefined = this.OnlyGroupIdDefined,
                 SiteUrl = this.SiteUrl,
                 IncludeSubsites = this.IncludeSubsites,
-
-                ListAll = this.ListAll,
-                IncludeHiddenLists = this.IncludeHiddenLists,
-                IncludeSystemLists = this.IncludeSystemLists,
-                ListTitle = this.ListTitle,
             };
 
-            await new ListReport(parameters, uiLog, cancelTokenSource).RunAsync();
+            await new SiteReport(parameters, uiLog, cancelTokenSource).RunAsync();
         }
     }
 }

@@ -10,7 +10,7 @@
 
     <Grid Background="Transparent">
         
-        <StackPanel>
+        <!--<StackPanel>
 
             <Label
                 Style="{DynamicResource MenuMainTitleLabel}"
@@ -100,7 +100,7 @@
 
             </Grid>
 
-        </StackPanel>
+        </StackPanel>-->
 
     </Grid>
 </Page>

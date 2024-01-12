@@ -27,7 +27,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             string methodName = $"{GetType().Name}";
             _logger.LogTxt(methodName, $"Start getting Item '{fileServerRelativeUrl}' from '{siteUrl}'");
 
-            ClientContext clientContext = await _appInfo.GetContext(_logger, siteUrl);
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
             return GetFileAsync(clientContext, fileServerRelativeUrl);
         }
@@ -61,7 +61,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             _appInfo.IsCancelled();
             _logger.LogTxt(GetType().Name, $"Start renaming file '{fileServerRelativeUrl}' to '{newName}'");
 
-            ClientContext clientContext = await _appInfo.GetContext(_logger, siteUrl);
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
             File oFile = GetFileAsync(clientContext, fileServerRelativeUrl);
             

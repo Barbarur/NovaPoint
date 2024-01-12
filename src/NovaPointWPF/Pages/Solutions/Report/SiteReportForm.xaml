@@ -1,4 +1,4 @@
-﻿<Page x:Class="NovaPointWPF.Pages.Solutions.Report.ListReportForm"
+﻿<Page x:Class="NovaPointWPF.Pages.Solutions.Report.SiteReportForm"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,20 +6,15 @@
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report"
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
-      Title="ListReportForm">
+      d:DesignHeight="500" d:DesignWidth="800"
+      Title="SiteReportForm">
 
-    <Grid Background="Transparent">
+    <Grid>
 
         <StackPanel>
 
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
-
-            <designmaterial:AdminForm
-                AdminUPN="{Binding AdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
 
             <designmaterial:SiteForm
                 SiteAll="{Binding SiteAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
@@ -31,15 +26,7 @@
                 IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 />
 
-            <designmaterial:ListForm
-                ListAll="{Binding ListAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeHiddenLists="{Binding IncludeHiddenLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeSystemLists="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                ListTitle="{Binding ListTitle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
-
         </StackPanel>
-
+        
     </Grid>
 </Page>

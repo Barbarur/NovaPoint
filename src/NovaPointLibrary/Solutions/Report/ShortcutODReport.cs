@@ -23,26 +23,36 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
 
-        public ShortcutODReport(AppInfo appInfo, Action<LogInfo> uiAddLog, ShortcutODReportParameters parameters)
+        private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
+        {
+            i => i["A2ODExtendedMetadata"],
+            i => i["Author"],
+            i => i["Created"],
+            i => i["Editor"],
+            i => i["ID"],
+            i => i.FileSystemObjectType,
+            i => i["FileLeafRef"],
+            i => i["FileRef"],
+        };
+
+        public ShortcutODReport(ShortcutODReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
             Parameters = parameters;
-            _appInfo = appInfo;
-
             _param.IncludePersonalSite = true;
             _param.IncludeShareSite = false;
             _param.OnlyGroupIdDefined = false;
             _param.IncludeSubsites = false;
             _param.ListTitle = "Documents";
+            _param.FileExpresions = _fileExpressions;
 
-            _logger = new(uiAddLog, this);
+            _logger = new(uiAddLog, this.GetType().Name, parameters);
+            _appInfo = new(_logger, cancelTokenSource);
         }
 
         public async Task RunAsync()
         {
             try
             {
-                _param.ParametersCheck();
-
                 await RunScriptAsync();
 
                 _logger.ScriptFinish();
@@ -82,17 +92,17 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task ProcessItems(string siteUrl, List oList, ProgressTracker parentProgress)
         {
-            Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
-            {
-                i => i["A2ODExtendedMetadata"],
-                i => i["Author"],
-                i => i["Created"],
-                i => i["Editor"],
-                i => i["ID"],
-                i => i.FileSystemObjectType,
-                i => i["FileLeafRef"],
-                i => i["FileRef"],
-            };
+            //Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
+            //{
+            //    i => i["A2ODExtendedMetadata"],
+            //    i => i["Author"],
+            //    i => i["Created"],
+            //    i => i["Editor"],
+            //    i => i["ID"],
+            //    i => i.FileSystemObjectType,
+            //    i => i["FileLeafRef"],
+            //    i => i["FileRef"],
+            //};
 
             _appInfo.IsCancelled();
             _logger.LogTxt(GetType().Name, $"Start getting Items for {oList.BaseType} '{oList.Title}' in '{siteUrl}'");
@@ -100,7 +110,7 @@ namespace NovaPointLibrary.Solutions.Report
             if (oList.BaseType != BaseType.DocumentLibrary) { return; }
 
             ProgressTracker progress = new(parentProgress, oList.ItemCount);
-            await foreach (ListItem oItem in new SPOListItemCSOM(_logger, _appInfo).Get(siteUrl, oList.Title, _param.GetItemParameters(), fileExpressions))
+            await foreach (ListItem oItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(siteUrl, oList, _param.GetItemParameters()))
             {
                 _appInfo.IsCancelled();
 

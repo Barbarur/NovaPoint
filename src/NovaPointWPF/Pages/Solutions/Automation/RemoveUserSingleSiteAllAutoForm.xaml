@@ -10,8 +10,8 @@
       Title="RemoveUserSingleSiteAllAutoForm">
 
     <Grid Background="Transparent">
-        <StackPanel>
-
+        <!--<StackPanel>
+            
             <Label
                 Style="{DynamicResource MenuMainTitleLabel}"
                 Content="Remove a User from all Site Collections"
@@ -111,6 +111,6 @@
                 </StackPanel>
 
             </Grid>
-        </StackPanel>
+        </StackPanel>-->
     </Grid>
 </Page>

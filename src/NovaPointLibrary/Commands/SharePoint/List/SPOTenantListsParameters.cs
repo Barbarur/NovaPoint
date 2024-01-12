@@ -11,11 +11,11 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 {
     public class SPOTenantListsParameters : SPOTenantSiteUrlsParameters
     {
-        internal Expression<Func<Microsoft.SharePoint.Client.List, object>>[] ListExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[] {};
-        internal bool ListAll { get; set; } = true;
-        internal bool IncludeHiddenLists { get; set; } = false;
-        internal bool IncludeSystemLists { get; set; } = false;
-        internal string ListTitle { get; set; } = String.Empty;
+        public Expression<Func<Microsoft.SharePoint.Client.List, object>>[] ListExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[] {};
+        public bool ListAll { get; set; } = true;
+        public bool IncludeHiddenLists { get; set; } = false;
+        public bool IncludeSystemLists { get; set; } = false;
+        public string ListTitle { get; set; } = String.Empty;
 
         internal new void ParametersCheck()
         {

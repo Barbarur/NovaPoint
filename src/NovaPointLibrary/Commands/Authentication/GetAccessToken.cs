@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.Authentication
 {
+    // TO BE DEPRECATED
     internal class GetAccessToken
     {
         private readonly NPLogger _logger;

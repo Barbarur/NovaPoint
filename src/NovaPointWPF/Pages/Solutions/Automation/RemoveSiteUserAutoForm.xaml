@@ -1,4 +1,4 @@
-﻿<Page x:Class="NovaPointWPF.Pages.Solutions.Automation.ClearRecycleBinAutoForm"
+﻿<Page x:Class="NovaPointWPF.Pages.Solutions.Automation.RemoveSiteUserAutoForm"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,14 +7,33 @@
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
       d:DesignHeight="900" d:DesignWidth="800"
-      Title="ClearRecycleBinAutoForm">
+      Title="RemoveSiteUserAutoForm">
 
     <Grid Background="Transparent">
-
         <StackPanel>
 
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Target user UPN"/>
+
+                    <TextBox
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding DeleteUserUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                </StackPanel>
+
+            </Grid>
 
             <designmaterial:AdminForm
                 AdminUPN="{Binding AdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
@@ -31,22 +50,6 @@
                 IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 />
 
-            <designmaterial:RecycleBinForm
-                AllItems="{Binding AllItems, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                FirstStage="{Binding FirstStage, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                SecondStage="{Binding SecondStage, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                DeletedAfter="{Binding DeletedAfter, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                DeletedBefore="{Binding DeletedBefore, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                DeletedByEmail="{Binding DeletedByEmail, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                OriginalLocation="{Binding OriginalLocation, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                FileSizeMb="{Binding FileSizeMb, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                FileSizeAbove="{Binding FileSizeAbove, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
-
         </StackPanel>
-
     </Grid>
 </Page>

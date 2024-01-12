@@ -1,361 +1,361 @@
-﻿using Microsoft.SharePoint.Client;
-using Newtonsoft.Json;
-using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.SharePoint.Item;
-using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Commands.SharePoint.Utilities;
-using NovaPointLibrary.Solutions.Report;
-using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿//using Microsoft.SharePoint.Client;
+//using Newtonsoft.Json;
+//using NovaPointLibrary.Commands.Authentication;
+//using NovaPointLibrary.Commands.SharePoint.Item;
+//using NovaPointLibrary.Commands.SharePoint.List;
+//using NovaPointLibrary.Commands.SharePoint.Site;
+//using NovaPointLibrary.Commands.SharePoint.Utilities;
+//using NovaPointLibrary.Solutions.Report;
+//using System;
+//using System.Collections.Generic;
+//using System.Dynamic;
+//using System.Linq;
+//using System.Linq.Expressions;
+//using System.Text;
+//using System.Threading.Tasks;
 
-namespace NovaPointLibrary.Solutions.Automation
-{
-    // PROTOTYPE ONLY
-    public class RestorePHLAuto : ISolution
-    {
-        public readonly static String s_SolutionName = "Restore Preservation Hold Library";
-        public readonly static String s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RestorePHL";
+//namespace NovaPointLibrary.Solutions.Automation
+//{
+//    // PROTOTYPE ONLY
+//    public class RestorePHLAuto : ISolution
+//    {
+//        public readonly static String s_SolutionName = "Restore Preservation Hold Library";
+//        public readonly static String s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RestorePHL";
 
-        private RestorePHLAutoParameters _param = new();
-        public ISolutionParameters Parameters
-        {
-            get { return _param; }
-            set { _param = (RestorePHLAutoParameters)value; }
-        }
+//        private RestorePHLAutoParameters _param = new();
+//        public ISolutionParameters Parameters
+//        {
+//            get { return _param; }
+//            set { _param = (RestorePHLAutoParameters)value; }
+//        }
 
-        private readonly NPLogger _logger;
-        private readonly AppInfo _appInfo;
+//        private readonly NPLogger _logger;
+//        private readonly AppInfo _appInfo;
 
-        public RestorePHLAuto(AppInfo appInfo, Action<LogInfo> uiAddLog, RestorePHLAutoParameters parameters)
-        {
-            Parameters = parameters;
-            _appInfo = appInfo;
-            _logger = new(uiAddLog, this);
-        }
+//        public RestorePHLAuto(RestorePHLAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+//        {
+//            Parameters = parameters;
+//            _logger = new(uiAddLog, this.GetType().Name, parameters);
+//            _appInfo = new(_logger, cancelTokenSource);
+//        }
 
-        public async Task RunAsync()
-        {
-            try
-            {
-                if (String.IsNullOrWhiteSpace(_param.AdminUPN))
-                {
-                    throw new Exception("FORM INCOMPLETED: Admin UPN cannot be empty.");
-                }
-                if (string.IsNullOrWhiteSpace(_param.SiteUrl) && !_param.SiteAll)
-                {
-                    throw new Exception($"FORM INCOMPLETED: Site URL cannot be empty when no processing all sites");
-                }
-                else if (!_param.ItemsAll && String.IsNullOrWhiteSpace(_param.FolderRelativeUrl))
-                {
-                    throw new Exception($"FORM INCOMPLETED: Relative Path cannot be empty when not collecting all Files");
-                }
-                else
-                {
-                    await RunScriptAsyncTEST();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.ScriptFinish(ex);
-            }
-        }
-
-
-        private async Task RunScriptAsyncNEW()
-        {
-            _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.ProcessItems";
-
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.GetListParameters()).GetListsAsync())
-            {
-                _appInfo.IsCancelled();
-
-                if (!String.IsNullOrWhiteSpace(results.Remarks))
-                {
-                    _logger.LogTxt(methodName, $"Processing Error '{results.Remarks}'");
-                    AddRecord(results.SiteUrl, results.List, remarks: results.Remarks);
-                    continue;
-                }
-
-                _logger.LogTxt(methodName, $"Start getting Items for '{results.List.Title}'");
-                try
-                {
-                    await ProcessItems(results.SiteUrl, results.List, results.Progress);
-                }
-                catch (Exception ex)
-                {
-                    _logger.ReportError(results.List.BaseType.ToString(), results.List.DefaultViewUrl, ex);
-                    AddRecord(results.SiteUrl, results.List, remarks: ex.Message);
-                }
-            }
-        }
+//        public async Task RunAsync()
+//        {
+//            try
+//            {
+//                if (String.IsNullOrWhiteSpace(_param.AdminUPN))
+//                {
+//                    throw new Exception("FORM INCOMPLETED: Admin UPN cannot be empty.");
+//                }
+//                if (string.IsNullOrWhiteSpace(_param.SiteUrl) && !_param.SiteAll)
+//                {
+//                    throw new Exception($"FORM INCOMPLETED: Site URL cannot be empty when no processing all sites");
+//                }
+//                else if (!_param.ItemsAll && String.IsNullOrWhiteSpace(_param.FolderRelativeUrl))
+//                {
+//                    throw new Exception($"FORM INCOMPLETED: Relative Path cannot be empty when not collecting all Files");
+//                }
+//                else
+//                {
+//                    await RunScriptAsyncTEST();
+//                }
+//            }
+//            catch (Exception ex)
+//            {
+//                _logger.ScriptFinish(ex);
+//            }
+//        }
 
 
-        private async Task RunScriptAsyncTEST()
-        {
-            _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.ProcessItems";
+//        private async Task RunScriptAsyncNEW()
+//        {
+//            _appInfo.IsCancelled();
+//            string methodName = $"{GetType().Name}.ProcessItems";
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.GetListParameters()).GetListsAsync())
-            {
-                _appInfo.IsCancelled();
+//            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.GetListParameters()).GetListsAsync())
+//            {
+//                _appInfo.IsCancelled();
 
-                if(!String.IsNullOrWhiteSpace(results.Remarks))
-                {
-                    _logger.LogTxt(methodName, $"Processing Error '{results.Remarks}'");
-                    AddRecord(results.SiteUrl, results.List, remarks: results.Remarks);
-                    continue;
-                }
+//                if (!String.IsNullOrWhiteSpace(results.Remarks))
+//                {
+//                    _logger.LogTxt(methodName, $"Processing Error '{results.Remarks}'");
+//                    AddRecord(results.SiteUrl, results.List, remarks: results.Remarks);
+//                    continue;
+//                }
 
-                _logger.LogTxt(methodName, $"Start getting Items for '{results.List.Title}'");
-                try
-                {
-                    await ProcessItems(results.SiteUrl, results.List, results.Progress);
-                }
-                catch (Exception ex)
-                {
-                    _logger.ReportError(results.List.BaseType.ToString(), results.List.DefaultViewUrl, ex);
-                    AddRecord(results.SiteUrl, results.List, remarks: ex.Message);
-                }
-            }
-        }
-        private async Task RunScriptAsync()
-        {
-            _appInfo.IsCancelled();
-
-            SPOProcessorParameters parameters = new()
-            {
-                AdminUPN = _param.AdminUPN,
-                RemoveAdmin = _param.RemoveAdmin,
-
-                SiteAll = _param.SiteAll,
-                IncludePersonalSite = _param.IncludePersonalSite,
-                IncludeShareSite = _param.IncludeShareSite,
-                OnlyGroupIdDefined = _param.OnlyGroupIdDefined,
-                SiteUrl = _param.SiteUrl,
-                IncludeSubsites = _param.IncludeSubsites,
-
-            };
+//                _logger.LogTxt(methodName, $"Start getting Items for '{results.List.Title}'");
+//                try
+//                {
+//                    await ProcessItems(results.SiteUrl, results.List, results.Progress);
+//                }
+//                catch (Exception ex)
+//                {
+//                    _logger.ReportError(results.List.BaseType.ToString(), results.List.DefaultViewUrl, ex);
+//                    AddRecord(results.SiteUrl, results.List, remarks: ex.Message);
+//                }
+//            }
+//        }
 
 
-            await foreach(var results in new SPOSiteProcessor(_logger, _appInfo, parameters).GetLists())
-            {
-                _appInfo.IsCancelled();
-                string methodName = $"{GetType().Name}.ProcessItems";
-                _logger.LogTxt(methodName, $"Processing Site URL '{results.SiteUrl}'");
-                //_logger.LogTxt(methodName, $"Result Remarks '{results.Remarks}'");
-                //_logger.LogTxt(methodName, $"Result List '{results.List.Title}'");
+//        private async Task RunScriptAsyncTEST()
+//        {
+//            _appInfo.IsCancelled();
+//            string methodName = $"{GetType().Name}.ProcessItems";
 
-                if (String.IsNullOrWhiteSpace(results.Remarks))
-                {
-                    _logger.LogTxt(methodName, $"Processing Library '{results.List.Title}'");
-                    try
-                    {
-                        await ProcessItems(results.SiteUrl, results.List, results.Progress);
-                    }
-                    catch (Exception ex)
-                    {
-                        AddRecord(results.SiteUrl, results.List, remarks: ex.Message);
-                    }
-                }
-                else
-                {
-                    _logger.LogTxt(methodName, $"Processing Error '{results.Remarks}'");
-                    AddRecord(results.SiteUrl, results.List, remarks: results.Remarks);
-                }
+//            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.GetListParameters()).GetListsAsync())
+//            {
+//                _appInfo.IsCancelled();
 
-            }
-        }
+//                if(!String.IsNullOrWhiteSpace(results.Remarks))
+//                {
+//                    _logger.LogTxt(methodName, $"Processing Error '{results.Remarks}'");
+//                    AddRecord(results.SiteUrl, results.List, remarks: results.Remarks);
+//                    continue;
+//                }
 
-        private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
-        {
-            i => i.HasUniqueRoleAssignments,
-                    i => i["Author"],
-                    i => i["Created"],
-                    i => i["Editor"],
-                    i => i["ID"],
-                    i => i.FileSystemObjectType,
-                    i => i["FileLeafRef"],
-                    i => i["FileRef"],
-                    i => i["File_x0020_Size"],
-                    i => i["Modified"],
-                    i => i["SMTotalSize"],
-                    i => i["Title"],
-                    i => i.Versions,
-                    i => i["_UIVersionString"],
-        };
+//                _logger.LogTxt(methodName, $"Start getting Items for '{results.List.Title}'");
+//                try
+//                {
+//                    await ProcessItems(results.SiteUrl, results.List, results.Progress);
+//                }
+//                catch (Exception ex)
+//                {
+//                    _logger.ReportError(results.List.BaseType.ToString(), results.List.DefaultViewUrl, ex);
+//                    AddRecord(results.SiteUrl, results.List, remarks: ex.Message);
+//                }
+//            }
+//        }
+//        private async Task RunScriptAsync()
+//        {
+//            _appInfo.IsCancelled();
 
-        private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _itemExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
-        {
-            i => i.HasUniqueRoleAssignments,
-                    i => i.AttachmentFiles,
-                    i => i["Author"],
-                    i => i["Created"],
-                    i => i["Editor"],
-                    i => i["ID"],
-                    i => i.FileSystemObjectType,
-                    i => i["FileLeafRef"],
-                    i => i["FileRef"],
-                    i => i["Modified"],
-                    i => i["SMTotalSize"],
-                    i => i["Title"],
-                    i => i.Versions,
-                    i => i["_UIVersionString"],
-        };
+//            SPOProcessorParameters parameters = new()
+//            {
+//                AdminUPN = _param.AdminUPN,
+//                RemoveAdmin = _param.RemoveAdmin,
 
-        private async Task ProcessItems(string siteUrl, List oList, ProgressTracker parentProgress)
-        {
-            _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.ProcessItems";
-            _logger.LogTxt(methodName, $"Start getting Items for '{oList.Title}'");
-                //- '{oList.Title}'
+//                SiteAll = _param.SiteAll,
+//                IncludePersonalSite = _param.IncludePersonalSite,
+//                IncludeShareSite = _param.IncludeShareSite,
+//                OnlyGroupIdDefined = _param.OnlyGroupIdDefined,
+//                SiteUrl = _param.SiteUrl,
+//                IncludeSubsites = _param.IncludeSubsites,
 
-            Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] currentExpressions;
+//            };
 
-            if (oList.BaseType == BaseType.DocumentLibrary)
-            {
-                currentExpressions = _fileExpressions;
-            }
-            else if (oList.BaseType == BaseType.GenericList)
-            {
-                currentExpressions = _itemExpressions;
-            }
-            else
-            {
-                AddRecord(siteUrl, oList, remarks: "This is not a List neither a Library");
 
-                return;
-            }
+//            await foreach(var results in new SPOSiteProcessor(_logger, _appInfo, parameters).GetLists())
+//            {
+//                _appInfo.IsCancelled();
+//                string methodName = $"{GetType().Name}.ProcessItems";
+//                _logger.LogTxt(methodName, $"Processing Site URL '{results.SiteUrl}'");
+//                //_logger.LogTxt(methodName, $"Result Remarks '{results.Remarks}'");
+//                //_logger.LogTxt(methodName, $"Result List '{results.List.Title}'");
 
-            ProgressTracker progress = new(parentProgress, oList.ItemCount);
+//                if (String.IsNullOrWhiteSpace(results.Remarks))
+//                {
+//                    _logger.LogTxt(methodName, $"Processing Library '{results.List.Title}'");
+//                    try
+//                    {
+//                        await ProcessItems(results.SiteUrl, results.List, results.Progress);
+//                    }
+//                    catch (Exception ex)
+//                    {
+//                        AddRecord(results.SiteUrl, results.List, remarks: ex.Message);
+//                    }
+//                }
+//                else
+//                {
+//                    _logger.LogTxt(methodName, $"Processing Error '{results.Remarks}'");
+//                    AddRecord(results.SiteUrl, results.List, remarks: results.Remarks);
+//                }
 
-            var spoItem = new SPOListItemCSOM(_logger, _appInfo);
-            await foreach (ListItem oItem in spoItem.Get(siteUrl, oList.Title, currentExpressions))
-            {
-                _appInfo.IsCancelled();
+//            }
+//        }
 
-                try
-                {
-                    if (oItem.FileSystemObjectType.ToString() == "Folder")
-                    {
-                        // NEED TEST; if Folder name change depending on being located in a Library or a List
-                        AddRecord(siteUrl, oList, oItem, (string)oItem["FileLeafRef"], "0", "0");
+//        private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
+//        {
+//            i => i.HasUniqueRoleAssignments,
+//                    i => i["Author"],
+//                    i => i["Created"],
+//                    i => i["Editor"],
+//                    i => i["ID"],
+//                    i => i.FileSystemObjectType,
+//                    i => i["FileLeafRef"],
+//                    i => i["FileRef"],
+//                    i => i["File_x0020_Size"],
+//                    i => i["Modified"],
+//                    i => i["SMTotalSize"],
+//                    i => i["Title"],
+//                    i => i.Versions,
+//                    i => i["_UIVersionString"],
+//        };
 
-                        continue;
-                    }
+//        private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _itemExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
+//        {
+//            i => i.HasUniqueRoleAssignments,
+//                    i => i.AttachmentFiles,
+//                    i => i["Author"],
+//                    i => i["Created"],
+//                    i => i["Editor"],
+//                    i => i["ID"],
+//                    i => i.FileSystemObjectType,
+//                    i => i["FileLeafRef"],
+//                    i => i["FileRef"],
+//                    i => i["Modified"],
+//                    i => i["SMTotalSize"],
+//                    i => i["Title"],
+//                    i => i.Versions,
+//                    i => i["_UIVersionString"],
+//        };
 
-                    if (oList.BaseType == BaseType.DocumentLibrary)
-                    {
-                        string itemName = (string)oItem["FileLeafRef"];
+//        private async Task ProcessItems(string siteUrl, List oList, ProgressTracker parentProgress)
+//        {
+//            _appInfo.IsCancelled();
+//            string methodName = $"{GetType().Name}.ProcessItems";
+//            _logger.LogTxt(methodName, $"Start getting Items for '{oList.Title}'");
+//                //- '{oList.Title}'
 
-                        float itemSizeMb = (float)Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2);
+//            Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] currentExpressions;
 
-                        FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)oItem["SMTotalSize"];
-                        float itemSizeTotalMb = (float)Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2);
+//            if (oList.BaseType == BaseType.DocumentLibrary)
+//            {
+//                currentExpressions = _fileExpressions;
+//            }
+//            else if (oList.BaseType == BaseType.GenericList)
+//            {
+//                currentExpressions = _itemExpressions;
+//            }
+//            else
+//            {
+//                AddRecord(siteUrl, oList, remarks: "This is not a List neither a Library");
 
-                        AddRecord(siteUrl, oList, oItem, itemName, itemSizeMb.ToString(), itemSizeTotalMb.ToString(), "");
-                    }
-                    else if (oList.BaseType == BaseType.GenericList)
-                    {
-                        string itemName = (string)oItem["Title"];
+//                return;
+//            }
 
-                        int itemSizeTotalBytes = 0;
-                        foreach (var oAttachment in oItem.AttachmentFiles)
-                        {
-                            var oFileAttachment = await spoItem.GetAttachmentFile(siteUrl, oAttachment.ServerRelativeUrl);
+//            ProgressTracker progress = new(parentProgress, oList.ItemCount);
 
-                            itemSizeTotalBytes += (int)oFileAttachment.Length;
-                        }
-                        float itemSizeTotalMb = (float)Math.Round(itemSizeTotalBytes / Math.Pow(1024, 2), 2);
+//            var spoItem = new SPOListItemCSOM(_logger, _appInfo);
+//            await foreach (ListItem oItem in spoItem.GetAsync(siteUrl, oList.Title, currentExpressions))
+//            {
+//                _appInfo.IsCancelled();
 
-                        AddRecord(siteUrl, oList, oItem, itemName, itemSizeTotalMb.ToString(), itemSizeTotalMb.ToString(), "");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.ReportError("Item", (string)oItem["FileRef"], ex);
+//                try
+//                {
+//                    if (oItem.FileSystemObjectType.ToString() == "Folder")
+//                    {
+//                        // NEED TEST; if Folder name change depending on being located in a Library or a List
+//                        AddRecord(siteUrl, oList, oItem, (string)oItem["FileLeafRef"], "0", "0");
 
-                    AddRecord(siteUrl, oList, oItem, remarks: ex.Message);
-                }
+//                        continue;
+//                    }
 
-                progress.ProgressUpdateReport();
-            }
-        }
+//                    if (oList.BaseType == BaseType.DocumentLibrary)
+//                    {
+//                        string itemName = (string)oItem["FileLeafRef"];
 
-        private void AddRecord(string siteUrl,
-                               Microsoft.SharePoint.Client.List? oList = null,
-                               Microsoft.SharePoint.Client.ListItem? oItem = null,
-                               string itemName = "",
-                               string itemSizeMb = "",
-                               string itemSizeTotalMb = "",
-                               string remarks = "")
-        {
+//                        float itemSizeMb = (float)Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2);
 
-            dynamic recordItem = new ExpandoObject();
-            recordItem.SiteUrl = siteUrl;
-            recordItem.ListTitle = oList != null ? oList.Title : String.Empty;
-            recordItem.ListType = oList != null ? oList.BaseType.ToString() : String.Empty;
+//                        FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)oItem["SMTotalSize"];
+//                        float itemSizeTotalMb = (float)Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2);
 
-            recordItem.ItemID = oItem != null ? oItem["ID"] : string.Empty;
-            recordItem.ItemName = oItem != null ? itemName : string.Empty;
-            recordItem.ItemPath = oItem != null ? oItem["FileRef"] : string.Empty;
-            recordItem.ItemType = oItem != null ? oItem.FileSystemObjectType.ToString() : string.Empty;
+//                        AddRecord(siteUrl, oList, oItem, itemName, itemSizeMb.ToString(), itemSizeTotalMb.ToString(), "");
+//                    }
+//                    else if (oList.BaseType == BaseType.GenericList)
+//                    {
+//                        string itemName = (string)oItem["Title"];
 
-            recordItem.ItemCreated = oItem != null ? oItem["Created"] : string.Empty;
-            FieldUserValue? author = oItem != null ? (FieldUserValue)oItem["Author"] : null;
-            recordItem.ItemCreatedBy = author?.Email;
+//                        int itemSizeTotalBytes = 0;
+//                        foreach (var oAttachment in oItem.AttachmentFiles)
+//                        {
+//                            var oFileAttachment = await spoItem.GetAttachmentFileAsync(siteUrl, oAttachment.ServerRelativeUrl);
 
-            recordItem.ItemModified = oItem != null ? oItem["Modified"] : string.Empty;
-            FieldUserValue? editor = oItem != null ? (FieldUserValue)oItem["Editor"] : null;
-            recordItem.ItemModifiedBy = editor?.Email;
+//                            itemSizeTotalBytes += (int)oFileAttachment.Length;
+//                        }
+//                        float itemSizeTotalMb = (float)Math.Round(itemSizeTotalBytes / Math.Pow(1024, 2), 2);
 
-            recordItem.ItemVersion = oItem != null ? oItem["_UIVersionString"] : string.Empty;
-            recordItem.ItemVersionsCount = oItem != null ? oItem.Versions.Count.ToString() : string.Empty;
+//                        AddRecord(siteUrl, oList, oItem, itemName, itemSizeTotalMb.ToString(), itemSizeTotalMb.ToString(), "");
+//                    }
+//                }
+//                catch (Exception ex)
+//                {
+//                    _logger.ReportError("Item", (string)oItem["FileRef"], ex);
 
-            recordItem.ItemSizeMb = oItem != null ? itemSizeMb : string.Empty;
-            recordItem.ItemSizeTotalMB = oItem != null ? itemSizeTotalMb : string.Empty;
+//                    AddRecord(siteUrl, oList, oItem, remarks: ex.Message);
+//                }
 
-            recordItem.Remarks = remarks;
+//                progress.ProgressUpdateReport();
+//            }
+//        }
 
-            _logger.RecordCSV(recordItem);
-        }
-    }
+//        private void AddRecord(string siteUrl,
+//                               Microsoft.SharePoint.Client.List? oList = null,
+//                               Microsoft.SharePoint.Client.ListItem? oItem = null,
+//                               string itemName = "",
+//                               string itemSizeMb = "",
+//                               string itemSizeTotalMb = "",
+//                               string remarks = "")
+//        {
 
-    public class RestorePHLAutoParameters : SPOTenantListsParameters, ISolutionParameters
-    {
+//            dynamic recordItem = new ExpandoObject();
+//            recordItem.SiteUrl = siteUrl;
+//            recordItem.ListTitle = oList != null ? oList.Title : String.Empty;
+//            recordItem.ListType = oList != null ? oList.BaseType.ToString() : String.Empty;
 
-        public bool ItemsAll { get; set; } = true;
-        public string FolderRelativeUrl { get; set; } = String.Empty;
+//            recordItem.ItemID = oItem != null ? oItem["ID"] : string.Empty;
+//            recordItem.ItemName = oItem != null ? itemName : string.Empty;
+//            recordItem.ItemPath = oItem != null ? oItem["FileRef"] : string.Empty;
+//            recordItem.ItemType = oItem != null ? oItem.FileSystemObjectType.ToString() : string.Empty;
 
-        public bool ReportMode { get; set; } = true;
+//            recordItem.ItemCreated = oItem != null ? oItem["Created"] : string.Empty;
+//            FieldUserValue? author = oItem != null ? (FieldUserValue)oItem["Author"] : null;
+//            recordItem.ItemCreatedBy = author?.Email;
 
-        internal SPOTenantListsParameters GetListParameters()
-        {
-            SPOTenantListsParameters p = new()
-            {
-                AdminUPN = AdminUPN,
-                RemoveAdmin = RemoveAdmin,
+//            recordItem.ItemModified = oItem != null ? oItem["Modified"] : string.Empty;
+//            FieldUserValue? editor = oItem != null ? (FieldUserValue)oItem["Editor"] : null;
+//            recordItem.ItemModifiedBy = editor?.Email;
 
-                SiteAll = SiteAll,
-                IncludePersonalSite = IncludePersonalSite,
-                IncludeShareSite = IncludeShareSite,
-                OnlyGroupIdDefined = OnlyGroupIdDefined,
-                SiteUrl = SiteUrl,
-                IncludeSubsites = IncludeSubsites,
+//            recordItem.ItemVersion = oItem != null ? oItem["_UIVersionString"] : string.Empty;
+//            recordItem.ItemVersionsCount = oItem != null ? oItem.Versions.Count.ToString() : string.Empty;
 
-                ListAll = ListAll,
-                IncludeHiddenLists = IncludeHiddenLists,
-                IncludeSystemLists = IncludeSystemLists,
-                ListTitle = ListTitle,
-            };
+//            recordItem.ItemSizeMb = oItem != null ? itemSizeMb : string.Empty;
+//            recordItem.ItemSizeTotalMB = oItem != null ? itemSizeTotalMb : string.Empty;
 
-            return p;
-        }
-    }
-}
+//            recordItem.Remarks = remarks;
+
+//            _logger.RecordCSV(recordItem);
+//        }
+//    }
+
+//    public class RestorePHLAutoParameters : SPOTenantListsParameters, ISolutionParameters
+//    {
+
+//        public bool ItemsAll { get; set; } = true;
+//        public string FolderRelativeUrl { get; set; } = String.Empty;
+
+//        public bool ReportMode { get; set; } = true;
+
+//        internal SPOTenantListsParameters GetListParameters()
+//        {
+//            SPOTenantListsParameters p = new()
+//            {
+//                AdminUPN = AdminUPN,
+//                RemoveAdmin = RemoveAdmin,
+
+//                SiteAll = SiteAll,
+//                IncludePersonalSite = IncludePersonalSite,
+//                IncludeShareSite = IncludeShareSite,
+//                OnlyGroupIdDefined = OnlyGroupIdDefined,
+//                SiteUrl = SiteUrl,
+//                IncludeSubsites = IncludeSubsites,
+
+//                ListAll = ListAll,
+//                IncludeHiddenLists = IncludeHiddenLists,
+//                IncludeSystemLists = IncludeSystemLists,
+//                ListTitle = ListTitle,
+//            };
+
+//            return p;
+//        }
+//    }
+//}

@@ -4,6 +4,7 @@ using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.Site;
 using NovaPointLibrary.Commands.User;
+using NovaPointLibrary.Solutions.Automation;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -13,87 +14,88 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions.Reports
 {
-    public class UserAllSiteSingleReport
-    {
-        public static readonly string s_SolutionName = "Users in a single Site report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-UserAllSiteSingleReport";
+    // TO DEPRECATED
+    //public class UserAllSiteSingleReport
+    //{
+    //    public static readonly string s_SolutionName = "Users in a single Site report";
+    //    public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-UserAllSiteSingleReport";
 
-        // Baic parameters required for all reports
-        private readonly NPLogger _logger;
-        private readonly Commands.Authentication.AppInfo AppInfo;
-        // Required parameters for the current report
-        private readonly string SiteUrl;
+    //    private UserAllSiteSingleReportParameters _param = new();
+    //    public ISolutionParameters Parameters
+    //    {
+    //        get { return _param; }
+    //        set { _param = (UserAllSiteSingleReportParameters)value; }
+    //    }
 
-        public UserAllSiteSingleReport(Action<LogInfo> uiAddLog, Commands.Authentication.AppInfo appInfo, UserAllSiteSingleReportParameters parameters)
-        {
-            _logger = new(uiAddLog, "Reports", GetType().Name); ;
-            AppInfo = appInfo;
-            SiteUrl = parameters.SiteUrl;
-        }
+    //    private readonly NPLogger _logger;
+    //    private readonly Commands.Authentication.AppInfo _appInfo;
 
-        public async Task RunAsync()
-        {
-            try
-            {
-                if (String.IsNullOrEmpty(SiteUrl) || String.IsNullOrWhiteSpace(SiteUrl))
-                {
-                    string message = "FORM INCOMPLETED: Site URL cannot be empty if you need to obtain the Site Users";
-                    Exception ex = new(message);
-                    throw ex;
-                }
-                else
-                {
-                    await RunScriptAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.ScriptFinish(ex);
-            }
-        }
-        private async Task RunScriptAsync()
-        {
-            _logger.ScriptStartNotice();
+    //    private readonly string SiteUrl;
 
-            string rootUrl = SiteUrl.Substring(0, SiteUrl.IndexOf(".com") + 4);
-            string rootSiteAccessToken = await new GetAccessToken(_logger, AppInfo).SpoInteractiveAsync(rootUrl);
+    //    public UserAllSiteSingleReport(UserAllSiteSingleReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+    //    {
+    //        Parameters = parameters;
+    //        _logger = new(uiAddLog, this.GetType().Name, parameters);
+    //        _appInfo = new(_logger, cancelTokenSource);
+    //    }
+
+    //    public async Task RunAsync()
+    //    {
+    //        try
+    //        {
+    //            if (String.IsNullOrEmpty(SiteUrl) || String.IsNullOrWhiteSpace(SiteUrl))
+    //            {
+    //                string message = "FORM INCOMPLETED: Site URL cannot be empty if you need to obtain the Site Users";
+    //                Exception ex = new(message);
+    //                throw ex;
+    //            }
+    //            else
+    //            {
+    //                await RunScriptAsync();
+    //            }
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            _logger.ScriptFinish(ex);
+    //        }
+    //    }
+    //    private async Task RunScriptAsync()
+    //    {
+    //        _logger.ScriptStartNotice();
+    //        _appInfo.IsCancelled();
+
+    //        string rootUrl = SiteUrl.Substring(0, SiteUrl.IndexOf(".com") + 4);
+    //        string rootSiteAccessToken = await new GetAccessToken(_logger, _appInfo).SpoInteractiveAsync(rootUrl);
             
-            if (AppInfo.CancelToken.IsCancellationRequested) { AppInfo.CancelToken.ThrowIfCancellationRequested(); };
-            List<Microsoft.SharePoint.Client.User> collUsers = new GetUser(_logger, rootSiteAccessToken).CsomAll(SiteUrl, false);
-            foreach (Microsoft.SharePoint.Client.User oUser in collUsers)
-            {
-                if (AppInfo.CancelToken.IsCancellationRequested) { AppInfo.CancelToken.ThrowIfCancellationRequested(); };
 
-                dynamic recordUser = new ExpandoObject();
-                recordUser.SiteUrl = SiteUrl;
-                recordUser.Title = oUser.Title;
-                recordUser.UserPrincipalName = oUser.UserPrincipalName;
-                recordUser.Email = oUser.Email;
-                recordUser.IsSiteAdmin = oUser.IsSiteAdmin;
-                recordUser.UserSPOID = GetUserId(oUser.UserId);
+    //        List<Microsoft.SharePoint.Client.User> collUsers = new GetUser(_logger, rootSiteAccessToken).CsomAll(SiteUrl, false);
+    //        foreach (Microsoft.SharePoint.Client.User oUser in collUsers)
+    //        {
+    //            _appInfo.IsCancelled();
 
-                _logger.RecordCSV(recordUser);
+    //            dynamic recordUser = new ExpandoObject();
+    //            recordUser.SiteUrl = SiteUrl;
+    //            recordUser.Title = oUser.Title;
+    //            recordUser.UserPrincipalName = oUser.UserPrincipalName;
+    //            recordUser.Email = oUser.Email;
+    //            recordUser.IsSiteAdmin = oUser.IsSiteAdmin;
+    //            recordUser.UserSPOID = GetUserId(oUser.UserId);
 
-            }
+    //            _logger.RecordCSV(recordUser);
 
-            _logger.ScriptFinish();
-        }
-        private static string GetUserId(UserIdInfo userIdInfo)
-        {
-            if (userIdInfo == null) { return ""; }
-            else { return userIdInfo.NameId.ToString(); }
-        }
-    }
+    //        }
 
-    public class UserAllSiteSingleReportParameters
-    {
-        
-        // Required parameters for the current report
-        internal string SiteUrl;
+    //        _logger.ScriptFinish();
+    //    }
+    //    private static string GetUserId(UserIdInfo userIdInfo)
+    //    {
+    //        if (userIdInfo == null) { return ""; }
+    //        else { return userIdInfo.NameId.ToString(); }
+    //    }
+    //}
 
-        public UserAllSiteSingleReportParameters(string siteUrl)
-        {
-            SiteUrl = siteUrl;
-        }
-    }
+    //public class UserAllSiteSingleReportParameters : ISolutionParameters
+    //{
+    //    public string SiteUrl { get; set; } = string.Empty;
+    //}
 }

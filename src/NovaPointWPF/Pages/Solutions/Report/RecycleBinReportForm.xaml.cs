@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -72,7 +73,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
+        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
             RecycleBinReportParameters parameters = new()
             {
@@ -97,7 +98,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 FileSizeAbove = this.FileSizeAbove,
             };
 
-            await new RecycleBinReport(appInfo, uiLog, parameters).RunAsync();
+            await new RecycleBinReport(parameters, uiLog, cancelTokenSource).RunAsync();
         }
     }
 }

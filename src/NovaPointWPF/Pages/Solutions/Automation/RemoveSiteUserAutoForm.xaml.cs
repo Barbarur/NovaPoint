@@ -1,9 +1,7 @@
-﻿using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Solutions;
-using NovaPointLibrary.Solutions.Report;
+﻿using NovaPointLibrary.Solutions;
+using NovaPointLibrary.Solutions.Automation;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -18,13 +16,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace NovaPointWPF.Pages.Solutions.Report
+namespace NovaPointWPF.Pages.Solutions.Automation
 {
     /// <summary>
-    /// Interaction logic for ListReportForm.xaml
+    /// Interaction logic for RemoveSiteUserAutoForm.xaml
     /// </summary>
-    public partial class ListReportForm : Page, ISolutionForm
+    public partial class RemoveSiteUserAutoForm : Page, ISolutionForm
     {
+        public string DeleteUserUPN { get; set; }
+
         public string AdminUPN { get; set; }
         public bool RemoveAdmin { get; set; }
 
@@ -35,21 +35,17 @@ namespace NovaPointWPF.Pages.Solutions.Report
         public string SiteUrl { get; set; }
         public bool IncludeSubsites { get; set; }
 
-        public bool ListAll { get; set; }
-        public bool IncludeHiddenLists { get; set; }
-        public bool IncludeSystemLists { get; set; }
-        public string ListTitle { get; set; }
-
-
-        public ListReportForm()
+        public RemoveSiteUserAutoForm()
         {
             InitializeComponent();
 
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = ListReport.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(ListReport);
-            SolutionHeader.SolutionDocs = ListReport.s_SolutionDocs;
+            SolutionHeader.SolutionTitle = RemoveSiteUserAuto.s_SolutionName;
+            SolutionHeader.SolutionCode = nameof(RemoveSiteUserAuto);
+            SolutionHeader.SolutionDocs = RemoveSiteUserAuto.s_SolutionDocs;
+
+            DeleteUserUPN = string.Empty;
 
             this.AdminUPN = String.Empty;
             this.RemoveAdmin = true;
@@ -60,17 +56,15 @@ namespace NovaPointWPF.Pages.Solutions.Report
             this.OnlyGroupIdDefined = false;
             this.SiteUrl = String.Empty;
             this.IncludeSubsites = false;
-
-            this.ListAll = true;
-            this.IncludeHiddenLists = false;
-            this.IncludeSystemLists = false;
-            this.ListTitle = String.Empty;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            ListReportParameters parameters = new()
+
+            RemoveUserAutoParameters parameters = new()
             {
+                DeleteUserUPN = this.DeleteUserUPN,
+
                 AdminUPN = this.AdminUPN,
                 RemoveAdmin = this.RemoveAdmin,
 
@@ -80,14 +74,9 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 OnlyGroupIdDefined = this.OnlyGroupIdDefined,
                 SiteUrl = this.SiteUrl,
                 IncludeSubsites = this.IncludeSubsites,
-
-                ListAll = this.ListAll,
-                IncludeHiddenLists = this.IncludeHiddenLists,
-                IncludeSystemLists = this.IncludeSystemLists,
-                ListTitle = this.ListTitle,
             };
+            await new RemoveSiteUserAuto(parameters, uiLog, cancelTokenSource).RunAsync();
 
-            await new ListReport(parameters, uiLog, cancelTokenSource).RunAsync();
         }
     }
 }

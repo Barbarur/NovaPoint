@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -73,7 +74,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
             this.FolderRelativeUrl = String.Empty;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
+        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
 
             ItemReportParameters parameters = new()
@@ -93,13 +94,10 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 IncludeSystemLists = this.IncludeSystemLists,
                 ListTitle = this.ListTitle,
 
-                ItemsAll = this.ItemsAll,
                 FolderRelativeUrl = this.FolderRelativeUrl,
             };
 
-            await new ItemReport(appInfo, uiLog, parameters).RunAsync();
-
+            await new ItemReport(parameters, uiLog, cancelTokenSource).RunAsync();
         }
-
     }
 }

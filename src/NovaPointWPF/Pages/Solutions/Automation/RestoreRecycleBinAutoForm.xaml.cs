@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -79,7 +80,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             this.RenameFile = false;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
+        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
             RestoreRecycleBinAutoParameters parameters = new()
             {
@@ -106,7 +107,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 RenameFile = this.RenameFile,
             };
 
-            await new RestoreRecycleBinAuto(appInfo, uiLog, parameters).RunAsync();
+            await new RestoreRecycleBinAuto(parameters, uiLog, cancelTokenSource).RunAsync();
 
         }
     }

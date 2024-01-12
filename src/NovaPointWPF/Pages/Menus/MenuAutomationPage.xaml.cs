@@ -38,9 +38,9 @@ namespace NovaPointWPF.Pages.Menus
 
 
         // SITES
-        private void GoSetSiteCollectionAdminAllAutoForm(object sender, RoutedEventArgs e)
+        private void GoSetSiteCollectionAdminAutoForm(object sender, RoutedEventArgs e)
         {
-            GoToSolutionForm(new SetSiteCollectionAdminAllAutoForm());
+            GoToSolutionForm(new SetSiteCollectionAdminAutoForm());
         }
 
         // LISTS
@@ -67,9 +67,9 @@ namespace NovaPointWPF.Pages.Menus
 
 
         // USER
-        private void GoRemoveUserSingleSiteAllAutoForm(object sender, RoutedEventArgs e)
+        private void GoRemoveSiteUserAutoFormForm(object sender, RoutedEventArgs e)
         {
-            GoToSolutionForm(new RemoveUserSingleSiteAllAutoForm());
+            GoToSolutionForm(new RemoveSiteUserAutoForm());
         }
 
     }

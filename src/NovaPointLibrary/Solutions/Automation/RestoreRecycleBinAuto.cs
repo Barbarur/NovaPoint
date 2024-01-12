@@ -3,6 +3,7 @@ using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.RecycleBin;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Solutions.Report;
 using PnP.Framework.Utilities;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class RestoreRecycleBinAuto : ISolution
     {
         public static readonly string s_SolutionName = "Restore items from recycle bin";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-RestoreRecycleBinAuto";
+        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RestoreRecycleBinAuto";
 
         private RestoreRecycleBinAutoParameters _param = new();
         public ISolutionParameters Parameters
@@ -28,11 +29,11 @@ namespace NovaPointLibrary.Solutions.Automation
         private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
 
-        public RestoreRecycleBinAuto(AppInfo appInfo, Action<LogInfo> uiAddLog, RestoreRecycleBinAutoParameters parameters)
-        {
+        public RestoreRecycleBinAuto(RestoreRecycleBinAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        {;
             Parameters = parameters;
-            _appInfo = appInfo;
-            _logger = new(uiAddLog, this);
+            _logger = new(uiAddLog, this.GetType().Name, parameters);
+            _appInfo = new(_logger, cancelTokenSource);
         }
 
         public async Task RunAsync()
@@ -55,7 +56,7 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _appInfo.IsCancelled();
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param).GetAsync())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
             {
                 _logger.LogUI(GetType().Name, $"Start processing recycle bin items for '{siteResults.Remarks}'");
                 
@@ -107,7 +108,7 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _appInfo.IsCancelled();
 
-            ClientContext clientContext = await _appInfo.GetContext(_logger, siteUrl);
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
             clientContext.Web.RecycleBin.RestoreAll();
             clientContext.ExecuteQueryRetry();
             AddRecord(siteUrl, remarks: "All recycle bin items have been restored");

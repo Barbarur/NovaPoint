@@ -34,7 +34,6 @@ namespace NovaPointWPF.Pages.Solutions
                 };
             }
         }
-        private string SolutionFolder2 = "C:\\Users\\ax_zi\\MEGA\\Coding Projects\\NovaPoint Project\\NovaPoint.wiki"; //string.Empty;
 
         public CancellationTokenSource CancelTokenSource { get; set; } = new();
 
@@ -79,11 +78,9 @@ namespace NovaPointWPF.Pages.Solutions
 
             try
             {
-                AppInfo appInfo = new();
+                this.CancelTokenSource = new();
 
-                this.CancelTokenSource = appInfo.CancelTokenSource;
-
-                await RunSolutionSecondThreadAsync(appInfo);
+                await RunSolutionSecondThreadAsync();
             }
             catch (Exception ex)
             {
@@ -97,11 +94,11 @@ namespace NovaPointWPF.Pages.Solutions
         }
 
         // Reference: https://learn.microsoft.com/en-us/answers/questions/1045656/wpf-usercontrol-run-button-click-async
-        private Task RunSolutionSecondThreadAsync(AppInfo appInfo)
+        private Task RunSolutionSecondThreadAsync()
         {
             return Task.Run(async() =>
             {
-                await _solutionForm.RunSolutionAsync(UILog, appInfo);
+                await _solutionForm.RunSolutionAsync(UILog, CancelTokenSource);
             });
         }
 

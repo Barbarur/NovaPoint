@@ -1,6 +1,4 @@
-﻿using NovaPointLibrary.Solutions.Reports;
-using NovaPointLibrary.Solutions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,9 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.QuickFix;
-using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Solutions.Report;
+using System.Threading;
 
 namespace NovaPointWPF.Pages.Solutions.QuickFix
 {
@@ -71,18 +69,21 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
 
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
+        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
 
 
-            IdMismatchTroubleParameters parameters = new(UserUpn, SiteUrl, AdminUpn)
+            IdMismatchTroubleParameters parameters = new()
             {
-                RemoveAdmin = RemoveAdmin,
-                PreventAllSites = PreventAllSites,
-                ReportMode = ReportMode
+                UserUpn = this.UserUpn,
+                SiteUrl = this.SiteUrl,
+                AdminUpn = this.AdminUpn,
+                RemoveAdmin = this.RemoveAdmin,
+                PreventAllSites = this.PreventAllSites,
+                ReportMode = this.ReportMode,
 
             };
-            await new IdMismatchTrouble(uiLog, appInfo, parameters).RunAsync();
+            await new IdMismatchTrouble(parameters, uiLog, cancelTokenSource).RunAsync();
         }
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -57,10 +58,11 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionDocs = PermissionsAllSiteSingleReport._solutionDocs;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
+        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            PermissionsAllSiteSingleParameters parameters = new(SiteUrl)
+            PermissionsAllSiteSingleParameters parameters = new()
             {
+                SiteUrl = SiteUrl,
                 IncludeAdmins = IncludeAdmins,
                 IncludeSiteAccess = IncludeSiteAccess,
                 IncludeUniquePermissions = IncludeUniquePermissions,
@@ -69,7 +71,9 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 IncludeSystemLists = IncludeSystemLists,
                 IncludeResourceLists = IncludeResourceLists,
             };
-            await new PermissionsAllSiteSingleReport(uiLog, appInfo, parameters).RunAsync();
+
+            await new PermissionsAllSiteSingleReport(parameters, uiLog, cancelTokenSource).RunAsync();
+
         }
     }
 }

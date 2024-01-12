@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -87,7 +88,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             this.ReportMode = true;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, AppInfo appInfo)
+        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
 
             RemoveFileVersionAutoParameters parameters = new()
@@ -108,7 +109,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 IncludeSystemLists = this.IncludeSystemLists,
                 ListTitle = this.ListTitle,
 
-                ItemsAll = this.ItemsAll,
                 FolderRelativeUrl = this.FolderRelativeUrl,
 
                 DeleteAll = this.DeleteAll,
@@ -118,7 +118,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 ReportMode = this.ReportMode,
             };
 
-            await new RemoveFileVersionAuto(appInfo, uiLog, parameters).RunAsync();
+            await new RemoveFileVersionAuto(parameters, uiLog, cancelTokenSource).RunAsync();
         }
 
         private bool _keepVersions;
