@@ -60,7 +60,7 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 progress = new(_logger, 1);
                 
-                Web oSite = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
+                Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
 
                 AddRecord(null, oSite);
 

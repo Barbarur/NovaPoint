@@ -13,7 +13,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Utilities
         internal string SiteUrl { get; set; }
         internal Microsoft.SharePoint.Client.List? List { get; set; } = null;
         internal ListItem? ListItem { get; set; } = null;
-        internal string Remarks { get; set; } = string.Empty;
+        internal string ErrorMessage { get; set; } = string.Empty;
 
         internal ProgressTracker Progress { get; set; }
 

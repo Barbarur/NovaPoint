@@ -60,7 +60,7 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 progress = new(_logger, 1);
 
-                Web oSite = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
+                Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
 
                 await SetAdmin(oSite.Url);
 
@@ -89,18 +89,12 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 if (_param.IsSiteAdmin)
                 {
-                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).Set(siteUrl, _param.TargetUserUPN);
+                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(siteUrl, _param.TargetUserUPN);
                     AddRecord(siteUrl, $"User '{_param.TargetUserUPN}' added as Site Collection Admin");
                 }
                 else
                 {
-                    string upnCoded = _param.TargetUserUPN.Replace("@", "_").Replace(".", "_");
-
-                    if (siteUrl.Contains(upnCoded, StringComparison.OrdinalIgnoreCase) && siteUrl.Contains("-my.sharepoint.com", StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new Exception("This is user's OneDrive. User will not be removed as Site Admin.");
-                    }
-                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).Remove(siteUrl, _param.TargetUserUPN);
+                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(siteUrl, _param.TargetUserUPN);
                     AddRecord(siteUrl, $"User '{_param.TargetUserUPN}' removed as Site Collection Admin");
                 }
             }

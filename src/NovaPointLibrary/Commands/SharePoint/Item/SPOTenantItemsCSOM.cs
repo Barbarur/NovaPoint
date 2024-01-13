@@ -35,7 +35,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(listResult.Remarks))
+                if (!String.IsNullOrWhiteSpace(listResult.ErrorMessage))
                 {
                     yield return listResult;
                     continue;

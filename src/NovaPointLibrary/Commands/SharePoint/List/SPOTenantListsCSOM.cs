@@ -29,7 +29,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             await foreach (SPOTenantResults siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
             {
 
-                if (!String.IsNullOrWhiteSpace(siteResults.Remarks))
+                if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
                 {
                     yield return siteResults;
                     continue;
@@ -46,7 +46,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                     _logger.ReportError("Site", siteResults.SiteUrl, ex);
 
                     errorResults = new(siteResults.Progress, siteResults.SiteUrl);
-                    errorResults.Remarks = ex.Message;
+                    errorResults.ErrorMessage = ex.Message;
                 }
 
                 if (errorResults != null)

@@ -29,35 +29,6 @@ namespace NovaPointWPF.UserControls
             InitializeComponent();
         }
 
-        //public string AdminUPN
-        //{
-        //    get { return (string)GetValue(AdminUPNProperty); }
-        //    set { SetValue(AdminUPNProperty, value); }
-        //}
-        //public static readonly DependencyProperty AdminUPNProperty =
-        //    DependencyProperty.Register("AdminUPN", typeof(string), typeof(SiteForm), new PropertyMetadata(string.Empty));
-
-
-        //public bool RemoveAdmin
-        //{
-        //    get { return (bool)GetValue(RemoveAdminProperty); }
-        //    set { SetValue(RemoveAdminProperty, value); }
-        //}
-        //public static readonly DependencyProperty RemoveAdminProperty =
-        //    DependencyProperty.Register("RemoveAdmin", typeof(bool), typeof(SiteForm), new FrameworkPropertyMetadata(defaultValue: false));
-
-
-
-        public bool SiteAll
-        {
-            get { return (bool)GetValue(SiteAllProperty); }
-            set { SetValue(SiteAllProperty, value); }
-        }
-        public static readonly DependencyProperty SiteAllProperty =
-            DependencyProperty.Register("SiteAll", typeof(bool), typeof(SiteForm), new FrameworkPropertyMetadata(defaultValue: false));
-
-
-
         public bool IncludePersonalSite
         {
             get { return (bool)GetValue(IncludePersonalSiteProperty); }

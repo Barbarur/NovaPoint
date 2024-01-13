@@ -58,9 +58,9 @@ namespace NovaPointLibrary.Solutions.Automation
             await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
             {
 
-                if (!String.IsNullOrWhiteSpace(siteResults.Remarks))
+                if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
                 {
-                    AddRecord(siteResults.SiteUrl, remarks: siteResults.Remarks);
+                    AddRecord(siteResults.SiteUrl, remarks: siteResults.ErrorMessage);
                     continue;
                 }
 
@@ -84,7 +84,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             if (user != null)
             {
-                if (user.IsSiteAdmin) { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).Remove(siteUrl, user.UserPrincipalName); }
+                if (user.IsSiteAdmin) { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveForceAsync(siteUrl, user.UserPrincipalName); }
 
                 await new SPOSiteUser(_logger, _appInfo).RemoveAsync(siteUrl, user.UserPrincipalName);
 

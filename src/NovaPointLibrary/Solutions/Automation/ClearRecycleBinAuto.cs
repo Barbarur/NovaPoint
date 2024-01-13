@@ -60,10 +60,10 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 _logger.LogUI(GetType().Name, $"Start processing recycle bin items for '{siteResults.SiteUrl}'");
 
-                if (!String.IsNullOrWhiteSpace(siteResults.Remarks))
+                if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
                 {
-                    _logger.ReportError("Site", siteResults.SiteUrl, siteResults.Remarks);
-                    AddRecord(siteResults.SiteUrl, remarks: siteResults.Remarks);
+                    _logger.ReportError("Site", siteResults.SiteUrl, siteResults.ErrorMessage);
+                    AddRecord(siteResults.SiteUrl, remarks: siteResults.ErrorMessage);
                     continue;
                 }
 

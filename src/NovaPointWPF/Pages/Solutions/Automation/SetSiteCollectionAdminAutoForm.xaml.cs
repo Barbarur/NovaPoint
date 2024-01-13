@@ -28,10 +28,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
         public bool IsSiteAdmin { get; set; }
 
 
-        public string AdminUPN { get; set; }
-        public bool RemoveAdmin { get; set; }
-
-        public bool SiteAll { get; set; }
         public bool IncludePersonalSite { get; set; }
         public bool IncludeShareSite { get; set; }
         public bool OnlyGroupIdDefined { get; set; }
@@ -51,7 +47,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             this.TargetUserUPN = string.Empty;
             this.IsSiteAdmin = true;
 
-            this.SiteAll = true;
             this.IncludePersonalSite = false;
             this.IncludeShareSite = true;
             this.OnlyGroupIdDefined = false;
@@ -66,7 +61,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 TargetUserUPN = this.TargetUserUPN,
                 IsSiteAdmin = this.IsSiteAdmin,
 
-                SiteAll = this.SiteAll,
                 IncludePersonalSite = this.IncludePersonalSite,
                 IncludeShareSite = this.IncludeShareSite,
                 OnlyGroupIdDefined = this.OnlyGroupIdDefined,

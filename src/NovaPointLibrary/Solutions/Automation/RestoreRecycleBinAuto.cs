@@ -58,12 +58,12 @@ namespace NovaPointLibrary.Solutions.Automation
 
             await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
             {
-                _logger.LogUI(GetType().Name, $"Start processing recycle bin items for '{siteResults.Remarks}'");
+                _logger.LogUI(GetType().Name, $"Start processing recycle bin items for '{siteResults.ErrorMessage}'");
                 
-                if (!String.IsNullOrWhiteSpace(siteResults.Remarks))
+                if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
                 {
-                    _logger.ReportError("Site", siteResults.SiteUrl, siteResults.Remarks);
-                    AddRecord(siteResults.SiteUrl, remarks: siteResults.Remarks);
+                    _logger.ReportError("Site", siteResults.SiteUrl, siteResults.ErrorMessage);
+                    AddRecord(siteResults.SiteUrl, remarks: siteResults.ErrorMessage);
                     continue;
                 }
 

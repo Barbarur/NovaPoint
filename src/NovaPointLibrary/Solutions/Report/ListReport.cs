@@ -87,7 +87,7 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 _appInfo.IsCancelled();
 
-                AddRecord(results.SiteUrl, results.List, remarks: results.Remarks);
+                AddRecord(results.SiteUrl, results.List, remarks: results.ErrorMessage);
 
             }
 

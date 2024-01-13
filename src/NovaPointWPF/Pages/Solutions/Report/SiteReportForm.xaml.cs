@@ -23,7 +23,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
     /// </summary>
     public partial class SiteReportForm : Page, ISolutionForm
     {
-        public bool SiteAll { get; set; }
         public bool IncludePersonalSite { get; set; }
         public bool IncludeShareSite { get; set; }
         public bool OnlyGroupIdDefined { get; set; }
@@ -40,7 +39,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionCode = nameof(SiteReport);
             SolutionHeader.SolutionDocs = SiteReport.s_SolutionDocs;
 
-            this.SiteAll = true;
             this.IncludePersonalSite = false;
             this.IncludeShareSite = true;
             this.OnlyGroupIdDefined = false;
@@ -52,7 +50,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
         {
             SiteReporttParameters parameters = new()
             {
-                SiteAll = this.SiteAll,
                 IncludePersonalSite = this.IncludePersonalSite,
                 IncludeShareSite = this.IncludeShareSite,
                 OnlyGroupIdDefined = this.OnlyGroupIdDefined,

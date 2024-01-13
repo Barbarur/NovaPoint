@@ -63,7 +63,7 @@
                         <RadioButton
                             Style="{DynamicResource SolutionFormToggleButton}"
                             Content="All Sites"
-                            IsChecked="{Binding SiteAll, ElementName=root}"
+                            IsChecked="True"
                             DockPanel.Dock="Left"/>
 
                         <RadioButton

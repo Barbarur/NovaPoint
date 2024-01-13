@@ -34,7 +34,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             ProgressTracker progress;
             if (!String.IsNullOrWhiteSpace(_param.SiteUrl))
             {
-                Web oSite = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
+                Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
 
                 progress = new(_logger, 1);
                 SPOTenantResults results = new(progress, oSite.Url);
@@ -59,8 +59,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         private async IAsyncEnumerable<SPOTenantResults> GetSubsitesAsync(SPOTenantResults siteCollectionResult)
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.GetSubsites";
-            _logger.LogTxt(methodName, $"Start getting Subsites for '{siteCollectionResult.SiteUrl}'");
+            _logger.LogTxt(GetType().Name, $"Getting Subsites from '{siteCollectionResult.SiteUrl}'");
 
             SPOTenantResults? errorResults = null;
             List<Web>? collSubsites = null;
@@ -72,8 +71,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             {
                 _logger.ReportError("Site", siteCollectionResult.SiteUrl, ex);
 
-                errorResults = new(siteCollectionResult.Progress, siteCollectionResult.SiteUrl);
-                errorResults.Remarks = ex.Message;
+                errorResults = new(siteCollectionResult.Progress, siteCollectionResult.SiteUrl)
+                {
+                    ErrorMessage = ex.Message
+                };
             }
 
             if (errorResults != null)
@@ -85,77 +86,61 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 siteCollectionResult.Progress.IncreaseTotalCount(collSubsites.Count);
                 foreach (var oSubsite in collSubsites)
                 {
-                    SPOTenantResults results = new(siteCollectionResult.Progress, oSubsite.Url);
-                    yield return results;
+                    SPOTenantResults resultsSubsite = new(siteCollectionResult.Progress, oSubsite.Url);
+                    yield return resultsSubsite;
 
                     siteCollectionResult.Progress.ProgressUpdateReport();
                 }
             }
-
-            _logger.LogTxt(methodName, $"Finish getting Subsites for '{siteCollectionResult}'");
         }
 
         internal async IAsyncEnumerable<SPOTenantResults> GetAsync()
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start getting Sites");
 
             GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetSignedInUser();
             string adminUPN = signedInUser.UserPrincipalName;
 
-            await foreach (SPOTenantResults SiteCollection in GetSiteCollectionsAsync())
+            await foreach (SPOTenantResults resultsSiteCollection in GetSiteCollectionsAsync())
             {
                 _appInfo.IsCancelled();
 
-                SPOTenantResults? errorResults = null;
                 try
                 {
-                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).Set(SiteCollection.SiteUrl, adminUPN);
+                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(resultsSiteCollection.SiteUrl, adminUPN);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Site", SiteCollection.SiteUrl, ex);
+                    _logger.ReportError("Site", resultsSiteCollection.SiteUrl, ex);
 
-                    errorResults = new(SiteCollection.Progress, SiteCollection.SiteUrl);
-                    errorResults.Remarks = ex.Message;
+                    resultsSiteCollection.ErrorMessage = ex.Message;
                 }
 
-                if (errorResults != null)
-                {
-                    yield return errorResults;
-                    continue;
-                }
-                else
-                {
-                    _logger.LogUI(GetType().Name, $"Processing Site '{SiteCollection.SiteUrl}'");
-                    yield return SiteCollection;
+                _logger.LogUI(GetType().Name, $"Processing Site '{resultsSiteCollection.SiteUrl}'");
+                yield return resultsSiteCollection;
 
-                    if (_param.IncludeSubsites)
+
+                if (string.IsNullOrWhiteSpace(resultsSiteCollection.ErrorMessage) && _param.IncludeSubsites)
+                {
+                    await foreach (SPOTenantResults subsite in GetSubsitesAsync(resultsSiteCollection))
                     {
-                        await foreach (SPOTenantResults subsite in GetSubsitesAsync(SiteCollection))
-                        {
-                            _logger.LogUI(GetType().Name, $"Processing Site '{subsite.SiteUrl}'");
-                            yield return subsite;
-                        }
+                        _logger.LogUI(GetType().Name, $"Processing Site '{subsite.SiteUrl}'");
+                        yield return subsite;
                     }
                 }
 
-                try
+                if (string.IsNullOrWhiteSpace(resultsSiteCollection.ErrorMessage) && _param.RemoveAdmin)
                 {
-                    if (_param.RemoveAdmin)
+                    try
                     {
-                        await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).Remove(SiteCollection.SiteUrl, adminUPN);
+                        await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(resultsSiteCollection.SiteUrl, adminUPN);
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logger.ReportError("Site", SiteCollection.SiteUrl, ex);
+                    catch (Exception ex)
+                    {
+                        _logger.ReportError("Site", resultsSiteCollection.SiteUrl, ex);
+                    }
                 }
             }
         }
-
-
-
-
     }
 }

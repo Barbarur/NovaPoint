@@ -25,7 +25,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
     /// </summary>
     public partial class ShortcutODReportForm : Page, ISolutionForm
     {
-        public string AdminUPN { get; set; }
         public bool RemoveAdmin { get; set; }
 
         private bool _siteAll;
@@ -62,10 +61,8 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionCode = nameof(ShortcutODReport);
             SolutionHeader.SolutionDocs = ShortcutODReport.s_SolutionDocs;
 
-            this.AdminUPN = String.Empty;
             this.RemoveAdmin = true;
 
-            this.SiteAll = true;
             this.SiteUrl = String.Empty;
 
             this.FolderRelativeUrl = String.Empty;
@@ -76,10 +73,8 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
             ShortcutODReportParameters parameters = new()
             {
-                AdminUPN = this.AdminUPN,
                 RemoveAdmin = this.RemoveAdmin,
 
-                SiteAll = this.SiteAll,
                 SiteUrl = this.SiteUrl,
 
                 FolderRelativeUrl = this.FolderRelativeUrl,

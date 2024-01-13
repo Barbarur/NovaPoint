@@ -27,11 +27,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async IAsyncEnumerable<SPOTenantResults> GetItemsAsync()
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.GetLists";
 
             await foreach (SPOTenantResults listResult in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
             {
-                if (!String.IsNullOrWhiteSpace(listResult.Remarks))
+                if (!String.IsNullOrWhiteSpace(listResult.ErrorMessage))
                 {
                     yield return listResult;
                     continue;
@@ -48,7 +47,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     _logger.ReportError("Site", listResult.SiteUrl, ex);
 
                     errorResults = new(listResult.Progress, listResult.SiteUrl);
-                    errorResults.Remarks = ex.Message;
+                    errorResults.ErrorMessage = ex.Message;
                 }
 
                 if (errorResults != null)

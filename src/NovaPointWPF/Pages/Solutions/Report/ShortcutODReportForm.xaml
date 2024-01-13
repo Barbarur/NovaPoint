@@ -19,37 +19,9 @@
 
             <StackPanel>
 
-                <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Admin Account"/>
-
-                <Grid
-                Margin="0, 0, 0, 15">
-
-                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
-
-                    <StackPanel
-                    Margin="12">
-
-                        <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="Admin UPN"/>
-
-                        <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding AdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                        Margin="0,0,0,8"/>
-
-                        <ToggleButton
-                        Style="{DynamicResource SolutionFormToggleButton}"
-                        Content="Remove Admin"
-                        IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                        HorizontalAlignment="Left"/>
-
-                    </StackPanel>
-
-                </Grid>
-
+                <designmaterial:AdminForm
+                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
 
                 <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"

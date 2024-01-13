@@ -16,7 +16,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
     {
         public bool RemoveAdmin { get; set; }
 
-        public bool SiteAll { get; set; }
         public bool IncludePersonalSite { get; set; }
         public bool IncludeShareSite { get; set; }
         public bool OnlyGroupIdDefined { get; set; }
@@ -45,7 +44,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
             this.RemoveAdmin = true;
 
-            this.SiteAll = true;
             this.IncludePersonalSite = false;
             this.IncludeShareSite = true;
             this.OnlyGroupIdDefined = false;
@@ -69,7 +67,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             {
                 RemoveAdmin = this.RemoveAdmin,
 
-                SiteAll = this.SiteAll,
                 IncludePersonalSite = this.IncludePersonalSite,
                 IncludeShareSite = this.IncludeShareSite,
                 OnlyGroupIdDefined = this.OnlyGroupIdDefined,

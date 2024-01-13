@@ -56,9 +56,9 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
             await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
             {
 
-                if (!String.IsNullOrWhiteSpace(siteResults.Remarks))
+                if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
                 {
-                    AddRecord(siteResults.SiteUrl, remarks: siteResults.Remarks);
+                    AddRecord(siteResults.SiteUrl, remarks: siteResults.ErrorMessage);
                     continue;
                 }
 

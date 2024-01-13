@@ -69,13 +69,26 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         //}
 
 
-        internal async Task Set(string siteUrl, string userAdmin)
+        internal async Task SetAsync(string siteUrl, string userAdmin)
         {
             await Process(siteUrl, userAdmin, true);
         }
 
+        internal async Task RemoveAsync(string siteUrl, string userAdmin)
+        {
+            string upnCoded = userAdmin.Trim().Replace("@", "_").Replace(".", "_");
 
-        internal async Task Remove(string siteUrl, string userAdmin)
+            if (siteUrl.Contains(upnCoded, StringComparison.OrdinalIgnoreCase) && siteUrl.Contains("-my.sharepoint.com", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new Exception("This is user's OneDrive. User will not be removed as Site Admin.");
+            }
+            else
+            {
+                await Process(siteUrl, userAdmin, false);
+            }
+        }
+
+        internal async Task RemoveForceAsync(string siteUrl, string userAdmin)
         {
             await Process(siteUrl, userAdmin, false);
         }
