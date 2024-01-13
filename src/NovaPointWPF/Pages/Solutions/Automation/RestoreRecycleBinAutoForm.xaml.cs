@@ -25,7 +25,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
     /// </summary>
     public partial class RestoreRecycleBinAutoForm : Page, ISolutionForm
     {
-        public string AdminUPN { get; set; }
         public bool RemoveAdmin { get; set; }
 
         public bool SiteAll { get; set; }
@@ -57,7 +56,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             SolutionHeader.SolutionCode = nameof(RestoreRecycleBinAuto);
             SolutionHeader.SolutionDocs = RestoreRecycleBinAuto.s_SolutionDocs;
 
-            this.AdminUPN = String.Empty;
             this.RemoveAdmin = true;
 
             this.SiteAll = true;
@@ -84,7 +82,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
         {
             RestoreRecycleBinAutoParameters parameters = new()
             {
-                AdminUPN = this.AdminUPN,
                 RemoveAdmin = this.RemoveAdmin,
 
                 SiteAll = this.SiteAll,

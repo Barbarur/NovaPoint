@@ -208,7 +208,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             dynamicRecord.IRM_Emabled = list != null ? list.IrmEnabled.ToString() : string.Empty;
 
-            dynamicRecord.Rquest_ForceCheckout = list != null ? list.ForceCheckout.ToString() : string.Empty;
+            dynamicRecord.ForceCheckout = list != null ? list.ForceCheckout.ToString() : string.Empty;
             
             dynamicRecord.Remarks = remarks;
 

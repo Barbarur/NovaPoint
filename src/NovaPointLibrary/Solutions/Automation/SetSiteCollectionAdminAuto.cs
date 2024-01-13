@@ -125,7 +125,12 @@ namespace NovaPointLibrary.Solutions.Automation
 
     public class SetSiteCollectionAdminAutoParameters : SPOTenantSiteUrlsParameters
     {
-        public string TargetUserUPN { get; set; } = string.Empty;
+        private string _targetUserUPN = string.Empty;
+        public string TargetUserUPN
+        {
+            get { return _targetUserUPN; }
+            set { _targetUserUPN = value.Trim();}
+        }
 
         public bool IsSiteAdmin { get; set; } = false;
 

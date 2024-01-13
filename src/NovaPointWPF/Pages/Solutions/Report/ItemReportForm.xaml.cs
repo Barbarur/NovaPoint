@@ -26,7 +26,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
     /// </summary>
     public partial class ItemReportForm : Page, ISolutionForm
     {
-        public string AdminUPN { get; set; }
         public bool RemoveAdmin { get; set; }
 
         public bool SiteAll { get; set; }
@@ -55,7 +54,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionCode = nameof(ItemReport);
             SolutionHeader.SolutionDocs = ItemReport.s_SolutionDocs;
 
-            this.AdminUPN = String.Empty;
             this.RemoveAdmin = true;
 
             this.SiteAll = true;
@@ -79,7 +77,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
             ItemReportParameters parameters = new()
             {
-                AdminUPN = this.AdminUPN,
                 RemoveAdmin = this.RemoveAdmin,
 
                 SiteAll = this.SiteAll,

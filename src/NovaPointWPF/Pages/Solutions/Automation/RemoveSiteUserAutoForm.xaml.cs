@@ -25,7 +25,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
     {
         public string DeleteUserUPN { get; set; }
 
-        public string AdminUPN { get; set; }
         public bool RemoveAdmin { get; set; }
 
         public bool SiteAll { get; set; }
@@ -47,7 +46,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
             DeleteUserUPN = string.Empty;
 
-            this.AdminUPN = String.Empty;
             this.RemoveAdmin = true;
 
             this.SiteAll = true;
@@ -65,7 +63,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             {
                 DeleteUserUPN = this.DeleteUserUPN,
 
-                AdminUPN = this.AdminUPN,
                 RemoveAdmin = this.RemoveAdmin,
 
                 SiteAll = this.SiteAll,

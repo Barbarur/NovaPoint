@@ -21,11 +21,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
         internal void ParametersCheck()
         {
-            if (String.IsNullOrWhiteSpace(AdminUPN))
-            {
-                throw new Exception("FORM INCOMPLETED: Admin UPN cannot be empty.");
-            }
-            else if (string.IsNullOrWhiteSpace(SiteUrl) && !SiteAll)
+            if (string.IsNullOrWhiteSpace(SiteUrl) && !SiteAll)
             {
                 throw new Exception($"FORM INCOMPLETED: Site URL cannot be empty when no processing all sites");
             }

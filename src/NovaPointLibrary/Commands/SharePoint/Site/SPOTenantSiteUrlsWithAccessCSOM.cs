@@ -1,6 +1,9 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
+using NovaPoint.Commands.Site;
+using NovaPointLibrary.Commands.AzureAD;
 using NovaPointLibrary.Commands.SharePoint.Utilities;
+using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Solutions;
 using System;
 using System.Collections.Generic;
@@ -26,8 +29,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         private async IAsyncEnumerable<SPOTenantResults> GetSiteCollectionsAsync()
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.GetSiteCollections";
-            _logger.LogTxt(methodName, $"Start getting Site Collections'");
+            _logger.LogTxt(GetType().Name, $"Getting Site Collections");
 
             ProgressTracker progress;
             if (!String.IsNullOrWhiteSpace(_param.SiteUrl))
@@ -35,10 +37,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 Web oSite = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
 
                 progress = new(_logger, 1);
-
                 SPOTenantResults results = new(progress, oSite.Url);
 
-                _logger.LogTxt(methodName, $"Finish getting Site Collections'");
                 yield return results;
                 progress.ProgressUpdateReport();
             }
@@ -47,7 +47,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
 
                 progress = new(_logger, collSiteCollections.Count);
-                _logger.LogTxt(methodName, $"Finish getting Site Collections'");
                 foreach (var oSiteCollection in collSiteCollections)
                 {
                     SPOTenantResults results = new(progress, oSiteCollection.Url);
@@ -99,8 +98,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         internal async IAsyncEnumerable<SPOTenantResults> GetAsync()
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.GetSites";
-            _logger.LogTxt(methodName, $"Start getting Sites");
+            _logger.LogTxt(GetType().Name, $"Start getting Sites");
+
+            GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetSignedInUser();
+            string adminUPN = signedInUser.UserPrincipalName;
 
             await foreach (SPOTenantResults SiteCollection in GetSiteCollectionsAsync())
             {
@@ -109,7 +110,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 SPOTenantResults? errorResults = null;
                 try
                 {
-                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).Set(SiteCollection.SiteUrl, _param.AdminUPN);
+                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).Set(SiteCollection.SiteUrl, adminUPN);
                 }
                 catch (Exception ex)
                 {
@@ -143,7 +144,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 {
                     if (_param.RemoveAdmin)
                     {
-                        await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).Remove(SiteCollection.SiteUrl, _param.AdminUPN);
+                        await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).Remove(SiteCollection.SiteUrl, adminUPN);
                     }
                 }
                 catch (Exception ex)

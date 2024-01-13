@@ -15,10 +15,9 @@
 
             <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Admin Account"/>
+                Content="Your Account will be added as Site Collection Administrator"/>
 
-            <Grid
-                Margin="0, 0, 0, 15">
+            <Grid>
 
                 <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
@@ -27,18 +26,25 @@
 
                     <Label
                         Style="{DynamicResource SolutionFormLabel}"
-                        Content="Admin UPN"/>
+                        Content="What to do when the solution finishes?"/>
 
-                    <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding AdminUPN, ElementName=root}"
-                        Margin="0,0,0,8"/>
+                    <StackPanel
+                        Orientation="Horizontal">
+                        
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Keep account as Admin"
+                            HorizontalAlignment="Left"
+                            Width="200"/>
 
-                    <ToggleButton
-                        Style="{DynamicResource SolutionFormToggleButton}"
-                        Content="Remove Admin"
-                        IsChecked="{Binding RemoveAdmin, ElementName=root}"
-                        HorizontalAlignment="Left"/>
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Remove account as Admin"
+                            IsChecked="{Binding RemoveAdmin, ElementName=root}"
+                            HorizontalAlignment="Left"
+                            Width="200"/>
+                        
+                    </StackPanel>
 
                 </StackPanel>
 

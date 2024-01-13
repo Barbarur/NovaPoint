@@ -24,7 +24,6 @@
                 HorizontalAlignment="Left"/>
 
             <designmaterial:AdminForm
-                AdminUPN="{Binding AdminUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 />
 

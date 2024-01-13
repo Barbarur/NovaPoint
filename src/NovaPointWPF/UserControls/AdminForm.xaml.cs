@@ -25,22 +25,13 @@ namespace NovaPointWPF.UserControls
             InitializeComponent();
         }
 
-        public string AdminUPN
-        {
-            get { return (string)GetValue(AdminUPNProperty); }
-            set { SetValue(AdminUPNProperty, value); }
-        }
-        public static readonly DependencyProperty AdminUPNProperty =
-            DependencyProperty.Register("AdminUPN", typeof(string), typeof(AdminForm), new PropertyMetadata(string.Empty));
-
-
         public bool RemoveAdmin
         {
             get { return (bool)GetValue(RemoveAdminProperty); }
             set { SetValue(RemoveAdminProperty, value); }
         }
         public static readonly DependencyProperty RemoveAdminProperty =
-            DependencyProperty.Register("RemoveAdmin", typeof(bool), typeof(AdminForm), new FrameworkPropertyMetadata(defaultValue: false));
+            DependencyProperty.Register("RemoveAdmin", typeof(bool), typeof(AdminForm), new FrameworkPropertyMetadata(defaultValue: true));
 
 
     }

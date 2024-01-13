@@ -20,16 +20,15 @@ namespace NovaPointLibrary.Commands.Utilities
     {
         private readonly NPLogger _logger;
         private AppInfo _appInfo;
-        private readonly string _accessToken;
+
         private readonly HttpClient HttpsClient;
-        private readonly string _graphUrl = "https://graph.microsoft.com/v1.0/";
+        private readonly string _graphUrl = "https://graph.microsoft.com/v1.0";
 
-
+        // THIS CONSTRUCTOR TO BE DEPRECATED
         internal GraphAPIHandler(NPLogger logger, AppInfo appInfo, string accessToken)
         {
             _logger = logger;
             _appInfo = appInfo;
-            _accessToken = accessToken;
             HttpsClient = new();
         }
 
@@ -86,7 +85,7 @@ namespace NovaPointLibrary.Commands.Utilities
         {
             _appInfo.IsCancelled(); 
             
-            HttpRequestMessage requestMessage = GetMessage(url, HttpMethod.Get);
+            HttpRequestMessage requestMessage = await GetMessage(url, HttpMethod.Get);
 
             var sendMessage = SendMessageAsync(requestMessage);
 
@@ -107,7 +106,7 @@ namespace NovaPointLibrary.Commands.Utilities
             }
         }
 
-        private HttpRequestMessage GetMessage(string url, HttpMethod method)
+        private async Task<HttpRequestMessage> GetMessage(string url, HttpMethod method)
         {
             _appInfo.IsCancelled();
 
@@ -116,10 +115,12 @@ namespace NovaPointLibrary.Commands.Utilities
                 url = url.Substring(1);
             }
 
+            string accessToken = await _appInfo.GetGraphAccessToken();
+
             HttpRequestMessage message = new();
             message.Method = method;
             message.RequestUri = !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? new Uri($"{_graphUrl}/{url}") : new Uri(url);
-            message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _accessToken);
+            message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
             _logger.LogTxt(GetType().Name, $"Request Message Uir {message.RequestUri}");
 

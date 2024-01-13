@@ -21,7 +21,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
 {
     public partial class RecycleBinReportForm : Page, ISolutionForm
     {
-        public string AdminUPN { get; set; }
         public bool RemoveAdmin { get; set; }
 
         public bool SiteAll { get; set; }
@@ -51,7 +50,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionCode = nameof(RecycleBinReport);
             SolutionHeader.SolutionDocs = RecycleBinReport.s_SolutionDocs;
 
-            this.AdminUPN = String.Empty;
             this.RemoveAdmin = true;
 
             this.SiteAll = true;
@@ -77,7 +75,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
         {
             RecycleBinReportParameters parameters = new()
             {
-                AdminUPN = this.AdminUPN,
                 RemoveAdmin = this.RemoveAdmin,
 
                 SiteAll = this.SiteAll,
