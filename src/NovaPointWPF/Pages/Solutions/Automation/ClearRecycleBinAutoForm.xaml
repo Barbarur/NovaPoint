@@ -16,19 +16,6 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <designmaterial:AdminForm
-                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
-
-            <designmaterial:SiteForm
-                IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
-
             <designmaterial:RecycleBinForm
                 AllItems="{Binding AllItems, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 
@@ -42,6 +29,19 @@
                 OriginalLocation="{Binding OriginalLocation, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 FileSizeMb="{Binding FileSizeMb, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 FileSizeAbove="{Binding FileSizeAbove, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+            
+            <designmaterial:AdminForm
+                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+            <designmaterial:SiteForm
+                IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                
+                SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 />
 
         </StackPanel>

@@ -68,17 +68,13 @@ namespace NovaPointWPF.UserControls
                 if(value)
                 {
                     AllSitesFilter.Visibility = Visibility.Collapsed; 
-                    
                     SingleSiteUrl.Visibility = Visibility.Visible;
                 }
                 else
                 {
                     AllSitesFilter.Visibility = Visibility.Visible;
-
                     SingleSiteUrl.Visibility = Visibility.Collapsed;
-                    SiteUrl = "";
-                    SetValue(SiteUrlProperty, string.Empty);
-                    SiteUrlTextBox.Text = String.Empty;
+                    SiteUrl = string.Empty;
                 }
             }
         }

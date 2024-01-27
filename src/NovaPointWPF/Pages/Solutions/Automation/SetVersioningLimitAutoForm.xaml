@@ -16,28 +16,6 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <designmaterial:AdminForm
-                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
-
-            <designmaterial:SiteForm
-                IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
-
-            <designmaterial:ListForm
-                ListAll="{Binding ListAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeHiddenLists="{Binding IncludeHiddenLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeSystemLists="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                ListTitle="{Binding ListTitle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
-
-
             <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
                 Content="Versioning limits"/>
@@ -66,7 +44,7 @@
                     <TextBox
                         Style="{DynamicResource SolutionFormTextBox}"
                         Text="{Binding LibraryMinorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-                        
+
                     <Label
                         Style="{DynamicResource SolutionFormLabel}"
                         Content="List major versioning limit"/>
@@ -79,6 +57,27 @@
                 </StackPanel>
 
             </Grid>
+            
+            <designmaterial:AdminForm
+                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+            <designmaterial:SiteForm
+                IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                
+                SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+            <designmaterial:ListForm
+                ListAll="{Binding ListAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeHiddenLists="{Binding IncludeHiddenLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeSystemLists="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                
+                ListTitle="{Binding ListTitle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
 
         </StackPanel>
 

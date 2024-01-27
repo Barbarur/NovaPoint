@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Automation"
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="1100" d:DesignWidth="600"
+      d:DesignHeight="1200" d:DesignWidth="600"
       Title="RemoveFileVersionAutoForm">
 
     <Grid Background="Transparent">
@@ -18,37 +18,10 @@
 
             <ToggleButton
                 Style="{DynamicResource SolutionFormToggleButton}"
-                Content="Remove Mode"
+                Content="Report Mode"
                 IsChecked="{Binding ReportMode, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 Margin="0, 0, 0, 15"
                 HorizontalAlignment="Left"/>
-
-            <designmaterial:AdminForm
-                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
-
-            <designmaterial:SiteForm
-                IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
-
-            <designmaterial:ListForm
-                ListAll="{Binding ListAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeHiddenLists="{Binding IncludeHiddenLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeSystemLists="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                ListTitle="{Binding ListTitle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
-
-            <designmaterial:ItemForm
-                ItemsAll="{Binding ItemsAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
 
             <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
@@ -105,6 +78,32 @@
                     </StackPanel>
                 </StackPanel>
             </Grid>
+
+            <designmaterial:AdminForm
+                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+            <designmaterial:SiteForm
+                IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                
+                SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+            <designmaterial:ListForm
+                ListAll="{Binding ListAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeHiddenLists="{Binding IncludeHiddenLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeSystemLists="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                
+                ListTitle="{Binding ListTitle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+            <designmaterial:ItemForm
+                ItemsAll="{Binding ItemsAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                
+                FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
         </StackPanel>
 

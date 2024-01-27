@@ -11,7 +11,6 @@
 
     <Grid>
 
-
         <StackPanel>
 
             <designmaterial:FormHeader
@@ -20,53 +19,54 @@
             <StackPanel>
 
                 <designmaterial:AdminForm
-                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
+                    RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                    />
 
                 <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Sites filter"/>
+                    Style="{DynamicResource MenuSectionTitleLabel}"
+                    Content="Sites filter"/>
 
                 <Grid>
 
                     <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
                     <StackPanel
-                    Margin="12">
+                        Margin="12">
 
                         <DockPanel
-                        Margin="0,0,0,9">
+                            Margin="0,0,0,9">
 
                             <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="All Sites"
-                            IsChecked="{Binding SiteAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                            DockPanel.Dock="Left"/>
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="All Sites"
+                                IsChecked="{Binding SiteAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                                DockPanel.Dock="Left"/>
 
                             <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Single Site"
-                            DockPanel.Dock="Left"/>
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Single Site"
+                                DockPanel.Dock="Left"/>
 
                             <TextBlock
-                            DockPanel.Dock="Left"
-                            Height="Auto"/>
+                                DockPanel.Dock="Left"
+                                Height="Auto"/>
 
                         </DockPanel>
 
                         <StackPanel
-                        x:Name="SingleSiteUrl"
-                        Visibility="Collapsed"
-                        Margin="9, 0, 0, 0">
+                            x:Name="SingleSiteUrl"
+                            Visibility="Collapsed"
+                            Margin="9, 0, 0, 0">
 
                             <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Site URL"/>
+                                Style="{DynamicResource SolutionFormLabel}"
+                                Content="Site URL"/>
 
                             <TextBox
-                            x:Name="SiteUrlTextBox"
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                                x:Name="SiteUrlTextBox"
+                                Style="{DynamicResource SolutionFormTextBox}"
+                                Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                                />
 
                         </StackPanel>
 
