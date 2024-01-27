@@ -80,13 +80,13 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _appInfo.IsCancelled();
 
-            User? user = await new SPOSiteUser(_logger, _appInfo).GetAsync(siteUrl, _param.DeleteUserUPN);
+            User? user = await new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteUrl, _param.DeleteUserUPN);
 
             if (user != null)
             {
                 if (user.IsSiteAdmin) { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveForceAsync(siteUrl, user.UserPrincipalName); }
 
-                await new SPOSiteUser(_logger, _appInfo).RemoveAsync(siteUrl, user.UserPrincipalName);
+                await new SPOSiteUserCSOM(_logger, _appInfo).RemoveAsync(siteUrl, user.UserPrincipalName);
 
                 AddRecord(siteUrl, "User removed");
             }

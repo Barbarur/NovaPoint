@@ -24,14 +24,6 @@ namespace NovaPointLibrary.Commands.Utilities
         private readonly HttpClient HttpsClient;
         private readonly string _graphUrl = "https://graph.microsoft.com/v1.0";
 
-        // THIS CONSTRUCTOR TO BE DEPRECATED
-        internal GraphAPIHandler(NPLogger logger, AppInfo appInfo, string accessToken)
-        {
-            _logger = logger;
-            _appInfo = appInfo;
-            HttpsClient = new();
-        }
-
         internal GraphAPIHandler(NPLogger logger, AppInfo appInfo)
         {
             _logger = logger;

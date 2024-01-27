@@ -1,79 +1,79 @@
-﻿using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Solutions;
-using NovaPointLibrary.Solutions.Report;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿//using NovaPointLibrary.Commands.Authentication;
+//using NovaPointLibrary.Solutions;
+//using NovaPointLibrary.Solutions.Report;
+//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using System.Threading;
+//using System.Threading.Tasks;
+//using System.Windows;
+//using System.Windows.Controls;
+//using System.Windows.Data;
+//using System.Windows.Documents;
+//using System.Windows.Input;
+//using System.Windows.Media;
+//using System.Windows.Media.Imaging;
+//using System.Windows.Navigation;
+//using System.Windows.Shapes;
 
-namespace NovaPointWPF.Pages.Solutions.Report
-{
-    /// <summary>
-    /// Interaction logic for PermissionsAllSiteSingleReportForm.xaml
-    /// </summary>
-    public partial class PermissionsAllSiteSingleReportForm : Page, ISolutionForm
-    {
-        public string SiteUrl { get; set; }
+//namespace NovaPointWPF.Pages.Solutions.Report
+//{
+//    /// <summary>
+//    /// Interaction logic for PermissionsAllSiteSingleReportForm.xaml
+//    /// </summary>
+//    public partial class PermissionsAllSiteSingleReportForm : Page, ISolutionForm
+//    {
+//        public string SiteUrl { get; set; }
 
-        public bool IncludeAdmins { get; set; }
-        public bool IncludeSiteAccess { get; set; }
-        public bool IncludeUniquePermissions { get; set; }
-        public bool IncludeSubsites { get; set; }
+//        public bool IncludeAdmins { get; set; }
+//        public bool IncludeSiteAccess { get; set; }
+//        public bool IncludeUniquePermissions { get; set; }
+//        public bool IncludeSubsites { get; set; }
 
-        private bool IncludeSystemLists { get; set; }
-        private bool IncludeResourceLists { get; set; }
-
-
-        public PermissionsAllSiteSingleReportForm()
-        {
-            InitializeComponent();
-
-            DataContext = this;
+//        private bool IncludeSystemLists { get; set; }
+//        private bool IncludeResourceLists { get; set; }
 
 
-            SiteUrl = string.Empty;
+//        public PermissionsAllSiteSingleReportForm()
+//        {
+//            InitializeComponent();
 
-            IncludeAdmins = true;
-            IncludeSiteAccess = true;
-            IncludeUniquePermissions = true;
-            IncludeSubsites = true;
-
-            IncludeSystemLists = false;
-            IncludeResourceLists = false;
+//            DataContext = this;
 
 
-            SolutionHeader.SolutionTitle = PermissionsAllSiteSingleReport._solutionName;
-            SolutionHeader.SolutionCode = nameof(PermissionsAllSiteSingleReport);
-            SolutionHeader.SolutionDocs = PermissionsAllSiteSingleReport._solutionDocs;
-        }
+//            SiteUrl = string.Empty;
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
-        {
-            PermissionsAllSiteSingleParameters parameters = new()
-            {
-                SiteUrl = SiteUrl,
-                IncludeAdmins = IncludeAdmins,
-                IncludeSiteAccess = IncludeSiteAccess,
-                IncludeUniquePermissions = IncludeUniquePermissions,
-                IncludeSubsites = IncludeSubsites,
+//            IncludeAdmins = true;
+//            IncludeSiteAccess = true;
+//            IncludeUniquePermissions = true;
+//            IncludeSubsites = true;
 
-                IncludeSystemLists = IncludeSystemLists,
-                IncludeResourceLists = IncludeResourceLists,
-            };
+//            IncludeSystemLists = false;
+//            IncludeResourceLists = false;
 
-            await new PermissionsAllSiteSingleReport(parameters, uiLog, cancelTokenSource).RunAsync();
 
-        }
-    }
-}
+//            SolutionHeader.SolutionTitle = PermissionsAllSiteSingleReport._solutionName;
+//            SolutionHeader.SolutionCode = nameof(PermissionsAllSiteSingleReport);
+//            SolutionHeader.SolutionDocs = PermissionsAllSiteSingleReport._solutionDocs;
+//        }
+
+//        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+//        {
+//            PermissionsAllSiteSingleParameters parameters = new()
+//            {
+//                SiteUrl = SiteUrl,
+//                IncludeAdmins = IncludeAdmins,
+//                IncludeSiteAccess = IncludeSiteAccess,
+//                IncludeUniquePermissions = IncludeUniquePermissions,
+//                IncludeSubsites = IncludeSubsites,
+
+//                IncludeSystemLists = IncludeSystemLists,
+//                IncludeResourceLists = IncludeResourceLists,
+//            };
+
+//            await new PermissionsAllSiteSingleReport(parameters, uiLog, cancelTokenSource).RunAsync();
+
+//        }
+//    }
+//}

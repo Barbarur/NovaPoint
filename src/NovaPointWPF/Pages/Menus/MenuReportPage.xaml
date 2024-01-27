@@ -119,8 +119,8 @@
 
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"
-                        Content="Permissions in a Site"
-                        Click="PermissionsAllSiteSingleReportFormClick"/>
+                        Content="User permissions"
+                        Click="PermissionsReportFormClick"/>
 
                 </StackPanel>
 

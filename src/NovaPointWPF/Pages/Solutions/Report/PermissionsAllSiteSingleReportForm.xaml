@@ -11,7 +11,7 @@
 
     <Grid Background="Transparent">
 
-        <StackPanel>
+        <!--<StackPanel>
 
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
@@ -119,6 +119,6 @@
                 
             </StackPanel>
 
-        </StackPanel>
+        </StackPanel>-->
     </Grid>
 </Page>

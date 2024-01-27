@@ -2,7 +2,6 @@
 using Microsoft.IdentityModel.Logging;
 using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
-using NovaPoint.Commands.Site;
 using NovaPointLibrary.Commands;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Permision;

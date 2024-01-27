@@ -8,25 +8,17 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
 {
     internal class SPOLocationPermissionsRecord
     {
-        internal string LocationType { get; set; }
-        internal string LocationName { get; set; }
-        internal string LocationUrl { get; set; }
-        internal List<SPORoleAssignmentRecord> SPORoleAssignmentUsersList { get; set; }
+        internal string _locationType;
+        internal string _locationName;
+        internal string _locationUrl;
+        internal SPORoleAssignmentUserRecord _role;
 
-        internal SPOLocationPermissionsRecord(string locationType, string locationName, string locationUrl, List<SPORoleAssignmentRecord> usersList)
+        internal SPOLocationPermissionsRecord(string locationType, string locationName, string locationUrl, SPORoleAssignmentUserRecord role)
         {
-            LocationType = locationType;
-            LocationName = locationName;
-            LocationUrl = locationUrl;
-
-            if (usersList.Count == 0)
-            {
-                SPORoleAssignmentUsersList = new() { new("", "", "", "", "No user has access to this location"), };
-            }
-            else
-            {
-                SPORoleAssignmentUsersList = usersList;
-            }
+            _locationType = locationType;
+            _locationName = locationName;
+            _locationUrl = locationUrl;
+            _role = role;
         }
     }
 }

@@ -46,7 +46,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 {
                     _logger.ReportError("Site", listResult.SiteUrl, ex);
 
-                    errorResults = new(listResult.Progress, listResult.SiteUrl);
+                    errorResults = new(listResult.Progress, listResult.SiteUrl, listResult.SiteName);
                     errorResults.ErrorMessage = ex.Message;
                 }
 

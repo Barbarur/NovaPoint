@@ -1,0 +1,59 @@
+﻿<Page x:Class="NovaPointWPF.Pages.Solutions.Report.PermissionsReportForm"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
+      mc:Ignorable="d" 
+      d:DesignHeight="1200" d:DesignWidth="600"
+      Title="PermissionsReportForm">
+
+    <Grid Background="Transparent">
+
+        <StackPanel>
+
+            <designmaterial:FormHeader
+                x:Name="SolutionHeader"/>
+
+            <designmaterial:PermissionForm
+                UserListOnly="{Binding UserListOnly, Mode=OneWayToSource}"
+                IncludeAdmins="{Binding IncludeAdmins, Mode=OneWayToSource}"
+                IncludeSiteAccess="{Binding IncludeSiteAccess, Mode=OneWayToSource}"
+                IncludeUniquePermissions="{Binding IncludeUniquePermissions, Mode=OneWayToSource}"
+                TargetUPN="{Binding TargetUPN, Mode=OneWayToSource}"
+                TargetEveryone="{Binding TargetEveryone, Mode=OneWayToSource}"
+                />
+            
+            <designmaterial:AdminForm
+                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+            <designmaterial:SiteForm
+                IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                
+                SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+            <designmaterial:ListForm
+                x:Name="ListPanel"
+                ListAll="{Binding ListAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeHiddenLists="{Binding IncludeHiddenLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeSystemLists="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                
+                ListTitle="{Binding ListTitle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+            <designmaterial:ItemForm
+                x:Name="ItemPanel"
+                ItemsAll="{Binding ItemsAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+        </StackPanel>
+
+    </Grid>
+</Page>

@@ -1,0 +1,137 @@
+﻿<UserControl x:Class="NovaPointWPF.UserControls.PermissionForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NovaPointWPF.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="600"
+             x:Name="root">
+    
+    <Grid
+        Margin="0,0,0,15">
+        
+        <StackPanel>
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Permissions filter"/>
+
+            <Grid>
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Margin="0,0,0,9">
+
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Site user list only"
+                            IsChecked="{Binding UserListOnly, ElementName=root}"/>
+
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Detailed report"
+                            IsChecked="{Binding DetailedReport, ElementName=root}"/>
+
+                    </StackPanel>
+
+                    <StackPanel
+                        x:Name="DetailPanel"
+                        Orientation="Vertical"
+                        Margin="9,0,0,9">
+
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Select which permissions to include on the report"/>
+
+                        <StackPanel
+                                    Orientation="Horizontal">
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Site Collection Admin"
+                                Width="168"
+                                IsChecked="{Binding IncludeAdmins, ElementName=root}"/>
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Site Permissions"
+                                Width="168"
+                                IsChecked="{Binding IncludeSiteAccess, ElementName=root}"/>
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Unique permissions"
+                                Width="168"
+                                IsChecked="{Binding IncludeUniquePermissions, ElementName=root}"/>
+                            
+                        </StackPanel>
+
+                    </StackPanel>
+
+
+                    <StackPanel
+                        Orientation="Vertical"
+                        Margin="0,0,0,0">
+
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Users to include on the report"/>
+
+                        <StackPanel
+                            Orientation="Horizontal">
+                            
+                            <RadioButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="All Users"
+                                IsChecked="True"/>
+
+                            <RadioButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Single User"
+                                IsChecked="{Binding SingleUser, ElementName=root}"/>
+                                
+                            <RadioButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="System Group"
+                                IsChecked="{Binding Everyone, ElementName=root}"/>
+                            
+                        </StackPanel>
+
+
+                    </StackPanel>
+
+                    <StackPanel
+                        x:Name="SingleUserTextbox"
+                        Visibility="Collapsed"
+                        Margin="9, 0, 0, 0">
+
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="User Name"/>
+
+                        <TextBox
+                            Style="{DynamicResource SolutionFormTextBox}"
+                            Text="{Binding TargetUPN, ElementName=root}"/>
+                        
+                    </StackPanel>
+
+                    <Label
+                        x:Name="EveryoneLabel"
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Margin="9,0,0,0"
+                        Visibility="Collapsed"
+                        Content="Report sites with 'Everyone'  and 'Everyone except external users'"/>
+
+
+                </StackPanel>
+
+            </Grid>
+        </StackPanel>
+
+    </Grid>
+</UserControl>

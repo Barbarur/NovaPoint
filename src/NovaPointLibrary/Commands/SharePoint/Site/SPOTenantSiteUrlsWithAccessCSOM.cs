@@ -1,6 +1,5 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
-using NovaPoint.Commands.Site;
 using NovaPointLibrary.Commands.AzureAD;
 using NovaPointLibrary.Commands.SharePoint.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
@@ -37,7 +36,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
 
                 progress = new(_logger, 1);
-                SPOTenantResults results = new(progress, oSite.Url);
+                SPOTenantResults results = new(progress, oSite.Url, oSite.Title);
 
                 yield return results;
                 progress.ProgressUpdateReport();
@@ -49,7 +48,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 progress = new(_logger, collSiteCollections.Count);
                 foreach (var oSiteCollection in collSiteCollections)
                 {
-                    SPOTenantResults results = new(progress, oSiteCollection.Url);
+                    SPOTenantResults results = new(progress, oSiteCollection.Url, oSiteCollection.Title);
                     yield return results;
                     progress.ProgressUpdateReport();
                 }
@@ -71,7 +70,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             {
                 _logger.ReportError("Site", siteCollectionResult.SiteUrl, ex);
 
-                errorResults = new(siteCollectionResult.Progress, siteCollectionResult.SiteUrl)
+                errorResults = new(siteCollectionResult.Progress, siteCollectionResult.SiteUrl, siteCollectionResult.SiteName)
                 {
                     ErrorMessage = ex.Message
                 };
@@ -86,7 +85,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 siteCollectionResult.Progress.IncreaseTotalCount(collSubsites.Count);
                 foreach (var oSubsite in collSubsites)
                 {
-                    SPOTenantResults resultsSubsite = new(siteCollectionResult.Progress, oSubsite.Url);
+                    SPOTenantResults resultsSubsite = new(siteCollectionResult.Progress, oSubsite.Url, oSubsite.Title);
                     yield return resultsSubsite;
 
                     siteCollectionResult.Progress.ProgressUpdateReport();
@@ -138,6 +137,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                     catch (Exception ex)
                     {
                         _logger.ReportError("Site", resultsSiteCollection.SiteUrl, ex);
+
+                        resultsSiteCollection.ErrorMessage = ex.Message;
+
+                    }
+                    if (!string.IsNullOrWhiteSpace(resultsSiteCollection.ErrorMessage))
+                    {
+                        yield return resultsSiteCollection;
                     }
                 }
             }

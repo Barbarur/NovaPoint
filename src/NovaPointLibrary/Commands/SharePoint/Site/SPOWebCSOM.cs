@@ -35,8 +35,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         internal async Task<Web> GetAsync(string siteUrl, Expression<Func<Web, object>>[] retrievalExpressions)
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.Get";
-            _logger.LogTxt(methodName, $"Start getting Site '{siteUrl}'");
+            _logger.LogTxt(GetType().Name, $"Getting Site '{siteUrl}'");
 
             var defaultExpressions = new Expression<Func<Web, object>>[]
             {
@@ -51,7 +50,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
             clientContext.Web.EnsureProperties(expressions);
 
-            _logger.LogTxt(methodName, $" Finish getting Site '{siteUrl}'");
             return clientContext.Web;
         }
     }

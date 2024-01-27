@@ -42,48 +42,6 @@ namespace NovaPointLibrary.Commands.Authentication
         private AuthenticationResult? _rootPersonalAuthenticationResult = null;
         private AuthenticationResult? _rootSharedAuthenticationResult = null;
 
-        //// KEEP FOR TESTING EASY SWITCH BETWEEN TENANTS
-        //public AppInfo(string domain, string tenantId, string clientId, bool cachingToken)
-        //{
-        //    Domain = domain;
-        //    _tenantId = tenantId;
-        //    _clientId = clientId;
-        //    _cachingToken = cachingToken;
-
-        //    this.CancelTokenSource = new();
-        //    this.CancelToken = CancelTokenSource.Token;
-
-
-        //    Uri authority = new($"https://login.microsoftonline.com/{_tenantId}");
-        //    _app = PublicClientApplicationBuilder.Create(_clientId)
-        //                                         .WithAuthority(authority)
-        //                                         .WithDefaultRedirectUri()
-        //                                         .Build();
-        //}
-
-        //public AppInfo()
-        //{
-        //    var appSettings = AppSettings.GetSettings();
-        //    Domain = appSettings.Domain;
-        //    _tenantId = appSettings.TenantID;
-        //    _clientId = appSettings.ClientId;
-        //    _cachingToken = appSettings.CachingToken;
-
-        //    if(string.IsNullOrWhiteSpace(Domain) || string.IsNullOrWhiteSpace(_tenantId) || string.IsNullOrWhiteSpace(_clientId))
-        //    {
-        //        throw new Exception("Please go to Settings and fill the App Information");
-        //    }
-
-        //    this.CancelTokenSource = new();
-        //    this.CancelToken = CancelTokenSource.Token;
-
-        //    Uri authority = new($"https://login.microsoftonline.com/{_tenantId}");
-        //    _app = PublicClientApplicationBuilder.Create(_clientId)
-        //                                         .WithAuthority(authority)
-        //                                         .WithDefaultRedirectUri()
-        //                                         .Build();
-        //}
-
         internal AppInfo(NPLogger logger, CancellationTokenSource cancelTokenSource)
         {
             _logger = logger;
@@ -178,6 +136,10 @@ namespace NovaPointLibrary.Commands.Authentication
                 _rootPersonalAuthenticationResult = await GetAccessTokenFromMemory(_rootPersonalAuthenticationResult, scopes);
                 result = _rootPersonalAuthenticationResult;
             }
+            else
+            {
+                throw new Exception($"root site '{rootUrl}' from '{siteUrl}' does not match with admin '{AdminUrl}', neither root urls '{RootSharedUrl}' '{RootPersonalUrl}'");
+            }
 
             if (result != null)
             {
@@ -236,7 +198,6 @@ namespace NovaPointLibrary.Commands.Authentication
             }
             else
             {
-                _logger.LogTxt(methodName, $"Finish getting Access Token");
                 return await aquireToken;
             }
         }

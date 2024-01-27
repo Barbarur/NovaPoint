@@ -27,6 +27,7 @@ namespace NovaPointWPF.Pages.Menus
         {
             InitializeComponent();
         }
+
         private void GoToSolutionForm(ISolutionForm solutionForm)
         {
             Frame? mainFrame = Application.Current.MainWindow.FindName("MainWindowMainFrame") as Frame;
@@ -35,10 +36,6 @@ namespace NovaPointWPF.Pages.Menus
         }
 
 
-        //private void SiteAllReportFormClick(object sender, RoutedEventArgs e)
-        //{
-        //    GoToSolutionForm(new SiteAllReportForm());
-        //}
 
         private void SiteReportFormClick(object sender, RoutedEventArgs e)
         {
@@ -69,10 +66,11 @@ namespace NovaPointWPF.Pages.Menus
             GoToSolutionForm(new RecycleBinReportForm());
         }
 
-               
-        private void PermissionsAllSiteSingleReportFormClick(object sender, RoutedEventArgs e)
+
+
+        private void PermissionsReportFormClick(object sender, RoutedEventArgs e)
         {
-            GoToSolutionForm(new PermissionsAllSiteSingleReportForm());
+            GoToSolutionForm(new PermissionsReportForm());
         }
 
     }

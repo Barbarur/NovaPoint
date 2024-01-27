@@ -26,31 +26,6 @@ namespace NovaPointLibrary.Solutions
 
         private readonly Stopwatch SW = new();
 
-        // TO BE DEPRECATED
-        internal NPLogger(Action<LogInfo> uiAddLog, string solutionType, string solutionName)
-        {
-            string methodName = $"{GetType().Name}.Main";
-
-            _uiAddLog = uiAddLog;
-
-            string userDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string folderName = solutionName + "_" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-            string folderPath = Path.Combine(userDocumentsFolder, "NovaPoint", solutionName, folderName);
-            Directory.CreateDirectory(folderPath);
-
-            _txtPath = Path.Combine(folderPath, folderName + "_Logs.txt");
-            _csvPath = Path.Combine(folderPath, folderName + "_Report.csv");
-
-
-            LogTxt(methodName, $"Solution logs can be found at: {_txtPath}");
-            LogTxt(methodName, $"Solution report can be found at: {_csvPath}");
-            _uiAddLog(LogInfo.FolderInfo(folderPath));
-
-            SW.Start();
-
-            LogUI(methodName, $"Solution has started, please wait to the end");
-        }
-
         public NPLogger(Action<LogInfo> uiAddLog, string solutionName, ISolutionParameters parameters)
         {
             _uiAddLog = uiAddLog;

@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.User
 {
-    internal class SPOSiteUser
+    internal class SPOSiteUserCSOM
     {
         private NPLogger _logger;
         private readonly AppInfo _appInfo;
 
-        internal SPOSiteUser(NPLogger logger, AppInfo appInfo)
+        internal SPOSiteUserCSOM(NPLogger logger, AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -64,7 +64,52 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             }
             catch
             {
-                _logger.AddLogToTxt($"User '{userUPN}' no found in Site '{siteUrl}'");
+                _logger.LogTxt(GetType().Name, $"User '{userUPN}' no found in Site '{siteUrl}'");
+                return null;
+            }
+        }
+
+        internal async Task<UserCollection?> GetAllAsync(string siteUrl)
+        {
+            _appInfo.IsCancelled();
+
+            _logger.LogTxt(GetType().Name, $"Getting all users from Site '{siteUrl}'");
+
+            var clientContext = await _appInfo.GetContext(siteUrl);
+
+            var retrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
+            {
+                u => u.Id,
+                u => u.Title,
+                u => u.LoginName,
+                u => u.UserPrincipalName,
+                u => u.Email,
+                u => u.IsShareByEmailGuestUser,
+                u => u.IsSiteAdmin,
+                u => u.UserId,
+                u => u.IsHiddenInUI,
+                u => u.PrincipalType,
+                u => u.Alerts.Include(
+                    a => a.Title,
+                    a => a.Status),
+                u => u.Groups.Include(
+                    g => g.Id,
+                    g => g.Title,
+                    g => g.LoginName)
+            };
+
+            try
+            {
+                UserCollection collUsers = clientContext.Web.SiteUsers;
+
+                clientContext.Load(collUsers, u => u.Include(retrievalExpressions));
+                clientContext.ExecuteQueryRetry();
+
+                return collUsers;
+            }
+            catch
+            {
+                _logger.LogTxt(GetType().Name, $"No users found in this Site");
                 return null;
             }
         }
