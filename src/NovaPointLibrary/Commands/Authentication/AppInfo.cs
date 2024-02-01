@@ -11,10 +11,38 @@ namespace NovaPointLibrary.Commands.Authentication
     {
         private readonly NPLogger _logger;
 
-        internal string _domain = String.Empty;
-        internal string AdminUrl { get; set; } = String.Empty;
-        internal string RootPersonalUrl { get; set; } = String.Empty;
-        internal string RootSharedUrl { get; set; } = String.Empty;
+        private string _adminUrl = string.Empty;
+        internal string AdminUrl
+        {
+            get { return _adminUrl; }
+            set
+            {
+                _adminUrl = value;
+                _logger.LogTxt(GetType().Name, $"SPO Admin URL '{value}'");
+            }
+        }
+
+        private string _rootPersonalUrl = string.Empty;
+        internal string RootPersonalUrl
+        {
+            get { return _rootPersonalUrl; }
+            set
+            {
+                _rootPersonalUrl = value;
+                _logger.LogTxt(GetType().Name, $"SPO -my URL '{value}'");
+            }
+        }
+        private string _rootSharedUrl = string.Empty;
+        internal string RootSharedUrl
+        {
+            get { return _rootSharedUrl; }
+            set
+            {
+                _rootSharedUrl = value;
+                _logger.LogTxt(GetType().Name, $"SPO root URL '{value}'");
+            }
+        }
+        private string _domain = String.Empty;
         internal string Domain
         {
             get { return _domain; }
@@ -112,13 +140,12 @@ namespace NovaPointLibrary.Commands.Authentication
         internal async Task<string> GetSPOAccessToken(string siteUrl)
         {
             this.IsCancelled();
-            string methodName = $"{GetType().Name}.GetSPOAccessToken";
 
             string rootUrl = siteUrl[..(siteUrl.IndexOf(".com") + 4)];
             string defaultPermissions = rootUrl + "/.default";
             string[] scopes = new string[] { defaultPermissions };
 
-            _logger.LogTxt(methodName, $"Start getting Access Token for root site {rootUrl}");
+            _logger.LogTxt(GetType().Name, $"Start getting Access Token for root site {rootUrl}");
 
             AuthenticationResult? result = null;
             if (rootUrl.Equals(AdminUrl, StringComparison.OrdinalIgnoreCase))
@@ -143,7 +170,7 @@ namespace NovaPointLibrary.Commands.Authentication
 
             if (result != null)
             {
-                _logger.LogTxt(methodName, $"Access Token expiration time: {result.ExpiresOn}");
+                _logger.LogTxt(GetType().Name, $"Access Token expiration time: {result.ExpiresOn}");
                 return result.AccessToken;
             }
             else
