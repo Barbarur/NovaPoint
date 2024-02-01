@@ -304,7 +304,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             dynamicRecord.Remarks = remarks;
 
-            _logger.RecordCSV(dynamicRecord);
+            _logger.DynamicCSV(dynamicRecord);
         }
 
 

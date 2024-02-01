@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report"
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="500" d:DesignWidth="600"
+      d:DesignHeight="900" d:DesignWidth="600"
       Title="SiteReportForm">
 
     <Grid>
@@ -15,6 +15,48 @@
 
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
+
+            <Label
+                    Style="{DynamicResource MenuSectionTitleLabel}"
+                    Content="Report type"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                        Margin="12">
+
+                    <DockPanel
+                            Margin="0,0,0,9">
+
+                        <RadioButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Standard"
+                                DockPanel.Dock="Left"/>
+
+                        <RadioButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Detailed"
+                                IsChecked="{Binding Detailed, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                                DockPanel.Dock="Left"/>
+
+                        <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Include Site Admins"
+                                IsChecked="{Binding IncludeAdmins, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                                DockPanel.Dock="Right"/>
+
+                        <TextBlock
+                                DockPanel.Dock="Left"
+                                Height="Auto"/>
+
+                    </DockPanel>
+
+                </StackPanel>
+
+            </Grid>
 
             <designmaterial:SiteForm
                 IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
@@ -25,6 +67,11 @@
                 IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 />
 
+            <designmaterial:AdminForm
+                x:Name="AdminPanel"
+                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+            
         </StackPanel>
         
     </Grid>

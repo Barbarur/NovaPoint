@@ -171,7 +171,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 dynamic recordError = new ExpandoObject();
                 recordError.SiteUrl = siteUrl;
                 recordError.Remarks = remarks;
-                _logger.RecordCSV(recordError);
+                _logger.DynamicCSV(recordError);
 
                 _logger.LogUI(methodName, remarks);
             }
@@ -226,7 +226,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             dynamic recordSite = new ExpandoObject();
             recordSite.SiteUrl = siteUrl;
             recordSite.Remarks = remarks;
-            _logger.RecordCSV(recordSite);
+            _logger.DynamicCSV(recordSite);
         }
     }
 

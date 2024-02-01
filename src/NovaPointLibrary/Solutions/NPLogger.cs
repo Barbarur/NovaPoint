@@ -56,7 +56,7 @@ namespace NovaPointLibrary.Solutions
             parameters.ParametersCheck();
 
             Type solutiontype = parameters.GetType();
-            PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
 
             foreach (var propertyInfo in properties)
             {
@@ -94,7 +94,7 @@ namespace NovaPointLibrary.Solutions
             _uiAddLog(logInfo);
         }
 
-        internal void RecordCSV(dynamic o)
+        internal void DynamicCSV(dynamic o)
         {
             StringBuilder sb = new();
             using StreamWriter csv = new(new FileStream(_csvPath, FileMode.Append, FileAccess.Write));
@@ -107,7 +107,7 @@ namespace NovaPointLibrary.Solutions
                     {
                         sb.Append($"{property.Key},");
                     }
-                    
+
                     csv.WriteLine(sb.ToString());
                     sb.Clear();
                 }
@@ -115,6 +115,35 @@ namespace NovaPointLibrary.Solutions
                 foreach (var property in (IDictionary<String, Object>)o)
                 {
                     sb.Append($"{property.Value},");
+                }
+
+                csv.WriteLine(sb.ToString());
+            }
+        }
+
+        internal void RecordCSV(ISolutionRecord record)
+        {
+            Type solutiontype = record.GetType();
+            PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
+
+            StringBuilder sb = new();
+            using StreamWriter csv = new(new FileStream(_csvPath, FileMode.Append, FileAccess.Write));
+            {
+                var csvFileLenth = new System.IO.FileInfo(_csvPath).Length;
+                if (csvFileLenth == 0)
+                {
+                    foreach (var propertyInfo in properties)
+                    {
+                        sb.Append($"{propertyInfo.Name},");
+                    }
+
+                    csv.WriteLine(sb.ToString());
+                    sb.Clear();
+                }
+
+                foreach (var propertyInfo in properties)
+                {
+                    sb.Append($"{propertyInfo.GetValue(record)},");
                 }
 
                 csv.WriteLine(sb.ToString());
@@ -165,15 +194,6 @@ namespace NovaPointLibrary.Solutions
         {
             using StreamWriter txt = new(new FileStream(_txtPath, FileMode.Append, FileAccess.Write));
             txt.WriteLine($"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} - [Logger.AddLogToTxt] {log}");
-        }
-
-        // TO BE DEPRECATED
-        internal void AddLogToUI(string log)
-        {
-            LogTxt(GetType().Name, log);
-
-            LogInfo logInfo = new(log);
-            _uiAddLog(logInfo);
         }
     }
 }

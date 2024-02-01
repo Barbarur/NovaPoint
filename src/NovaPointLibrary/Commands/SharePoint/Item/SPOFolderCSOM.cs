@@ -16,7 +16,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             _appInfo = appInfo;
         }
 
-        internal async Task<Folder> GetFolderAsync(string siteUrl, string folderServerRelativeUrl)
+        internal async Task<Folder> GetFolderAsync(string siteUrl, string folderServerRelativeUrl, Expression<Func<Folder, object>>[]? retrievalExpressions = null)
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}";
@@ -24,10 +24,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
-            return GetFolderAsync(clientContext, folderServerRelativeUrl);
+            return GetFolderAsync(clientContext, folderServerRelativeUrl, retrievalExpressions);
         }
 
-        internal Folder GetFolderAsync(ClientContext clientContext, string folderServerRelativeUrl)
+        internal Folder GetFolderAsync(ClientContext clientContext, string folderServerRelativeUrl, Expression<Func<Folder, object>>[]? retrievalExpressions = null)
         {
             _appInfo.IsCancelled();
 
@@ -36,16 +36,17 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 folderServerRelativeUrl = folderServerRelativeUrl.Insert(0, "/");
             }
 
-            var defaultExpressions = new Expression<Func<Microsoft.SharePoint.Client.Folder, object>>[]
+            var defaultExpressions = new Expression<Func<Folder, object>>[]
             {
                 f => f.Exists,
                 f => f.Name,
                 f => f.ServerRelativePath,
                 f => f.ServerRelativeUrl,
             };
+            if (retrievalExpressions != null) { defaultExpressions = retrievalExpressions.Union(defaultExpressions).ToArray(); }
 
             Folder oFolder = clientContext.Web.GetFolderByServerRelativeUrl(folderServerRelativeUrl);
-            clientContext.Load(oFolder, f => f.Name, f => f.ServerRelativePath);
+            clientContext.Load(oFolder, defaultExpressions);
             clientContext.ExecuteQueryRetry();
 
             return oFolder;
@@ -57,7 +58,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             _logger.LogTxt(GetType().Name, $"Start renaming folder '{fileServerRelativeUrl}' to '{newName}'");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
-            
+
             Folder oFolder = GetFolderAsync(clientContext, fileServerRelativeUrl);
 
             var targetPath = string.Concat(oFolder.ServerRelativePath.DecodedUrl.Remove(oFolder.ServerRelativePath.DecodedUrl.Length - oFolder.Name.Length), newName);

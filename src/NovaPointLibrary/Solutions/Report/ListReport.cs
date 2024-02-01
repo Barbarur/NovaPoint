@@ -211,7 +211,7 @@ namespace NovaPointLibrary.Solutions.Report
             
             dynamicRecord.Remarks = remarks;
 
-            _logger.RecordCSV(dynamicRecord);
+            _logger.DynamicCSV(dynamicRecord);
         }
     }
 

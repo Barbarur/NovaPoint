@@ -380,7 +380,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
             
             recordItem.Remarks = remarks;
 
-            _logger.RecordCSV(recordItem);
+            _logger.DynamicCSV(recordItem);
         }
     }
 }

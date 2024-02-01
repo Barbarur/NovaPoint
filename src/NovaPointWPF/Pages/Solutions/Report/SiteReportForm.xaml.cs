@@ -23,11 +23,44 @@ namespace NovaPointWPF.Pages.Solutions.Report
     /// </summary>
     public partial class SiteReportForm : Page, ISolutionForm
     {
+        private bool _detailed;
+        public bool Detailed
+        {
+            get { return _detailed; }
+            set
+            {
+                _detailed = value;
+                NeedAddAdmin();
+            }
+        }
+
+        private bool _includeAdmins;
+        public bool IncludeAdmins
+        {
+            get { return _includeAdmins; }
+            set
+            {
+                _includeAdmins = value;
+                NeedAddAdmin();
+            }
+        }
+
+        public bool RemoveAdmin { get; set; }
+
         public bool IncludePersonalSite { get; set; }
         public bool IncludeShareSite { get; set; }
         public bool OnlyGroupIdDefined { get; set; }
         public string SiteUrl { get; set; }
-        public bool IncludeSubsites { get; set; }
+        private bool _includeSubsites;
+        public bool IncludeSubsites
+        {
+            get { return _includeSubsites; }
+            set
+            {
+                _includeSubsites = value;
+                NeedAddAdmin();
+            }
+        }
 
         public SiteReportForm()
         {
@@ -39,6 +72,11 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionCode = nameof(SiteReport);
             SolutionHeader.SolutionDocs = SiteReport.s_SolutionDocs;
 
+            this.Detailed = true;
+            this.IncludeAdmins = false;
+
+            this.RemoveAdmin = true;
+
             this.IncludePersonalSite = false;
             this.IncludeShareSite = true;
             this.OnlyGroupIdDefined = false;
@@ -46,10 +84,25 @@ namespace NovaPointWPF.Pages.Solutions.Report
             this.IncludeSubsites = false;
         }
 
+        private void NeedAddAdmin()
+        {
+            if(Detailed || IncludeAdmins || IncludeSubsites)
+            {
+                AdminPanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                AdminPanel.Visibility = Visibility.Collapsed;
+            }
+        }
+
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SiteReporttParameters parameters = new()
+            SiteReportParameters parameters = new()
             {
+                Detailed = this.Detailed,
+                IncludeAdmins = this.IncludeAdmins,
+
                 IncludePersonalSite = this.IncludePersonalSite,
                 IncludeShareSite = this.IncludeShareSite,
                 OnlyGroupIdDefined = this.OnlyGroupIdDefined,

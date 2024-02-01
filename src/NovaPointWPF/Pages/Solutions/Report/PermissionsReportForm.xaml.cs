@@ -80,7 +80,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionDocs = PermissionsReport.s_SolutionDocs;
 
             this.UserListOnly = false;
-            this.TargetUPN = "StartingText";
+            this.TargetUPN = string.Empty;
             this.TargetEveryone = false;
 
             this.IncludeAdmins = true;

@@ -12,7 +12,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using static NovaPointLibrary.Commands.SharePoint.Permision.SPOSitePermissionsCSOM;
+
 
 namespace NovaPointLibrary.Solutions.Report
 {
@@ -175,7 +175,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             dynamicRecord.Remarks = record._role.Remarks;
 
-            _logger.RecordCSV(dynamicRecord);
+            _logger.DynamicCSV(dynamicRecord);
 
         }
 
