@@ -21,17 +21,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _appInfo = appInfo;
         }
 
-        internal async Task<Microsoft.SharePoint.Client.Site> GetAsync(string siteUrl)
-        {
-            _appInfo.IsCancelled();
-
-            var expresions = new Expression<Func<Microsoft.SharePoint.Client.Site, object>>[]
-            {
-            };
-
-            return await GetAsync(siteUrl, expresions);
-        }
-
         internal async Task<Microsoft.SharePoint.Client.Site> GetAsync(string siteUrl, Expression<Func<Microsoft.SharePoint.Client.Site, object>>[]? retrievalExpressions = null)
         {
             _appInfo.IsCancelled();

@@ -31,21 +31,9 @@ namespace NovaPointLibrary.Solutions
         private double _counterStep = 0;
         private readonly ProgressTracker? _parentProgress = null;
 
-        // TO BE REMOVED WHEN Main IS DEPRECATED
-        //private readonly Action<double> _progressUI;
-
-
-        //internal ProgressTracker(Main main, int totalCount)
-        //{
-        //    _progressUI = main.AddProgressToUI;
-        //    _counter = 0;
-        //    Total = totalCount;
-        //}
-
         internal ProgressTracker(NPLogger logger, int totalCount)
         {
             _logger = logger;
-            //_progressUI = logger.ProgressUI;
             _counter = 0;
             Total = totalCount;
         }
@@ -53,7 +41,6 @@ namespace NovaPointLibrary.Solutions
         internal ProgressTracker(ProgressTracker parentProgress, int totalCount)
         {
             _logger = parentProgress._logger;
-            //_progressUI = parentProgress._progressUI;
             _parentProgress = parentProgress;
             _counter = 0;
             Total = totalCount;
@@ -81,7 +68,6 @@ namespace NovaPointLibrary.Solutions
                 double progress = Math.Round(progressvalue * 100, 2);
 
                 _logger.ProgressUI(progress);
-                //_progressUI(progress);
             }
             else
             {

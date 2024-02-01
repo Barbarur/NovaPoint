@@ -19,10 +19,5 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
         public double FileSizeMb { get; set; } = 0;
         public bool FileSizeAbove { get; set; } = true;
         public bool RenameFile { get; set; } = false;
-
-        internal new void ParametersCheck()
-        {
-            base.ParametersCheck();
-        }
     }
 }

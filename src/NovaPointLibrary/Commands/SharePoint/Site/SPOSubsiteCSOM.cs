@@ -25,7 +25,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _appInfo = appInfo;
         }
 
-
         internal async Task<List<Web>> GetAsync(string siteUrl, Expression<Func<Web, object>>[]? retrievalExpressions = null)
         {
             _appInfo.IsCancelled();

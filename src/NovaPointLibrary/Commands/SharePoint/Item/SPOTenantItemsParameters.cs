@@ -10,10 +10,5 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal Expression<Func<ListItem, object>>[] ItemExpresions = new Expression<Func<ListItem, object>>[] { };
         internal Expression<Func<ListItem, object>>[] FileExpresions = new Expression<Func<ListItem, object>>[] { };
         public string FolderRelativeUrl { get; set; } = String.Empty;
-
-        internal new void ParametersCheck()
-        {
-            base.ParametersCheck();
-        }
     }
 }
