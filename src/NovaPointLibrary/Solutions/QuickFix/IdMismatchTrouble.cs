@@ -232,9 +232,26 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
     public class IdMismatchTroubleParameters : ISolutionParameters
     {
-        public string UserUpn { get; set; } = String.Empty;
-        public string SiteUrl { get; set; } = String.Empty;
-        public string AdminUpn { get; set; } = String.Empty;
+        private string _userUpn = string.Empty;
+        public string UserUpn
+        {
+            get { return _userUpn; }
+            set { _userUpn = value.Trim(); }
+        }
+
+        private string _siteUrl = string.Empty;
+        public string SiteUrl
+        {
+            get { return _siteUrl; }
+            set { _siteUrl = value.Trim(); }
+        }
+
+        private string _adminUpn = string.Empty;
+        public string AdminUpn
+        {
+            get { return _adminUpn; }
+            set { _adminUpn = value.Trim(); }
+        }
         public bool RemoveAdmin { get; set; } = false;
         public bool PreventAllSites { get; set; } = false;
         public bool ReportMode { get; set; } = false;

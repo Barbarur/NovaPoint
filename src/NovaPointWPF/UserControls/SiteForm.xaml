@@ -41,10 +41,12 @@
                             DockPanel.Dock="Left"/>
 
                         <ToggleButton
+                            x:Name="SubsiteToggleButton"
                             Style="{DynamicResource SolutionFormToggleButton}"
                             Content="Include Subsites"
                             IsChecked="{Binding IncludeSubsites, ElementName=root}"
-                            DockPanel.Dock="Right"/>
+                            DockPanel.Dock="Right"
+                            Visibility="Visible"/>
 
                         <TextBlock
                             DockPanel.Dock="Left"

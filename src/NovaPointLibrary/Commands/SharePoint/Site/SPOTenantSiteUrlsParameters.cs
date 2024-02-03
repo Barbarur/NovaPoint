@@ -14,7 +14,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         public bool IncludePersonalSite { get; set; } = false;
         public bool IncludeShareSite { get; set; } = true;
         public bool OnlyGroupIdDefined { get; set; } = false;
-        public string SiteUrl { get; set; } = String.Empty;
+
+        private string _siteUrl = string.Empty;
+        public string SiteUrl
+        {
+            get { return _siteUrl; }
+            set { _siteUrl = value.Trim(); }
+        }
+
         public bool IncludeSubsites { get; set; } = false;
 
         internal void ParametersCheck()

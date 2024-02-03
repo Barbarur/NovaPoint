@@ -49,14 +49,14 @@ namespace NovaPointLibrary.Solutions
         internal void IncreaseTotalCount(int addUnits)
         {
             Total += addUnits;
-            float progressValue = (float)Math.Round(_counter * _counterStep, 2);
+            double progressValue = Math.Round(_counter * _counterStep, 4);
             ProgressUpdateReport(progressValue);
         }
 
         internal void ProgressUpdateReport()
         {
             _counter++;
-            double progressValue = Math.Round(_counter * _counterStep, 2);
+            double progressValue = Math.Round(_counter * _counterStep, 4);
             
             ProgressUpdateReport(progressValue);
         }
@@ -77,7 +77,7 @@ namespace NovaPointLibrary.Solutions
 
         private void ProgressUpdateFromChild(double childProgressvalue)
         {
-            double progressValue = Math.Round((_counter + childProgressvalue) * _counterStep, 2);
+            double progressValue = Math.Round((_counter + childProgressvalue) * _counterStep, 4);
             
             ProgressUpdateReport(progressValue);
         }

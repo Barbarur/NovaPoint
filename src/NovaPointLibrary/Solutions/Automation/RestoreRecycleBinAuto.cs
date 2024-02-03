@@ -341,9 +341,5 @@ namespace NovaPointLibrary.Solutions.Automation
 
     public class RestoreRecycleBinAutoParameters : SPORecycleBinItemParameters, ISolutionParameters
     {
-        internal SPORecycleBinItemParameters GetRecycleBinParameters()
-        {
-            return this;
-        }
     }
 }

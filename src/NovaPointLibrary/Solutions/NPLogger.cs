@@ -56,7 +56,7 @@ namespace NovaPointLibrary.Solutions
             parameters.ParametersCheck();
 
             Type solutiontype = parameters.GetType();
-            PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
+            PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             foreach (var propertyInfo in properties)
             {

@@ -15,7 +15,13 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         public bool ListAll { get; set; } = true;
         public bool IncludeHiddenLists { get; set; } = false;
         public bool IncludeSystemLists { get; set; } = false;
-        public string ListTitle { get; set; } = String.Empty;
+
+        private string _listTitle = string.Empty;
+        public string ListTitle
+        {
+            get { return _listTitle; }
+            set { _listTitle = value.Trim(); }
+        }
 
         internal new void ParametersCheck()
         {

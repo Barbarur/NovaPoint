@@ -14,8 +14,20 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
         public bool SecondStage { get; set; } = true;
         public DateTime DeletedAfter { get; set; } = DateTime.MinValue;
         public DateTime DeletedBefore { get; set; } = DateTime.MaxValue;
-        public string DeletedByEmail { get; set; } = String.Empty;
-        public string OriginalLocation { get; set; } = String.Empty;
+
+        private string _deletedByEmail = String.Empty;
+        public string DeletedByEmail
+        {
+            get { return _deletedByEmail; }
+            set { _deletedByEmail = value.Trim(); }
+        }
+
+        private string _originalLocation = String.Empty;
+        public string OriginalLocation
+        {
+            get { return _originalLocation; }
+            set { _originalLocation = value.Trim(); }
+        }
         public double FileSizeMb { get; set; } = 0;
         public bool FileSizeAbove { get; set; } = true;
         public bool RenameFile { get; set; } = false;

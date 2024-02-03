@@ -180,11 +180,7 @@ namespace NovaPointLibrary.Solutions.Automation
         }
     }
 
-    public class ClearRecycleBinAutoParameters : SPORecycleBinItemParameters, ISolutionParameters
+    public class ClearRecycleBinAutoParameters : SPORecycleBinItemParameters
     {
-        internal SPORecycleBinItemParameters GetRecycleBinParameters()
-        {
-            return this;
-        }
     }
 }

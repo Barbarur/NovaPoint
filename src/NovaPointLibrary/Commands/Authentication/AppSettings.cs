@@ -15,21 +15,21 @@ namespace NovaPointLibrary.Commands.Authentication
         public string Domain
         {
             get { return _domain; }
-            set { _domain = value; }
+            set { _domain = value.Trim(); }
         }
 
         private string _tenantId = string.Empty;
         public string TenantID
         {
             get { return _tenantId; }
-            set { _tenantId = value; }
+            set { _tenantId = value.Trim(); }
         }
 
         private string _clientId { get; set; } = string.Empty;
         public string ClientId
         {
             get { return _clientId; }
-            set { _clientId = value; }
+            set { _clientId = value.Trim(); }
         }
 
         private bool _cachingToken { get; set; } = false;

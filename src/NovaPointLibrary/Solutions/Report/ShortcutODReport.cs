@@ -110,7 +110,7 @@ namespace NovaPointLibrary.Solutions.Report
             if (oList.BaseType != BaseType.DocumentLibrary) { return; }
 
             ProgressTracker progress = new(parentProgress, oList.ItemCount);
-            await foreach (ListItem oItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(siteUrl, oList, _param.GetItemParameters()))
+            await foreach (ListItem oItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(siteUrl, oList, _param))
             {
                 _appInfo.IsCancelled();
 
@@ -159,11 +159,5 @@ namespace NovaPointLibrary.Solutions.Report
 
     public class ShortcutODReportParameters : SPOTenantItemsParameters, ISolutionParameters
     {
-
-        internal SPOTenantItemsParameters GetItemParameters()
-        {
-            return this;
-        }
-
     }
 }

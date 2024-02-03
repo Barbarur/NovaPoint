@@ -111,6 +111,11 @@ namespace NovaPointLibrary.Solutions.Automation
 
     public class RemoveUserAutoParameters : SPORecycleBinItemParameters, ISolutionParameters
     {
-        public string DeleteUserUPN { get; set; } = string.Empty;
+        private string _deleteUserUPN = String.Empty;
+        public string DeleteUserUPN
+        {
+            get { return _deleteUserUPN; }
+            set { _deleteUserUPN = value.Trim(); }
+        }
     }
 }

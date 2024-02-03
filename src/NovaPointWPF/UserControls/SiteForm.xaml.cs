@@ -98,5 +98,22 @@ namespace NovaPointWPF.UserControls
         public static readonly DependencyProperty IncludeSubsitesProperty =
             DependencyProperty.Register("IncludeSubsites", typeof(bool), typeof(SiteForm), new FrameworkPropertyMetadata(defaultValue: false));
 
+        public bool _subsitesVisibility = true;
+        public bool SubsitesVisibility
+        {
+            get { return _subsitesVisibility; }
+            set
+            {
+                _subsitesVisibility = value;
+                if (value)
+                {
+                    SubsiteToggleButton.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    SubsiteToggleButton.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
     }
 }
