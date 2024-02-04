@@ -103,6 +103,8 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 Detailed = this.Detailed,
                 IncludeAdmins = this.IncludeAdmins,
 
+                RemoveAdmin = this.RemoveAdmin,
+
                 IncludePersonalSite = this.IncludePersonalSite,
                 IncludeShareSite = this.IncludeShareSite,
                 OnlyGroupIdDefined = this.OnlyGroupIdDefined,
