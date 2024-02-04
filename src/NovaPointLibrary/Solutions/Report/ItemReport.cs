@@ -29,20 +29,21 @@ namespace NovaPointLibrary.Solutions.Report
 
         private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
         {
-            i => i.HasUniqueRoleAssignments,
-            i => i["Author"],
-            i => i["Created"],
-            i => i["Editor"],
-            i => i["ID"],
-            i => i.FileSystemObjectType,
-            i => i["FileLeafRef"],
-            i => i["FileRef"],
-            i => i["File_x0020_Size"],
-            i => i["Modified"],
-            i => i["SMTotalSize"],
-            i => i["Title"],
-            i => i.Versions,
-            i => i["_UIVersionString"],
+            f => f.HasUniqueRoleAssignments,
+            f => f["Author"],
+            f => f["Created"],
+            f => f["Editor"],
+            f => f["ID"],
+            f => f.File.Level,
+            f => f.FileSystemObjectType,
+            f => f["FileLeafRef"],
+            f => f["FileRef"],
+            f => f["File_x0020_Size"],
+            f => f["Modified"],
+            f => f["SMTotalSize"],
+            f => f.Versions,
+            f => f["_UIVersionString"],
+
         };
 
         private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _itemExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
@@ -118,6 +119,17 @@ namespace NovaPointLibrary.Solutions.Report
 
             ProgressTracker progress = new(parentProgress, oList.ItemCount);
 
+            if(oList.ItemCount == 0)
+            {
+                AddRecord(siteUrl, oList, remarks: $"'{oList.BaseType}' is empty");
+                return;
+            }
+
+            if (oList.ItemCount > 5000)
+            {
+                _logger.LogUI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' is a large list with {oList.ItemCount} items. Expect the Solution to take longer to run.");
+            }
+
             var spoItem = new SPOListItemCSOM(_logger, _appInfo);
             await foreach (ListItem oItem in spoItem.GetAsync(siteUrl, oList, _param))
             {
@@ -142,7 +154,7 @@ namespace NovaPointLibrary.Solutions.Report
                         FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)oItem["SMTotalSize"];
                         float itemSizeTotalMb = (float)Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2);
 
-                        AddRecord(siteUrl, oList, oItem, itemName, itemSizeMb.ToString(), itemSizeTotalMb.ToString(), "");
+                        AddRecord(siteUrl, oList, oItem, itemName, itemSizeMb.ToString(), itemSizeTotalMb.ToString(), oItem.File.Level.ToString(), "");
                     }
                     else if (oList.BaseType == BaseType.GenericList)
                     {
@@ -178,6 +190,7 @@ namespace NovaPointLibrary.Solutions.Report
                                string itemName = "",
                                string itemSizeMb = "",
                                string itemSizeTotalMb = "",
+                               string checkOut = "",
                                string remarks = "")
         {
 
@@ -185,6 +198,7 @@ namespace NovaPointLibrary.Solutions.Report
             recordItem.SiteUrl = siteUrl;
             recordItem.ListTitle = oList != null ? oList.Title : String.Empty;
             recordItem.ListType = oList != null ? oList.BaseType.ToString() : String.Empty;
+            recordItem.ListDefaultViewUrl = oList != null ? oList.DefaultViewUrl : string.Empty;
 
             recordItem.ItemID = oItem != null ? oItem["ID"] : string.Empty;
             recordItem.ItemName = oItem != null ? itemName : string.Empty;
@@ -204,6 +218,8 @@ namespace NovaPointLibrary.Solutions.Report
 
             recordItem.ItemSizeMb = oItem != null ? itemSizeMb : string.Empty;
             recordItem.ItemSizeTotalMB = oItem != null ? itemSizeTotalMb : string.Empty;
+
+            recordItem.FileCheckOut = checkOut;
 
             recordItem.Remarks = remarks;
 

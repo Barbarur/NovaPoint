@@ -186,28 +186,32 @@ namespace NovaPointLibrary.Solutions.Report
         //    }
         //}
 
-        private void AddRecord(string siteURL, Microsoft.SharePoint.Client.List? list = null, string remarks = "")
+        private void AddRecord(string siteURL, Microsoft.SharePoint.Client.List? oList = null, string remarks = "")
         {
             dynamic dynamicRecord = new ExpandoObject();
             dynamicRecord.SiteURL = siteURL;
 
-            dynamicRecord.ListType = list != null ? list.BaseType.ToString() : string.Empty;
-            dynamicRecord.ListDefaultViewUrl = list != null ? list.DefaultViewUrl : string.Empty;
-            dynamicRecord.ListID = list != null ? list.Id.ToString() : string.Empty;
+            dynamicRecord.ListTitle = oList != null ? oList.Title : String.Empty;
+            dynamicRecord.ListType = oList != null ? oList.BaseType.ToString() : string.Empty;
+            dynamicRecord.ListDefaultViewUrl = oList != null ? oList.DefaultViewUrl : string.Empty;
+            dynamicRecord.ListID = oList != null ? oList.Id.ToString() : string.Empty;
 
-            dynamicRecord.Created = list != null ? list.Created.ToString() : string.Empty;
-            dynamicRecord.LastModifiedDate = list != null ? list.LastItemUserModifiedDate.ToString() : string.Empty;
+            dynamicRecord.Hidden = oList != null ? oList.Hidden.ToString() : string.Empty;
+            dynamicRecord.IsSystemList = oList != null ? oList.IsSystemList.ToString() : string.Empty;
 
-            dynamicRecord.ItemCount = list != null ? list.ItemCount.ToString() : string.Empty;
+            dynamicRecord.Created = oList != null ? oList.Created.ToString() : string.Empty;
+            dynamicRecord.LastModifiedDate = oList != null ? oList.LastItemUserModifiedDate.ToString() : string.Empty;
 
-            dynamicRecord.MajorVersioning = list != null ? list.EnableVersioning.ToString() : string.Empty;
-            dynamicRecord.MajorVersionLimit = list != null ? list.MajorVersionLimit.ToString() : string.Empty;
-            dynamicRecord.MinorVersioning = list != null ? list.EnableMinorVersions.ToString() : string.Empty; // might be a problem for Lists
-            dynamicRecord.MinorVersionLimit = list != null ? list.MajorWithMinorVersionsLimit.ToString() : string.Empty;
+            dynamicRecord.ItemCount = oList != null ? oList.ItemCount.ToString() : string.Empty;
 
-            dynamicRecord.IRM_Emabled = list != null ? list.IrmEnabled.ToString() : string.Empty;
+            dynamicRecord.MajorVersioning = oList != null ? oList.EnableVersioning.ToString() : string.Empty;
+            dynamicRecord.MajorVersionLimit = oList != null ? oList.MajorVersionLimit.ToString() : string.Empty;
+            dynamicRecord.MinorVersioning = oList != null ? oList.EnableMinorVersions.ToString() : string.Empty; // might be a problem for Lists
+            dynamicRecord.MinorVersionLimit = oList != null ? oList.MajorWithMinorVersionsLimit.ToString() : string.Empty;
 
-            dynamicRecord.ForceCheckout = list != null ? list.ForceCheckout.ToString() : string.Empty;
+            dynamicRecord.IRM_Emabled = oList != null ? oList.IrmEnabled.ToString() : string.Empty;
+
+            dynamicRecord.ForceCheckout = oList != null ? oList.ForceCheckout.ToString() : string.Empty;
             
             dynamicRecord.Remarks = remarks;
 
