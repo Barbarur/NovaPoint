@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace NovaPointWPF.Pages.Solutions
@@ -84,8 +86,7 @@ namespace NovaPointWPF.Pages.Solutions
             }
             catch (Exception ex)
             {
-                LogInfo log = new(ex.Message);
-                UILog(log);
+                UILog(LogInfo.ErrorNotification(ex.Message));
             }
 
             BackButton.IsEnabled = true;
@@ -104,6 +105,7 @@ namespace NovaPointWPF.Pages.Solutions
 
         private void CancelButton_ClickAsync(object sender, RoutedEventArgs e)
         {
+            UILog(LogInfo.ErrorNotification("Canceling solution. Please wait while we stop all the processes."));
             this.CancelTokenSource.Cancel();
             this.CancelTokenSource.Dispose();
             CancelButton.IsEnabled = false;
@@ -117,46 +119,108 @@ namespace NovaPointWPF.Pages.Solutions
                 try { Process.Start("explorer.exe", @SolutionFolder); }
                 catch (Exception ex)
                 {
-                    LogInfo logInfo = new(ex.Message);
-                    UILog(logInfo);
+                    UILog(LogInfo.ErrorNotification(ex.Message));
                 }
             };
         }
 
         private void UILog(LogInfo logInfo)
         {
-            // https://stackoverflow.com/questions/2382663/ensuring-that-things-run-on-the-ui-thread-in-wpf
-            if (BoxText.Dispatcher.CheckAccess())
+            // Reference: https://stackoverflow.com/questions/2382663/ensuring-that-things-run-on-the-ui-thread-in-wpf
+
+            if (!string.IsNullOrWhiteSpace(logInfo.TextBase) || !string.IsNullOrWhiteSpace(logInfo.TextError) || !string.IsNullOrEmpty(logInfo.SolutionFolder))
             {
-                if (!string.IsNullOrEmpty(logInfo.MainClassInfo)) { BoxText.Text = BoxText.Text + logInfo.MainClassInfo + "\n"; }
-                if (logInfo.PercentageProgress != -1)
+                if (BoxText.Dispatcher.CheckAccess())
+                {
+                    if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { BoxText.Inlines.Add(new Run($"{logInfo.TextBase} \n") ); }
+
+                    if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { BoxText.Inlines.Add(new Run($"{logInfo.TextError} \n") { Foreground = Brushes.IndianRed, FontWeight = FontWeights.Medium }); }
+
+                }
+                else
+                {
+                    BoxText.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                    new Action(() =>
+                    {
+                        if (!string.IsNullOrEmpty(logInfo.SolutionFolder)) { SolutionFolder = logInfo.SolutionFolder; }
+
+                        if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { BoxText.Inlines.Add(new Run($"{logInfo.TextBase} \n") ); }
+
+                        if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { BoxText.Inlines.Add(new Run($"{logInfo.TextError} \n") { Foreground = Brushes.IndianRed, FontWeight = FontWeights.Medium }); }
+                    }));
+                }
+            }
+
+            if (logInfo.PercentageProgress != -1)
+            {
+                if (Progress.Dispatcher.CheckAccess())
                 {
                     Progress.Value = logInfo.PercentageProgress;
                     PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
-                    if ( !string.IsNullOrWhiteSpace(logInfo.PendingTime))
-                    {
-                        PendingTime.Content = $"{logInfo.PendingTime}";
-                    }
+                    PendingTime.Content = $"{logInfo.PendingTime}";
                 }
-            }
-            else
-            {
-                BoxText.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
-                new Action(() =>
+                else
                 {
-                    if (!string.IsNullOrEmpty(logInfo.SolutionFolder)) { SolutionFolder = logInfo.SolutionFolder; }
-                    if (!string.IsNullOrEmpty(logInfo.MainClassInfo)) { BoxText.Text = BoxText.Text + logInfo.MainClassInfo + "\n"; }
-                    if (logInfo.PercentageProgress != -1)
+                    Progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                    new Action(() =>
                     {
                         Progress.Value = logInfo.PercentageProgress;
                         PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
-                        if (!string.IsNullOrWhiteSpace(logInfo.PendingTime))
-                        {
-                            PendingTime.Content = $"{logInfo.PendingTime}";
-                        }
-                    }
-                }));
+                        PendingTime.Content = $"{logInfo.PendingTime}";
+                    }));
+                }
             }
+
+
+
+            //if (BoxText.Dispatcher.CheckAccess())
+            //{
+            //    if (!string.IsNullOrEmpty(logInfo.MainClassInfo)) { BoxText.Text = BoxText.Text + logInfo.MainClassInfo + "\n"; }
+            //    if (logInfo.PercentageProgress != -1)
+            //    {
+            //        Progress.Value = logInfo.PercentageProgress;
+            //        PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
+            //        if ( !string.IsNullOrWhiteSpace(logInfo.PendingTime))
+            //        {
+            //            PendingTime.Content = $"{logInfo.PendingTime}";
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    BoxText.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+            //    new Action(() =>
+            //    {
+            //        if (!string.IsNullOrEmpty(logInfo.SolutionFolder)) { SolutionFolder = logInfo.SolutionFolder; }
+            //        if (!string.IsNullOrEmpty(logInfo.MainClassInfo))
+            //        { 
+            //            //BoxText.Text = BoxText.Text + logInfo.MainClassInfo + "\n";
+            //            BoxText.Inlines.Add(new Run($"{logInfo.MainClassInfo} \n") { Foreground = Brushes.Green });
+            //        }
+
+            //        //Span sp = new();
+            //        //sp.Background = Brushes.Red;
+            //        //sp.TextInput = "Testing text";
+            //        //if (!string.IsNullOrEmpty(logInfo.MainClassInfo)) { BoxText.Text = BoxText.Text + <Span Foreground="Red">"Here"</Span> + "\n"; }
+
+            //        BoxText.Inlines.Add(new Run("text formatting ") { Foreground = Brushes.Blue });
+            //        //BoxText.Inlines.Add()
+
+
+
+
+
+            //        if (logInfo.PercentageProgress != -1)
+            //        {
+            //            Progress.Value = logInfo.PercentageProgress;
+            //            PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
+            //            if (!string.IsNullOrWhiteSpace(logInfo.PendingTime))
+            //            {
+            //                PendingTime.Content = $"{logInfo.PendingTime}";
+            //            }
+            //        }
+            //    }));
+            //}
         }
     }
 }

@@ -75,13 +75,12 @@ namespace NovaPointLibrary.Solutions
         {
             LogTxt(classMethod, log);
 
-            LogInfo logInfo = new(log);
-            _uiAddLog(logInfo);
+            _uiAddLog(LogInfo.TextNotification(log));
         }
 
         internal void ProgressUI(double progress)
         {
-            LogTxt("ProgressUI", $"Progress {progress}%");
+            //LogTxt("ProgressUI", $"Progress {progress}%");
             string pendingTime = $"Pending Time: Calculating...";
 
             if (progress > 1)
@@ -89,9 +88,8 @@ namespace NovaPointLibrary.Solutions
                 TimeSpan ts = TimeSpan.FromMilliseconds( (SW.Elapsed.TotalMilliseconds * 100 / progress - SW.Elapsed.TotalMilliseconds) );
                 pendingTime = $"Pending Time: {ts.Hours}h:{ts.Minutes}m:{ts.Seconds}s";
             }
- 
-            LogInfo logInfo = new(progress, pendingTime);
-            _uiAddLog(logInfo);
+
+            _uiAddLog(LogInfo.ProgressUpdate(progress, pendingTime));
         }
 
         internal void DynamicCSV(dynamic o)
@@ -159,8 +157,8 @@ namespace NovaPointLibrary.Solutions
         internal void ScriptFinish(Exception ex)
         {
             ScriptFinishNotice();
-            LogUI($"{GetType().Name}.ScriptFinish", ex.Message);
-            LogTxt($"{GetType().Name}.ScriptFinish", $"{ex.StackTrace}");
+            _uiAddLog(LogInfo.ErrorNotification(ex.Message));
+            LogTxt(GetType().Name, ex.Message);
         }
 
         private void ScriptFinishNotice()
@@ -171,18 +169,29 @@ namespace NovaPointLibrary.Solutions
 
         internal void ReportError(string type, string URL, Exception ex)
         {
-            LogUI(GetType().Name, $"ERROR for {type} '{URL}'");
-            LogTxt(GetType().Name, $"Exception message: {ex.Message}");
-            LogTxt(GetType().Name, $"Trace: {ex.StackTrace}");
+            //_uiAddLog(LogInfo.TextNotification($"ERROR for {type} '{URL}'"));
+            //LogTxt(GetType().Name, $"ERROR for {type} '{URL}'");
+            //LogTxt(GetType().Name, $"Exception message: {ex.Message}");
+            //LogTxt(GetType().Name, $"Trace: {ex.StackTrace}");
+            ReportError(type, URL, ex.Message, ex.StackTrace);
         }
 
-        internal void ReportError(string type, string URL, string exceptionMessage)
+        //internal void ReportError(string type, string URL, string exceptionMessage)
+        //{
+
+        //    LogUI(GetType().Name, $"Error processing {type} '{URL}'");
+        //    LogTxt(GetType().Name, $"Exception: {exceptionMessage}");
+        //    LogTxt(GetType().Name, $"Trace: {exceptionMessage}");
+        //}
+
+        internal void ReportError(string type, string URL, string exMessage, string? exStackTrace = null)
         {
-            LogUI(GetType().Name, $"Error processing {type} '{URL}'");
-            LogTxt(GetType().Name, $"Exception: {exceptionMessage}");
-            LogTxt(GetType().Name, $"Trace: {exceptionMessage}");
-        }
+            _uiAddLog(LogInfo.ErrorNotification($"Error processing {type} '{URL}'"));
+            LogTxt(GetType().Name, $"Error processing {type} '{URL}'");
 
+            LogTxt(GetType().Name, $"Exception: {exMessage}");
+            LogTxt(GetType().Name, $"Trace: {exStackTrace}");
+        }
 
 
 

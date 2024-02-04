@@ -221,6 +221,10 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                     if (oList.Hidden == true && !parameters.IncludeHiddenLists) { continue; }
 
                     if (oList.IsSystemList && !parameters.IncludeSystemLists) { continue; }
+
+                    // Excluded, User information can be retrieve Web.SiteUser
+                    if (oList.Title == "User Information List") { continue; }
+
                     finalCollList.Add(oList);
                 }
 

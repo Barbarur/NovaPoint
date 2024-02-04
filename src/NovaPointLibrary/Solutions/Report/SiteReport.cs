@@ -92,6 +92,7 @@ namespace NovaPointLibrary.Solutions.Report
             foreach (var oSiteCollection in collSiteCollections)
             {
                 _appInfo.IsCancelled();
+                _logger.LogUI(GetType().Name, $"Processing Site Collection '{oSiteCollection.Url}'");
 
                 try
                 {
@@ -171,7 +172,7 @@ namespace NovaPointLibrary.Solutions.Report
         private async Task GetSubsitesAsync(string siteUrl, ProgressTracker parentProgress)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting Subsites for '{siteUrl}'");
+            _logger.LogUI(GetType().Name, $"Getting Subsites for '{siteUrl}'");
 
             List<Web> collSubsites = await new SPOSubsiteCSOM(_logger, _appInfo).GetAsync(siteUrl);
 

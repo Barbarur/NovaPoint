@@ -10,15 +10,13 @@
     
     <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="600"/>
-            <ColumnDefinition Width="30"/>
+            <ColumnDefinition Width="15"/>
             <ColumnDefinition MinWidth="600"/>
-            <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
 
         <Grid Background="Transparent"
-              Grid.Column="1">
+              Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition Height="90"/>
@@ -44,7 +42,7 @@
 
             <Grid Background="Transparent"
                   Grid.Row="1"
-                  Margin="0,13,0,0">
+                  Margin="0,12,0,0">
 
                 <Border
                     Style="{DynamicResource MenuBackgroudBorder}"/>
@@ -92,12 +90,12 @@
 
         <Border
             Style="{DynamicResource BackBackgroudBorder}"
-            Grid.Column="3"/>
+            Grid.Column="2"/>
 
 
         <Grid Background="Transparent"
               ScrollViewer.VerticalScrollBarVisibility="Auto"
-              Grid.Column="3"
+              Grid.Column="2"
               Margin="15,8">
             
             <Grid.RowDefinitions>

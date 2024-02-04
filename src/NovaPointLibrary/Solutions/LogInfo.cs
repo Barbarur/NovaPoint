@@ -12,43 +12,49 @@ namespace NovaPointLibrary.Solutions
 {
     public class LogInfo
     {
-        public string ClassMethod { get; set; } = string.Empty;
+        public string TextBase { get; set; } = string.Empty;
+        public string TextError { get; set; } = string.Empty;
+
         public string MainClassInfo { get; set; } = string.Empty;
-        public string DetailInfo { get; set; } = string.Empty;
         public double PercentageProgress { get; set; } = -1;
         public string PendingTime { get; set; } = string.Empty;
         public string SolutionFolder { get; set; } = string.Empty;
 
-        public LogInfo()
-        {
-        }
-
-        public LogInfo(string mainInfo)
-        {
-            MainClassInfo = mainInfo;
-        }
-
-        public LogInfo(Action<LogInfo> logger)
-        {
-            logger(this);
-        }
-        public LogInfo(double percentageProgress, string pendingTime)
-        {
-            PercentageProgress = percentageProgress;
-            PendingTime = pendingTime;
-        }
-
         public static LogInfo FolderInfo(string folder)
         {
-            LogInfo logInfo = new();
-            logInfo.SolutionFolder = folder;
+            LogInfo logInfo = new()
+            {
+                SolutionFolder = folder
+            };
             return logInfo;
         }
-        internal void Clear()
+
+        public static LogInfo TextNotification(string text)
         {
-            MainClassInfo = String.Empty;
-            DetailInfo = String.Empty; 
-            PercentageProgress = 0;
+            LogInfo li= new()
+            {
+                TextBase = text,
+            };
+            return li;
+        }
+
+        public static LogInfo ErrorNotification(string error)
+        {
+            LogInfo li = new()
+            {
+                TextError = error,
+            };
+            return li;
+        }
+
+        public static LogInfo ProgressUpdate(double percentageProgress, string pendingTime)
+        {
+            LogInfo li = new()
+            {
+            PercentageProgress = percentageProgress,
+            PendingTime = pendingTime,
+            };
+            return li;
         }
     }
 }

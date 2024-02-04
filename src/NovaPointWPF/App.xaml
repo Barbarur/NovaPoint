@@ -416,6 +416,7 @@
             <Setter Property="FontFamily" Value="Segoe UI Variable Text"/>
             <Setter Property="SelectionBrush" Value="#484D65"/>
             <Setter Property="SelectionTextBrush" Value="#030615"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource LogoPinkColor}"/>
 
             <Setter Property="Template">
                 <Setter.Value>

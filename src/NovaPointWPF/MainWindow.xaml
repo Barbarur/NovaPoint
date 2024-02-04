@@ -9,7 +9,7 @@
         Background="#030615">
 
     <Grid Background="Transparent"
-          Margin="4">
+          Margin="12">
 
         <Frame x:Name="MainWindowMainFrame"
                NavigationUIVisibility="Hidden"/>

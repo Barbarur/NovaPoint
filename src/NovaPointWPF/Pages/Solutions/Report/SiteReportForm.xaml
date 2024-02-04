@@ -71,7 +71,7 @@
                 x:Name="AdminPanel"
                 RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 />
-            
+
         </StackPanel>
         
     </Grid>

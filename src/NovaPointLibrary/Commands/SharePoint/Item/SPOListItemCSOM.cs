@@ -85,7 +85,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 clientContext.ExecuteQueryRetry();
 
                 counter += subcollListItem.Count;
-                _logger.LogUI(GetType().Name, $"Collected from '{TargetList.Title}' {counter} items...");
+                if (counter >= 5000) { _logger.LogUI(GetType().Name, $"Collected from '{TargetList.Title}' {counter} items..."); }
+                else { _logger.LogTxt(GetType().Name, $"Collected from '{TargetList.Title}' {counter} items..."); }
+                
                 camlQuery.ListItemCollectionPosition = subcollListItem.ListItemCollectionPosition;
 
                 yield return subcollListItem;
