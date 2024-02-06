@@ -34,7 +34,7 @@ namespace NovaPointLibrary.Solutions.Report
             f => f["Created"],
             f => f["Editor"],
             f => f["ID"],
-            f => f.File.Level,
+            f => f.File.CheckOutType,
             f => f.FileSystemObjectType,
             f => f["FileLeafRef"],
             f => f["FileRef"],
@@ -154,7 +154,7 @@ namespace NovaPointLibrary.Solutions.Report
                         FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)oItem["SMTotalSize"];
                         float itemSizeTotalMb = (float)Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2);
 
-                        AddRecord(siteUrl, oList, oItem, itemName, itemSizeMb.ToString(), itemSizeTotalMb.ToString(), oItem.File.Level.ToString(), "");
+                        AddRecord(siteUrl, oList, oItem, itemName, itemSizeMb.ToString(), itemSizeTotalMb.ToString(), oItem.File.CheckOutType.ToString(), "");
                     }
                     else if (oList.BaseType == BaseType.GenericList)
                     {

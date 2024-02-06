@@ -20,7 +20,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
         public bool IncludeShareSite { get; set; }
         public bool OnlyGroupIdDefined { get; set; }
         public string SiteUrl { get; set; }
-        public bool IncludeSubsites { get; set; }
 
         public bool AllItems { get; set; }
         public bool FirstStage { get; set; }
@@ -48,7 +47,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             this.IncludeShareSite = true;
             this.OnlyGroupIdDefined = false;
             this.SiteUrl = String.Empty;
-            this.IncludeSubsites = false;
 
             this.AllItems = true;
             this.FirstStage = true;
@@ -71,7 +69,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 IncludeShareSite = this.IncludeShareSite,
                 OnlyGroupIdDefined = this.OnlyGroupIdDefined,
                 SiteUrl = this.SiteUrl,
-                IncludeSubsites = this.IncludeSubsites,
 
                 AllItems = this.AllItems,
                 FirstStage = this.FirstStage,

@@ -13,8 +13,12 @@ namespace NovaPointLibrary.Commands.SharePoint.List
     {
         public Expression<Func<Microsoft.SharePoint.Client.List, object>>[] ListExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[] {};
         public bool ListAll { get; set; } = true;
+        
+        public bool IncludeLists { get; set; } = true;
+        public bool IncludeLibraries { get; set; } = true;
         public bool IncludeHiddenLists { get; set; } = false;
         public bool IncludeSystemLists { get; set; } = false;
+
 
         private string _listTitle = string.Empty;
         public string ListTitle

@@ -33,8 +33,7 @@
                     <StackPanel
                         Margin="12">
 
-                        <DockPanel
-                            Margin="0,0,0,9">
+                        <DockPanel>
 
                             <RadioButton
                                 Style="{DynamicResource SolutionFormToggleButton}"
@@ -77,6 +76,7 @@
             </StackPanel>
 
             <designmaterial:ItemForm
+                FilterTarget="Library"
                 ItemsAll="{Binding ItemsAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 />

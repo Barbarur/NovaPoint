@@ -25,15 +25,91 @@ namespace NovaPointWPF.UserControls
             InitializeComponent();
         }
 
-
-        public bool ListAll
+        private string _filterTarget = "Both";
+        public string FilterTarget
         {
-            get { return (bool)GetValue(ListAllProperty); }
-            set { SetValue(ListAllProperty, value); }
+            get { return _filterTarget; }
+            set
+            {
+                _filterTarget = value;
+                if (value == "List")
+                {
+                    MainLabel.Content = "List filter";
+                    AllButton.Content = "All lists";
+                    SingleButton.Content = "Single list";
+                }
+                else if(value == "Library")
+                {
+                    MainLabel.Content = "Library filter";
+                    AllButton.Content = "All libraries";
+                    SingleButton.Content = "Single library";
+                }
+                else
+                {
+                    MainLabel.Content = "Library and List filter";
+                    AllButton.Content = "All libraries and lists";
+                    SingleButton.Content = "Single library or list";
+                }
+            }
         }
-        public static readonly DependencyProperty ListAllProperty =
-            DependencyProperty.Register("ListAll", typeof(bool), typeof(ListForm), new FrameworkPropertyMetadata(defaultValue: false));
 
+        private bool _singleList = false;
+        public bool SingleList
+        {
+            get { return _singleList; }
+            set
+            {
+                _singleList = value;
+                if (value)
+                {
+                    AllFilterStack.Visibility = Visibility.Collapsed;
+
+                    SingleListTitle.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    if (ListsFilterVisibility) { AllFilterStack.Visibility = Visibility.Visible; }
+
+                    SingleListTitle.Visibility = Visibility.Collapsed;
+                    ListTitle = string.Empty;
+                }
+            }
+        }
+
+        private bool _listsFilterVisibility = true;
+        public bool ListsFilterVisibility
+        {
+            get { return _listsFilterVisibility; }
+            set
+            {
+                _listsFilterVisibility = value;
+                if (value)
+                {
+                    AllFilterStack.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    AllFilterStack.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+
+        public bool IncludeLibraries
+        {
+            get { return (bool)GetValue(IncludeLibrariesProperty); }
+            set { SetValue(IncludeLibrariesProperty, value); }
+        }
+        public static readonly DependencyProperty IncludeLibrariesProperty =
+            DependencyProperty.Register("IncludeLibraries", typeof(bool), typeof(ListForm), new FrameworkPropertyMetadata(defaultValue: true));
+
+        public bool IncludeLists
+        {
+            get { return (bool)GetValue(IncludeListsProperty); }
+            set { SetValue(IncludeListsProperty, value); }
+        }
+        public static readonly DependencyProperty IncludeListsProperty =
+            DependencyProperty.Register("IncludeLists", typeof(bool), typeof(ListForm), new FrameworkPropertyMetadata(defaultValue: true));
 
         public bool IncludeHiddenLists
         {
@@ -51,32 +127,7 @@ namespace NovaPointWPF.UserControls
         public static readonly DependencyProperty IncludeSystemListsProperty =
             DependencyProperty.Register("IncludeSystemLists", typeof(bool), typeof(ListForm), new FrameworkPropertyMetadata(defaultValue: false));
 
-
-
-        private bool _singleList;
-        public bool SingleList
-        {
-            get { return _singleList; }
-            set
-            {
-                _singleList = value;
-                if (value)
-                {
-                    AllListsFilter.Visibility = Visibility.Collapsed;
-
-                    SingleListTitle.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    AllListsFilter.Visibility = Visibility.Visible;
-
-                    SingleListTitle.Visibility = Visibility.Collapsed;
-                    ListTitle = string.Empty;
-                }
-            }
-        }
-
-
+        
         public string ListTitle
         {
             get { return (string)GetValue(ListTitleProperty); }
@@ -84,8 +135,6 @@ namespace NovaPointWPF.UserControls
         }
         public static readonly DependencyProperty ListTitleProperty =
             DependencyProperty.Register("ListTitle", typeof(string), typeof(ListForm), new PropertyMetadata(string.Empty));
-
-
 
     }
 }

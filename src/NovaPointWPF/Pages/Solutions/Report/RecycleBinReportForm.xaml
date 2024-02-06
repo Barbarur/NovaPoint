@@ -26,7 +26,7 @@
                 OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 
                 SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                SubsitesVisibility="False"
                 />
 
             <designmaterial:RecycleBinForm

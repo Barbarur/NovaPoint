@@ -11,11 +11,11 @@
     <Grid
         Background="Transparent"
         Margin="0, 0, 0, 15">
-        
-        
+
         <StackPanel>
 
             <Label
+                x:Name="MainLabel"
                 Style="{DynamicResource MenuSectionTitleLabel}"
                 Content="Files and Items filter"/>
 
@@ -30,6 +30,7 @@
                         Orientation="Horizontal">
 
                         <RadioButton
+                            x:Name="AllButton"
                             Style="{DynamicResource SolutionFormToggleButton}"
                             Content="All files and items"
                             IsChecked="{Binding ItemsAll, ElementName=root}"/>

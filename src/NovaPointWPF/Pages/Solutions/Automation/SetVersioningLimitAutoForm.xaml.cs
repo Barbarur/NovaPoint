@@ -33,7 +33,8 @@ namespace NovaPointWPF.Pages.Solutions.Automation
         public string SiteUrl { get; set; }
         public bool IncludeSubsites { get; set; }
 
-        public bool ListAll { get; set; }
+        public bool IncludeLists { get; set; }
+        public bool IncludeLibraries { get; set; }
         public bool IncludeHiddenLists { get; set; }
         public bool IncludeSystemLists { get; set; }
         public string ListTitle { get; set; }
@@ -61,7 +62,8 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             this.SiteUrl = String.Empty;
             this.IncludeSubsites = false;
 
-            this.ListAll = true;
+            this.IncludeLists = true;
+            this.IncludeLibraries = true;
             this.IncludeHiddenLists = false;
             this.IncludeSystemLists = false;
             this.ListTitle = String.Empty;
@@ -83,7 +85,8 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 SiteUrl = this.SiteUrl,
                 IncludeSubsites = this.IncludeSubsites,
 
-                ListAll = this.ListAll,
+                IncludeLists = this.IncludeLists,
+                IncludeLibraries = this.IncludeLibraries,
                 IncludeHiddenLists = this.IncludeHiddenLists,
                 IncludeSystemLists = this.IncludeSystemLists,
                 ListTitle = this.ListTitle,

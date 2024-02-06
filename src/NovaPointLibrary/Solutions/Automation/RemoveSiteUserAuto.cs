@@ -33,6 +33,8 @@ namespace NovaPointLibrary.Solutions.Automation
         public RemoveSiteUserAuto(RemoveUserAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
             Parameters = parameters;
+            _param.IncludeSubsites = false;
+
             _logger = new(uiAddLog, this.GetType().Name, parameters);
             _appInfo = new(_logger, cancelTokenSource);
         }

@@ -93,16 +93,14 @@
                 />
 
             <designmaterial:ListForm
-                ListAll="{Binding ListAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeHiddenLists="{Binding IncludeHiddenLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeSystemLists="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
+                FilterTarget="Library"
                 ListTitle="{Binding ListTitle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                ListsFilterVisibility="False"
                 />
 
             <designmaterial:ItemForm
+                FilterTarget="Library"
                 ItemsAll="{Binding ItemsAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
                 FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
         </StackPanel>

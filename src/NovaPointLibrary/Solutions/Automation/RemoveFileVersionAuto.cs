@@ -28,7 +28,6 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
         {
-            i => i.HasUniqueRoleAssignments,
             i => i["Author"],
             i => i["Created"],
             i => i["Editor"],
@@ -39,7 +38,6 @@ namespace NovaPointLibrary.Solutions.Automation
             i => i["File_x0020_Size"],
             i => i["Modified"],
             i => i["SMTotalSize"],
-            i => i["Title"],
             i => i.Versions,
             i => i["_UIVersionString"],
         };
@@ -48,18 +46,13 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             Parameters = parameters;
             _param.FileExpresions = _fileExpressions;
+            _param.IncludeLists = false;
+            _param.IncludeHiddenLists = false;
+            _param.IncludeSystemLists = false;
+
             _logger = new(uiAddLog, this.GetType().Name, parameters);
             _appInfo = new(_logger, cancelTokenSource);
         }
-
-        //private Main _main;
-
-        //public RemoveFileVersionAuto(Commands.Authentication.AppInfo appInfo, Action<LogInfo> uiAddLog, ISolutionParameters parameters)
-        //{
-        //    Parameters = parameters;
-
-        //    _main = new(this, appInfo, uiAddLog);
-        //}
 
         public async Task RunAsync()
         {
@@ -74,44 +67,13 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 _logger.ScriptFinish(ex);
             }
-            //try
-            //{
-            //    if (string.IsNullOrWhiteSpace(_param.SiteUrl) && !_param.SiteAll)
-            //    {
-            //        throw new Exception($"FORM INCOMPLETED: Site URL cannot be empty when no processing all sites");
-            //    }
-            //    else if (!_param.ListAll && String.IsNullOrWhiteSpace(_param.ListTitle))
-            //    {
-            //        throw new Exception($"FORM INCOMPLETED: Library name cannot be empty when not processing all Libraries");
-            //    }
-            //    else if (_param.ListAll && !_param.ItemsAll)
-            //    {
-            //        throw new Exception($"FORM ERROR: You cannot target specific Relative URL when running the solution across all Libraries");
-            //    }
-            //    else if (!_param.ItemsAll && String.IsNullOrWhiteSpace(_param.FolderRelativeUrl))
-            //    {
-            //        throw new Exception($"FORM INCOMPLETED: Relative Path cannot be empty when not collecting all Files");
-            //    }
-            //    else if (!_param.DeleteAll && string.IsNullOrWhiteSpace(_param.VersionsToKeep.ToString()))
-            //    {
-            //        throw new Exception($"FORM INCOMPLETED: Number of versions to keep cannot be empty when no deleting all versions");
-            //    }
-            //    else
-            //    {
-            //        await RunScriptAsync();
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    _main.ScriptFinish(ex);
-            //}
         }
 
         private async Task RunScriptAsync()
         {
             _appInfo.IsCancelled();
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
+            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetAsync())
             {
                 _appInfo.IsCancelled();
 
@@ -131,153 +93,11 @@ namespace NovaPointLibrary.Solutions.Automation
                     AddRecord(results.SiteUrl, results.List, remarks: ex.Message);
                 }
             }
-
-
-            //_main.IsCancelled();
-
-            //ProgressTracker progress;
-            //if (!String.IsNullOrWhiteSpace(_param.SiteUrl))
-            //{
-            //    Web oSite = await new SPOSiteCSOM(_main).GetToDeprecate(_param.SiteUrl);
-
-            //    progress = new(_main, 1);
-            //    await ProcessSite(oSite.Url, progress);
-            //}
-            //else
-            //{
-            //    List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_main).GetDeprecated(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
-
-            //    progress = new(_main, collSiteCollections.Count);
-            //    foreach (var oSiteCollection in collSiteCollections)
-            //    {
-            //        await ProcessSite(oSiteCollection.Url, progress);
-            //        progress.ProgressUpdateReport();
-            //    }
-            //}
-
-            //_main.ScriptFinish();
         }
-
-        //private async Task ProcessSite(string siteUrl, ProgressTracker progress)
-        //{
-        //    _main.IsCancelled();
-        //    string methodName = $"{GetType().Name}.ProcessSite";
-
-        //    try
-        //    {
-        //        _main.AddLogToUI(methodName, $"Processing Site '{siteUrl}'");
-
-        //        await new SPOSiteCollectionAdminCSOM(_main).SetDEPRECATED(siteUrl, _param.AdminUPN);
-
-        //        await ProcessLists(siteUrl, progress);
-
-        //        await ProcessSubsites(siteUrl, progress);
-
-        //        if (_param.RemoveAdmin)
-        //        {
-        //            await new SPOSiteCollectionAdminCSOM(_main).RemoveDEPRECATED(siteUrl, _param.AdminUPN);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _main.ReportError("Site", siteUrl, ex);
-
-        //        AddRecord(siteUrl, remarks: ex.Message);
-        //    }
-        //}
-
-        //private async Task ProcessSubsites(string siteUrl, ProgressTracker progress)
-        //{
-        //    _main.IsCancelled();
-        //    string methodName = $"{GetType().Name}.ProcessSubsites";
-
-        //    if (!_param.IncludeSubsites) { return; }
-
-        //    var collSubsites = await new SPOSubsiteCSOM(_main).GetDEPRECATED(siteUrl);
-
-        //    progress.IncreaseTotalCount(collSubsites.Count);
-        //    foreach (var oSubsite in collSubsites)
-        //    {
-        //        _main.AddLogToUI(methodName, $"Processing Subsite '{oSubsite.Title}'");
-
-        //        try
-        //        {
-        //            await ProcessLists(oSubsite.Url, progress);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _main.ReportError("Subsite", oSubsite.Url, ex);
-
-        //            AddRecord(oSubsite.Url, remarks: ex.Message);
-        //        }
-
-        //        progress.ProgressUpdateReport();
-        //    }
-        //}
-
-        //private async Task ProcessLists(string siteUrl, ProgressTracker parentPprogress)
-        //{
-        //    _main.IsCancelled();
-        //    string methodName = $"{GetType().Name}.ProcessLists";
-
-        //    var collList = await new SPOListCSOM(_main).GetDEPRECATED(siteUrl, _param.ListTitle, _param.IncludeHiddenLists, _param.IncludeSystemLists);
-
-        //    ProgressTracker progress = new(parentPprogress, collList.Count);
-        //    foreach (var oList in collList)
-        //    {
-        //        _main.IsCancelled();
-
-        //        _main.AddLogToUI(methodName, $"Processing Library '{oList.Title}'");
-
-        //        if(oList.BaseType != BaseType.DocumentLibrary)
-        //        {
-        //            AddRecord(siteUrl, oList, remarks: "Skipped; This is not a Document Library");
-
-        //            continue;
-        //        }
-
-        //        try
-        //        {
-        //            await ProcessItems(siteUrl, oList, progress);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _main.ReportError(oList.BaseType.ToString(), oList.DefaultViewUrl, ex);
-
-        //            AddRecord(siteUrl, oList, remarks: ex.Message);
-        //        }
-
-        //        progress.ProgressUpdateReport();
-
-
-        //    }
-        //}
-
 
         private async Task ProcessItems(string siteUrl, List oList, ProgressTracker parentProgress)
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.ProcessItems";
-
-
-            //Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
-            //{
-            //    i => i.HasUniqueRoleAssignments,
-            //    i => i["Author"],
-            //    i => i["Created"],
-            //    i => i["Editor"],
-            //    i => i["ID"],
-            //    i => i.FileSystemObjectType,
-            //    i => i["FileLeafRef"],
-            //    i => i["FileRef"],
-            //    i => i["File_x0020_Size"],
-            //    i => i["Modified"],
-            //    i => i["SMTotalSize"],
-            //    i => i["Title"],
-            //    i => i.Versions,
-            //    i => i["_UIVersionString"],
-            //};
-
 
             ProgressTracker progress = new(parentProgress, oList.ItemCount);
 
@@ -387,7 +207,6 @@ namespace NovaPointLibrary.Solutions.Automation
                 else { AddRecord(siteUrl, oList, oItem, remarks: "No versions to delete"); }
             }
         }
-
 
         private void AddRecord(string siteUrl,
                                Microsoft.SharePoint.Client.List? oList = null,

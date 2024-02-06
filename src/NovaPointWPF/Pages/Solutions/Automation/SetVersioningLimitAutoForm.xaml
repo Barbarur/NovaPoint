@@ -72,7 +72,8 @@
                 />
 
             <designmaterial:ListForm
-                ListAll="{Binding ListAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeLists="{Binding IncludeLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeLibraries="{Binding IncludeLibraries, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeHiddenLists="{Binding IncludeHiddenLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeSystemLists="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 

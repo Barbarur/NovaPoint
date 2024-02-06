@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NovaPointWPF.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
+             d:DesignHeight="450" d:DesignWidth="600"
              x:Name="root">
 
     <Grid
@@ -16,6 +16,7 @@
         <StackPanel>
 
             <Label
+                x:Name="MainLabel"
                 Style="{DynamicResource MenuSectionTitleLabel}"
                 Content="Library and List filter"/>
 
@@ -27,15 +28,15 @@
 
 
                     <StackPanel
-                        Orientation="Horizontal"
-                        Margin="0,0,0,9">
+                        Orientation="Horizontal">
 
                         <RadioButton
+                            x:Name="AllButton"
                             Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="All libraries and lists"
-                            IsChecked="{Binding ListAll, ElementName=root}"/>
+                            Content="All libraries and lists"/>
 
                         <RadioButton
+                            x:Name="SingleButton"
                             Style="{DynamicResource SolutionFormToggleButton}"
                             Content="Single library or list"
                             IsChecked="{Binding SingleList, ElementName=root}"/>
@@ -44,39 +45,62 @@
                     </StackPanel>
 
                     <StackPanel
-                        x:Name="AllListsFilter"
-                        Margin="9, 0, 0, 0">
+                        x:Name="AllFilterStack"
+                        Margin="9, 9, 0, 0"
+                        Visibility="Visible">
 
 
                         <Label
+                            x:Name="AllFilterLabel"
                             Style="{DynamicResource SolutionFormLabel}"
-                            Content="Additional lists to include"/>
+                            Content="Lists and libraries to include"/>
 
-                        <StackPanel
-                            Orientation="Horizontal">
+                        <DockPanel>
 
                             <ToggleButton
                                 Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Include hidden lists"
+                                Content="Lists"
+                                Width="120"
+                                DockPanel.Dock="Left"
+                                IsChecked="{Binding IncludeLibraries, ElementName=root}"/>
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Libraries"
+                                Width="120"
+                                DockPanel.Dock="Left"
+                                IsChecked="{Binding IncludeLists, ElementName=root}"/>
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Hidden lists"
+                                Width="120"
+                                DockPanel.Dock="Right"
                                 IsChecked="{Binding IncludeHiddenLists, ElementName=root}"/>
 
                             <ToggleButton
                                 Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Include system lists"
+                                Content="System lists"
+                                Width="120"
+                                DockPanel.Dock="Right"
                                 IsChecked="{Binding IncludeSystemLists, ElementName=root}"/>
 
-                        </StackPanel>
+                            <Label
+                                DockPanel.Dock="Right"/>
+
+
+                        </DockPanel>
 
                     </StackPanel>
 
                     <StackPanel
                         x:Name="SingleListTitle"
                         Visibility="Collapsed"
-                        Margin="9, 0, 0, 0">
+                        Margin="9, 9, 0, 0">
 
                         <Label
                             Style="{DynamicResource SolutionFormLabel}"
-                            Content="Library or List title"/>
+                            Content="Title"/>
 
                         <TextBox
                             Style="{DynamicResource SolutionFormTextBox}"

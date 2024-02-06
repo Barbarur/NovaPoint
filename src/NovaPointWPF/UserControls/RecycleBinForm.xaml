@@ -24,8 +24,7 @@
                 <StackPanel
                     Margin="12">
 
-                    <DockPanel
-                        Margin="0,0,0,9">
+                    <DockPanel>
 
                         <RadioButton
                             Style="{DynamicResource SolutionFormToggleButton}"
@@ -46,7 +45,8 @@
                     </DockPanel>
 
                     <StackPanel
-                        x:Name="FilterPanel">
+                        x:Name="FilterPanel"
+                        Margin="9,9,9,0">
 
                         <Label
                             Style="{DynamicResource SolutionFormLabel}"
@@ -148,7 +148,7 @@
 
                         <StackPanel
                             Orientation="Vertical"
-                            Margin="0,0,0,9">
+                            Margin="0,0,0,0">
 
                             <Label
                                 Style="{DynamicResource SolutionFormLabel}"

@@ -35,12 +35,13 @@
                 OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 
                 SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                SubsitesVisibility="False"
                 />
 
             <designmaterial:ListForm
                 x:Name="ListPanel"
-                ListAll="{Binding ListAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeLists="{Binding IncludeLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeLibraries="{Binding IncludeLibraries, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeHiddenLists="{Binding IncludeHiddenLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeSystemLists="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 
