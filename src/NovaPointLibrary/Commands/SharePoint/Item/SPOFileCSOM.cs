@@ -69,5 +69,16 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             oFile.MoveToUsingPath(ResourcePath.FromDecodedUrl(targetPath), MoveOperations.None);
             clientContext.ExecuteQueryRetry();
         }
+
+        internal async Task CheckInAsync(string siteUrl, ListItem oFile, CheckinType checkinType, string comment)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Check-in file '{oFile["FileRef"]}' at '{siteUrl}'");
+
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
+
+            clientContext.Web.CheckInFile($"{oFile["FileRef"]}", checkinType, comment);
+
+        }
     }
 }

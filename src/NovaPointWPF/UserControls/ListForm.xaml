@@ -33,6 +33,7 @@
                         <RadioButton
                             x:Name="AllButton"
                             Style="{DynamicResource SolutionFormToggleButton}"
+                            IsChecked="True"
                             Content="All libraries and lists"/>
 
                         <RadioButton

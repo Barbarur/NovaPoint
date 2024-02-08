@@ -25,6 +25,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _param = parameters;
         }
 
+        // TO BE DEPRECATED
         private async IAsyncEnumerable<SPOTenantResults> GetSiteCollectionsAsync()
         {
             _appInfo.IsCancelled();
@@ -55,6 +56,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             }
         }
 
+        // TO BE DEPRECATED
         private async IAsyncEnumerable<SPOTenantResults> GetSubsitesAsync(SPOTenantResults siteCollectionResult)
         {
             _appInfo.IsCancelled();
@@ -93,6 +95,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             }
         }
 
+        // TO BE DEPRECATED
         internal async IAsyncEnumerable<SPOTenantResults> GetAsync()
         {
             _appInfo.IsCancelled();
@@ -100,50 +103,191 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetSignedInUser();
             string adminUPN = signedInUser.UserPrincipalName;
 
-            await foreach (SPOTenantResults resultsSiteCollection in GetSiteCollectionsAsync())
+            await foreach (SPOTenantResults resultSiteCollection in GetSiteCollectionsAsync())
             {
                 _appInfo.IsCancelled();
 
+                _logger.LogUI(GetType().Name, $"Processing Site '{resultSiteCollection.SiteUrl}'");
+
                 try
                 {
-                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(resultsSiteCollection.SiteUrl, adminUPN);
+                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(resultSiteCollection.SiteUrl, adminUPN);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Site", resultsSiteCollection.SiteUrl, ex);
+                    _logger.ReportError("Site", resultSiteCollection.SiteUrl, ex);
 
-                    resultsSiteCollection.ErrorMessage = ex.Message;
+                    resultSiteCollection.ErrorMessage = ex.Message;
                 }
-
-                _logger.LogUI(GetType().Name, $"Processing Site '{resultsSiteCollection.SiteUrl}'");
-                yield return resultsSiteCollection;
+                yield return resultSiteCollection;
 
 
-                if (string.IsNullOrWhiteSpace(resultsSiteCollection.ErrorMessage) && _param.IncludeSubsites)
+                if (string.IsNullOrWhiteSpace(resultSiteCollection.ErrorMessage)) { continue; }
+
+
+                if (_param.IncludeSubsites)
                 {
-                    await foreach (SPOTenantResults subsite in GetSubsitesAsync(resultsSiteCollection))
+                    await foreach (SPOTenantResults subsite in GetSubsitesAsync(resultSiteCollection))
                     {
                         _logger.LogUI(GetType().Name, $"Processing Site '{subsite.SiteUrl}'");
                         yield return subsite;
                     }
                 }
 
-                if (string.IsNullOrWhiteSpace(resultsSiteCollection.ErrorMessage) && _param.RemoveAdmin)
+
+                if (_param.RemoveAdmin)
                 {
                     try
                     {
-                        await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(resultsSiteCollection.SiteUrl, adminUPN);
+                        await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(resultSiteCollection.SiteUrl, adminUPN);
                     }
                     catch (Exception ex)
                     {
-                        _logger.ReportError("Site", resultsSiteCollection.SiteUrl, ex);
+                        _logger.ReportError("Site", resultSiteCollection.SiteUrl, ex);
 
-                        resultsSiteCollection.ErrorMessage = ex.Message;
+                        resultSiteCollection.ErrorMessage = ex.Message;
 
                     }
-                    if (!string.IsNullOrWhiteSpace(resultsSiteCollection.ErrorMessage))
+                    if (!string.IsNullOrWhiteSpace(resultSiteCollection.ErrorMessage))
                     {
-                        yield return resultsSiteCollection;
+                        yield return resultSiteCollection;
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+        private async IAsyncEnumerable<SPOTenantSiteUrlsRecord> GetSiteCollectionsAsyncNEW()
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Getting Site Collections");
+
+            ProgressTracker progress;
+            if (!String.IsNullOrWhiteSpace(_param.SiteUrl))
+            {
+                Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
+
+                progress = new(_logger, 1);
+
+                yield return new SPOTenantSiteUrlsRecord(progress, oSite);
+
+                progress.ProgressUpdateReport();
+            }
+            else
+            {
+                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
+
+                progress = new(_logger, collSiteCollections.Count);
+                foreach (var oSiteCollection in collSiteCollections)
+                {
+                    yield return new SPOTenantSiteUrlsRecord(progress, oSiteCollection);
+                    
+                    progress.ProgressUpdateReport();
+                }
+            }
+        }
+
+        private async IAsyncEnumerable<SPOTenantSiteUrlsRecord> GetSubsitesAsyncNEW(SPOTenantSiteUrlsRecord siteCollectionResult)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Getting Subsites from '{siteCollectionResult.SiteUrl}'");
+
+            SPOTenantSiteUrlsRecord? errorResults = null;
+            List<Web>? collSubsites = null;
+            try
+            {
+                collSubsites = await new SPOSubsiteCSOM(_logger, _appInfo).GetAsync(siteCollectionResult.SiteUrl);
+            }
+            catch (Exception ex)
+            {
+                _logger.ReportError("Site", siteCollectionResult.SiteUrl, ex);
+
+                errorResults = new(siteCollectionResult)
+                {
+                    ErrorMessage = ex.Message,
+                };
+            }
+
+
+            if (errorResults != null)
+            {
+                yield return errorResults;
+                yield break;
+            }
+
+
+            else if (collSubsites != null)
+            {
+                siteCollectionResult.Progress.IncreaseTotalCount(collSubsites.Count);
+                foreach (var oSubsite in collSubsites)
+                {
+                    SPOTenantSiteUrlsRecord resultsSubsite = new(siteCollectionResult.Progress, oSubsite);
+                    yield return resultsSubsite;
+
+                    siteCollectionResult.Progress.ProgressUpdateReport();
+                }
+            }
+        }
+
+        internal async IAsyncEnumerable<SPOTenantSiteUrlsRecord> GetAsyncNEW()
+        {
+            _appInfo.IsCancelled();
+
+            GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetSignedInUser();
+            string adminUPN = signedInUser.UserPrincipalName;
+
+            await foreach (var resultSiteCollection in GetSiteCollectionsAsyncNEW())
+            {
+                _appInfo.IsCancelled();
+                _logger.LogUI(GetType().Name, $"Processing Site '{resultSiteCollection.SiteUrl}'");
+
+                try
+                {
+                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(resultSiteCollection.SiteUrl, adminUPN);
+                }
+                catch (Exception ex)
+                {
+                    _logger.ReportError("Site", resultSiteCollection.SiteUrl, ex);
+
+                    resultSiteCollection.ErrorMessage = ex.Message;
+                }
+
+                yield return resultSiteCollection;
+
+
+                if (string.IsNullOrWhiteSpace(resultSiteCollection.ErrorMessage)) { continue; }
+
+
+                if (_param.IncludeSubsites)
+                {
+                    await foreach (var subsite in GetSubsitesAsyncNEW(resultSiteCollection))
+                    {
+                        _logger.LogUI(GetType().Name, $"Processing Site '{subsite.SiteUrl}'");
+                        yield return subsite;
+                    }
+                }
+
+
+                if (_param.RemoveAdmin)
+                {
+                    try
+                    {
+                        await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(resultSiteCollection.SiteUrl, adminUPN);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.ReportError("Site", resultSiteCollection.SiteUrl, ex);
+
+                        resultSiteCollection.ErrorMessage = ex.Message;
+
+                    }
+                    if (!string.IsNullOrWhiteSpace(resultSiteCollection.ErrorMessage))
+                    {
+                        yield return resultSiteCollection;
                     }
                 }
             }

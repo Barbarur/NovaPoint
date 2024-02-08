@@ -1,0 +1,114 @@
+﻿<Page x:Class="NovaPointWPF.Pages.Solutions.Automation.CheckInFileAutoForm"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Automation"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
+      mc:Ignorable="d" 
+      d:DesignHeight="900" d:DesignWidth="600"
+      Title="CheckInFileAutoForm">
+
+    <Grid Background="Transparent">
+
+        <StackPanel>
+
+            <designmaterial:FormHeader
+            x:Name="SolutionHeader"/>
+
+            <ToggleButton
+                Style="{DynamicResource SolutionFormToggleButton}"
+                Content="Report Mode"
+                IsChecked="{Binding ReportMode, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                Margin="0, 0, 0, 15"
+                HorizontalAlignment="Left"/>
+
+            <Label
+            Style="{DynamicResource MenuSectionTitleLabel}"
+            Content="Check in action"/>
+
+            <Grid
+            Margin="0, 0, 0, 15">
+
+                <Border
+                Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <DockPanel>
+
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Major version"
+                            IsChecked="{Binding Major, Mode=TwoWay}"
+                            Click="CheckInTypeClick"
+                            DockPanel.Dock="Left"/>
+
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Minor version"
+                            IsChecked="{Binding Minor, Mode=TwoWay}"
+                            Click="CheckInTypeClick"
+                            DockPanel.Dock="Left"/>
+
+                        
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Discard check out"
+                            IsChecked="{Binding Discard, Mode=TwoWay}"
+                            Click="CheckInTypeClick"
+                            DockPanel.Dock="Right"/>
+
+                        <Label/>
+
+                    </DockPanel>
+
+                    <StackPanel
+                        x:Name="CheckInCommentForm">
+
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Check in comment"/>
+
+                        <TextBox
+                            x:Name="CommentTextBox"
+                            Style="{DynamicResource SolutionFormTextBox}"
+                            Text="{Binding Comment, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <designmaterial:AdminForm
+                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+            />
+
+            <designmaterial:SiteForm
+                IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+            
+                SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+            />
+
+            <designmaterial:ListForm
+                FilterTarget="Library"
+                ListsFilterVisibility="false"
+                IncludeHiddenLists="{Binding IncludeHiddenLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeSystemLists="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+
+                ListTitle="{Binding ListTitle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+            <designmaterial:ItemForm
+                FilterTarget="Library"
+                ItemsAll="{Binding ItemsAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+        </StackPanel>
+
+    </Grid>
+</Page>

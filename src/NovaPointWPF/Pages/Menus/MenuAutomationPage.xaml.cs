@@ -43,17 +43,24 @@ namespace NovaPointWPF.Pages.Menus
             GoToSolutionForm(new SetSiteCollectionAdminAutoForm());
         }
 
+
         // LISTS
         private void SetVersioningLimitAutoClick(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new SetVersioningLimitAutoForm());
         }
 
+
         // ITEMS
         private void RemoveFileVersionAutoClick(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new RemoveFileVersionAutoForm());
         }
+        private void CheckInFileAutoClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new CheckInFileAutoForm());
+        }
+
 
         // RECYCLE BIN
         private void ClearRecycleBinAutoClick(object sender, RoutedEventArgs e)

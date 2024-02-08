@@ -312,7 +312,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ComboBoxItem}">
                         <Grid
-                            Margin="3, 1">
+                            Margin="3, 3">
 
                             <Border
                                 Name="Border"

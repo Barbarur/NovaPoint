@@ -1,5 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Xml.Linq;
 
@@ -10,6 +11,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
     {
         private readonly NPLogger _logger;
         private readonly Authentication.AppInfo _appInfo;
+
+        private readonly Expression<Func<ListItem, object>>[] _defaultExpressions = new Expression<Func<ListItem, object>>[]
+        {
+            i => i["FileRef"],
+        };
 
         internal SPOListItemCSOM(NPLogger logger, Authentication.AppInfo appInfo)
         {
@@ -47,11 +53,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] requestedExpressions;
             if (TargetList.BaseType == BaseType.DocumentLibrary)
             {
-                requestedExpressions = parameters.FileExpresions;
+                requestedExpressions = _defaultExpressions.Union(parameters.FileExpresions).ToArray();
             }
             else if (TargetList.BaseType == BaseType.GenericList)
             {
-                requestedExpressions = parameters.ItemExpresions;
+                requestedExpressions = _defaultExpressions.Union(parameters.ItemExpresions).ToArray();
             }
             else
             {
@@ -108,7 +114,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     {
                         yield return oItem;
                     }
-                    if (!String.IsNullOrWhiteSpace(parameters.FolderRelativeUrl) && oItem["FileRef"].ToString() != null && oItem["FileRef"].ToString().Contains(parameters.FolderRelativeUrl))
+                    else if (!String.IsNullOrWhiteSpace(parameters.FolderRelativeUrl) && oItem["FileRef"].ToString() != null && oItem["FileRef"].ToString().Contains(parameters.FolderRelativeUrl))
                     {
                         yield return oItem;
                     }

@@ -22,6 +22,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             _param = parameters;
         }
 
+        // TO BE DEPRECATED
         internal async IAsyncEnumerable<SPOTenantResults> GetListsAsync()
         {
             _appInfo.IsCancelled();
@@ -61,6 +62,64 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                         _logger.LogTxt(GetType().Name, $"Processing {oList.BaseType} '{oList.Title}'");
                         SPOTenantResults results = new(progress, siteResults.SiteUrl, oList);
                         yield return results;
+
+                        progress.ProgressUpdateReport();
+                    }
+                }
+            }
+        }
+
+
+
+        internal async IAsyncEnumerable<SPOTenantListsRecord> GetAsync()
+        {
+            _appInfo.IsCancelled();
+
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsyncNEW())
+            {
+
+                if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
+                {
+                    SPOTenantListsRecord record = new(siteResults, siteResults.Progress, null)
+                    {
+                        ErrorMessage = siteResults.ErrorMessage,
+                    };
+
+                    yield return record;
+                    continue;
+                }
+
+
+                SPOTenantListsRecord? errorRRecord = null;
+                List<Microsoft.SharePoint.Client.List>? collList = null;
+                try
+                {
+                    collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param);
+                }
+                catch (Exception ex)
+                {
+                    _logger.ReportError("Site", siteResults.SiteUrl, ex);
+
+                    SPOTenantListsRecord record = new(siteResults, siteResults.Progress, null)
+                    {
+                        ErrorMessage = ex.Message
+                    };
+                }
+
+
+                if (errorRRecord != null)
+                {
+                    yield return errorRRecord;
+                }
+                else if (collList != null)
+                {
+                    ProgressTracker progress = new(siteResults.Progress, collList.Count);
+                    foreach (var oList in collList)
+                    {
+                        _logger.LogTxt(GetType().Name, $"Processing {oList.BaseType} '{oList.Title}'");
+
+                        SPOTenantListsRecord record = new(siteResults, siteResults.Progress, oList);
+                        yield return record;
 
                         progress.ProgressUpdateReport();
                     }

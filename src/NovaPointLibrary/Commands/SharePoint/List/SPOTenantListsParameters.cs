@@ -12,7 +12,6 @@ namespace NovaPointLibrary.Commands.SharePoint.List
     public class SPOTenantListsParameters : SPOTenantSiteUrlsParameters
     {
         public Expression<Func<Microsoft.SharePoint.Client.List, object>>[] ListExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[] {};
-        public bool ListAll { get; set; } = true;
         
         public bool IncludeLists { get; set; } = true;
         public bool IncludeLibraries { get; set; } = true;
@@ -27,14 +26,5 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             set { _listTitle = value.Trim(); }
         }
 
-        internal new void ParametersCheck()
-        {
-            base.ParametersCheck();
-
-            if (!ListAll && String.IsNullOrWhiteSpace(ListTitle))
-            {
-                throw new Exception($"FORM INCOMPLETED: Library name cannot be empty when not processing all Libraries");
-            }
-        }
     }
 }
