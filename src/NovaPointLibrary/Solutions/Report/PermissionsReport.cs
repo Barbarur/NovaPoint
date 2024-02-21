@@ -73,7 +73,7 @@ namespace NovaPointLibrary.Solutions.Report
 
                 if (_param.UserListOnly)
                 {
-                    var collUsers = await new SPOSiteUserCSOM(_logger, _appInfo).GetAllAsync(siteResults.SiteUrl);
+                    var collUsers = await new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl);
 
                     if(collUsers != null)
                     {

@@ -13,8 +13,18 @@ namespace NovaPointLibrary.Commands.SharePoint.User
 {
     internal class SPOSiteUserCSOM
     {
-        private NPLogger _logger;
+        private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
+
+        private readonly Expression<Func<Microsoft.SharePoint.Client.User, object>>[] _retrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
+        {
+            u => u.Id,
+            u => u.Title,
+            u => u.LoginName,
+            u => u.UserPrincipalName,
+            u => u.Email,
+            u => u.UserId,
+        };
 
         internal SPOSiteUserCSOM(NPLogger logger, AppInfo appInfo)
         {
@@ -32,32 +42,11 @@ namespace NovaPointLibrary.Commands.SharePoint.User
 
             var clientContext = await _appInfo.GetContext(siteUrl);
 
-            var retrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
-            {
-                u => u.Id,
-                u => u.Title,
-                u => u.LoginName,
-                u => u.UserPrincipalName,
-                u => u.Email,
-                u => u.IsShareByEmailGuestUser,
-                u => u.IsSiteAdmin,
-                u => u.UserId,
-                u => u.IsHiddenInUI,
-                u => u.PrincipalType,
-                u => u.Alerts.Include(
-                    a => a.Title,
-                    a => a.Status),
-                u => u.Groups.Include(
-                    g => g.Id,
-                    g => g.Title,
-                    g => g.LoginName)
-            };
-
             try
             {
                 Microsoft.SharePoint.Client.User user = clientContext.Web.SiteUsers.GetByLoginName(userLoginName);
 
-                clientContext.Load(user, retrievalExpressions);
+                clientContext.Load(user, _retrievalExpressions);
                 clientContext.ExecuteQueryRetry();
 
                 return user;
@@ -69,7 +58,47 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             }
         }
 
-        internal async Task<UserCollection?> GetAllAsync(string siteUrl)
+        internal async Task<Microsoft.SharePoint.Client.User?> GetByEmailAsync(string siteUrl,
+                                                                               string userEmail,
+                                                                               Expression<Func<Microsoft.SharePoint.Client.User, object>>[] retrievalExpressions)
+        {
+            _appInfo.IsCancelled();
+
+            _logger.LogTxt(GetType().Name, $"Getting user with email '{userEmail}' from Site '{siteUrl}'");
+
+            var expressions = _retrievalExpressions.Union(retrievalExpressions).ToArray();
+
+            var clientContext = await _appInfo.GetContext(siteUrl);
+
+            try
+            {
+                Microsoft.SharePoint.Client.User user = clientContext.Web.SiteUsers.GetByEmail(userEmail);
+
+                clientContext.Load(user, expressions);
+                clientContext.ExecuteQueryRetry();
+
+                return user;
+            }
+            catch
+            {
+                _logger.LogTxt(GetType().Name, $"User with email '{userEmail}' no found in Site '{siteUrl}'");
+                return null;
+            }
+        }
+
+        internal async Task<UserCollection?> GetAsync(string siteUrl)
+        {
+            _appInfo.IsCancelled();
+
+            var expresions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
+            {
+            };
+
+            return await GetAsync(siteUrl, expresions);
+        }
+
+        internal async Task<UserCollection?> GetAsync(string siteUrl,
+                                                      Expression<Func<Microsoft.SharePoint.Client.User, object>>[] retrievalExpressions)
         {
             _appInfo.IsCancelled();
 
@@ -77,26 +106,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
 
             var clientContext = await _appInfo.GetContext(siteUrl);
 
-            var retrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
-            {
-                u => u.Id,
-                u => u.Title,
-                u => u.LoginName,
-                u => u.UserPrincipalName,
-                u => u.Email,
-                u => u.IsShareByEmailGuestUser,
-                u => u.IsSiteAdmin,
-                u => u.UserId,
-                u => u.IsHiddenInUI,
-                u => u.PrincipalType,
-                u => u.Alerts.Include(
-                    a => a.Title,
-                    a => a.Status),
-                u => u.Groups.Include(
-                    g => g.Id,
-                    g => g.Title,
-                    g => g.LoginName)
-            };
+            var expressions = _retrievalExpressions.Union(retrievalExpressions).ToArray();
 
             try
             {
@@ -110,6 +120,82 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             catch
             {
                 _logger.LogTxt(GetType().Name, $"No users found in this Site");
+                return null;
+            }
+        }
+        
+        internal async Task<List<Microsoft.SharePoint.Client.User>?> GetEXTAsync(string siteUrl,
+                                                                                 Expression<Func<Microsoft.SharePoint.Client.User, object>>[] retrievalExpressions)
+        {
+            _appInfo.IsCancelled();
+
+            _logger.LogTxt(GetType().Name, $"Getting all EXT users from Site '{siteUrl}'");
+
+            var collUsers = await GetAsync(siteUrl, retrievalExpressions);
+
+            List<Microsoft.SharePoint.Client.User> collExtUsers = new() { };
+            if ( collUsers != null)
+            {
+                foreach (var oUser in collUsers)
+                {
+                    if (oUser.LoginName.Contains("#ext#") || oUser.LoginName.Contains("urn:spo:guest") ) { collExtUsers.Add(oUser); }
+                }
+                return collExtUsers;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        internal async Task<Microsoft.SharePoint.Client.User?> GetEveryoneAsync(string siteUrl,
+                                                                                Expression<Func<Microsoft.SharePoint.Client.User, object>>[] retrievalExpressions)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Getting 'Everyone' group from Site '{siteUrl}'");
+
+            var clientContext = await _appInfo.GetContext(siteUrl);
+
+            var expressions = _retrievalExpressions.Union(retrievalExpressions).ToArray();
+
+            try
+            {
+                Microsoft.SharePoint.Client.User user = clientContext.Web.SiteUsers.GetByLoginName("c:0(.s|true");
+
+                clientContext.Load(user, expressions);
+                clientContext.ExecuteQueryRetry();
+
+                return user;
+            }
+            catch
+            {
+                _logger.LogTxt(GetType().Name, $"'Everyone' group no found in Site '{siteUrl}'");
+                return null;
+            }
+        }
+
+        internal async Task<Microsoft.SharePoint.Client.User?> GetEveryoneExceptExternalUsersAsync(string siteUrl,
+                                                                                                   Expression<Func<Microsoft.SharePoint.Client.User, object>>[] retrievalExpressions)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Getting 'Everyone except external users' group from Site '{siteUrl}'");
+
+            var clientContext = await _appInfo.GetContext(siteUrl);
+
+            var expressions = _retrievalExpressions.Union(retrievalExpressions).ToArray();
+
+            try
+            {
+                Microsoft.SharePoint.Client.User user = clientContext.Web.SiteUsers.GetByLoginName($"c:0-.f|rolemanager|spo-grid-all-users/{_appInfo._tenantId}");
+
+                clientContext.Load(user, expressions);
+                clientContext.ExecuteQueryRetry();
+
+                return user;
+            }
+            catch
+            {
+                _logger.LogTxt(GetType().Name, $"'Everyone except external users' group no found in Site '{siteUrl}'");
                 return null;
             }
         }
@@ -127,20 +213,15 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             clientContext.ExecuteQueryRetry();
         }
 
-        // Reference:
-        // https://pnp.github.io/powershell/cmdlets/Remove-PnPUser.html
-        // https://github.com/pnp/powershell/blob/dev/src/Commands/Principals/RemoveUser.cs
-        internal async Task RemoveAsync(string siteUrl, string userUPN)
+        internal async Task RemoveAsync(string siteUrl, Microsoft.SharePoint.Client.User oUser)
         {
             _appInfo.IsCancelled();
 
-            string userLoginName = "i:0#.f|membership|" + userUPN;
-
-            _logger.LogTxt(GetType().Name, $"Removing '{userUPN}', LoginName '{userLoginName}' from Site '{siteUrl}'");
+            _logger.LogTxt(GetType().Name, $"Removing user with LoginName '{oUser.LoginName}' from Site '{siteUrl}'");
 
             var siteContext = await _appInfo.GetContext(siteUrl);
 
-            siteContext.Web.SiteUsers.RemoveByLoginName(userLoginName);
+            siteContext.Web.SiteUsers.RemoveByLoginName(oUser.LoginName);
             siteContext.ExecuteQueryRetry();
         }
     }

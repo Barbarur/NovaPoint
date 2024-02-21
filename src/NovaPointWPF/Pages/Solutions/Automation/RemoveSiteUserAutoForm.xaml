@@ -15,25 +15,13 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <Grid
-                Margin="0, 0, 0, 15">
-
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
-
-                <StackPanel
-                    Margin="12">
-
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="Target user UPN"/>
-
-                    <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding DeleteUserUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                </StackPanel>
-
-            </Grid>
+            <designmaterial:UserForm
+                AllUsers="{Binding AllUsers, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeUserUPN="{Binding TargetUserUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeExternalUsers="{Binding IncludeExternalUsers, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeEveryone="{Binding IncludeEveryone, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeEveryoneExceptExternal="{Binding IncludeEveryoneExceptExternal, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
 
             <designmaterial:AdminForm
                 RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
