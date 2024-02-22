@@ -9,7 +9,16 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
 {
     public class SPORecycleBinItemParameters : SPOTenantSiteUrlsParameters
     {
-        public bool AllItems { get; set; } = false;
+        private bool _allItems;
+        public bool AllItems
+        { 
+            get { return _allItems; }
+            set
+            {
+                _allItems = value;
+                ResetValues();
+            } 
+        }
         public bool FirstStage { get; set; } = true;
         public bool SecondStage { get; set; } = true;
         public DateTime DeletedAfter { get; set; } = DateTime.MinValue;
@@ -31,5 +40,17 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
         public double FileSizeMb { get; set; } = 0;
         public bool FileSizeAbove { get; set; } = true;
         public bool RenameFile { get; set; } = false;
+
+        private void ResetValues()
+        {
+            FirstStage = true;
+            SecondStage = true;
+            DeletedAfter = DateTime.MinValue;
+            DeletedBefore = DateTime.MaxValue;
+            DeletedByEmail = String.Empty;
+            OriginalLocation = String.Empty;
+            FileSizeMb = 0;
+            FileSizeAbove = true;
+        }
     }
 }

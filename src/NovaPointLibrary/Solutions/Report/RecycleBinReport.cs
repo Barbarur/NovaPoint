@@ -57,6 +57,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
             {
+                _appInfo.IsCancelled();
 
                 if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
                 {

@@ -58,8 +58,8 @@ namespace NovaPointLibrary.Solutions.Automation
 
             await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
             {
-                _logger.LogUI(GetType().Name, $"Start processing recycle bin items for '{siteResults.SiteUrl}'");
-
+                _appInfo.IsCancelled();
+                
                 if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
                 {
                     _logger.ReportError("Site", siteResults.SiteUrl, siteResults.ErrorMessage);

@@ -58,8 +58,8 @@ namespace NovaPointLibrary.Solutions.Automation
 
             await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
             {
-                _logger.LogUI(GetType().Name, $"Start processing recycle bin items for '{siteResults.ErrorMessage}'");
-                
+                _appInfo.IsCancelled();
+
                 if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
                 {
                     _logger.ReportError("Site", siteResults.SiteUrl, siteResults.ErrorMessage);
@@ -79,7 +79,12 @@ namespace NovaPointLibrary.Solutions.Automation
                         if(ex.Message.Contains("The attempted operation is prohibited because it exceeds the list view threshold"))
                         {
                             _param.AllItems = false;
-                            _logger.LogUI(GetType().Name, "Recycle bin items cannot be restored in bulk due view threshold limitation. Recycle bin items will be restored individually.");
+                            _logger.LogUI(GetType().Name, "Recycle bin items cannot be restored in bulk due view threshold limitation. Recycle bin items will be restored individually which might take a bit longer to finish.");
+                        }
+                        else if (ex.Message.Contains("rename the existing") && _param.RenameFile)
+                        {
+                            _param.AllItems = false;
+                            _logger.LogUI(GetType().Name, "Recycle bin items cannot be restored in bulk due some files and folders with the same name already existing in the target location. Recycle bin items will be restored individually which might take a bit longer to finish.");
                         }
                         else
                         {
@@ -130,7 +135,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 try
                 {
-                    remarks = await RestoreRenameAsync(new SPORecycleBinItemREST(_logger, _appInfo).RestoreAsync, siteUrl, oRecycleBinItem, _param.RenameFile);
+                    remarks = await RestoreRenameAsync(new SPORecycleBinItemREST(_logger, _appInfo).RestoreAsync, siteUrl, oRecycleBinItem);
                 }
                 catch (Exception ex)
                 {
@@ -152,21 +157,21 @@ namespace NovaPointLibrary.Solutions.Automation
             _logger.LogTxt(GetType().Name, $"Finish processing recycle bin items for '{siteUrl}'");
         }
 
-        private async Task<string> RestoreRenameAsync(Func<string, RecycleBinItem, Task> restore, string siteUrl, RecycleBinItem oRecycleBinItem, bool renameFile)
+        private async Task<string> RestoreRenameAsync(Func<string, RecycleBinItem, Task> restore, string siteUrl, RecycleBinItem oRecycleBinItem)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Processing restoration of item '{oRecycleBinItem.Title}' with id '{oRecycleBinItem.Id}', renaming file '{renameFile}'");
+            _logger.LogTxt(GetType().Name, $"Processing restoration of item '{oRecycleBinItem.Title}' with id '{oRecycleBinItem.Id}', renaming file '{_param.RenameFile}'");
 
-            string IsRestored = $"'{oRecycleBinItem.ItemType}' restored from Recycle bin correctly";
+            string isRestored = $"'{oRecycleBinItem.ItemType}' restored from Recycle bin correctly";
 
             try
             {
                 await restore(siteUrl, oRecycleBinItem);
-                return IsRestored;
+                return isRestored;
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("rename the existing file and try again.") && renameFile)
+                if (ex.Message.Contains("rename the existing") && _param.RenameFile)
                 {
                     if (oRecycleBinItem.ItemType != RecycleBinItemType.File && oRecycleBinItem.ItemType != RecycleBinItemType.Folder)
                     {
@@ -179,7 +184,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     {
                         remarks = await FileRenameAsync(siteUrl, oRecycleBinItem);
                         await restore(siteUrl, oRecycleBinItem);
-                        remarks += " " + IsRestored;
+                        remarks += " " + isRestored;
                         return remarks;
                     }
                     catch (Exception e)
@@ -198,8 +203,7 @@ namespace NovaPointLibrary.Solutions.Automation
         internal async Task<string> FileRenameAsync(string siteUrl, RecycleBinItem oRecycleBinItem)
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}";
-            _logger.LogTxt(methodName, $"Renaming original item {oRecycleBinItem.Title} in {siteUrl}");
+            _logger.LogTxt(GetType().Name, $"Renaming original item {oRecycleBinItem.Title} in {siteUrl}");
 
             string unavailableName = oRecycleBinItem.Title;
             string newName;
@@ -233,8 +237,7 @@ namespace NovaPointLibrary.Solutions.Automation
         internal string GetNewName(string itemName)
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}";
-            _logger.LogTxt(GetType().Name, $"Getting new name for file {itemName}");
+            _logger.LogTxt(GetType().Name, $"Getting new name for item '{itemName}'");
 
             string itemNameOnly = Path.GetFileNameWithoutExtension(itemName);
             var extension = Path.GetExtension(itemName);
@@ -264,9 +267,9 @@ namespace NovaPointLibrary.Solutions.Automation
         internal async Task<bool> IsNameAvailable(string siteUrl, RecycleBinItem oRecycleBinItem, string itemNewTitle)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Check if file with name '{itemNewTitle}' exists in original location");
 
             string itemRelativeUrl = UrlUtility.Combine(oRecycleBinItem.DirName, itemNewTitle);
+            _logger.LogTxt(GetType().Name, $"Check if file with name '{itemRelativeUrl}' exists in original location");
 
             bool exists = true;
 
@@ -278,11 +281,14 @@ namespace NovaPointLibrary.Solutions.Automation
             else if (oRecycleBinItem.ItemType == RecycleBinItemType.Folder)
             {
                 var oFolder = await new SPOFolderCSOM(_logger, _appInfo).GetFolderAsync(siteUrl, itemRelativeUrl);
-                if (oFolder.Exists) { exists = false; }
+                if (oFolder != null) { exists = false; }
+            }
+            else
+            {
+                throw new Exception("This is neither a File or a Folder");
             }
 
             return exists;
-
         }
 
         internal async Task RenameTargetLocationFile(string siteUrl, RecycleBinItem oRecycleBinItem, string newName)
