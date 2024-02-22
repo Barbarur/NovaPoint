@@ -41,7 +41,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 fileServerRelativeUrl = fileServerRelativeUrl.Insert(0, "/");
             }
 
-            var defaultExpressions = new Expression<Func<Microsoft.SharePoint.Client.File, object>>[]
+            var defaultExpressions = new Expression<Func<File, object>>[]
             {
                 f => f.Exists,
                 f => f.Name,

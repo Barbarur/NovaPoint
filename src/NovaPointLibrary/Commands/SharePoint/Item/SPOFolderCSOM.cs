@@ -16,18 +16,17 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             _appInfo = appInfo;
         }
 
-        internal async Task<Folder> GetFolderAsync(string siteUrl, string folderServerRelativeUrl, Expression<Func<Folder, object>>[]? retrievalExpressions = null)
+        internal async Task<Folder?> GetFolderAsync(string siteUrl, string folderServerRelativeUrl, Expression<Func<Folder, object>>[]? retrievalExpressions = null)
         {
             _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}";
-            _logger.LogTxt(methodName, $"Start getting Item '{folderServerRelativeUrl}' from '{siteUrl}'");
+            _logger.LogTxt(GetType().Name, $"Start getting Item '{folderServerRelativeUrl}' from '{siteUrl}'");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
             return GetFolderAsync(clientContext, folderServerRelativeUrl, retrievalExpressions);
         }
 
-        internal Folder GetFolderAsync(ClientContext clientContext, string folderServerRelativeUrl, Expression<Func<Folder, object>>[]? retrievalExpressions = null)
+        internal Folder? GetFolderAsync(ClientContext clientContext, string folderServerRelativeUrl, Expression<Func<Folder, object>>[]? retrievalExpressions = null)
         {
             _appInfo.IsCancelled();
 
@@ -45,11 +44,19 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             };
             if (retrievalExpressions != null) { defaultExpressions = retrievalExpressions.Union(defaultExpressions).ToArray(); }
 
-            Folder oFolder = clientContext.Web.GetFolderByServerRelativeUrl(folderServerRelativeUrl);
-            clientContext.Load(oFolder, defaultExpressions);
-            clientContext.ExecuteQueryRetry();
+            try
+            {
+                Folder oFolder = clientContext.Web.GetFolderByServerRelativeUrl(folderServerRelativeUrl);
+                clientContext.Load(oFolder, defaultExpressions);
+                clientContext.ExecuteQueryRetry();
 
-            return oFolder;
+                return oFolder;
+            }
+            catch
+            {
+                _logger.LogTxt(GetType().Name, $"Folder '{folderServerRelativeUrl}' doesn't exists.");
+                return null;
+            }
         }
 
         internal async Task RenameFolderAsync(string siteUrl, string fileServerRelativeUrl, string newName)
@@ -59,11 +66,19 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
-            Folder oFolder = GetFolderAsync(clientContext, fileServerRelativeUrl);
+            Folder? oFolder = GetFolderAsync(clientContext, fileServerRelativeUrl);
 
-            var targetPath = string.Concat(oFolder.ServerRelativePath.DecodedUrl.Remove(oFolder.ServerRelativePath.DecodedUrl.Length - oFolder.Name.Length), newName);
-            oFolder.MoveToUsingPath(ResourcePath.FromDecodedUrl(targetPath));
-            clientContext.ExecuteQueryRetry();
+            if(oFolder != null)
+            {
+                var targetPath = string.Concat(oFolder.ServerRelativePath.DecodedUrl.Remove(oFolder.ServerRelativePath.DecodedUrl.Length - oFolder.Name.Length), newName);
+                oFolder.MoveToUsingPath(ResourcePath.FromDecodedUrl(targetPath));
+                clientContext.ExecuteQueryRetry();
+
+            }
+            else
+            {
+                throw new Exception($"Folder '{fileServerRelativeUrl}' doesn't exists.");
+            }
         }
     }
 }
