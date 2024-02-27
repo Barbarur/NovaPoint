@@ -56,10 +56,8 @@ namespace NovaPointLibrary.Commands.Authentication
         }
 
         internal string _tenantId { get; set; } = string.Empty;
-        
-        internal string _clientId { get; set; } = string.Empty;
-        
-        internal bool _cachingToken { get; set; } = false;
+        private string _clientId;
+        private bool _cachingToken;
 
         internal CancellationTokenSource CancelTokenSource { get; init; }
         internal CancellationToken CancelToken { get; init; }
@@ -95,7 +93,7 @@ namespace NovaPointLibrary.Commands.Authentication
                                                  .Build();
         }
 
-        public void IsCancelled()
+        internal void IsCancelled()
         {
             if ( CancelToken.IsCancellationRequested ) { CancelToken.ThrowIfCancellationRequested(); }
         }

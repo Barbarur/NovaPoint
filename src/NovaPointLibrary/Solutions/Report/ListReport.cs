@@ -3,7 +3,6 @@ using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Commands.Site;
 using NovaPointLibrary.Solutions.Automation;
 using System;
 using System.Collections.Generic;

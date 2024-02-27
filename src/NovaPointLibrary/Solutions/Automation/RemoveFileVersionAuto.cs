@@ -140,8 +140,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 _logger.LogTxt(GetType().Name, $"Deleting all version '{oItem["FileLeafRef"]}'");
 
                 int numberVersionsToDelete = oItem.Versions.Count - 1;
-                double itemSize = (double)Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2);
-                var versionsDeletedMB = itemSize * numberVersionsToDelete;
+                var versionsDeletedMB = Math.Round((Convert.ToDouble(oItem["File_x0020_Size"]) * numberVersionsToDelete) / Math.Pow(1024, 2), 2);
 
                 if (!_param.ReportMode)
                 {
@@ -196,8 +195,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     }
 
                     int versionsDeletedCount = numberVersionsToDelete - errorsCount;
-                    var itemSize = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2);
-                    var versionsDeletedMB = itemSize * versionsDeletedCount;
+                    var versionsDeletedMB = Math.Round( (Convert.ToDouble(oItem["File_x0020_Size"]) * versionsDeletedCount) / Math.Pow(1024, 2), 2);
 
                     if (errorsCount > 0) { remarks = $"Error while deleting {errorsCount} versions"; }
 

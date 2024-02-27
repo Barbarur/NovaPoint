@@ -1,4 +1,5 @@
-﻿using NovaPointLibrary.Solutions;
+﻿using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
 using System;
 using System.Collections.Generic;
@@ -63,15 +64,8 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-
-            RemoveUserAutoParameters parameters = new()
+            SPOTenantSiteUrlsParameters siteParameters = new()
             {
-                AllUsers = this.AllUsers,
-                TargetUserUPN = this.TargetUserUPN,
-                IncludeExternalUsers = this.IncludeExternalUsers,
-                IncludeEveryone = this.IncludeEveryone,
-                IncludeEveryoneExceptExternal = this.IncludeEveryoneExceptExternal,
-
                 RemoveAdmin = this.RemoveAdmin,
 
                 IncludePersonalSite = this.IncludePersonalSite,
@@ -79,11 +73,30 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 OnlyGroupIdDefined = this.OnlyGroupIdDefined,
                 SiteUrl = this.SiteUrl,
             };
-            //uiLog(LogInfo.ErrorNotification($"AllUsers: {AllUsers}"));
-            //uiLog(LogInfo.ErrorNotification($"TargetUserUPN: {TargetUserUPN}"));
-            //uiLog(LogInfo.ErrorNotification($"IncludeExternalUsers: {IncludeExternalUsers}"));
-            //uiLog(LogInfo.ErrorNotification($"IncludeEveryone: {IncludeEveryone}"));
-            //uiLog(LogInfo.ErrorNotification($"IncludeEveryoneExceptExternal: {IncludeEveryoneExceptExternal}"));
+
+            RemoveUserAutoParameters parameters = new()
+            {
+                //AllUsers = this.AllUsers,
+                //TargetUserUPN = this.TargetUserUPN,
+                //IncludeExternalUsers = this.IncludeExternalUsers,
+                //IncludeEveryone = this.IncludeEveryone,
+                //IncludeEveryoneExceptExternal = this.IncludeEveryoneExceptExternal,
+                UserParameters = this.UserForm.Parameters,
+
+                SiteParameters = siteParameters,
+
+                //RemoveAdmin = this.RemoveAdmin,
+
+                //IncludePersonalSite = this.IncludePersonalSite,
+                //IncludeShareSite = this.IncludeShareSite,
+                //OnlyGroupIdDefined = this.OnlyGroupIdDefined,
+                //SiteUrl = this.SiteUrl,
+            };
+            //uiLog(LogInfo.ErrorNotification($"AllUsers: {UserForm.Parameters.AllUsers}"));
+            //uiLog(LogInfo.ErrorNotification($"TargetUserUPN: {UserForm.Parameters.IncludeUserUPN}"));
+            //uiLog(LogInfo.ErrorNotification($"IncludeExternalUsers: {UserForm.Parameters.IncludeExternalUsers}"));
+            //uiLog(LogInfo.ErrorNotification($"IncludeEveryone: {UserForm.Parameters.IncludeEveryone}"));
+            //uiLog(LogInfo.ErrorNotification($"IncludeEveryoneExceptExternal: {UserForm.Parameters.IncludeEveryoneExceptExternal}"));
             await new RemoveSiteUserAuto(parameters, uiLog, cancelTokenSource).RunAsync();
 
         }

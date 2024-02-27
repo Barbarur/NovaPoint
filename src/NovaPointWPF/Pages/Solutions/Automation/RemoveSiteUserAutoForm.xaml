@@ -15,13 +15,8 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <designmaterial:UserForm
-                AllUsers="{Binding AllUsers, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeUserUPN="{Binding TargetUserUPN, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeExternalUsers="{Binding IncludeExternalUsers, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeEveryone="{Binding IncludeEveryone, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeEveryoneExceptExternal="{Binding IncludeEveryoneExceptExternal, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
+            <designmaterial:UserSiteForm
+                x:Name="UserForm"/>
 
             <designmaterial:AdminForm
                 RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"

@@ -3,7 +3,6 @@ using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.RecycleBin;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Commands.Site;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;

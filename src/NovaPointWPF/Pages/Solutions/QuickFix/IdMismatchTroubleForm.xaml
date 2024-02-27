@@ -19,7 +19,7 @@
 
             <ToggleButton
                 Style="{DynamicResource SolutionFormToggleButton}"
-                Content="Remove Mode"
+                Content="Report Mode"
                 IsChecked="{Binding ReportMode, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 Margin="0, 0, 0, 15"
                 HorizontalAlignment="Left"/>
@@ -27,7 +27,7 @@
 
             <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Admin Account"/>
+                Content="Affected user"/>
 
             <Grid
                 Margin="0, 0, 0, 15">
@@ -39,81 +39,30 @@
 
                     <Label
                         Style="{DynamicResource SolutionFormLabel}"
-                        Content="Admin UPN"/>
-
-                    <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding AdminUpn, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                    <ToggleButton
-                        Style="{DynamicResource SolutionFormToggleButton}"
-                        Content="Remove Admin"
-                        IsChecked="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                        HorizontalAlignment="Left"/>
-
-                </StackPanel>
-
-            </Grid>
-
-
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Solution Scope"/>
-
-
-            <Grid
-                Margin="0, 0, 0, 15">
-
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
-
-                <StackPanel
-                    Margin="12">
-
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="Affected User UPN"/>
+                        Content="User UPN"/>
 
                     <TextBox
                         Style="{DynamicResource SolutionFormTextBox}"
                         Text="{Binding UserUpn, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-                    <StackPanel
-                        x:Name="SiteUrlAffectedTextBox">
-                        
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Affected Site URL"/>
-
-                        <TextBox
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-                        
-                    </StackPanel>
-
-                    <StackPanel
-                        x:Name="SiteUrlCorrectCheckBox"
-                        Visibility="Collapsed">
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Site where user has CORRECT access"/>
-
-                        <TextBox
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                    </StackPanel>
-
-                    <ToggleButton
-                        x:Name="PreventAllSitesCheckBox"
-                        Style="{DynamicResource SolutionFormToggleButton}"
-                        Content="Prevent this issue on all Sites"
-                        IsChecked="{Binding PreventAllSites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                        HorizontalAlignment="Left"
-                        Width="200"/>
-                    
                 </StackPanel>
+
             </Grid>
+
+
+            <designmaterial:AdminForm
+                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                />
+
+            <designmaterial:SiteForm
+                IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+    
+                SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+    
+                SubsitesVisibility="false"
+                />
 
         </StackPanel>
 

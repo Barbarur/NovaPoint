@@ -32,7 +32,6 @@ namespace NovaPointWPF.Pages
         {
             var appSettings = AppSettings.GetSettings();
             if (!appSettings.IsUpdated) { SettingsButton.Background = Brushes.DarkRed; }
-            else { SettingsButton.Background = Brushes.Transparent; }
         }
 
         private void Reports_Click(object sender, RoutedEventArgs e)

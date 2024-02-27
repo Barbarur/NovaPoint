@@ -86,17 +86,6 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             }
         }
 
-        internal async Task<UserCollection?> GetAsync(string siteUrl)
-        {
-            _appInfo.IsCancelled();
-
-            var expresions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
-            {
-            };
-
-            return await GetAsync(siteUrl, expresions);
-        }
-
         internal async Task<UserCollection?> GetAsync(string siteUrl,
                                                       Expression<Func<Microsoft.SharePoint.Client.User, object>>[] retrievalExpressions)
         {
@@ -123,7 +112,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
                 return null;
             }
         }
-        
+
         internal async Task<List<Microsoft.SharePoint.Client.User>?> GetEXTAsync(string siteUrl,
                                                                                  Expression<Func<Microsoft.SharePoint.Client.User, object>>[] retrievalExpressions)
         {
@@ -138,7 +127,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             {
                 foreach (var oUser in collUsers)
                 {
-                    if (oUser.LoginName.Contains("#ext#") || oUser.LoginName.Contains("urn:spo:guest") ) { collExtUsers.Add(oUser); }
+                    if (oUser.LoginName.Contains("#ext#", StringComparison.OrdinalIgnoreCase) || oUser.LoginName.Contains("urn:spo:guest", StringComparison.OrdinalIgnoreCase) ) { collExtUsers.Add(oUser); }
                 }
                 return collExtUsers;
             }
@@ -197,6 +186,63 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             {
                 _logger.LogTxt(GetType().Name, $"'Everyone except external users' group no found in Site '{siteUrl}'");
                 return null;
+            }
+        }
+
+
+        internal async IAsyncEnumerable<Microsoft.SharePoint.Client.User> GetAsync(string siteUrl,
+                                                                                   SPOSiteUserParameters parameters,
+                                                                                   Expression<Func<Microsoft.SharePoint.Client.User, object>>[] retrievalExpressions)
+        {
+            _appInfo.IsCancelled();
+
+            var expressions = _retrievalExpressions.Union(retrievalExpressions).ToArray();
+
+
+            if (parameters.AllUsers)
+            {
+                var collUsers = await GetAsync(siteUrl, expressions);
+
+                if (collUsers != null)
+                {
+                    foreach (Microsoft.SharePoint.Client.User oUser in collUsers)
+                    {
+                        yield return oUser;
+                    }
+                }
+
+                yield break;
+            }
+
+            if (!string.IsNullOrWhiteSpace(parameters.IncludeUserUPN))
+            {
+                var oUser = await GetByEmailAsync(siteUrl, parameters.IncludeUserUPN, expressions);
+
+                if (oUser != null) { yield return oUser; }
+            }
+            if (parameters.IncludeExternalUsers)
+            {
+                var collExtUsers = await GetEXTAsync(siteUrl, expressions);
+
+                if (collExtUsers != null)
+                {
+                    foreach (Microsoft.SharePoint.Client.User oUser in collExtUsers)
+                    {
+                        yield return oUser;
+                    }
+                }
+            }
+            if (parameters.IncludeEveryone)
+            {
+                var oUser = await GetEveryoneAsync(siteUrl, expressions);
+
+                if (oUser != null) { yield return oUser; }
+            }
+            if (parameters.IncludeEveryoneExceptExternal)
+            {
+                var oUser = await GetEveryoneExceptExternalUsersAsync(siteUrl, expressions);
+
+                if (oUser != null) { yield return oUser; }
             }
         }
 

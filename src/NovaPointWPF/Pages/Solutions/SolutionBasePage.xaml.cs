@@ -171,56 +171,6 @@ namespace NovaPointWPF.Pages.Solutions
                 }
             }
 
-
-
-            //if (BoxText.Dispatcher.CheckAccess())
-            //{
-            //    if (!string.IsNullOrEmpty(logInfo.MainClassInfo)) { BoxText.Text = BoxText.Text + logInfo.MainClassInfo + "\n"; }
-            //    if (logInfo.PercentageProgress != -1)
-            //    {
-            //        Progress.Value = logInfo.PercentageProgress;
-            //        PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
-            //        if ( !string.IsNullOrWhiteSpace(logInfo.PendingTime))
-            //        {
-            //            PendingTime.Content = $"{logInfo.PendingTime}";
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    BoxText.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
-            //    new Action(() =>
-            //    {
-            //        if (!string.IsNullOrEmpty(logInfo.SolutionFolder)) { SolutionFolder = logInfo.SolutionFolder; }
-            //        if (!string.IsNullOrEmpty(logInfo.MainClassInfo))
-            //        { 
-            //            //BoxText.Text = BoxText.Text + logInfo.MainClassInfo + "\n";
-            //            BoxText.Inlines.Add(new Run($"{logInfo.MainClassInfo} \n") { Foreground = Brushes.Green });
-            //        }
-
-            //        //Span sp = new();
-            //        //sp.Background = Brushes.Red;
-            //        //sp.TextInput = "Testing text";
-            //        //if (!string.IsNullOrEmpty(logInfo.MainClassInfo)) { BoxText.Text = BoxText.Text + <Span Foreground="Red">"Here"</Span> + "\n"; }
-
-            //        BoxText.Inlines.Add(new Run("text formatting ") { Foreground = Brushes.Blue });
-            //        //BoxText.Inlines.Add()
-
-
-
-
-
-            //        if (logInfo.PercentageProgress != -1)
-            //        {
-            //            Progress.Value = logInfo.PercentageProgress;
-            //            PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
-            //            if (!string.IsNullOrWhiteSpace(logInfo.PendingTime))
-            //            {
-            //                PendingTime.Content = $"{logInfo.PendingTime}";
-            //            }
-            //        }
-            //    }));
-            //}
         }
     }
 }

@@ -74,7 +74,7 @@
                     </StackPanel>
 
 
-                    <StackPanel
+                    <!--<StackPanel
                         Orientation="Vertical"
                         Margin="0,0,0,0">
 
@@ -125,7 +125,7 @@
                         Style="{DynamicResource SolutionFormLabel}"
                         Margin="9,0,0,0"
                         Visibility="Collapsed"
-                        Content="Report sites with 'Everyone'  and 'Everyone except external users'"/>
+                        Content="Report sites with 'Everyone'  and 'Everyone except external users'"/>-->
 
 
                 </StackPanel>

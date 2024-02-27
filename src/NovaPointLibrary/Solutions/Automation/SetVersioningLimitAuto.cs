@@ -6,7 +6,6 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Permision;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Commands.Site;
 using NovaPointLibrary.Solutions.Report;
 using System;
 using System.Collections.Generic;

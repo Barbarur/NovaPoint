@@ -4,6 +4,7 @@ using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Permision;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.User;
+using NovaPointLibrary.Commands.SharePoint.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -31,6 +32,16 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
+        private readonly Expression<Func<Microsoft.SharePoint.Client.User, object>>[] _userRetrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
+        {
+            u => u.Id,
+            u => u.Title,
+            u => u.LoginName,
+            u => u.UserPrincipalName,
+            u => u.Email,
+            u => u.UserId,
+        };
+
         public PermissionsReport(PermissionsReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
             Parameters = parameters;
@@ -56,8 +67,8 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
-            SPOSitePermissionsCSOM sitePermissions = new(_logger, _appInfo, _param);
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
+            SPOSitePermissionsCSOM sitePermissions = new(_logger, _appInfo, _param.PermissionsParameters);
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.PermissionsParameters).GetAsync())
             {
 
                 if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
@@ -66,31 +77,24 @@ namespace NovaPointLibrary.Solutions.Report
                     continue;
                 }
 
-                if(!await IsTargetSite(siteResults.SiteUrl))
+                if (_param.OnlyUserList)
                 {
-                    continue;
-                }
-
-                if (_param.UserListOnly)
-                {
-                    var collUsers = await new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl);
-
-                    if(collUsers != null)
+                    //await UserListOnlyAsync(siteResults);
+                    StringBuilder sb = new();
+                    
+                    await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.UserParameters, _userRetrievalExpressions))
                     {
-                        StringBuilder sb = new();
-                        foreach(var oUser in collUsers)
-                        {
-                            sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
-                        }
-                        AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("Site user List", "", sb.ToString(), "","")));
+                        sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
                     }
-                    else
-                    {
-                        AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("", "", "", "", "No users found in this Site")));
-                    }
+
+                    if (string.IsNullOrWhiteSpace(sb.ToString())) { continue; }
+                    AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("Site user List", "", sb.ToString(), "", "")));
+                
                 }
                 else
                 {
+                    if (!await IsTargetSite(siteResults.SiteUrl)) { continue; }
+
                     try
                     {
                         await foreach(var record in sitePermissions.GetAsync(siteResults.SiteUrl, siteResults.Progress))
@@ -105,54 +109,71 @@ namespace NovaPointLibrary.Solutions.Report
                     }
                 }
             }
-
         }
+
+        //private async Task UserListOnlyAsync(SPOTenantResults siteResults)
+        //{
+        //    StringBuilder sb = new();
+
+        //    //if (_param.UserParameters.AllUsers)
+        //    //{
+        //    //    var collUsers = await new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _retrievalExpressions);
+
+        //    //    if (collUsers != null)
+        //    //    {
+        //    //        foreach (var oUser in collUsers)
+        //    //        {
+        //    //            sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
+        //    //        }
+        //    //        AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("Site user List", "", sb.ToString(), "", "")));
+        //    //    }
+        //    //}
+        //    //else
+        //    //{
+        //    //}
+        //    await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.UserParameters, _retrievalExpressions))
+        //    {
+        //        sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
+        //        AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("Site user List", "", sb.ToString(), "", "")));
+        //    }
+        //}
 
         private async Task<bool> IsTargetSite(string siteUrl)
         {
-            if (!string.IsNullOrWhiteSpace(_param.TargetUPN))
-            {
-                // confirm use for Security Groups
-
-                var oUser = await new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteUrl, _param.TargetUPN);
-                
-                if (oUser != null) { return true; }
-                else { return false; }
-
-            }
-            else if (_param.TargetEveryone)
-            {
-                var retrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
-                {
-                    u => u.Title,
-                };
-
-                var clientContext = await _appInfo.GetContext(siteUrl);
-                var collUsers = clientContext.Web.SiteUsers.Where(u => u.Title.Contains("Everyone", StringComparison.OrdinalIgnoreCase) || u.Title.Contains("Everyone except external users", StringComparison.OrdinalIgnoreCase));
-                clientContext.Load(clientContext.Web.SiteUsers, u => u.Include(retrievalExpressions));
-                clientContext.ExecuteQueryRetry();
-
-                if (collUsers.Any()) { return true; }
-                else { return false; }
-
-            }
-            else
+            if (_param.UserParameters.AllUsers)
             {
                 return true;
             }
+
+            await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteUrl, _param.UserParameters, _userRetrievalExpressions))
+            {
+                return true;
+            }
+
+            return false;
+            
         }
 
         private void FilterRecord(SPOLocationPermissionsRecord record)
         {
-            if (!string.IsNullOrWhiteSpace(_param.TargetUPN) && record._role.Users.Contains(_param.TargetUPN, StringComparison.OrdinalIgnoreCase))
+
+            if (_param.UserParameters.AllUsers)
             {
                 AddRecord(record);
             }
-            if (_param.TargetEveryone && (record._role.AccountType.Contains("Everyone", StringComparison.OrdinalIgnoreCase) || record._role.AccountType.Contains("Everyone except external users", StringComparison.OrdinalIgnoreCase)))
+            else if (!string.IsNullOrWhiteSpace(_param.UserParameters.IncludeUserUPN) && record._role.Users.Contains(_param.UserParameters.IncludeUserUPN, StringComparison.OrdinalIgnoreCase))
             {
                 AddRecord(record);
             }
-            if(string.IsNullOrWhiteSpace(_param.TargetUPN) && !_param.TargetEveryone)
+            else if (_param.UserParameters.IncludeExternalUsers && (record._role.AccountType.Contains("#ext#", StringComparison.OrdinalIgnoreCase) || record._role.AccountType.Contains("urn:spo:guest", StringComparison.OrdinalIgnoreCase)))
+            {
+                AddRecord(record);
+            }
+            else if (_param.UserParameters.IncludeEveryone && record._role.AccountType.Contains("Everyone", StringComparison.OrdinalIgnoreCase))
+            {
+                AddRecord(record);
+            }
+            else if (_param.UserParameters.IncludeEveryoneExceptExternal && record._role.AccountType.Contains("Everyone except external users", StringComparison.OrdinalIgnoreCase))
             {
                 AddRecord(record);
             }
@@ -181,16 +202,10 @@ namespace NovaPointLibrary.Solutions.Report
 
     }
 
-    public class PermissionsReportParameters : SPOSitePermissionsCSOMParameters
+    public class PermissionsReportParameters : ISolutionParameters
     {
-        private string _targetUPN = string.Empty;
-        public string TargetUPN
-        {
-            get { return _targetUPN; }
-            set { _targetUPN = value.Trim(); }
-        }
-        public bool TargetEveryone { get; set; } = false;
-        public bool UserListOnly { get; set; } = false;
-
+        public bool OnlyUserList { get; set; } = false;
+        public SPOSiteUserParameters UserParameters { get; set; } = new();
+        public SPOSitePermissionsCSOMParameters PermissionsParameters { get; set; } = new();
     }
 }

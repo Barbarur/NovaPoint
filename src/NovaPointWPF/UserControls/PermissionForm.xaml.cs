@@ -38,7 +38,13 @@ namespace NovaPointWPF.UserControls
             {
                 _detailedReport = value;
                 if (value) { DetailPanel.Visibility = Visibility.Visible; }
-                else { DetailPanel.Visibility = Visibility.Collapsed; }
+                else
+                {
+                    DetailPanel.Visibility = Visibility.Collapsed;
+                    IncludeAdmins = false;
+                    IncludeSiteAccess = false;
+                    IncludeUniquePermissions = false;
+                }
             }
         }
 
@@ -70,47 +76,47 @@ namespace NovaPointWPF.UserControls
 
 
 
-        private bool _singleUser;
-        public bool SingleUser
-        {
-            get { return _singleUser; }
-            set
-            {
-                _singleUser = value;
-                if (value) { SingleUserTextbox.Visibility = Visibility.Visible; }
-                else
-                {
-                    SingleUserTextbox.Visibility = Visibility.Collapsed;
-                    this.TargetUPN = string.Empty;
-                }
-            }
-        }
-        public string TargetUPN
-        {
-            get { return (string)GetValue(TargetUPNProperty); }
-            set { SetValue(TargetUPNProperty, value); }
-        }
-        public static readonly DependencyProperty TargetUPNProperty =
-            DependencyProperty.Register("TargetUPN", typeof(string), typeof(PermissionForm), new PropertyMetadata(string.Empty));
+        //private bool _singleUser;
+        //public bool SingleUser
+        //{
+        //    get { return _singleUser; }
+        //    set
+        //    {
+        //        _singleUser = value;
+        //        if (value) { SingleUserTextbox.Visibility = Visibility.Visible; }
+        //        else
+        //        {
+        //            SingleUserTextbox.Visibility = Visibility.Collapsed;
+        //            this.TargetUPN = string.Empty;
+        //        }
+        //    }
+        //}
+        //public string TargetUPN
+        //{
+        //    get { return (string)GetValue(TargetUPNProperty); }
+        //    set { SetValue(TargetUPNProperty, value); }
+        //}
+        //public static readonly DependencyProperty TargetUPNProperty =
+        //    DependencyProperty.Register("TargetUPN", typeof(string), typeof(PermissionForm), new PropertyMetadata(string.Empty));
 
-        public bool Everyone
-        {
-            get { return TargetEveryone; }
-            set
-            {
-                if (value) { EveryoneLabel.Visibility = Visibility.Visible; }
-                else { EveryoneLabel.Visibility = Visibility.Collapsed; }
-                TargetEveryone = value;
-            }
-        }
+        //public bool Everyone
+        //{
+        //    get { return TargetEveryone; }
+        //    set
+        //    {
+        //        if (value) { EveryoneLabel.Visibility = Visibility.Visible; }
+        //        else { EveryoneLabel.Visibility = Visibility.Collapsed; }
+        //        TargetEveryone = value;
+        //    }
+        //}
 
-        public bool TargetEveryone
-        {
-            get { return (bool)GetValue(TargetEveryoneProperty); }
-            set { SetValue(TargetEveryoneProperty, value); }
-        }
-        public static readonly DependencyProperty TargetEveryoneProperty =
-            DependencyProperty.Register("TargetEveryone", typeof(bool), typeof(PermissionForm), new FrameworkPropertyMetadata(defaultValue: false));
+        //public bool TargetEveryone
+        //{
+        //    get { return (bool)GetValue(TargetEveryoneProperty); }
+        //    set { SetValue(TargetEveryoneProperty, value); }
+        //}
+        //public static readonly DependencyProperty TargetEveryoneProperty =
+        //    DependencyProperty.Register("TargetEveryone", typeof(bool), typeof(PermissionForm), new FrameworkPropertyMetadata(defaultValue: false));
 
 
 

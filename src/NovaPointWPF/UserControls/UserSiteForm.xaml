@@ -1,0 +1,121 @@
+﻿<UserControl x:Class="NovaPointWPF.UserControls.UserSiteForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NovaPointWPF.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="600"
+             x:Name="root">
+    
+    <Grid Background="Transparent"
+        Margin="0, 0, 0, 15">
+
+        <StackPanel>
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Users and groups"/>
+
+            <Grid>
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <StackPanel
+                        Orientation="Horizontal">
+
+                        <ToggleButton
+                            Content="All users"
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Width="120"
+                            IsChecked="{Binding AllUsers, ElementName=root}"/>
+
+
+                        <ToggleButton
+                            Content="Single User"
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Width="120"
+                            IsChecked="{Binding SingleUser, ElementName=root}"/>
+
+                        <ToggleButton
+                            Content="All guests"
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Width="120"
+                            IsChecked="{Binding IncludeExternalUsers, ElementName=root}"/>
+
+                        <ToggleButton
+                            Content="System group"
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Width="120"
+                            IsChecked="{Binding IncludeSystemGroups, ElementName=root}"/>
+
+                    </StackPanel>
+
+                    <Label
+                        x:Name="AllUsersLabel"
+                        Margin="9,9,0,0"
+                        Visibility="Collapsed"
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Solution will include all users, guest users and groups."/>
+
+                    <StackPanel
+                        x:Name="SingleUserPanel"
+                        Margin="9,9,0,0"
+                        Visibility="Visible">
+
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Target user UPN"/>
+
+                        <TextBox
+                            Style="{DynamicResource SolutionFormTextBox}"
+                            Text="{Binding IncludeUserUPN, ElementName=root}"/>
+
+                    </StackPanel>
+
+                    <Label
+                        x:Name="ExternalLabel"
+                        Margin="9,9,0,0"
+                        Visibility="Collapsed"
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Solution will include all External users."/>
+
+                    <StackPanel
+                        x:Name="SystemGroupPanel"
+                        Margin="9,9,0,0"
+                        Visibility="Collapsed">
+
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Select the system groups"/>
+
+                        <StackPanel
+                            Orientation="Horizontal">
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Width="108"
+                                Content="Everyone"
+                                IsChecked="{Binding IncludeEveryone, ElementName=root}"/>
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Width="240"
+                                Content="Everyone except external users"
+                                IsChecked="{Binding IncludeEveryoneExceptExternal, ElementName=root}"/>
+
+                        </StackPanel>
+
+                    </StackPanel>
+
+                </StackPanel>
+
+            </Grid>
+
+        </StackPanel>
+
+    </Grid>
+</UserControl>

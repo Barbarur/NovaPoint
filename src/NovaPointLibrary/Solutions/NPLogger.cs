@@ -52,19 +52,46 @@ namespace NovaPointLibrary.Solutions
         private void SolutionProperties(ISolutionParameters parameters)
         {
             LogTxt(GetType().Name, $"Solution properties");
+            LogTxt(GetType().Name, $"========== ========== ==========");
 
             parameters.ParametersCheck();
 
-            Type solutiontype = parameters.GetType();
-            PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            LogProperties(parameters);
+            //Type solutiontype = parameters.GetType();
+            //PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-            foreach (var propertyInfo in properties)
+            //foreach (var propertyInfo in properties)
+            //{
+            //    LogTxt(GetType().Name, $"{propertyInfo.Name}: {propertyInfo.GetValue(parameters)}");
+            //}
+
+            LogTxt(GetType().Name, $"========== ========== ==========");
+        }
+
+        private void LogProperties(ISolutionParameters parameters)
+        {
+            Type solutiontype = parameters.GetType();
+            PropertyInfo[] collPropertyInfo = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var propertyInfo in collPropertyInfo)
             {
-                LogTxt(GetType().Name, $"{propertyInfo.Name}: {propertyInfo.GetValue(parameters)}");
+                var oProperty = propertyInfo.GetValue(parameters);
+
+                if (oProperty != null)
+                {
+                    if (typeof(ISolutionParameters).IsAssignableFrom(oProperty.GetType()))
+                    {
+                        LogProperties((ISolutionParameters)oProperty);
+                    }
+                    else
+                    {
+                        LogTxt(GetType().Name, $"{propertyInfo.Name}: {oProperty}");
+                    }
+                }
             }
         }
 
-        
+
         internal void LogTxt(string classMethod, string log)
         {
             using StreamWriter txt = new(new FileStream(_txtPath, FileMode.Append, FileAccess.Write));
@@ -169,20 +196,8 @@ namespace NovaPointLibrary.Solutions
 
         internal void ReportError(string type, string URL, Exception ex)
         {
-            //_uiAddLog(LogInfo.TextNotification($"ERROR for {type} '{URL}'"));
-            //LogTxt(GetType().Name, $"ERROR for {type} '{URL}'");
-            //LogTxt(GetType().Name, $"Exception message: {ex.Message}");
-            //LogTxt(GetType().Name, $"Trace: {ex.StackTrace}");
             ReportError(type, URL, ex.Message, ex.StackTrace);
         }
-
-        //internal void ReportError(string type, string URL, string exceptionMessage)
-        //{
-
-        //    LogUI(GetType().Name, $"Error processing {type} '{URL}'");
-        //    LogTxt(GetType().Name, $"Exception: {exceptionMessage}");
-        //    LogTxt(GetType().Name, $"Trace: {exceptionMessage}");
-        //}
 
         internal void ReportError(string type, string URL, string exMessage, string? exStackTrace = null)
         {
@@ -199,10 +214,10 @@ namespace NovaPointLibrary.Solutions
 
 
         // TO BE DEPRECATED
-        internal void AddLogToTxt(string log)
-        {
-            using StreamWriter txt = new(new FileStream(_txtPath, FileMode.Append, FileAccess.Write));
-            txt.WriteLine($"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} - [Logger.AddLogToTxt] {log}");
-        }
+        //internal void AddLogToTxt(string log)
+        //{
+        //    using StreamWriter txt = new(new FileStream(_txtPath, FileMode.Append, FileAccess.Write));
+        //    txt.WriteLine($"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} - [Logger.AddLogToTxt] {log}");
+        //}
     }
 }

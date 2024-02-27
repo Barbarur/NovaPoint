@@ -15,6 +15,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NovaPointLibrary.Commands.SharePoint.User;
+using NovaPointLibrary.Commands.SharePoint.Permision;
 
 namespace NovaPointWPF.Pages.Solutions.Report
 {
@@ -48,9 +50,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
             }
         }
 
-        public string TargetUPN { get; set; }
-        public bool TargetEveryone { get; set; }
-
         public bool RemoveAdmin { get; set; }
 
         public bool IncludePersonalSite { get; set; }
@@ -81,8 +80,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionDocs = PermissionsReport.s_SolutionDocs;
 
             this.UserListOnly = false;
-            this.TargetUPN = string.Empty;
-            this.TargetEveryone = false;
 
             this.IncludeAdmins = true;
             this.IncludeSiteAccess = true;
@@ -107,17 +104,11 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-
-            PermissionsReportParameters parameters = new()
+            SPOSitePermissionsCSOMParameters permissionsParameters = new()
             {
-                UserListOnly = this.UserListOnly,
-                
                 IncludeAdmins = this.IncludeAdmins,
                 IncludeSiteAccess = this.IncludeSiteAccess,
                 IncludeUniquePermissions = this.IncludeUniquePermissions,
-
-                TargetUPN = this.TargetUPN,
-                TargetEveryone = this.TargetEveryone,
 
                 RemoveAdmin = this.RemoveAdmin,
 
@@ -133,6 +124,34 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 ListTitle = this.ListTitle,
 
                 FolderRelativeUrl = this.FolderRelativeUrl,
+            };
+
+            PermissionsReportParameters parameters = new()
+            {
+                UserParameters = this.UserForm.Parameters,
+
+                OnlyUserList = this.UserListOnly,
+
+                PermissionsParameters = permissionsParameters,
+
+                //IncludeAdmins = this.IncludeAdmins,
+                //IncludeSiteAccess = this.IncludeSiteAccess,
+                //IncludeUniquePermissions = this.IncludeUniquePermissions,
+
+                //RemoveAdmin = this.RemoveAdmin,
+
+                //IncludePersonalSite = this.IncludePersonalSite,
+                //IncludeShareSite = this.IncludeShareSite,
+                //OnlyGroupIdDefined = this.OnlyGroupIdDefined,
+                //SiteUrl = this.SiteUrl,
+
+                //IncludeLists = this.IncludeLists,
+                //IncludeLibraries = this.IncludeLibraries,
+                //IncludeHiddenLists = this.IncludeHiddenLists,
+                //IncludeSystemLists = this.IncludeSystemLists,
+                //ListTitle = this.ListTitle,
+
+                //FolderRelativeUrl = this.FolderRelativeUrl,
             };
 
             await new PermissionsReport(parameters, uiLog, cancelTokenSource).RunAsync();

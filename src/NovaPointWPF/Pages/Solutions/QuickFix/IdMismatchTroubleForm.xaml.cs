@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.QuickFix;
 using System.Threading;
+using NovaPointLibrary.Commands.SharePoint.Site;
 
 namespace NovaPointWPF.Pages.Solutions.QuickFix
 {
@@ -23,32 +24,16 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
     /// </summary>
     public partial class IdMismatchTroubleForm : Page, ISolutionForm
     {
-        public string UserUpn { get; set; }
-        public string SiteUrl { get; set; }
-        public string AdminUpn { get; set; }
-        public bool RemoveAdmin { get; set; }
-        public bool PreventAllSites { get; set; }
-        private bool _reportMode;
-        public bool ReportMode
-        { 
-            get { return _reportMode; }
-            set
-            {
-                _reportMode = value;
-                if (value == true)
-                {
-                    SiteUrlAffectedTextBox.Visibility = Visibility.Collapsed;
-                    SiteUrlCorrectCheckBox.Visibility = Visibility.Visible;
-                    PreventAllSitesCheckBox.IsChecked = true;
-                }
-                else if (value == false)
-                {
-                    SiteUrlAffectedTextBox.Visibility = Visibility.Visible;
-                    SiteUrlCorrectCheckBox.Visibility = Visibility.Collapsed;
-                }
+        public bool ReportMode { get; set; }
 
-            }
-        }
+        public string UserUpn { get; set; }
+        
+        public bool RemoveAdmin { get; set; }
+
+        public bool IncludePersonalSite { get; set; }
+        public bool IncludeShareSite { get; set; }
+        public bool OnlyGroupIdDefined { get; set; }
+        public string SiteUrl { get; set; }
 
         public IdMismatchTroubleForm()
         {
@@ -56,32 +41,39 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
 
             DataContext = this;
 
-            UserUpn = string.Empty;
-            SiteUrl = string.Empty;
-            AdminUpn = string.Empty;
-            RemoveAdmin = true;
-            PreventAllSites = false;
-
-
             SolutionHeader.SolutionTitle = IdMismatchTrouble._solutionName;
             SolutionHeader.SolutionCode = nameof(IdMismatchTrouble);
             SolutionHeader.SolutionDocs = IdMismatchTrouble._solutionDocs;
 
+            this.ReportMode = true;
+
+            this.UserUpn = string.Empty;
+            
+            this.RemoveAdmin = true;
+
+            this.IncludePersonalSite = false;
+            this.IncludeShareSite = true;
+            this.OnlyGroupIdDefined = false;
+            this.SiteUrl = String.Empty;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
+            SPOTenantSiteUrlsParameters siteParameters = new()
+            {
+                RemoveAdmin = this.RemoveAdmin,
 
+                IncludePersonalSite = this.IncludePersonalSite,
+                IncludeShareSite = this.IncludeShareSite,
+                OnlyGroupIdDefined = this.OnlyGroupIdDefined,
+                SiteUrl = this.SiteUrl,
+            };
 
             IdMismatchTroubleParameters parameters = new()
             {
-                UserUpn = this.UserUpn,
-                SiteUrl = this.SiteUrl,
-                AdminUpn = this.AdminUpn,
-                RemoveAdmin = this.RemoveAdmin,
-                PreventAllSites = this.PreventAllSites,
                 ReportMode = this.ReportMode,
-
+                UserUpn = this.UserUpn,
+                SiteParameters = siteParameters,
             };
             await new IdMismatchTrouble(parameters, uiLog, cancelTokenSource).RunAsync();
         }

@@ -5,7 +5,6 @@ using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Commands.Site;
 using System;
 using System.Dynamic;
 using System.Linq.Expressions;

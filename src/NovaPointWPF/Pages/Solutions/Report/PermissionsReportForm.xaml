@@ -21,9 +21,10 @@
                 IncludeAdmins="{Binding IncludeAdmins, Mode=OneWayToSource}"
                 IncludeSiteAccess="{Binding IncludeSiteAccess, Mode=OneWayToSource}"
                 IncludeUniquePermissions="{Binding IncludeUniquePermissions, Mode=OneWayToSource}"
-                TargetUPN="{Binding TargetUPN, Mode=OneWayToSource}"
-                TargetEveryone="{Binding TargetEveryone, Mode=OneWayToSource}"
                 />
+
+            <designmaterial:UserSiteForm
+                x:Name="UserForm"/>
             
             <designmaterial:AdminForm
                 RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
@@ -35,7 +36,6 @@
                 OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 
                 SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                SubsitesVisibility="False"
                 />
 
             <designmaterial:ListForm
