@@ -79,9 +79,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         public SPOSitePermissionsCSOM(NPLogger logger, AppInfo appInfo, SPOSitePermissionsCSOMParameters parameters)
         {
             _param = parameters;
-            _param.ListExpresions = _listExpresions;
-            _param.FileExpresions = _fileExpressions;
-            _param.ItemExpresions = _itemExpressions;
+            _param.ListsParam.ListExpresions = _listExpresions;
+            _param.ItemsParam.FileExpresions = _fileExpressions;
+            _param.ItemsParam.ItemExpresions = _itemExpressions;
             _logger = logger;
             _appInfo = appInfo;
         }
@@ -196,7 +196,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             string failedTry = string.Empty;
             try
             {
-                collLists = await new SPOListCSOM(_logger, _appInfo).GetAsync(oSite.Url, _param);
+                collLists = await new SPOListCSOM(_logger, _appInfo).GetAsync(oSite.Url, _param.ListsParam);
             }
             catch (Exception ex)
             {
@@ -257,7 +257,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             ProgressTracker progress = new(parentProgress, oList.ItemCount);
             try
             {
-                await foreach (ListItem oItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(oSite.Url, oList, _param))
+                await foreach (ListItem oItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(oSite.Url, oList, _param.ItemsParam))
                 {
                     if (oItem.HasUniqueRoleAssignments)
                     {
@@ -285,10 +285,17 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         }
     }
 
-    public class SPOSitePermissionsCSOMParameters : SPOTenantItemsParameters
+    public class SPOSitePermissionsCSOMParameters : ISolutionParameters
     {
         public bool IncludeAdmins { get; set; } = false;
         public bool IncludeSiteAccess { get; set; } = false;
         public bool IncludeUniquePermissions { get; set; } = false;
+        public SPOListsParameters ListsParam { get; set; }
+        public SPOItemsParameters ItemsParam { get; set; }
+        public SPOSitePermissionsCSOMParameters(SPOListsParameters listParam, SPOItemsParameters itemParam)
+        {
+            ListsParam = listParam;
+            ItemsParam = itemParam;
+        }
     }
 }

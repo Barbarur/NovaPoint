@@ -26,21 +26,21 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             _param = parameters;
         }
 
-        internal async IAsyncEnumerable<SPOTenantResults> GetItemsAsync()
-        {
-            _appInfo.IsCancelled();
-            string methodName = $"{GetType().Name}.GetLists";
+        //internal async IAsyncEnumerable<SPOTenantResults> GetItemsAsync()
+        //{
+        //    _appInfo.IsCancelled();
+        //    string methodName = $"{GetType().Name}.GetLists";
 
-            await foreach (SPOTenantResults listResult in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
-            {
-                _appInfo.IsCancelled();
+        //    await foreach (SPOTenantResults listResult in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
+        //    {
+        //        _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(listResult.ErrorMessage))
-                {
-                    yield return listResult;
-                    continue;
-                }
-            }
-        }
+        //        if (!String.IsNullOrWhiteSpace(listResult.ErrorMessage))
+        //        {
+        //            yield return listResult;
+        //            continue;
+        //        }
+        //    }
+        //}
     }
 }

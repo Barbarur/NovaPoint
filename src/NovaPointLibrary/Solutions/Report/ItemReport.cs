@@ -16,7 +16,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionName = "Files and Items report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ItemReport";
 
-        private ItemReportParameters _param = new();
+        private ItemReportParameters _param;
         public ISolutionParameters Parameters
         {
             get { return _param; }
@@ -66,8 +66,8 @@ namespace NovaPointLibrary.Solutions.Report
         public ItemReport(ItemReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
             Parameters = parameters;
-            _param.FileExpresions = _fileExpressions;
-            _param.ItemExpresions = _itemExpressions;
+            _param.ItemsParam.FileExpresions = _fileExpressions;
+            _param.ItemsParam.ItemExpresions = _itemExpressions;
             _logger = new(uiAddLog, this.GetType().Name, parameters);
             _appInfo = new(_logger, cancelTokenSource);
         }
@@ -90,7 +90,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
+            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
@@ -130,7 +130,7 @@ namespace NovaPointLibrary.Solutions.Report
             }
 
             var spoItem = new SPOListItemCSOM(_logger, _appInfo);
-            await foreach (ListItem oItem in spoItem.GetAsync(siteUrl, oList, _param))
+            await foreach (ListItem oItem in spoItem.GetAsync(siteUrl, oList, _param.ItemsParam))
             {
                 _appInfo.IsCancelled();
 
@@ -226,7 +226,16 @@ namespace NovaPointLibrary.Solutions.Report
         }
     }
 
-    public class ItemReportParameters : SPOTenantItemsParameters
+    public class ItemReportParameters : ISolutionParameters
     {
+        public SPOTenantListsParameters TListsParam {  get; set; }
+        public SPOItemsParameters ItemsParam {  get; set; }
+
+        public ItemReportParameters(SPOTenantListsParameters listsParam,
+                                    SPOItemsParameters itemsParam)
+        {
+            TListsParam = listsParam;
+            ItemsParam = itemsParam;
+        }
     }
 }

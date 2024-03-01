@@ -1,8 +1,12 @@
 ﻿using NovaPointLibrary;
+using NovaPointLibrary.Commands.SharePoint.Item;
+using NovaPointLibrary.Commands.SharePoint.RecycleBin;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,10 +21,155 @@ using System.Windows.Shapes;
 
 namespace NovaPointWPF.UserControls
 {
-    public partial class RecycleBinForm : UserControl
+    public partial class RecycleBinForm : UserControl, INotifyPropertyChanged
     {
+        public SPORecycleBinItemParameters Parameters { get; set; } = new();
+
+
         public List<string> listDates = new();
         public List<string> lisHours = new();
+
+
+        private bool _allItems = true;
+        public bool AllItems
+        {
+            get { return _allItems; }
+            set
+            {
+                _allItems = value;
+                Parameters.AllItems = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _filterItems = false;
+        public bool FilterItems
+        {
+            get { return _filterItems; }
+            set
+            {
+                _filterItems = value;
+                if (value) { FilterPanel.Visibility = Visibility.Visible; }
+                else
+                {
+                    FilterPanel.Visibility = Visibility.Collapsed;
+
+                    FirstStage = true;
+                    SecondStage = true;
+
+                    CBAfterDates.SelectedIndex = 0;
+                    CBAfterHour.SelectedIndex = 0;
+                    CBBeforeDates.SelectedIndex = 95;
+                    CBBeforeHour.SelectedIndex = 47;
+
+                    DeletedByEmail = string.Empty;
+                    OriginalLocation = string.Empty;
+                    FileSizeMb = 0;
+                    FileSizeAbove = true;
+
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _firstStage = true;
+        public bool FirstStage
+        {
+            get { return _firstStage; }
+            set
+            {
+                _firstStage = value;
+                Parameters.FirstStage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _secondStage = true;
+        public bool SecondStage
+        {
+            get { return _secondStage; }
+            set
+            {
+                _secondStage = value;
+                Parameters.SecondStage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private DateTime _deletedAfter;
+        public DateTime DeletedAfter
+        {
+            get { return _deletedAfter; }
+            set
+            {
+                _deletedAfter = value;
+                Parameters.DeletedAfter = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+        private DateTime _deletedBefore;
+        public DateTime DeletedBefore
+        {
+            get { return _deletedBefore; }
+            set
+            {
+                _deletedBefore = value;
+                Parameters.DeletedBefore = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _deletedByEmail;
+        public string DeletedByEmail
+        {
+            get { return _deletedByEmail; }
+            set
+            {
+                _deletedByEmail = value;
+                Parameters.DeletedByEmail = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _originalLocation;
+        public string OriginalLocation
+        {
+            get { return _originalLocation; }
+            set
+            {
+                _originalLocation = value;
+                Parameters.OriginalLocation = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int _fileSizeMb;
+        public int FileSizeMb
+        {
+            get { return _fileSizeMb; }
+            set
+            {
+                _fileSizeMb = value;
+                Parameters.FileSizeMb = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _fileSizeAbove = true;
+        public bool FileSizeAbove
+        {
+            get { return _fileSizeAbove; }
+            set
+            {
+                _fileSizeAbove = value;
+                Parameters.FileSizeAbove = value;
+                OnPropertyChanged();
+            }
+        }
+
+
 
         public RecycleBinForm()
         {
@@ -37,8 +186,15 @@ namespace NovaPointWPF.UserControls
             CBAfterHour.SelectedIndex = 0;
             CBBeforeDates.SelectedIndex = 95;
             CBBeforeHour.SelectedIndex = 47;
-            AllItems = true;
-            FilterItems = false;
+            //AllItems = true;
+            //FilterItems = false;
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private void AddDatesHours()
@@ -62,8 +218,8 @@ namespace NovaPointWPF.UserControls
 
         private void DateTimeAfterSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string date = CBAfterDates.SelectedItem as string;
-            string hour = CBAfterHour.SelectedItem as string;
+            string? date = CBAfterDates.SelectedItem as string;
+            string? hour = CBAfterHour.SelectedItem as string;
 
             if (!string.IsNullOrWhiteSpace(date) && !string.IsNullOrWhiteSpace(hour))
             {
@@ -78,8 +234,8 @@ namespace NovaPointWPF.UserControls
 
         private void DateTimeBeforeSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string date = CBBeforeDates.SelectedItem as string;
-            string hour = CBBeforeHour.SelectedItem as string;
+            string? date = CBBeforeDates.SelectedItem as string;
+            string? hour = CBBeforeHour.SelectedItem as string;
 
             if (!string.IsNullOrWhiteSpace(date) && !string.IsNullOrWhiteSpace(hour))
             {
@@ -91,110 +247,6 @@ namespace NovaPointWPF.UserControls
                 DeletedBefore = dateTime;
             }
         }
-
-        public bool AllItems
-        {
-            get { return (bool)GetValue(AllItemsProperty); }
-            set { SetValue(AllItemsProperty, value); }
-        }
-        public static readonly DependencyProperty AllItemsProperty =
-            DependencyProperty.Register("AllItems", typeof(bool), typeof(RecycleBinForm), new FrameworkPropertyMetadata(defaultValue: false));
-
-        private bool _filterItems;
-        public bool FilterItems
-        {
-            get { return _filterItems; }
-            set
-            {
-                _filterItems = value;
-                if (value) { FilterPanel.Visibility = Visibility.Visible; }
-                else
-                {
-                    FilterPanel.Visibility = Visibility.Collapsed;
-
-                    FirstStage = true;
-                    SecondStage = true;
-
-                    CBAfterDates.SelectedIndex = 0;
-                    CBAfterHour.SelectedIndex = 0;
-                    CBBeforeDates.SelectedIndex = 95;
-                    CBBeforeHour.SelectedIndex = 47;
-
-                    DeletedByEmail = string.Empty;
-                    OriginalLocation = string.Empty;
-                    FileSizeMb = 0;
-                }
-            }
-        }
-
-        public bool FirstStage
-        {
-            get { return (bool)GetValue(FirstStageProperty); }
-            set { SetValue(FirstStageProperty, value); }
-        }
-
-        public static readonly DependencyProperty FirstStageProperty =
-            DependencyProperty.Register("FirstStage", typeof(bool), typeof(RecycleBinForm), new FrameworkPropertyMetadata(defaultValue: true));
-
-        public bool SecondStage
-        {
-            get { return (bool)GetValue(SecondStageProperty); }
-            set { SetValue(SecondStageProperty, value); }
-        }
-        public static readonly DependencyProperty SecondStageProperty =
-            DependencyProperty.Register("SecondStage", typeof(bool), typeof(RecycleBinForm), new FrameworkPropertyMetadata(defaultValue: false));
-
-
-
-        public DateTime DeletedAfter
-        {
-            get { return (DateTime)GetValue(DeletedAfterProperty); }
-            set { SetValue(DeletedAfterProperty, value); }
-        }
-        public static readonly DependencyProperty DeletedAfterProperty =
-            DependencyProperty.Register("DeletedAfter", typeof(DateTime), typeof(RecycleBinForm), new FrameworkPropertyMetadata(defaultValue: DateTime.UtcNow));
-
-        public DateTime DeletedBefore
-        {
-            get { return (DateTime)GetValue(DeletedBeforeProperty); }
-            set { SetValue(DeletedBeforeProperty, value); }
-        }
-        public static readonly DependencyProperty DeletedBeforeProperty =
-            DependencyProperty.Register("DeletedBefore", typeof(DateTime), typeof(RecycleBinForm), new FrameworkPropertyMetadata(defaultValue: DateTime.UtcNow));
-
-
-
-        public string DeletedByEmail
-        {
-            get { return (string)GetValue(DeletedByEmailProperty); }
-            set { SetValue(DeletedByEmailProperty, value); }
-        }
-        public static readonly DependencyProperty DeletedByEmailProperty =
-            DependencyProperty.Register("DeletedByEmail", typeof(string), typeof(RecycleBinForm), new PropertyMetadata(string.Empty));
-
-        public string OriginalLocation
-        {
-            get { return (string)GetValue(OriginalLocationProperty); }
-            set { SetValue(OriginalLocationProperty, value); }
-        }
-        public static readonly DependencyProperty OriginalLocationProperty =
-            DependencyProperty.Register("OriginalLocation", typeof(string), typeof(RecycleBinForm), new PropertyMetadata(string.Empty));
-
-        public int FileSizeMb
-        {
-            get { return (int)GetValue(FileSizeMbProperty); }
-            set { SetValue(FileSizeMbProperty, value); }
-        }
-        public static readonly DependencyProperty FileSizeMbProperty =
-            DependencyProperty.Register("FileSizeMb", typeof(int), typeof(RecycleBinForm), new PropertyMetadata(0));
-
-        public bool FileSizeAbove
-        {
-            get { return (bool)GetValue(FileSizeAboveProperty); }
-            set { SetValue(FileSizeAboveProperty, value); }
-        }
-        public static readonly DependencyProperty FileSizeAboveProperty =
-            DependencyProperty.Register("FileSizeAbove", typeof(bool), typeof(RecycleBinForm), new FrameworkPropertyMetadata(defaultValue: true));
 
     }
 }

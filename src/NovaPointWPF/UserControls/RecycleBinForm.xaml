@@ -46,7 +46,8 @@
 
                     <StackPanel
                         x:Name="FilterPanel"
-                        Margin="9,9,9,0">
+                        Margin="9,9,9,0"
+                        Visibility="Collapsed">
 
                         <Label
                             Style="{DynamicResource SolutionFormLabel}"

@@ -21,20 +21,15 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionName = "Delete items from recycle bin";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-ClearRecycleBinAuto";
 
-        private ClearRecycleBinAutoParameters _param = new();
-        public ISolutionParameters Parameters
-        {
-            get { return _param; }
-            set { _param = (ClearRecycleBinAutoParameters)value; }
-        }
+        private ClearRecycleBinAutoParameters _param;
 
         private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
 
         public ClearRecycleBinAuto(ClearRecycleBinAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            Parameters = parameters;
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
+            _param = parameters;
+            _logger = new(uiAddLog, this.GetType().Name, _param);
             _appInfo = new(_logger, cancelTokenSource);
         }
 
@@ -56,7 +51,7 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _appInfo.IsCancelled();
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
             {
                 _appInfo.IsCancelled();
                 
@@ -67,7 +62,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     continue;
                 }
 
-                if (_param.AllItems)
+                if (_param.RecycleBinParam.AllItems)
                 {
                     try
                     {
@@ -77,7 +72,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     {
                         if (ex.Message.Contains("The attempted operation is prohibited because it exceeds the list view threshold"))
                         {
-                            _param.AllItems = false;
+                            _param.RecycleBinParam.AllItems = false;
                             _logger.LogUI(GetType().Name, "Recycle bin cannot be cleared in bulk due view threshold limitation. Recycle bin items will be deleted individually.");
                         }
                         else
@@ -88,7 +83,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     }
                 }
 
-                if (!_param.AllItems)
+                if (!_param.RecycleBinParam.AllItems)
                 {
                     try
                     {
@@ -121,7 +116,7 @@ namespace NovaPointLibrary.Solutions.Automation
             int itemCounter = 0;
             int itemExpectedCount = 5000;
             var spoRecycleBinItem = new SPORecycleBinItemCSOM(_logger, _appInfo);
-            await foreach (RecycleBinItem oRecycleBinItem in spoRecycleBinItem.GetAsync(siteUrl, _param))
+            await foreach (RecycleBinItem oRecycleBinItem in spoRecycleBinItem.GetAsync(siteUrl, _param.RecycleBinParam))
             {
                 _appInfo.IsCancelled();
 
@@ -180,7 +175,15 @@ namespace NovaPointLibrary.Solutions.Automation
         }
     }
 
-    public class ClearRecycleBinAutoParameters : SPORecycleBinItemParameters
+    public class ClearRecycleBinAutoParameters : ISolutionParameters
     {
+        public SPORecycleBinItemParameters RecycleBinParam { get; set; }
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam { get; set; }
+        public ClearRecycleBinAutoParameters(SPORecycleBinItemParameters recycleBinParam,
+                                             SPOTenantSiteUrlsWithAccessParameters siteAccParam)
+        {
+            RecycleBinParam = recycleBinParam;
+            SiteAccParam = siteAccParam;
+        }
     }
 }

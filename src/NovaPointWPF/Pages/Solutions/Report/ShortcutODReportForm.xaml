@@ -19,8 +19,7 @@
             <StackPanel>
 
                 <designmaterial:AdminForm
-                    RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                    />
+                    x:Name="AdminF"/>
 
                 <Label
                     Style="{DynamicResource MenuSectionTitleLabel}"
@@ -37,13 +36,14 @@
 
                             <RadioButton
                                 Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="All Sites"
-                                IsChecked="{Binding SiteAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                                Content="All OneDrive"
+                                IsChecked="{Binding AllSiteCollections, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                                 DockPanel.Dock="Left"/>
 
                             <RadioButton
                                 Style="{DynamicResource SolutionFormToggleButton}"
                                 Content="Single Site"
+                                IsChecked="True"
                                 DockPanel.Dock="Left"/>
 
                             <TextBlock
@@ -54,7 +54,7 @@
 
                         <StackPanel
                             x:Name="SingleSiteUrl"
-                            Visibility="Collapsed"
+                            Visibility="Visible"
                             Margin="9, 0, 0, 0">
 
                             <Label
@@ -75,11 +75,14 @@
 
             </StackPanel>
 
-            <designmaterial:ItemForm
+            <designmaterial:ItemTenantForm
+                x:Name="ItemForm"
+                FilterTarget="Library"/>
+            <!--<designmaterial:ItemForm
                 FilterTarget="Library"
                 ItemsAll="{Binding ItemsAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
+                />-->
 
         </StackPanel>
 

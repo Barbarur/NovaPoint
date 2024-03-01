@@ -23,51 +23,51 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         }
 
         // TO BE DEPRECATED
-        internal async IAsyncEnumerable<SPOTenantResults> GetListsAsync()
-        {
-            _appInfo.IsCancelled();
+        //internal async IAsyncEnumerable<SPOTenantResults> GetListsAsync()
+        //{
+        //    _appInfo.IsCancelled();
 
-            await foreach (SPOTenantResults siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
-            {
+        //    await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+        //    {
 
-                if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
-                {
-                    yield return siteResults;
-                    continue;
-                }
+        //        if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
+        //        {
+        //            yield return siteResults;
+        //            continue;
+        //        }
 
-                SPOTenantResults? errorResults = null;
-                List<Microsoft.SharePoint.Client.List>? collList = null;
-                try
-                {
-                    collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param);
-                }
-                catch (Exception ex)
-                {
-                    _logger.ReportError("Site", siteResults.SiteUrl, ex);
+        //        SPOTenantResults? errorResults = null;
+        //        List<Microsoft.SharePoint.Client.List>? collList = null;
+        //        try
+        //        {
+        //            collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.ListParam);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            _logger.ReportError("Site", siteResults.SiteUrl, ex);
 
-                    errorResults = new(siteResults.Progress, siteResults.SiteUrl, siteResults.SiteName);
-                    errorResults.ErrorMessage = ex.Message;
-                }
+        //            errorResults = new(siteResults.Progress, siteResults.SiteUrl, siteResults.SiteName);
+        //            errorResults.ErrorMessage = ex.Message;
+        //        }
 
-                if (errorResults != null)
-                {
-                    yield return errorResults;
-                }
-                else if (collList != null)
-                {
-                    ProgressTracker progress = new(siteResults.Progress, collList.Count);
-                    foreach (var oList in collList)
-                    {
-                        _logger.LogTxt(GetType().Name, $"Processing {oList.BaseType} '{oList.Title}'");
-                        SPOTenantResults results = new(progress, siteResults.SiteUrl, oList);
-                        yield return results;
+        //        if (errorResults != null)
+        //        {
+        //            yield return errorResults;
+        //        }
+        //        else if (collList != null)
+        //        {
+        //            ProgressTracker progress = new(siteResults.Progress, collList.Count);
+        //            foreach (var oList in collList)
+        //            {
+        //                _logger.LogTxt(GetType().Name, $"Processing {oList.BaseType} '{oList.Title}'");
+        //                SPOTenantResults results = new(progress, siteResults.SiteUrl, oList);
+        //                yield return results;
 
-                        progress.ProgressUpdateReport();
-                    }
-                }
-            }
-        }
+        //                progress.ProgressUpdateReport();
+        //            }
+        //        }
+        //    }
+        //}
 
 
 
@@ -75,7 +75,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         {
             _appInfo.IsCancelled();
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsyncNEW())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsyncNEW())
             {
 
                 if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
@@ -94,7 +94,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 List<Microsoft.SharePoint.Client.List>? collList = null;
                 try
                 {
-                    collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param);
+                    collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.ListParam);
                 }
                 catch (Exception ex)
                 {

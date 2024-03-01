@@ -21,7 +21,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionName = "Libraries and Lists report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ListReport";
 
-        private ListReportParameters _param = new();
+        private ListReportParameters _param;
         public ISolutionParameters Parameters
         {
             get { return _param; }
@@ -58,7 +58,7 @@ namespace NovaPointLibrary.Solutions.Report
         public ListReport(ListReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
             Parameters = parameters;
-            _param.ListExpresions = _listExpresions;
+            _param.TListsParam.ListParam.ListExpresions = _listExpresions;
             _logger = new(uiAddLog, this.GetType().Name, parameters);
             _appInfo = new(_logger, cancelTokenSource);
         }
@@ -81,7 +81,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
+            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
@@ -218,8 +218,12 @@ namespace NovaPointLibrary.Solutions.Report
         }
     }
 
-    public class ListReportParameters : SPOTenantListsParameters
+    public class ListReportParameters : ISolutionParameters
     {
-
+        public SPOTenantListsParameters TListsParam {  get; set; }
+        public ListReportParameters(SPOTenantListsParameters tenantListsParam)
+        {
+            TListsParam = tenantListsParam;
+        }
     }
 }

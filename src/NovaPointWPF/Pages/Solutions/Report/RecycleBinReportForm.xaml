@@ -16,20 +16,24 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
+            <designmaterial:RecycleBinForm
+                x:Name="RecycleF"/>
+            
             <designmaterial:AdminForm
-                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
+                x:Name="AdminF"/>
 
-            <designmaterial:SiteForm
+            <designmaterial:SiteTenantForm
+                x:Name="SiteF"/>
+            <!--<designmaterial:SiteForm
                 IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 
                 SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 SubsitesVisibility="False"
-                />
+                />-->
 
-            <designmaterial:RecycleBinForm
+            <!--<designmaterial:RecycleBinForm
                 AllItems="{Binding FirstStage, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 
                 FirstStage="{Binding FirstStage, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
@@ -42,7 +46,7 @@
                 OriginalLocation="{Binding OriginalLocation, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 FileSizeMb="{Binding FileSizeMb, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 FileSizeAbove="{Binding FileSizeAbove, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
+                />-->
 
         </StackPanel>
 

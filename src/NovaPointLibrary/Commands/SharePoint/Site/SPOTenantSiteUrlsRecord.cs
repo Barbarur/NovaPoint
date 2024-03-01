@@ -1,6 +1,7 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
+using PnP.Core.Model.SharePoint;
 using System;
 using System.Collections.Generic;
 using System.Linq;

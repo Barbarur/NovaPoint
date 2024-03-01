@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Automation"
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="900" d:DesignWidth="600"
+      d:DesignHeight="1200" d:DesignWidth="600"
       Title="CheckInFileAutoForm">
 
     <Grid Background="Transparent">
@@ -24,14 +24,14 @@
                 HorizontalAlignment="Left"/>
 
             <Label
-            Style="{DynamicResource MenuSectionTitleLabel}"
-            Content="Check in action"/>
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Check in action"/>
 
             <Grid
-            Margin="0, 0, 0, 15">
+                Margin="0, 0, 0, 15">
 
                 <Border
-                Style="{DynamicResource MenuBackgroudBorder}"/>
+                    Style="{DynamicResource MenuBackgroudBorder}"/>
 
                 <StackPanel
                     Margin="12">
@@ -81,32 +81,40 @@
             </Grid>
 
             <designmaterial:AdminForm
-                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-            />
+                x:Name="AdminF"/>
 
-            <designmaterial:SiteForm
+            <designmaterial:SiteTenantForm
+                x:Name="SiteF"/>
+            <!--<designmaterial:SiteForm
                 IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
             
                 SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-            />
+            />-->
 
-            <designmaterial:ListForm
+            <designmaterial:ListTenantForm
+                x:Name="ListForm"
+                FilterTarget="Library"
+                ListsFilterVisibility="False"/>
+            <!--<designmaterial:ListForm
                 FilterTarget="Library"
                 ListsFilterVisibility="false"
                 IncludeHiddenLists="{Binding IncludeHiddenLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeSystemLists="{Binding IncludeSystemLists, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
 
                 ListTitle="{Binding ListTitle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
+                />-->
 
-            <designmaterial:ItemForm
+            <designmaterial:ItemTenantForm
+                x:Name="ItemForm"
+                FilterTarget="Library"/>
+            <!--<designmaterial:ItemForm
                 FilterTarget="Library"
                 ItemsAll="{Binding ItemsAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
+                />-->
 
         </StackPanel>
 

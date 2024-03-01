@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
+using NovaPointLibrary.Commands.SharePoint.Site;
 using System.Dynamic;
 using System.Linq.Expressions;
 
@@ -13,7 +14,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionName = "OneDrive shortcut report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ShortcutODReport";
 
-        private ShortcutODReportParameters _param = new();
+        private ShortcutODReportParameters _param;
         public ISolutionParameters Parameters
         {
             get { return _param; }
@@ -38,12 +39,15 @@ namespace NovaPointLibrary.Solutions.Report
         public ShortcutODReport(ShortcutODReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
             Parameters = parameters;
-            _param.IncludePersonalSite = true;
-            _param.IncludeShareSite = false;
-            _param.OnlyGroupIdDefined = false;
-            _param.IncludeSubsites = false;
-            _param.ListTitle = "Documents";
-            _param.FileExpresions = _fileExpressions;
+            _param.TListsParam.SiteAccParam.SiteParam.IncludePersonalSite = true;
+            _param.TListsParam.SiteAccParam.SiteParam.IncludeShareSite = false;
+            _param.TListsParam.SiteAccParam.SiteParam.OnlyGroupIdDefined = false;
+            _param.TListsParam.SiteAccParam.SiteParam.IncludeSubsites = false;
+            _param.TListsParam.ListParam.AllLists= false;
+            _param.TListsParam.ListParam.IncludeLists = false;
+            _param.TListsParam.ListParam.IncludeLibraries = false;
+            _param.TListsParam.ListParam.ListTitle = "Documents";
+            _param.ItemsParam.FileExpresions = _fileExpressions;
 
             _logger = new(uiAddLog, this.GetType().Name, parameters);
             _appInfo = new(_logger, cancelTokenSource);
@@ -68,7 +72,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
+            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
@@ -110,7 +114,7 @@ namespace NovaPointLibrary.Solutions.Report
             if (oList.BaseType != BaseType.DocumentLibrary) { return; }
 
             ProgressTracker progress = new(parentProgress, oList.ItemCount);
-            await foreach (ListItem oItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(siteUrl, oList, _param))
+            await foreach (ListItem oItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(siteUrl, oList, _param.ItemsParam))
             {
                 _appInfo.IsCancelled();
 
@@ -157,7 +161,16 @@ namespace NovaPointLibrary.Solutions.Report
         }
     }
 
-    public class ShortcutODReportParameters : SPOTenantItemsParameters, ISolutionParameters
+    public class ShortcutODReportParameters : ISolutionParameters
     {
+        public SPOTenantListsParameters TListsParam {  get; set; }
+        public SPOItemsParameters ItemsParam {  get; set; }
+
+        public ShortcutODReportParameters(SPOTenantListsParameters listsParameters,
+                                          SPOItemsParameters itemsParameters)
+        {
+            TListsParam = listsParameters;
+            ItemsParam = itemsParameters;
+        }
     }
 }

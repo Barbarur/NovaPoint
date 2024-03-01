@@ -12,8 +12,6 @@ namespace NovaPointLibrary.Solutions
         public static readonly string s_SolutionName = "Solution";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/";
 
-        public ISolutionParameters Parameters { get; set; }
-
         public async Task RunAsync()
         {
         }

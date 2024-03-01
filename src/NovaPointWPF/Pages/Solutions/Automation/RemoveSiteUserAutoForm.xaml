@@ -16,13 +16,14 @@
                 x:Name="SolutionHeader"/>
 
             <designmaterial:UserSiteForm
-                x:Name="UserForm"/>
+                x:Name="UserF"/>
 
             <designmaterial:AdminForm
-                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
+                x:Name="AdminF"/>
 
-            <designmaterial:SiteForm
+            <designmaterial:SiteTenantForm
+                x:Name="SiteF"/>
+            <!--<designmaterial:SiteForm
                 IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
@@ -30,7 +31,7 @@
                 SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 
                 SubsitesVisibility="false"
-                />
+                />-->
 
         </StackPanel>
     </Grid>

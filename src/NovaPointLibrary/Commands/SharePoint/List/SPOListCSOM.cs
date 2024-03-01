@@ -29,7 +29,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
 
         internal async Task<List<Microsoft.SharePoint.Client.List>> GetAsync(string siteUrl,
-                                                                             SPOTenantListsParameters parameters)
+                                                                             SPOListsParameters parameters)
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.Get";
@@ -52,15 +52,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
-            if (!String.IsNullOrWhiteSpace(parameters.ListTitle))
-            {
-                Microsoft.SharePoint.Client.List list = clientContext.Web.GetListByTitle(parameters.ListTitle, expressions);
-                List<Microsoft.SharePoint.Client.List> collList = new() { list };
-
-                _logger.LogTxt(GetType().Name, $"Collected list '{parameters.ListTitle}'");
-                return collList;
-            }
-            else
+            if (parameters.AllLists)
             {
                 ListCollection collList = clientContext.Web.Lists;
                 clientContext.Load(collList, l => l.Include(expressions));
@@ -89,6 +81,44 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
                 return finalCollList;
             }
+
+            else
+            {
+                Microsoft.SharePoint.Client.List list = clientContext.Web.GetListByTitle(parameters.ListTitle, expressions);
+                List<Microsoft.SharePoint.Client.List> collList = new() { list };
+
+                _logger.LogTxt(GetType().Name, $"Collected list '{parameters.ListTitle}'");
+                return collList;
+            }
+            //else
+            //{
+            //    ListCollection collList = clientContext.Web.Lists;
+            //    clientContext.Load(collList, l => l.Include(expressions));
+            //    clientContext.ExecuteQuery();
+
+            //    _logger.LogTxt(methodName, $"Finish getting Lists: {collList.Count}");
+
+            //    List<Microsoft.SharePoint.Client.List> finalCollList = new();
+            //    foreach (Microsoft.SharePoint.Client.List oList in collList)
+            //    {
+            //        if (!parameters.IncludeHiddenLists && oList.Hidden == true) { continue; }
+
+            //        if (!parameters.IncludeSystemLists && oList.IsSystemList) { continue; }
+
+            //        if (!parameters.IncludeLibraries && oList.BaseType == BaseType.DocumentLibrary) { continue; }
+
+            //        if (!parameters.IncludeLists && oList.BaseType == BaseType.GenericList) { continue; }
+
+            //        // Excluded, User information can be retrieved Web.SiteUser
+            //        if (oList.Title == "User Information List") { continue; }
+
+            //        finalCollList.Add(oList);
+            //    }
+
+            //    _logger.LogTxt(methodName, $"Finish filtering lists: {finalCollList.Count}");
+
+            //    return finalCollList;
+            //}
         }
     }
 }

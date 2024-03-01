@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NovaPointLibrary.Commands.SharePoint.Site;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,14 +26,18 @@ namespace NovaPointWPF.UserControls
             InitializeComponent();
         }
 
+        public SPOTenantSiteUrlsWithAccessParameters Parameters { get; set; } = new();
+
+        private bool _removeAdmin = true;
         public bool RemoveAdmin
         {
-            get { return (bool)GetValue(RemoveAdminProperty); }
-            set { SetValue(RemoveAdminProperty, value); }
+            get { return _removeAdmin; }
+            set
+            {
+                _removeAdmin = value;
+                Parameters.RemoveAdmin = value;
+            }
         }
-        public static readonly DependencyProperty RemoveAdminProperty =
-            DependencyProperty.Register("RemoveAdmin", typeof(bool), typeof(AdminForm), new FrameworkPropertyMetadata(defaultValue: true));
-
 
     }
 }

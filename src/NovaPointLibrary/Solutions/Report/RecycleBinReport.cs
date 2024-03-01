@@ -20,20 +20,14 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionName = "Recycle bin report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-RecycleBinReport";
 
-        private RecycleBinReportParameters _param = new();
-        public ISolutionParameters Parameters
-        {
-            get { return _param; }
-            set { _param = (RecycleBinReportParameters)value; }
-        }
-
+        private RecycleBinReportParameters _param;
         private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
 
         public RecycleBinReport(RecycleBinReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            Parameters = parameters;
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
+            _param = parameters;
+            _logger = new(uiAddLog, this.GetType().Name, _param);
             _appInfo = new(_logger, cancelTokenSource);
         }
 
@@ -55,7 +49,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
@@ -85,7 +79,7 @@ namespace NovaPointLibrary.Solutions.Report
             int itemCounter = 0;
             int itemExpectedCount = 5000;
             var spoRecycleBinItem = new SPORecycleBinItemCSOM(_logger, _appInfo);
-            await foreach (RecycleBinItem oRecycleBinItem in spoRecycleBinItem.GetAsync(siteUrl, _param))
+            await foreach (RecycleBinItem oRecycleBinItem in spoRecycleBinItem.GetAsync(siteUrl, _param.RecycleBinParam))
             {
                 _appInfo.IsCancelled();
 
@@ -129,7 +123,15 @@ namespace NovaPointLibrary.Solutions.Report
         }
     }
 
-    public class RecycleBinReportParameters : SPORecycleBinItemParameters, ISolutionParameters
+    public class RecycleBinReportParameters : ISolutionParameters
     {
+        public SPORecycleBinItemParameters RecycleBinParam { get; set; }
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam { get; set; }
+        public RecycleBinReportParameters(SPORecycleBinItemParameters recycleBinParam,
+                                          SPOTenantSiteUrlsWithAccessParameters siteAccParam)
+        {
+            RecycleBinParam = recycleBinParam;
+            SiteAccParam = siteAccParam;
+        }
     }
 }

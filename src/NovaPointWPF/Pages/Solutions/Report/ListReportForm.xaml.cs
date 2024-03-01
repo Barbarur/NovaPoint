@@ -1,6 +1,9 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.SharePoint.List;
+using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Report;
+using NovaPointWPF.UserControls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
@@ -25,19 +28,19 @@ namespace NovaPointWPF.Pages.Solutions.Report
     /// </summary>
     public partial class ListReportForm : Page, ISolutionForm
     {
-        public bool RemoveAdmin { get; set; }
+        //public bool RemoveAdmin { get; set; }
 
-        public bool IncludePersonalSite { get; set; }
-        public bool IncludeShareSite { get; set; }
-        public bool OnlyGroupIdDefined { get; set; }
-        public string SiteUrl { get; set; }
-        public bool IncludeSubsites { get; set; }
+        //public bool IncludePersonalSite { get; set; }
+        //public bool IncludeShareSite { get; set; }
+        //public bool OnlyGroupIdDefined { get; set; }
+        //public string SiteUrl { get; set; }
+        //public bool IncludeSubsites { get; set; }
 
-        public bool IncludeLists { get; set; }
-        public bool IncludeLibraries { get; set; }
-        public bool IncludeHiddenLists { get; set; }
-        public bool IncludeSystemLists { get; set; }
-        public string ListTitle { get; set; }
+        //public bool IncludeLists { get; set; }
+        //public bool IncludeLibraries { get; set; }
+        //public bool IncludeHiddenLists { get; set; }
+        //public bool IncludeSystemLists { get; set; }
+        //public string ListTitle { get; set; }
 
 
         public ListReportForm()
@@ -50,39 +53,68 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionCode = nameof(ListReport);
             SolutionHeader.SolutionDocs = ListReport.s_SolutionDocs;
 
-            this.RemoveAdmin = true;
+            //this.RemoveAdmin = true;
 
-            this.IncludePersonalSite = false;
-            this.IncludeShareSite = true;
-            this.OnlyGroupIdDefined = false;
-            this.SiteUrl = String.Empty;
-            this.IncludeSubsites = false;
+            //this.IncludePersonalSite = false;
+            //this.IncludeShareSite = true;
+            //this.OnlyGroupIdDefined = false;
+            //this.SiteUrl = String.Empty;
+            //this.IncludeSubsites = false;
 
-            this.IncludeLists = true;
-            this.IncludeLibraries = true;
-            this.IncludeHiddenLists = false;
-            this.IncludeSystemLists = false;
-            this.ListTitle = String.Empty;
+            //this.IncludeLists = true;
+            //this.IncludeLibraries = true;
+            //this.IncludeHiddenLists = false;
+            //this.IncludeSystemLists = false;
+            //this.ListTitle = String.Empty;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            ListReportParameters parameters = new()
-            {
-                RemoveAdmin = this.RemoveAdmin,
+            //ListReportParameters parameters = new()
+            //{
+            //    RemoveAdmin = this.RemoveAdmin,
 
-                IncludePersonalSite = this.IncludePersonalSite,
-                IncludeShareSite = this.IncludeShareSite,
-                OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-                SiteUrl = this.SiteUrl,
-                IncludeSubsites = this.IncludeSubsites,
+            //    IncludePersonalSite = this.IncludePersonalSite,
+            //    IncludeShareSite = this.IncludeShareSite,
+            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
+            //    SiteUrl = this.SiteUrl,
+            //    IncludeSubsites = this.IncludeSubsites,
 
-                IncludeLists = this.IncludeLists,
-                IncludeLibraries = this.IncludeLibraries,
-                IncludeHiddenLists = this.IncludeHiddenLists,
-                IncludeSystemLists = this.IncludeSystemLists,
-                ListTitle = this.ListTitle,
-            };
+            //    IncludeLists = this.IncludeLists,
+            //    IncludeLibraries = this.IncludeLibraries,
+            //    IncludeHiddenLists = this.IncludeHiddenLists,
+            //    IncludeSystemLists = this.IncludeSystemLists,
+            //    ListTitle = this.ListTitle,
+            //};
+
+
+            //SPOTenantSiteUrlsParameters tSiteParam = new()
+            //{
+            //    IncludePersonalSite = this.IncludePersonalSite,
+            //    IncludeShareSite = this.IncludeShareSite,
+            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
+            //    SiteUrl = this.SiteUrl,
+            //    IncludeSubsites = this.IncludeSubsites,
+            //};
+
+            //var listParameters = ListForm.Parameters;
+
+            //SPOTenantListsParameters tListParam = new(tSiteParam, listParameters);
+
+            //ListReportParameters parameters = new(tListParam);
+
+            //await new ListReport(parameters, uiLog, cancelTokenSource).RunAsync();
+
+
+            var siteAccParam = AdminF.Parameters;
+            var siteParam = SiteF.Parameters;
+            siteAccParam.SiteParam = siteParam;
+
+            var listParameters = ListForm.Parameters;
+
+            SPOTenantListsParameters tListParam = new(siteAccParam, listParameters);
+
+            ListReportParameters parameters = new(tListParam);
 
             await new ListReport(parameters, uiLog, cancelTokenSource).RunAsync();
         }

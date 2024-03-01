@@ -85,7 +85,8 @@ namespace NovaPointLibrary.Solutions
                     }
                     else
                     {
-                        LogTxt(GetType().Name, $"{propertyInfo.Name}: {oProperty}");
+                        //LogTxt(GetType().Name, $"{propertyInfo.Name}: {oProperty}");
+                        LogUI(GetType().Name, $"{propertyInfo.Name}: {oProperty}");
                     }
                 }
             }

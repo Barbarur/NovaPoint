@@ -1,0 +1,110 @@
+﻿<UserControl x:Class="NovaPointWPF.UserControls.SiteTenantForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NovaPointWPF.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="600"
+             x:Name="root">
+    
+    <Grid Background="Transparent"
+      Margin="0, 0, 0, 15">
+
+        <StackPanel>
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Sites filter"/>
+
+            <Grid>
+
+                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                   Margin="12">
+
+                    <DockPanel
+                       Margin="0,0,0,9">
+
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="All Sites"
+                            IsChecked="{Binding AllSiteCollections, ElementName=root}"
+                            DockPanel.Dock="Left"/>
+
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Single Site"
+                            IsChecked="{Binding SingleSite, ElementName=root}"
+                            DockPanel.Dock="Left"/>
+
+                        <ToggleButton
+                        x:Name="SubsiteToggleButton"
+                        Style="{DynamicResource SolutionFormToggleButton}"
+                        Content="Include Subsites"
+                        IsChecked="{Binding IncludeSubsites, ElementName=root}"
+                        DockPanel.Dock="Right"
+                        Visibility="Visible"/>
+
+                        <TextBlock
+                        DockPanel.Dock="Left"
+                        Height="Auto"/>
+
+                    </DockPanel>
+
+                    <StackPanel
+                        x:Name="AllSitesFilter"
+                        Visibility="Collapsed"
+                        Margin="9, 0, 0, 0">
+
+                        <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Sites to Include"/>
+
+                        <StackPanel
+                        Orientation="Horizontal">
+
+                            <ToggleButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Include OneDrive"
+                            IsChecked="{Binding IncludePersonalSite, ElementName=root}"/>
+
+                            <ToggleButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Include Sites"
+                            IsChecked="{Binding IncludeShareSite, ElementName=root}"/>
+
+                            <ToggleButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Only Teams Sites"
+                            IsChecked="{Binding OnlyGroupIdDefined, ElementName=root}"/>
+
+                        </StackPanel>
+
+                    </StackPanel>
+
+                    <StackPanel
+                    x:Name="SingleSiteUrl"
+                    Visibility="Visible"
+                    Margin="9, 0, 0, 0">
+
+                        <Label
+                        Style="{DynamicResource SolutionFormLabel}"
+                        Content="Site URL"/>
+
+                        <TextBox
+                        x:Name="SiteUrlTextBox"
+                        Style="{DynamicResource SolutionFormTextBox}"
+                        Text="{Binding SiteUrl, ElementName=root}"/>
+
+                    </StackPanel>
+
+                </StackPanel>
+
+            </Grid>
+
+        </StackPanel>
+
+    </Grid>
+</UserControl>

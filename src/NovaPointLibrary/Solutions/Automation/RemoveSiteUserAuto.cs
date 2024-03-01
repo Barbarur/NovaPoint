@@ -21,7 +21,7 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionName = "Remove user from Site";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSiteUserAuto";
 
-        private RemoveUserAutoParameters _param = new();
+        private RemoveUserAutoParameters _param;
         public ISolutionParameters Parameters
         {
             get { return _param; }
@@ -42,7 +42,7 @@ namespace NovaPointLibrary.Solutions.Automation
         public RemoveSiteUserAuto(RemoveUserAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
             Parameters = parameters;
-            _param.SiteParameters.IncludeSubsites = false;
+            _param.SiteAccParam.SiteParam.IncludeSubsites = false;
 
             _logger = new(uiAddLog, this.GetType().Name, parameters);
             _appInfo = new(_logger, cancelTokenSource);
@@ -66,7 +66,7 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _appInfo.IsCancelled();
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteParameters).GetAsyncNEW())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsyncNEW())
             {
                 _appInfo.IsCancelled();
 
@@ -103,7 +103,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             }
 
-            await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteUrl, _param.UserParameters, _userRetrievalExpressions))
+            await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteUrl, _param.UserParam, _userRetrievalExpressions))
             {
                 _appInfo.IsCancelled();
 
@@ -239,12 +239,19 @@ namespace NovaPointLibrary.Solutions.Automation
 
     public class RemoveUserAutoParameters : ISolutionParameters
     {
-        public SPOSiteUserParameters UserParameters { get; set; } = new();
-        public SPOTenantSiteUrlsParameters SiteParameters { get; set; } = new();
+        public SPOSiteUserParameters UserParam {  get; set; }
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam {  get; set; }
         //public bool AllUsers { get; set; } = true;
         //public string TargetUserUPN { get; set; } = string.Empty;
         //public bool IncludeExternalUsers { get; set; } = false;
         //public bool IncludeEveryone { get; set; } = false;
         //public bool IncludeEveryoneExceptExternal { get; set; } = false;
+
+        public RemoveUserAutoParameters(SPOSiteUserParameters userParam,
+                                        SPOTenantSiteUrlsWithAccessParameters siteParam)
+        {
+            UserParam = userParam;
+            SiteAccParam = siteParam;
+        }
     }
 }

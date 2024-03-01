@@ -3,6 +3,7 @@ using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.RecycleBin;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Commands.SharePoint.User;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -18,7 +19,7 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionName = "Add or Remove user as Admin";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-SetSiteCollectionAdminAuto";
 
-        private SetSiteCollectionAdminAutoParameters _param = new();
+        private SetSiteCollectionAdminAutoParameters _param;
         public ISolutionParameters Parameters
         {
             get { return _param; }
@@ -54,11 +55,11 @@ namespace NovaPointLibrary.Solutions.Automation
             _appInfo.IsCancelled();
 
             ProgressTracker progress;
-            if (!String.IsNullOrWhiteSpace(_param.SiteUrl))
+            if (!String.IsNullOrWhiteSpace(_param.SiteParam.SiteUrl))
             {
                 progress = new(_logger, 1);
 
-                Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
+                Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.SiteUrl);
 
                 await SetAdmin(oSite.Url);
 
@@ -66,7 +67,7 @@ namespace NovaPointLibrary.Solutions.Automation
             }
             else
             {
-                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
+                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.SiteUrl, _param.SiteParam.IncludeShareSite, _param.SiteParam.IncludePersonalSite, _param.SiteParam.OnlyGroupIdDefined);
 
                 progress = new(_logger, collSiteCollections.Count);
                 foreach (var oSiteCollection in collSiteCollections)
@@ -115,7 +116,7 @@ namespace NovaPointLibrary.Solutions.Automation
         }
     }
 
-    public class SetSiteCollectionAdminAutoParameters : SPOTenantSiteUrlsParameters
+    public class SetSiteCollectionAdminAutoParameters : ISolutionParameters
     {
         private string _targetUserUPN = string.Empty;
         public string TargetUserUPN
@@ -126,5 +127,10 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public bool IsSiteAdmin { get; set; } = false;
 
+        public SPOTenantSiteUrlsParameters SiteParam { get; set; }
+        public SetSiteCollectionAdminAutoParameters(SPOTenantSiteUrlsParameters siteParam)
+        {
+            SiteParam = siteParam;
+        }
     }
 }

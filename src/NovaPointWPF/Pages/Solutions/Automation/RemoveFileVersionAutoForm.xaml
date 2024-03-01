@@ -80,28 +80,36 @@
             </Grid>
 
             <designmaterial:AdminForm
-                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
+                x:Name="AdminF"/>
 
-            <designmaterial:SiteForm
+            <designmaterial:SiteTenantForm
+                x:Name="SiteF"/>
+            <!--<designmaterial:SiteForm
                 IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 
                 SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeSubsites="{Binding IncludeSubsites, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
+                />-->
 
-            <designmaterial:ListForm
+            <designmaterial:ListTenantForm
+                x:Name="ListForm"
+                FilterTarget="Library"
+                ListsFilterVisibility="False"/>
+            <!--<designmaterial:ListForm
                 FilterTarget="Library"
                 ListTitle="{Binding ListTitle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 ListsFilterVisibility="False"
-                />
+                />-->
 
-            <designmaterial:ItemForm
+            <designmaterial:ItemTenantForm
+                x:Name="ItemForm"
+                FilterTarget="Library"/>
+            <!--<designmaterial:ItemForm
                 FilterTarget="Library"
                 ItemsAll="{Binding ItemsAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>-->
 
         </StackPanel>
 

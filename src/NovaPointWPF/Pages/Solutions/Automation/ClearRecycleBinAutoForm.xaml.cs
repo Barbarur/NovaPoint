@@ -1,6 +1,7 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
+using NovaPointLibrary.Solutions.Report;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,25 +62,34 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            ClearRecycleBinAutoParameters parameters = new()
-            {
-                RemoveAdmin = this.RemoveAdmin,
+            //ClearRecycleBinAutoParameters parameters = new()
+            //{
+            //    RemoveAdmin = this.RemoveAdmin,
 
-                IncludePersonalSite = this.IncludePersonalSite,
-                IncludeShareSite = this.IncludeShareSite,
-                OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-                SiteUrl = this.SiteUrl,
+            //    IncludePersonalSite = this.IncludePersonalSite,
+            //    IncludeShareSite = this.IncludeShareSite,
+            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
+            //    SiteUrl = this.SiteUrl,
 
-                AllItems = this.AllItems,
-                FirstStage = this.FirstStage,
-                SecondStage = this.SecondStage,
-                DeletedAfter = this.DeletedAfter,
-                DeletedBefore = this.DeletedBefore,
-                DeletedByEmail = this.DeletedByEmail,
-                OriginalLocation = this.OriginalLocation,
-                FileSizeMb = this.FileSizeMb,
-                FileSizeAbove = this.FileSizeAbove,
-            };
+            //    AllItems = this.AllItems,
+            //    FirstStage = this.FirstStage,
+            //    SecondStage = this.SecondStage,
+            //    DeletedAfter = this.DeletedAfter,
+            //    DeletedBefore = this.DeletedBefore,
+            //    DeletedByEmail = this.DeletedByEmail,
+            //    OriginalLocation = this.OriginalLocation,
+            //    FileSizeMb = this.FileSizeMb,
+            //    FileSizeAbove = this.FileSizeAbove,
+            //};
+
+            //await new ClearRecycleBinAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+
+
+            var siteAccParam = AdminF.Parameters;
+            var siteParam = SiteF.Parameters;
+            siteAccParam.SiteParam = siteParam;
+
+            ClearRecycleBinAutoParameters parameters = new(RecycleF.Parameters, siteAccParam);
 
             await new ClearRecycleBinAuto(parameters, uiLog, cancelTokenSource).RunAsync();
         }

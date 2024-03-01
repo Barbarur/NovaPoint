@@ -1,4 +1,6 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.SharePoint.List;
+using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
 using NovaPointLibrary.Solutions.Report;
@@ -26,22 +28,34 @@ namespace NovaPointWPF.Pages.Solutions.Automation
     /// </summary>
     public partial class RemoveFileVersionAutoForm : Page, ISolutionForm
     {
-        public bool RemoveAdmin { get; set; }
+        //public bool RemoveAdmin { get; set; }
 
-        public bool IncludePersonalSite { get; set; }
-        public bool IncludeShareSite { get; set; }
-        public bool OnlyGroupIdDefined { get; set; }
-        public string SiteUrl { get; set; }
-        public bool IncludeSubsites { get; set; }
+        //public bool IncludePersonalSite { get; set; }
+        //public bool IncludeShareSite { get; set; }
+        //public bool OnlyGroupIdDefined { get; set; }
+        //public string SiteUrl { get; set; }
+        //public bool IncludeSubsites { get; set; }
 
-        public string ListTitle { get; set; }
+        //public string ListTitle { get; set; }
 
 
-        public bool ItemsAll { get; set; }
-        public string FolderRelativeUrl { get; set; }
+        //public bool ItemsAll { get; set; }
+        //public string FolderRelativeUrl { get; set; }
 
         public bool DeleteAll { get; set; }
         public int VersionsToKeep { get; set; }
+
+        private bool _keepVersions;
+        public bool KeepVersions
+        {
+            get { return _keepVersions; }
+            set
+            {
+                _keepVersions = value;
+                if (value) { KeepVersionsForm.Visibility = Visibility.Visible; }
+                else { KeepVersionsForm.Visibility = Visibility.Collapsed; }
+            }
+        }
         public bool Recycle { get; set; }
 
         public bool ReportMode { get; set; }
@@ -57,18 +71,18 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             SolutionHeader.SolutionCode = nameof(RemoveFileVersionAuto);
             SolutionHeader.SolutionDocs = RemoveFileVersionAuto.s_SolutionDocs;
 
-            this.RemoveAdmin = true;
+            //this.RemoveAdmin = true;
 
-            this.IncludePersonalSite = false;
-            this.IncludeShareSite = true;
-            this.OnlyGroupIdDefined = false;
-            this.SiteUrl = String.Empty;
-            this.IncludeSubsites = false;
+            //this.IncludePersonalSite = false;
+            //this.IncludeShareSite = true;
+            //this.OnlyGroupIdDefined = false;
+            //this.SiteUrl = String.Empty;
+            //this.IncludeSubsites = false;
 
-            this.ListTitle = String.Empty;
+            //this.ListTitle = String.Empty;
 
-            this.ItemsAll = true;
-            this.FolderRelativeUrl = String.Empty;
+            //this.ItemsAll = true;
+            //this.FolderRelativeUrl = String.Empty;
 
             this.DeleteAll = false;
             this.KeepVersions = true;
@@ -81,21 +95,74 @@ namespace NovaPointWPF.Pages.Solutions.Automation
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
 
-            RemoveFileVersionAutoParameters parameters = new()
+            //RemoveFileVersionAutoParameters parameters = new()
+
+            //{
+            //    RemoveAdmin = this.RemoveAdmin,
+
+            //    IncludePersonalSite = this.IncludePersonalSite,
+            //    IncludeShareSite = this.IncludeShareSite,
+            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
+            //    SiteUrl = this.SiteUrl,
+            //    IncludeSubsites = this.IncludeSubsites,
+
+            //    ListTitle = this.ListTitle,
+
+            //    FolderRelativeUrl = this.FolderRelativeUrl,
+
+            //    DeleteAll = this.DeleteAll,
+            //    VersionsToKeep = this.VersionsToKeep,
+            //    Recycle = this.Recycle,
+
+            //    ReportMode = this.ReportMode,
+            //};
+
+            //SPOTenantSiteUrlsParameters tSiteParam = new()
+            //{
+            //    IncludePersonalSite = this.IncludePersonalSite,
+            //    IncludeShareSite = this.IncludeShareSite,
+            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
+            //    SiteUrl = this.SiteUrl,
+            //    IncludeSubsites = this.IncludeSubsites,
+            //};
+
+            //var listParameters = ListForm.Parameters;
+
+            //SPOTenantListsParameters tListParam = new(tSiteParam, listParameters);
+
+            //var itemParameters = ItemForm.Parameters;
+
+
+            //RemoveFileVersionAutoParameters parameters = new(tListParam, itemParameters)
+
+            //{
+            //    DeleteAll = this.DeleteAll,
+            //    VersionsToKeep = this.VersionsToKeep,
+            //    Recycle = this.Recycle,
+
+            //    ReportMode = this.ReportMode,
+            //};
+
+            //await new RemoveFileVersionAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+
+
+
+
+
+
+
+
+
+
+            var siteAccParam = AdminF.Parameters;
+            var siteParam = SiteF.Parameters;
+            siteAccParam.SiteParam = siteParam;
+
+            SPOTenantListsParameters tListParam = new(siteAccParam, ListForm.Parameters);
+
+            RemoveFileVersionAutoParameters parameters = new(tListParam, ItemForm.Parameters)
 
             {
-                RemoveAdmin = this.RemoveAdmin,
-
-                IncludePersonalSite = this.IncludePersonalSite,
-                IncludeShareSite = this.IncludeShareSite,
-                OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-                SiteUrl = this.SiteUrl,
-                IncludeSubsites = this.IncludeSubsites,
-
-                ListTitle = this.ListTitle,
-
-                FolderRelativeUrl = this.FolderRelativeUrl,
-
                 DeleteAll = this.DeleteAll,
                 VersionsToKeep = this.VersionsToKeep,
                 Recycle = this.Recycle,
@@ -106,16 +173,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             await new RemoveFileVersionAuto(parameters, uiLog, cancelTokenSource).RunAsync();
         }
 
-        private bool _keepVersions;
-        public bool KeepVersions
-        {
-            get { return _keepVersions; }
-            set
-            {
-                _keepVersions = value;
-                if (value) { KeepVersionsForm.Visibility = Visibility.Visible; }
-                else { KeepVersionsForm.Visibility = Visibility.Collapsed; }
-            }
-        }
+
     }
 }

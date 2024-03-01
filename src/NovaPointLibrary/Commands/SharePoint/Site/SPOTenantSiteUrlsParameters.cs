@@ -9,10 +9,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     public class SPOTenantSiteUrlsParameters : ISolutionParameters
     {
-        public bool RemoveAdmin { get; set; } = false;
-
+        public bool AllSiteCollections { get; set; } = false;
         public bool IncludePersonalSite { get; set; } = false;
-        public bool IncludeShareSite { get; set; } = true;
+        public bool IncludeShareSite { get; set; } = false;
         public bool OnlyGroupIdDefined { get; set; } = false;
 
         private string _siteUrl = string.Empty;
@@ -24,8 +23,5 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
         public bool IncludeSubsites { get; set; } = false;
 
-        internal void ParametersCheck()
-        {
-        }
     }
 }

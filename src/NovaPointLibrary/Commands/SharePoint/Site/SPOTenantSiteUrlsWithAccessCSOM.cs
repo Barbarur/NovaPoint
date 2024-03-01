@@ -16,14 +16,77 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
     {
         private readonly NPLogger _logger;
         private readonly Authentication.AppInfo _appInfo;
-        private readonly SPOTenantSiteUrlsParameters _param;
+        private readonly SPOTenantSiteUrlsWithAccessParameters _param;
 
-        internal SPOTenantSiteUrlsWithAccessCSOM(NPLogger logger, Authentication.AppInfo appInfo, SPOTenantSiteUrlsParameters parameters)
+        internal SPOTenantSiteUrlsWithAccessCSOM(NPLogger logger, Authentication.AppInfo appInfo, SPOTenantSiteUrlsWithAccessParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;
             _param = parameters;
         }
+
+        //internal async IAsyncEnumerable<SPOTenantSiteUrlsRecord> GetAsyncALL(SPOTenantSiteUrlsParameters parameters)
+        //{
+        //    _appInfo.IsCancelled();
+
+        //    GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetSignedInUser();
+        //    string adminUPN = signedInUser.UserPrincipalName;
+
+        //    await foreach (var resultSiteCollection in new SPOTenantSitesURLsCSOM(_logger, _appInfo, _param).GetAsync())
+        //    {
+        //        _appInfo.IsCancelled();
+        //        _logger.LogUI(GetType().Name, $"Processing Site '{resultSiteCollection.SiteUrl}'");
+
+        //        if()
+
+        //        try
+        //        {
+        //            await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(resultSiteCollection.SiteUrl, adminUPN);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            _logger.ReportError("Site", resultSiteCollection.SiteUrl, ex);
+
+        //            resultSiteCollection.ErrorMessage = ex.Message;
+        //        }
+
+        //        yield return resultSiteCollection;
+
+
+        //        if (string.IsNullOrWhiteSpace(resultSiteCollection.ErrorMessage)) { continue; }
+
+
+        //        if (_param.IncludeSubsites)
+        //        {
+        //            await foreach (var subsite in GetSubsitesAsyncNEW(resultSiteCollection))
+        //            {
+        //                _logger.LogUI(GetType().Name, $"Processing Site '{subsite.SiteUrl}'");
+        //                yield return subsite;
+        //            }
+        //        }
+
+
+        //        if (_param.RemoveAdmin)
+        //        {
+        //            try
+        //            {
+        //                await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(resultSiteCollection.SiteUrl, adminUPN);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                _logger.ReportError("Site", resultSiteCollection.SiteUrl, ex);
+
+        //                resultSiteCollection.ErrorMessage = ex.Message;
+
+        //            }
+        //            if (!string.IsNullOrWhiteSpace(resultSiteCollection.ErrorMessage))
+        //            {
+        //                yield return resultSiteCollection;
+        //            }
+        //        }
+        //    }
+        //}
+
 
         // TO BE DEPRECATED
         private async IAsyncEnumerable<SPOTenantResults> GetSiteCollectionsAsync()
@@ -32,9 +95,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _logger.LogTxt(GetType().Name, $"Getting Site Collections");
 
             ProgressTracker progress;
-            if (!String.IsNullOrWhiteSpace(_param.SiteUrl))
+            if (!String.IsNullOrWhiteSpace(_param.SiteParam.SiteUrl))
             {
-                Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
+                Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.SiteUrl);
 
                 progress = new(_logger, 1);
                 SPOTenantResults results = new(progress, oSite.Url, oSite.Title);
@@ -44,7 +107,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             }
             else
             {
-                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
+                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.SiteUrl, _param.SiteParam.IncludeShareSite, _param.SiteParam.IncludePersonalSite, _param.SiteParam.OnlyGroupIdDefined);
 
                 progress = new(_logger, collSiteCollections.Count);
                 foreach (var oSiteCollection in collSiteCollections)
@@ -125,7 +188,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 if (string.IsNullOrWhiteSpace(resultSiteCollection.ErrorMessage)) { continue; }
 
 
-                if (_param.IncludeSubsites)
+                if (_param.SiteParam.IncludeSubsites)
                 {
                     await foreach (SPOTenantResults subsite in GetSubsitesAsync(resultSiteCollection))
                     {
@@ -167,9 +230,23 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _logger.LogTxt(GetType().Name, $"Getting Site Collections");
 
             ProgressTracker progress;
-            if (!String.IsNullOrWhiteSpace(_param.SiteUrl))
+
+            if (_param.SiteParam.AllSiteCollections)
             {
-                Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl);
+                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.SiteUrl, _param.SiteParam.IncludeShareSite, _param.SiteParam.IncludePersonalSite, _param.SiteParam.OnlyGroupIdDefined);
+
+                progress = new(_logger, collSiteCollections.Count);
+                foreach (var oSiteCollection in collSiteCollections)
+                {
+                    yield return new SPOTenantSiteUrlsRecord(progress, oSiteCollection);
+
+                    progress.ProgressUpdateReport();
+                }
+
+            }
+            else if (!String.IsNullOrWhiteSpace(_param.SiteParam.SiteUrl))
+            {
+                Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.SiteUrl);
 
                 progress = new(_logger, 1);
 
@@ -177,18 +254,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
                 progress.ProgressUpdateReport();
             }
-            else
-            {
-                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
 
-                progress = new(_logger, collSiteCollections.Count);
-                foreach (var oSiteCollection in collSiteCollections)
-                {
-                    yield return new SPOTenantSiteUrlsRecord(progress, oSiteCollection);
-                    
-                    progress.ProgressUpdateReport();
-                }
-            }
         }
 
         private async IAsyncEnumerable<SPOTenantSiteUrlsRecord> GetSubsitesAsyncNEW(SPOTenantSiteUrlsRecord siteCollectionResult)
@@ -262,7 +328,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 if (string.IsNullOrWhiteSpace(resultSiteCollection.ErrorMessage)) { continue; }
 
 
-                if (_param.IncludeSubsites)
+                if (_param.SiteParam.IncludeSubsites)
                 {
                     await foreach (var subsite in GetSubsitesAsyncNEW(resultSiteCollection))
                     {

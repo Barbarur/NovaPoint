@@ -4,6 +4,7 @@ using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.AzureAD;
 using NovaPointLibrary.Commands.SharePoint.Item;
+using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Permision;
 using NovaPointLibrary.Commands.SharePoint.RecycleBin;
 using NovaPointLibrary.Commands.SharePoint.Site;
@@ -26,7 +27,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionName = "Site Collections & Subsites report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-SiteReport";
 
-        private SiteReportParameters _param = new();
+        private SiteReportParameters _param;
         public ISolutionParameters Parameters
         {
             get { return _param; }
@@ -56,19 +57,18 @@ namespace NovaPointLibrary.Solutions.Report
         public SiteReport(SiteReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
             Parameters = parameters;
-            _param.IncludeSiteAccess = false;
-            _param.IncludeUniquePermissions = false;
+            _param.PermissionsParam.IncludeSiteAccess = false;
+            _param.PermissionsParam.IncludeUniquePermissions = false;
 
             _logger = new(uiAddLog, this.GetType().Name, parameters);
             _appInfo = new(_logger, cancelTokenSource);
-            _sitePermissions = new(_logger, _appInfo, _param);
+            _sitePermissions = new(_logger, _appInfo, _param.PermissionsParam);
         }
 
         public async Task RunAsync()
         {
             try
             {
-                
                 await RunScriptAsync();
 
                 _logger.ScriptFinish();
@@ -86,7 +86,7 @@ namespace NovaPointLibrary.Solutions.Report
             GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetSignedInUser();
             string adminUPN = signedInUser.UserPrincipalName;
 
-            List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
+            List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SitesAccParam.SiteParam.SiteUrl, _param.SitesAccParam.SiteParam.IncludeShareSite, _param.SitesAccParam.SiteParam.IncludePersonalSite, _param.SitesAccParam.SiteParam.OnlyGroupIdDefined);
 
             ProgressTracker progress = new(_logger, collSiteCollections.Count);
             foreach (var oSiteCollection in collSiteCollections)
@@ -110,7 +110,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
 
                 var recordSiteCollection = await GetSiteCollectionRecord(oSiteCollection);
-                if (_param.IncludeAdmins)
+                if (_param.PermissionsParam.IncludeAdmins)
                 {
                     await foreach (var admins in _sitePermissions.GetAsync(oSiteCollection.Url, progress))
                     {
@@ -123,7 +123,7 @@ namespace NovaPointLibrary.Solutions.Report
                     _logger.RecordCSV(recordSiteCollection);
                 }
 
-                if (_param.IncludeSubsites)
+                if (_param.SitesAccParam.SiteParam.IncludeSubsites)
                 {
                     try
                     {
@@ -197,7 +197,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task RemoveAdmin(string siteUrl, string adminUPN)
         {
-            if (NeedAccess() && _param.RemoveAdmin)
+            if (NeedAccess() && _param.SitesAccParam.RemoveAdmin)
             {
                 await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(siteUrl, adminUPN);
             }
@@ -205,7 +205,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private bool NeedAccess()
         {
-            if (_param.Detailed || _param.IncludeAdmins || _param.IncludeSubsites)
+            if (_param.Detailed || _param.PermissionsParam.IncludeAdmins || _param.SitesAccParam.SiteParam.IncludeSubsites)
             {
                 return true;
             }
@@ -291,8 +291,17 @@ namespace NovaPointLibrary.Solutions.Report
 
     }
 
-    public class SiteReportParameters : SPOSitePermissionsCSOMParameters
+    public class SiteReportParameters : ISolutionParameters
     {
         public bool Detailed { get; set; } = false;
+        public SPOTenantSiteUrlsWithAccessParameters SitesAccParam {  get; set; }
+        public SPOSitePermissionsCSOMParameters PermissionsParam {  get; set; }
+
+        public SiteReportParameters(SPOTenantSiteUrlsWithAccessParameters tenantSitesParam, 
+                                    SPOSitePermissionsCSOMParameters permissionsParam)
+        {
+            SitesAccParam = tenantSitesParam;
+            PermissionsParam = permissionsParam;
+        }
     }
 }

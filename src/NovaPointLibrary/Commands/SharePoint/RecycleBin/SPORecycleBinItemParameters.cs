@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Solutions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
 {
-    public class SPORecycleBinItemParameters : SPOTenantSiteUrlsParameters
+    public class SPORecycleBinItemParameters : ISolutionParameters
     {
         private bool _allItems;
         public bool AllItems
@@ -39,8 +40,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
         }
         public double FileSizeMb { get; set; } = 0;
         public bool FileSizeAbove { get; set; } = true;
-        public bool RenameFile { get; set; } = false;
-
+        
         private void ResetValues()
         {
             FirstStage = true;

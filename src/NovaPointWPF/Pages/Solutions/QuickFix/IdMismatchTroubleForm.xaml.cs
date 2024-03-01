@@ -16,6 +16,7 @@ using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.QuickFix;
 using System.Threading;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointWPF.UserControls;
 
 namespace NovaPointWPF.Pages.Solutions.QuickFix
 {
@@ -59,21 +60,32 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOTenantSiteUrlsParameters siteParameters = new()
-            {
-                RemoveAdmin = this.RemoveAdmin,
+            //SPOTenantSiteUrlsParameters siteParameters = new()
+            //{
+            //    RemoveAdmin = this.RemoveAdmin,
 
-                IncludePersonalSite = this.IncludePersonalSite,
-                IncludeShareSite = this.IncludeShareSite,
-                OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-                SiteUrl = this.SiteUrl,
-            };
+            //    IncludePersonalSite = this.IncludePersonalSite,
+            //    IncludeShareSite = this.IncludeShareSite,
+            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
+            //    SiteUrl = this.SiteUrl,
+            //};
 
-            IdMismatchTroubleParameters parameters = new()
+            //IdMismatchTroubleParameters parameters = new()
+            //{
+            //    ReportMode = this.ReportMode,
+            //    UserUpn = this.UserUpn,
+            //    SiteParameters = siteParameters,
+            //};
+            //await new IdMismatchTrouble(parameters, uiLog, cancelTokenSource).RunAsync();
+
+            var siteAccParam = AdminF.Parameters;
+            var siteParam = SiteF.Parameters;
+            siteAccParam.SiteParam = siteParam;
+
+            IdMismatchTroubleParameters parameters = new(siteAccParam)
             {
                 ReportMode = this.ReportMode,
                 UserUpn = this.UserUpn,
-                SiteParameters = siteParameters,
             };
             await new IdMismatchTrouble(parameters, uiLog, cancelTokenSource).RunAsync();
         }

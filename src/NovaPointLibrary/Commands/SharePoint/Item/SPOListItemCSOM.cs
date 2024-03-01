@@ -25,7 +25,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
         private async IAsyncEnumerable<ListItemCollection> GetBatchAsync(string siteUrl,
                                                                          Microsoft.SharePoint.Client.List TargetList,
-                                                                         SPOTenantItemsParameters parameters)
+                                                                         SPOItemsParameters parameters)
         {
             _appInfo.IsCancelled();
             _logger.LogTxt(GetType().Name, $"Start getting Items by batch");
@@ -104,7 +104,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
         internal async IAsyncEnumerable<ListItem> GetAsync(string siteUrl,
                                                            Microsoft.SharePoint.Client.List oList,
-                                                           SPOTenantItemsParameters parameters)
+                                                           SPOItemsParameters parameters)
         {
             await foreach (var listItemCollection in GetBatchAsync(siteUrl, oList, parameters))
             {

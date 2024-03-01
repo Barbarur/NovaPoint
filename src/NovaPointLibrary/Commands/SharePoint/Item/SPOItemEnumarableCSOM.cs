@@ -24,49 +24,49 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             _param = parameters;
         }
 
-        internal async IAsyncEnumerable<SPOTenantResults> GetItemsAsync()
-        {
-            _appInfo.IsCancelled();
+        //internal async IAsyncEnumerable<SPOTenantResults> GetItemsAsync()
+        //{
+        //    _appInfo.IsCancelled();
 
-            await foreach (SPOTenantResults listResult in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
-            {
-                if (!String.IsNullOrWhiteSpace(listResult.ErrorMessage))
-                {
-                    yield return listResult;
-                    continue;
-                }
+        //    await foreach (SPOTenantResults listResult in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
+        //    {
+        //        if (!String.IsNullOrWhiteSpace(listResult.ErrorMessage))
+        //        {
+        //            yield return listResult;
+        //            continue;
+        //        }
 
-                SPOTenantResults? errorResults = null;
-                List<Microsoft.SharePoint.Client.List>? collList = null;
-                try
-                {
-                    collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(listResult.SiteUrl, _param);
-                }
-                catch (Exception ex)
-                {
-                    _logger.ReportError("Site", listResult.SiteUrl, ex);
+        //        SPOTenantResults? errorResults = null;
+        //        List<Microsoft.SharePoint.Client.List>? collList = null;
+        //        try
+        //        {
+        //            collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(listResult.SiteUrl, _param);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            _logger.ReportError("Site", listResult.SiteUrl, ex);
 
-                    errorResults = new(listResult.Progress, listResult.SiteUrl, listResult.SiteName);
-                    errorResults.ErrorMessage = ex.Message;
-                }
+        //            errorResults = new(listResult.Progress, listResult.SiteUrl, listResult.SiteName);
+        //            errorResults.ErrorMessage = ex.Message;
+        //        }
 
-                if (errorResults != null)
-                {
-                    yield return errorResults;
-                }
-                else if (collList != null)
-                {
-                    ProgressTracker progress = new(listResult.Progress, collList.Count);
-                    foreach (var oList in collList)
-                    {
-                        SPOTenantResults results = new(progress, listResult.SiteUrl, oList);
-                        yield return results;
+        //        if (errorResults != null)
+        //        {
+        //            yield return errorResults;
+        //        }
+        //        else if (collList != null)
+        //        {
+        //            ProgressTracker progress = new(listResult.Progress, collList.Count);
+        //            foreach (var oList in collList)
+        //            {
+        //                SPOTenantResults results = new(progress, listResult.SiteUrl, oList);
+        //                yield return results;
 
-                        progress.ProgressUpdateReport();
-                    }
-                }
-            }
-        }
+        //                progress.ProgressUpdateReport();
+        //            }
+        //        }
+        //    }
+        //}
 
 
     }

@@ -22,13 +22,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
         public readonly static string _solutionName = "Resolve user ID Mismatch";
         public readonly static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-IdMismatchTrouble";
 
-        private IdMismatchTroubleParameters _param = new();
-        public ISolutionParameters Parameters
-        {
-            get { return _param; }
-            set { _param = (IdMismatchTroubleParameters)value; }
-        }
-
+        private IdMismatchTroubleParameters _param;
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
@@ -42,8 +36,8 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
         public IdMismatchTrouble(IdMismatchTroubleParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            Parameters = parameters;
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
+            _param = parameters;
+            _logger = new(uiAddLog, this.GetType().Name, _param);
             _appInfo = new(_logger, cancelTokenSource);
         }
 
@@ -91,7 +85,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             _logger.LogUI(GetType().Name, $"Affected user account SID: {userSID}");
 
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteParameters).GetAsyncNEW())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsyncNEW())
             {
                 _appInfo.IsCancelled();
 
@@ -316,7 +310,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             set { _userUpn = value.Trim(); }
         }
 
-        public SPOTenantSiteUrlsParameters SiteParameters { get; set; } = new();
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam { get; set; }
 
         //private string _siteUrl = string.Empty;
         //public string SiteUrl
@@ -333,5 +327,10 @@ namespace NovaPointLibrary.Solutions.QuickFix
         //}
         //public bool RemoveAdmin { get; set; } = false;
         //public bool PreventAllSites { get; set; } = false;
+
+        public IdMismatchTroubleParameters(SPOTenantSiteUrlsWithAccessParameters siteParam)
+        {
+            SiteAccParam = siteParam;
+        }
     }
 }

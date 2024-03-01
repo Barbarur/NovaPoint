@@ -16,7 +16,7 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <designmaterial:RecycleBinForm
+            <!--<designmaterial:RecycleBinForm
                 AllItems="{Binding AllItems, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 
                 FirstStage="{Binding FirstStage, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
@@ -29,7 +29,7 @@
                 OriginalLocation="{Binding OriginalLocation, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 FileSizeMb="{Binding FileSizeMb, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 FileSizeAbove="{Binding FileSizeAbove, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
+                />-->
 
             <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
@@ -57,19 +57,23 @@
                 </StackPanel>
 
             </Grid>
-            
-            <designmaterial:AdminForm
-                RemoveAdmin="{Binding RemoveAdmin, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />
 
-            <designmaterial:SiteForm
+            <designmaterial:RecycleBinForm
+                x:Name="RecycleF"/>
+
+            <designmaterial:AdminForm
+                x:Name="AdminF"/>
+
+            <designmaterial:SiteTenantForm
+                x:Name="SiteF"/>
+            <!--<designmaterial:SiteForm
                 IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 
                 SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                 SubsitesVisibility="False"
-                />
+                />-->
 
         </StackPanel>
 

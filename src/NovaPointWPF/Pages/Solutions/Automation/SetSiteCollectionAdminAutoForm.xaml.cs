@@ -28,11 +28,11 @@ namespace NovaPointWPF.Pages.Solutions.Automation
         public bool IsSiteAdmin { get; set; }
 
 
-        public bool IncludePersonalSite { get; set; }
-        public bool IncludeShareSite { get; set; }
-        public bool OnlyGroupIdDefined { get; set; }
-        public string SiteUrl { get; set; }
-        public bool IncludeSubsites { get; set; }
+        //public bool IncludePersonalSite { get; set; }
+        //public bool IncludeShareSite { get; set; }
+        //public bool OnlyGroupIdDefined { get; set; }
+        //public string SiteUrl { get; set; }
+        //public bool IncludeSubsites { get; set; }
 
         public SetSiteCollectionAdminAutoForm()
         {
@@ -47,25 +47,36 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             this.TargetUserUPN = string.Empty;
             this.IsSiteAdmin = true;
 
-            this.IncludePersonalSite = false;
-            this.IncludeShareSite = true;
-            this.OnlyGroupIdDefined = false;
-            this.SiteUrl = String.Empty;
-            this.IncludeSubsites = false;
+            //this.IncludePersonalSite = false;
+            //this.IncludeShareSite = true;
+            //this.OnlyGroupIdDefined = false;
+            //this.SiteUrl = String.Empty;
+            //this.IncludeSubsites = false;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SetSiteCollectionAdminAutoParameters parameters = new()
+            //SetSiteCollectionAdminAutoParameters parameters = new()
+            //{
+            //    TargetUserUPN = this.TargetUserUPN,
+            //    IsSiteAdmin = this.IsSiteAdmin,
+
+            //    IncludePersonalSite = this.IncludePersonalSite,
+            //    IncludeShareSite = this.IncludeShareSite,
+            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
+            //    SiteUrl = this.SiteUrl,
+            //    IncludeSubsites = this.IncludeSubsites,
+            //};
+
+            //await new SetSiteCollectionAdminAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+
+
+            var siteParam = SiteF.Parameters;
+
+            SetSiteCollectionAdminAutoParameters parameters = new(siteParam)
             {
                 TargetUserUPN = this.TargetUserUPN,
                 IsSiteAdmin = this.IsSiteAdmin,
-
-                IncludePersonalSite = this.IncludePersonalSite,
-                IncludeShareSite = this.IncludeShareSite,
-                OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-                SiteUrl = this.SiteUrl,
-                IncludeSubsites = this.IncludeSubsites,
             };
 
             await new SetSiteCollectionAdminAuto(parameters, uiLog, cancelTokenSource).RunAsync();

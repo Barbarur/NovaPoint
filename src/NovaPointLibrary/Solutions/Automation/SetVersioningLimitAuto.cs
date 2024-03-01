@@ -24,13 +24,7 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionName = "Set versioning limit";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-SetVersioningLimitAuto";
 
-        private SetVersioningLimitAutoParameters _param = new();
-        public ISolutionParameters Parameters
-        {
-            get { return _param; }
-            set { _param = (SetVersioningLimitAutoParameters)value; }
-        }
-
+        private SetVersioningLimitAutoParameters _param;
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
@@ -52,9 +46,9 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public SetVersioningLimitAuto(SetVersioningLimitAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            Parameters = parameters;
-            _param.ListExpresions = _listExpresions;
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
+            _param = parameters;
+            _param.TListsParam.ListParam.ListExpresions = _listExpresions;
+            _logger = new(uiAddLog, this.GetType().Name, _param);
             _appInfo = new(_logger, cancelTokenSource);
         }
 
@@ -83,7 +77,7 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _appInfo.IsCancelled();
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param).GetListsAsync())
+            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
@@ -311,16 +305,21 @@ namespace NovaPointLibrary.Solutions.Automation
 
     }
 
-    public class SetVersioningLimitAutoParameters : SPOTenantListsParameters
+    public class SetVersioningLimitAutoParameters : ISolutionParameters
     {
         public int LibraryMajorVersionLimit { get; set; } = 500;
         public int LibraryMinorVersionLimit { get; set; } = 0;
         public int ListMajorVersionLimit { get; set; } = 500;
 
-        internal new void ParametersCheck()
-        {
-            base.ParametersCheck();
+        public SPOTenantListsParameters TListsParam {  get; set; }
 
+        public SetVersioningLimitAutoParameters(SPOTenantListsParameters listsParameters)
+        {
+            TListsParam = listsParameters;
+        }
+
+        internal void ParametersCheck()
+        {
             if (LibraryMajorVersionLimit < 1 && LibraryMinorVersionLimit > 0)
             {
                 throw new Exception($"FORM INCOMPLETED: You cannot set Minor verion limit for a library without setting Major version limit.");

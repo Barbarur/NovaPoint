@@ -15,7 +15,7 @@
 
             <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Your Account will be added as Site Collection Administrator"/>
+                Content="Your account will be added as Site Collection Administrator"/>
 
             <Grid>
 
