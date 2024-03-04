@@ -28,13 +28,6 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
         public bool ReportMode { get; set; }
 
         public string UserUpn { get; set; }
-        
-        public bool RemoveAdmin { get; set; }
-
-        public bool IncludePersonalSite { get; set; }
-        public bool IncludeShareSite { get; set; }
-        public bool OnlyGroupIdDefined { get; set; }
-        public string SiteUrl { get; set; }
 
         public IdMismatchTroubleForm()
         {
@@ -49,35 +42,10 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
             this.ReportMode = true;
 
             this.UserUpn = string.Empty;
-            
-            this.RemoveAdmin = true;
-
-            this.IncludePersonalSite = false;
-            this.IncludeShareSite = true;
-            this.OnlyGroupIdDefined = false;
-            this.SiteUrl = String.Empty;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            //SPOTenantSiteUrlsParameters siteParameters = new()
-            //{
-            //    RemoveAdmin = this.RemoveAdmin,
-
-            //    IncludePersonalSite = this.IncludePersonalSite,
-            //    IncludeShareSite = this.IncludeShareSite,
-            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-            //    SiteUrl = this.SiteUrl,
-            //};
-
-            //IdMismatchTroubleParameters parameters = new()
-            //{
-            //    ReportMode = this.ReportMode,
-            //    UserUpn = this.UserUpn,
-            //    SiteParameters = siteParameters,
-            //};
-            //await new IdMismatchTrouble(parameters, uiLog, cancelTokenSource).RunAsync();
-
             var siteAccParam = AdminF.Parameters;
             var siteParam = SiteF.Parameters;
             siteAccParam.SiteParam = siteParam;

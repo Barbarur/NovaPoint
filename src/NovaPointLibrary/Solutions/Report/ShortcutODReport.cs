@@ -96,18 +96,6 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task ProcessItems(string siteUrl, List oList, ProgressTracker parentProgress)
         {
-            //Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
-            //{
-            //    i => i["A2ODExtendedMetadata"],
-            //    i => i["Author"],
-            //    i => i["Created"],
-            //    i => i["Editor"],
-            //    i => i["ID"],
-            //    i => i.FileSystemObjectType,
-            //    i => i["FileLeafRef"],
-            //    i => i["FileRef"],
-            //};
-
             _appInfo.IsCancelled();
             _logger.LogTxt(GetType().Name, $"Start getting Items for {oList.BaseType} '{oList.Title}' in '{siteUrl}'");
 

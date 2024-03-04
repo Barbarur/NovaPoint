@@ -25,68 +25,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _param = parameters;
         }
 
-        //internal async IAsyncEnumerable<SPOTenantSiteUrlsRecord> GetAsyncALL(SPOTenantSiteUrlsParameters parameters)
-        //{
-        //    _appInfo.IsCancelled();
-
-        //    GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetSignedInUser();
-        //    string adminUPN = signedInUser.UserPrincipalName;
-
-        //    await foreach (var resultSiteCollection in new SPOTenantSitesURLsCSOM(_logger, _appInfo, _param).GetAsync())
-        //    {
-        //        _appInfo.IsCancelled();
-        //        _logger.LogUI(GetType().Name, $"Processing Site '{resultSiteCollection.SiteUrl}'");
-
-        //        if()
-
-        //        try
-        //        {
-        //            await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(resultSiteCollection.SiteUrl, adminUPN);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _logger.ReportError("Site", resultSiteCollection.SiteUrl, ex);
-
-        //            resultSiteCollection.ErrorMessage = ex.Message;
-        //        }
-
-        //        yield return resultSiteCollection;
-
-
-        //        if (string.IsNullOrWhiteSpace(resultSiteCollection.ErrorMessage)) { continue; }
-
-
-        //        if (_param.IncludeSubsites)
-        //        {
-        //            await foreach (var subsite in GetSubsitesAsyncNEW(resultSiteCollection))
-        //            {
-        //                _logger.LogUI(GetType().Name, $"Processing Site '{subsite.SiteUrl}'");
-        //                yield return subsite;
-        //            }
-        //        }
-
-
-        //        if (_param.RemoveAdmin)
-        //        {
-        //            try
-        //            {
-        //                await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(resultSiteCollection.SiteUrl, adminUPN);
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                _logger.ReportError("Site", resultSiteCollection.SiteUrl, ex);
-
-        //                resultSiteCollection.ErrorMessage = ex.Message;
-
-        //            }
-        //            if (!string.IsNullOrWhiteSpace(resultSiteCollection.ErrorMessage))
-        //            {
-        //                yield return resultSiteCollection;
-        //            }
-        //        }
-        //    }
-        //}
-
 
         // TO BE DEPRECATED
         private async IAsyncEnumerable<SPOTenantResults> GetSiteCollectionsAsync()

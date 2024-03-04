@@ -57,13 +57,6 @@ namespace NovaPointLibrary.Solutions
             parameters.ParametersCheck();
 
             LogProperties(parameters);
-            //Type solutiontype = parameters.GetType();
-            //PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            //foreach (var propertyInfo in properties)
-            //{
-            //    LogTxt(GetType().Name, $"{propertyInfo.Name}: {propertyInfo.GetValue(parameters)}");
-            //}
 
             LogTxt(GetType().Name, $"========== ========== ==========");
         }
@@ -85,8 +78,8 @@ namespace NovaPointLibrary.Solutions
                     }
                     else
                     {
-                        //LogTxt(GetType().Name, $"{propertyInfo.Name}: {oProperty}");
-                        LogUI(GetType().Name, $"{propertyInfo.Name}: {oProperty}");
+                        LogTxt(GetType().Name, $"{propertyInfo.Name}: {oProperty}");
+                        //LogUI(GetType().Name, $"{propertyInfo.Name}: {oProperty}");
                     }
                 }
             }
@@ -108,7 +101,6 @@ namespace NovaPointLibrary.Solutions
 
         internal void ProgressUI(double progress)
         {
-            //LogTxt("ProgressUI", $"Progress {progress}%");
             string pendingTime = $"Pending Time: Calculating...";
 
             if (progress > 1)
@@ -209,16 +201,5 @@ namespace NovaPointLibrary.Solutions
             LogTxt(GetType().Name, $"Trace: {exStackTrace}");
         }
 
-
-
-
-
-
-        // TO BE DEPRECATED
-        //internal void AddLogToTxt(string log)
-        //{
-        //    using StreamWriter txt = new(new FileStream(_txtPath, FileMode.Append, FileAccess.Write));
-        //    txt.WriteLine($"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} - [Logger.AddLogToTxt] {log}");
-        //}
     }
 }

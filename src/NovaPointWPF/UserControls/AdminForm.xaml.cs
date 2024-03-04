@@ -38,6 +38,5 @@ namespace NovaPointWPF.UserControls
                 Parameters.RemoveAdmin = value;
             }
         }
-
     }
 }

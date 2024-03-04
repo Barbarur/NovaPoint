@@ -78,11 +78,6 @@
             <designmaterial:ItemTenantForm
                 x:Name="ItemForm"
                 FilterTarget="Library"/>
-            <!--<designmaterial:ItemForm
-                FilterTarget="Library"
-                ItemsAll="{Binding ItemsAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                FolderRelativeUrl="{Binding FolderRelativeUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />-->
 
         </StackPanel>
 

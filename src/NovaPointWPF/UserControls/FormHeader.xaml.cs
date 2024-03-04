@@ -53,9 +53,6 @@ namespace NovaPointWPF.UserControls
 
         private void RedTheDocsClick(object sender, RoutedEventArgs e)
         {
-            //string NavigateUri = "https://github.com/Barbarur/NovaPoint/wiki/";
-            //var url = NavigateUri.Replace("&", "^&");
-            //Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
             Process.Start(new ProcessStartInfo("cmd", $"/c start {SolutionDocs}") { CreateNoWindow = true });
         }
 

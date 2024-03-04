@@ -24,30 +24,7 @@
 
             <designmaterial:SiteTenantForm
                 x:Name="SiteF"/>
-            <!--<designmaterial:SiteForm
-                IncludePersonalSite="{Binding IncludePersonalSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                IncludeShareSite="{Binding IncludeShareSite, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                OnlyGroupIdDefined="{Binding OnlyGroupIdDefined, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                SiteUrl="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                SubsitesVisibility="False"
-                />-->
-
-            <!--<designmaterial:RecycleBinForm
-                AllItems="{Binding FirstStage, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                FirstStage="{Binding FirstStage, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                SecondStage="{Binding SecondStage, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                DeletedAfter="{Binding DeletedAfter, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                DeletedBefore="{Binding DeletedBefore, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                
-                DeletedByEmail="{Binding DeletedByEmail, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                OriginalLocation="{Binding OriginalLocation, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                FileSizeMb="{Binding FileSizeMb, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                FileSizeAbove="{Binding FileSizeAbove, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                />-->
-
+            
         </StackPanel>
 
     </Grid>

@@ -28,8 +28,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
     /// </summary>
     public partial class ShortcutODReportForm : Page, ISolutionForm
     {
-        //public bool RemoveAdmin { get; set; }
-
         private bool _allSiteCollections = false;
         public bool AllSiteCollections
         {
@@ -52,8 +50,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
         public string SiteUrl { get; set; }
 
-        //public string FolderRelativeUrl { get; set; } = String.Empty;
-
 
         public ShortcutODReportForm()
         {
@@ -64,47 +60,10 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionTitle = ShortcutODReport.s_SolutionName;
             SolutionHeader.SolutionCode = nameof(ShortcutODReport);
             SolutionHeader.SolutionDocs = ShortcutODReport.s_SolutionDocs;
-
-            //this.RemoveAdmin = true;
-
-            //this.SiteUrl = String.Empty;
-
-            //this.FolderRelativeUrl = String.Empty;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-
-            //ShortcutODReportParameters parameters = new()
-            //{
-            //    RemoveAdmin = this.RemoveAdmin,
-
-            //    SiteUrl = this.SiteUrl,
-
-            //    FolderRelativeUrl = this.FolderRelativeUrl,
-            //};
-
-            //SPOTenantSiteUrlsParameters tSiteParam = new()
-            //{
-            //    RemoveAdmin = this.RemoveAdmin,
-            //    SiteUrl = this.SiteUrl,
-            //};
-
-            //SPOListsParameters listParameters = new();
-
-            //SPOTenantListsParameters tListParam = new(tSiteParam, listParameters);
-
-            //var itemParameters = ItemForm.Parameters;
-
-            //ShortcutODReportParameters parameters = new(tListParam, itemParameters);
-
-            //await new ShortcutODReport(parameters, uiLog, cancelTokenSource).RunAsync();
-
-
-
-
-
-
             var siteAccParam = AdminF.Parameters;
             siteAccParam.SiteParam.AllSiteCollections = this.AllSiteCollections;
             siteAccParam.SiteParam.SiteUrl = this.SiteUrl;

@@ -73,61 +73,6 @@
 
                     </StackPanel>
 
-
-                    <!--<StackPanel
-                        Orientation="Vertical"
-                        Margin="0,0,0,0">
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Users to include on the report"/>
-
-                        <StackPanel
-                            Orientation="Horizontal">
-                            
-                            <RadioButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="All Users"
-                                IsChecked="True"/>
-
-                            <RadioButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Single User"
-                                IsChecked="{Binding SingleUser, ElementName=root}"/>
-                                
-                            <RadioButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="System Group"
-                                IsChecked="{Binding Everyone, ElementName=root}"/>
-                            
-                        </StackPanel>
-
-
-                    </StackPanel>
-
-                    <StackPanel
-                        x:Name="SingleUserTextbox"
-                        Visibility="Collapsed"
-                        Margin="9, 0, 0, 0">
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="User Name"/>
-
-                        <TextBox
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding TargetUPN, ElementName=root}"/>
-                        
-                    </StackPanel>
-
-                    <Label
-                        x:Name="EveryoneLabel"
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Margin="9,0,0,0"
-                        Visibility="Collapsed"
-                        Content="Report sites with 'Everyone'  and 'Everyone except external users'"/>-->
-
-
                 </StackPanel>
 
             </Grid>

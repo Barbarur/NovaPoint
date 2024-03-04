@@ -15,23 +15,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
     /// </summary>
     public partial class ClearRecycleBinAutoForm : Page, ISolutionForm
     {
-        public bool RemoveAdmin { get; set; }
-
-        public bool IncludePersonalSite { get; set; }
-        public bool IncludeShareSite { get; set; }
-        public bool OnlyGroupIdDefined { get; set; }
-        public string SiteUrl { get; set; }
-
-        public bool AllItems { get; set; }
-        public bool FirstStage { get; set; }
-        public bool SecondStage { get; set; }
-        public DateTime DeletedAfter { get; set; }
-        public DateTime DeletedBefore { get; set; }
-        public string DeletedByEmail { get; set; }
-        public string OriginalLocation { get; set; }
-        public double FileSizeMb { get; set; }
-        public bool FileSizeAbove { get; set; }
-
         public ClearRecycleBinAutoForm()
         {
             InitializeComponent();
@@ -41,50 +24,10 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             SolutionHeader.SolutionTitle = ClearRecycleBinAuto.s_SolutionName;
             SolutionHeader.SolutionCode = nameof(ClearRecycleBinAuto);
             SolutionHeader.SolutionDocs = ClearRecycleBinAuto.s_SolutionDocs;
-
-            this.RemoveAdmin = true;
-
-            this.IncludePersonalSite = false;
-            this.IncludeShareSite = true;
-            this.OnlyGroupIdDefined = false;
-            this.SiteUrl = String.Empty;
-
-            this.AllItems = true;
-            this.FirstStage = true;
-            this.SecondStage = true;
-            this.DeletedAfter = DateTime.UtcNow.AddDays(-94);
-            this.DeletedBefore = DateTime.UtcNow.AddDays(1);
-            this.DeletedByEmail = string.Empty;
-            this.OriginalLocation = string.Empty;
-            this.FileSizeMb = 0;
-            this.FileSizeAbove = true;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            //ClearRecycleBinAutoParameters parameters = new()
-            //{
-            //    RemoveAdmin = this.RemoveAdmin,
-
-            //    IncludePersonalSite = this.IncludePersonalSite,
-            //    IncludeShareSite = this.IncludeShareSite,
-            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-            //    SiteUrl = this.SiteUrl,
-
-            //    AllItems = this.AllItems,
-            //    FirstStage = this.FirstStage,
-            //    SecondStage = this.SecondStage,
-            //    DeletedAfter = this.DeletedAfter,
-            //    DeletedBefore = this.DeletedBefore,
-            //    DeletedByEmail = this.DeletedByEmail,
-            //    OriginalLocation = this.OriginalLocation,
-            //    FileSizeMb = this.FileSizeMb,
-            //    FileSizeAbove = this.FileSizeAbove,
-            //};
-
-            //await new ClearRecycleBinAuto(parameters, uiLog, cancelTokenSource).RunAsync();
-
-
             var siteAccParam = AdminF.Parameters;
             var siteParam = SiteF.Parameters;
             siteAccParam.SiteParam = siteParam;

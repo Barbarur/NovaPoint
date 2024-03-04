@@ -32,24 +32,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
         public bool IncludeAdmins {  get; set; }
 
-
-        //public bool RemoveAdmin { get; set; }
-
-        //public bool IncludePersonalSite { get; set; }
-        //public bool IncludeShareSite { get; set; }
-        //public bool OnlyGroupIdDefined { get; set; }
-        //public string SiteUrl { get; set; }
-        //private bool _includeSubsites;
-        //public bool IncludeSubsites
-        //{
-        //    get { return _includeSubsites; }
-        //    set
-        //    {
-        //        _includeSubsites = value;
-        //        NeedAddAdmin();
-        //    }
-        //}
-
         public SiteReportForm()
         {
             InitializeComponent();
@@ -62,62 +44,10 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
             this.Detailed = true;
             this.IncludeAdmins = false;
-
-            //this.RemoveAdmin = true;
-
-            //this.IncludePersonalSite = false;
-            //this.IncludeShareSite = true;
-            //this.OnlyGroupIdDefined = false;
-            //this.SiteUrl = String.Empty;
-            //this.IncludeSubsites = false;
         }
-
-        //private void NeedAddAdmin()
-        //{
-        //    if(Detailed || IncludeAdmins || IncludeSubsites)
-        //    {
-        //        AdminF.Visibility = Visibility.Visible;
-        //    }
-        //    else
-        //    {
-        //        AdminF.Visibility = Visibility.Collapsed;
-        //    }
-        //}
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            //SPOTenantSiteUrlsParameters tSiteParam = new()
-            //{
-            //    RemoveAdmin = this.RemoveAdmin,
-
-            //    IncludePersonalSite = this.IncludePersonalSite,
-            //    IncludeShareSite = this.IncludeShareSite,
-            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-            //    SiteUrl = this.SiteUrl,
-            //    IncludeSubsites = this.IncludeSubsites,
-            //};
-
-            //SPOListsParameters l = new();
-            //SPOItemsParameters i = new();
-            //SPOSitePermissionsCSOMParameters permissionsParameters = new(l, i)
-            //{
-            //    IncludeAdmins = this.IncludeAdmins,
-            //};
-
-            //SiteReportParameters parameters = new(tSiteParam, permissionsParameters)
-            //{
-            //    Detailed = this.Detailed,
-            //};
-
-            //await new SiteReport(parameters, uiLog, cancelTokenSource).RunAsync();
-
-
-
-
-
-
-
-
             SPOListsParameters l = new();
             SPOItemsParameters i = new();
             SPOSitePermissionsCSOMParameters permissionsParameters = new(l, i)

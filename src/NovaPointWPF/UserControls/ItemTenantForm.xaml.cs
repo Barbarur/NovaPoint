@@ -51,9 +51,6 @@ namespace NovaPointWPF.UserControls
             }
         }
 
-        //private bool _itemsAll = true;
-        //public bool ItemsAll { get; set; }
-
 
         private bool _relativeUrl;
         public bool RelativeUrl

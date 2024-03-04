@@ -52,13 +52,6 @@ namespace NovaPointLibrary.Solutions.Automation
             _appInfo = new(_logger, cancelTokenSource);
         }
 
-        //public SetVersioningLimitAuto(Commands.Authentication.AppInfo appInfo, Action<LogInfo> uiAddLog, SetVersioningLimitAutoParameters parameters)
-        //{
-        //    Parameters = parameters;
-
-        //    _main = new(this, appInfo, uiAddLog);
-        //}
-
         public async Task RunAsync()
         {
             try
@@ -98,130 +91,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
             }
 
-            //ProgressTracker progress;
-            //if (!String.IsNullOrWhiteSpace(_param.SiteUrl))
-            //{
-            //    Web oSite = await new SPOSiteCSOM(_main).GetToDeprecate(_param.SiteUrl);
-
-            //    progress = new(_main, 1);
-            //    await ProcessSite(oSite.Url, progress);
-            //}
-            //else
-            //{
-            //    List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_main).GetDeprecated(_param.SiteUrl, _param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
-
-            //    progress = new(_main, collSiteCollections.Count);
-            //    foreach (var oSiteCollection in collSiteCollections)
-            //    {
-            //        await ProcessSite(oSiteCollection.Url, progress);
-            //        progress.ProgressUpdateReport();
-            //    }
-            //}
-
-            //_main.ScriptFinish();
         }
-
-        //private async Task ProcessSite(string siteUrl, ProgressTracker progress)
-        //{
-        //    _main.IsCancelled();
-        //    string methodName = $"{GetType().Name}.ProcessSite";
-
-        //    try
-        //    {
-        //        _main.AddLogToUI(methodName, $"Processing Site '{siteUrl}'");
-
-        //        await new SPOSiteCollectionAdminCSOM(_main).SetDEPRECATED(siteUrl, _param.AdminUPN);
-
-        //        await ProcessLists(siteUrl, progress);
-
-        //        await ProcessSubsites(siteUrl, progress);
-
-        //        if (_param.RemoveAdmin)
-        //        {
-        //            await new SPOSiteCollectionAdminCSOM(_main).RemoveDEPRECATED(siteUrl, _param.AdminUPN);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _main.ReportError("Site", siteUrl, ex);
-
-        //        AddRecord(siteUrl, string.Empty, remarks: ex.Message);
-        //    }
-        //}
-
-        //private async Task ProcessSubsites(string siteUrl, ProgressTracker progress)
-        //{
-        //    _main.IsCancelled();
-        //    string methodName = $"{GetType().Name}.ProcessSubsites";
-
-        //    if (!_param.IncludeSubsites) { return; }
-
-        //    var collSubsites = await new SPOSubsiteCSOM(_main).GetDEPRECATED(siteUrl);
-
-        //    progress.IncreaseTotalCount(collSubsites.Count);
-        //    foreach (var oSubsite in collSubsites)
-        //    {
-        //        _main.AddLogToUI(methodName, $"Processing Subsite '{oSubsite.Title}'");
-
-        //        try
-        //        {
-        //            await ProcessLists(oSubsite.Url, progress);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _main.ReportError("Subsite", oSubsite.Url, ex);
-
-        //            AddRecord(oSubsite.Url, string.Empty, remarks: ex.Message);
-        //        }
-
-        //        progress.ProgressUpdateReport();
-        //    }
-        //}
-
-        //private async Task ProcessLists(string siteUrl, ProgressTracker parentPprogress)
-        //{
-        //    _main.IsCancelled();
-        //    string methodName = $"{GetType().Name}.ProcessLists";
-
-        //    var collList = await new SPOListCSOM(_main).GetDEPRECATED(siteUrl, _param.ListTitle, _param.IncludeHiddenLists, _param.IncludeSystemLists);
-
-        //    ProgressTracker progress = new(parentPprogress, collList.Count);
-        //    foreach (var oList in collList)
-        //    {
-        //        _main.AddLogToUI(methodName, $"Processing '{oList.BaseType}' - '{oList.Title}'");
-
-        //        try
-        //        {
-        //            await SetVersioning(siteUrl, oList.Title);
-
-        //            AddRecord(siteUrl, oList.Title, "");
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _main.ReportError("Subsite", siteUrl, ex);
-
-        //            AddRecord(siteUrl, oList.Title, remarks: ex.Message);
-        //        }
-
-        //        progress.ProgressUpdateReport();
-        //    }
-        //}
-
-        //private readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
-        //{
-
-        //    l => l.Hidden,
-
-        //    l => l.BaseType,
-        //    l => l.Title,
-        //    l => l.DefaultViewUrl,
-        //    l => l.Id,
-
-        //    l => l.EnableVersioning,
-        //    l => l.MajorVersionLimit,
-        //    l => l.EnableMinorVersions,
-        //    l => l.MajorWithMinorVersionsLimit,
-        //};
 
         private async Task SetVersioning(string siteUrl, Microsoft.SharePoint.Client.List olist)
         {
@@ -299,10 +169,6 @@ namespace NovaPointLibrary.Solutions.Automation
 
             _logger.DynamicCSV(dynamicRecord);
         }
-
-
-
-
     }
 
     public class SetVersioningLimitAutoParameters : ISolutionParameters

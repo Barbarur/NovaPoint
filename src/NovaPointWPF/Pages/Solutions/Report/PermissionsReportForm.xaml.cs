@@ -53,25 +53,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
             }
         }
 
-        //public bool RemoveAdmin { get; set; }
-
-        //public bool IncludePersonalSite { get; set; }
-        //public bool IncludeShareSite { get; set; }
-        //public bool OnlyGroupIdDefined { get; set; }
-        //public string SiteUrl { get; set; }
-        //public bool IncludeSubsites { get; set; }
-
-        //public bool IncludeLists { get; set; }
-        //public bool IncludeLibraries { get; set; }
-        //public bool IncludeHiddenLists { get; set; }
-        //public bool IncludeSystemLists { get; set; }
-        //public string ListTitle { get; set; }
-
-
-        //public bool ItemsAll { get; set; } = false;
-        //public string FolderRelativeUrl { get; set; } = String.Empty;
-
-
         public PermissionsReportForm()
         {
             InitializeComponent();
@@ -87,111 +68,10 @@ namespace NovaPointWPF.Pages.Solutions.Report
             this.IncludeAdmins = true;
             this.IncludeSiteAccess = true;
             this.IncludeUniquePermissions = true;
-
-            //this.RemoveAdmin = true;
-
-            //this.IncludePersonalSite = false;
-            //this.IncludeShareSite = true;
-            //this.OnlyGroupIdDefined = false;
-            //this.SiteUrl = String.Empty;
-
-            //this.IncludeLists = true;
-            //this.IncludeLibraries = true;
-            //this.IncludeHiddenLists = false;
-            //this.IncludeSystemLists = false;
-            //this.ListTitle = String.Empty;
-
-            //this.ItemsAll = true;
-            //this.FolderRelativeUrl = String.Empty;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            //SPOSitePermissionsCSOMParameters permissionsParameters = new()
-            //{
-            //    IncludeAdmins = this.IncludeAdmins,
-            //    IncludeSiteAccess = this.IncludeSiteAccess,
-            //    IncludeUniquePermissions = this.IncludeUniquePermissions,
-
-            //    RemoveAdmin = this.RemoveAdmin,
-
-            //    IncludePersonalSite = this.IncludePersonalSite,
-            //    IncludeShareSite = this.IncludeShareSite,
-            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-            //    SiteUrl = this.SiteUrl,
-
-            //    IncludeLists = this.IncludeLists,
-            //    IncludeLibraries = this.IncludeLibraries,
-            //    IncludeHiddenLists = this.IncludeHiddenLists,
-            //    IncludeSystemLists = this.IncludeSystemLists,
-            //    ListTitle = this.ListTitle,
-
-            //    FolderRelativeUrl = this.FolderRelativeUrl,
-            //};
-
-            //PermissionsReportParameters parameters = new()
-            //{
-            //    UserParameters = this.UserForm.Parameters,
-
-            //    OnlyUserList = this.UserListOnly,
-
-            //    PermissionsParameters = permissionsParameters,
-
-            //    //IncludeAdmins = this.IncludeAdmins,
-            //    //IncludeSiteAccess = this.IncludeSiteAccess,
-            //    //IncludeUniquePermissions = this.IncludeUniquePermissions,
-
-            //    //RemoveAdmin = this.RemoveAdmin,
-
-            //    //IncludePersonalSite = this.IncludePersonalSite,
-            //    //IncludeShareSite = this.IncludeShareSite,
-            //    //OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-            //    //SiteUrl = this.SiteUrl,
-
-            //    //IncludeLists = this.IncludeLists,
-            //    //IncludeLibraries = this.IncludeLibraries,
-            //    //IncludeHiddenLists = this.IncludeHiddenLists,
-            //    //IncludeSystemLists = this.IncludeSystemLists,
-            //    //ListTitle = this.ListTitle,
-
-            //    //FolderRelativeUrl = this.FolderRelativeUrl,
-            //};
-
-
-
-
-
-            //var userParameters = this.UserForm.Parameters;
-
-
-            //SPOTenantSiteUrlsParameters tSiteParam = new()
-            //{
-            //    RemoveAdmin = this.RemoveAdmin,
-
-            //    IncludePersonalSite = this.IncludePersonalSite,
-            //    IncludeShareSite = this.IncludeShareSite,
-            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-            //    SiteUrl = this.SiteUrl,
-            //    IncludeSubsites = this.IncludeSubsites,
-            //};
-
-            //SPOSitePermissionsCSOMParameters permissionsParameters = new(ListForm.Parameters, ItemForm.Parameters)
-            //{
-            //    IncludeAdmins = this.IncludeAdmins,
-            //    IncludeSiteAccess = this.IncludeSiteAccess,
-            //    IncludeUniquePermissions = this.IncludeUniquePermissions,
-            //};
-
-            //PermissionsReportParameters parameters = new(userParameters, tSiteParam, permissionsParameters)
-            //{
-            //    OnlyUserList = this.UserListOnly,
-            //};
-
-            //await new PermissionsReport(parameters, uiLog, cancelTokenSource).RunAsync();
-
-
-
-
             var siteAccParam = AdminF.Parameters;
             var siteParam = SiteF.Parameters;
             siteAccParam.SiteParam = siteParam;

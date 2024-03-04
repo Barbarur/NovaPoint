@@ -28,20 +28,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
     /// </summary>
     public partial class SetVersioningLimitAutoForm : Page, ISolutionForm
     {
-        //public bool RemoveAdmin { get; set; }
-
-        //public bool IncludePersonalSite { get; set; }
-        //public bool IncludeShareSite { get; set; }
-        //public bool OnlyGroupIdDefined { get; set; }
-        //public string SiteUrl { get; set; }
-        //public bool IncludeSubsites { get; set; }
-
-        //public bool IncludeLists { get; set; }
-        //public bool IncludeLibraries { get; set; }
-        //public bool IncludeHiddenLists { get; set; }
-        //public bool IncludeSystemLists { get; set; }
-        //public string ListTitle { get; set; }
-
         public int LibraryMajorVersionLimit { get; set; } = 500;
         public int LibraryMinorVersionLimit { get; set; } = 0;
         public int ListMajorVersionLimit { get; set; } = 500;
@@ -57,20 +43,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             SolutionHeader.SolutionCode = nameof(SetVersioningLimitAuto);
             SolutionHeader.SolutionDocs = SetVersioningLimitAuto.s_SolutionDocs;
 
-            //this.RemoveAdmin = true;
-
-            //this.IncludePersonalSite = false;
-            //this.IncludeShareSite = true;
-            //this.OnlyGroupIdDefined = false;
-            //this.SiteUrl = String.Empty;
-            //this.IncludeSubsites = false;
-
-            //this.IncludeLists = true;
-            //this.IncludeLibraries = true;
-            //this.IncludeHiddenLists = false;
-            //this.IncludeSystemLists = false;
-            //this.ListTitle = String.Empty;
-
             this.LibraryMajorVersionLimit = 500;
             this.LibraryMinorVersionLimit = 0;
             this.ListMajorVersionLimit = 500;
@@ -78,55 +50,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            //SetVersioningLimitAutoParameters parameters = new()
-            ////{
-            ////    RemoveAdmin = this.RemoveAdmin,
-
-            ////    IncludePersonalSite = this.IncludePersonalSite,
-            ////    IncludeShareSite = this.IncludeShareSite,
-            ////    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-            ////    SiteUrl = this.SiteUrl,
-            ////    IncludeSubsites = this.IncludeSubsites,
-
-            ////    IncludeLists = this.IncludeLists,
-            ////    IncludeLibraries = this.IncludeLibraries,
-            ////    IncludeHiddenLists = this.IncludeHiddenLists,
-            ////    IncludeSystemLists = this.IncludeSystemLists,
-            ////    ListTitle = this.ListTitle,
-
-            ////    LibraryMajorVersionLimit = this.LibraryMajorVersionLimit,
-            ////    LibraryMinorVersionLimit = this.LibraryMinorVersionLimit,
-            ////    ListMajorVersionLimit = this.ListMajorVersionLimit,
-            ////};
-
-            //SPOTenantSiteUrlsParameters tSiteParam = new()
-            //{
-            //    IncludePersonalSite = this.IncludePersonalSite,
-            //    IncludeShareSite = this.IncludeShareSite,
-            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-            //    SiteUrl = this.SiteUrl,
-            //    IncludeSubsites = this.IncludeSubsites,
-            //};
-
-            //var listParameters = ListForm.Parameters;
-
-            //SPOTenantListsParameters tListParam = new(tSiteParam, listParameters);
-
-            //SetVersioningLimitAutoParameters parameters = new(tListParam)
-            //{
-            //    LibraryMajorVersionLimit = this.LibraryMajorVersionLimit,
-            //    LibraryMinorVersionLimit = this.LibraryMinorVersionLimit,
-            //    ListMajorVersionLimit = this.ListMajorVersionLimit,
-            //};
-
-            //await new SetVersioningLimitAuto(parameters, uiLog, cancelTokenSource).RunAsync();
-
-
-
-
-
-
-
             var siteAccParam = AdminF.Parameters;
             var siteParam = SiteF.Parameters;
             siteAccParam.SiteParam = siteParam;

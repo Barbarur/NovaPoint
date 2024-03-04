@@ -34,22 +34,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
         public bool Discard { get; set; }
         public string Comment { get; set; }
 
-        //public bool RemoveAdmin { get; set; }
-
-        //public bool IncludePersonalSite { get; set; }
-        //public bool IncludeShareSite { get; set; }
-        //public bool OnlyGroupIdDefined { get; set; }
-        //public string SiteUrl { get; set; }
-        //public bool IncludeSubsites { get; set; }
-
-        //public bool ListAll { get; set; }
-        //public string ListTitle { get; set; }
-
-
-        //public bool ItemsAll { get; set; }
-        //public string FolderRelativeUrl { get; set; }
-
-
         public CheckInFileAutoForm()
         {
             InitializeComponent();
@@ -67,79 +51,10 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             this.Minor = false;
             this.Discard = false;
             this.Comment = string.Empty;
-
-            //this.RemoveAdmin = true;
-
-            //this.IncludePersonalSite = false;
-            //this.IncludeShareSite = true;
-            //this.OnlyGroupIdDefined = false;
-            //this.SiteUrl = String.Empty;
-            //this.IncludeSubsites = false;
-
-            //this.ListAll = true;
-            //this.ListTitle = String.Empty;
-
-            //this.ItemsAll = true;
-            //this.FolderRelativeUrl = String.Empty;
-
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            //CheckInFileAutoParameters parameters = new()
-            //{
-            //    ReportMode = this.ReportMode,
-            //    CheckinType =  this.CheckinType,
-            //    Comment =  this.Comment,
-
-            //    RemoveAdmin = this.RemoveAdmin,
-
-            //    IncludePersonalSite = this.IncludePersonalSite,
-            //    IncludeShareSite = this.IncludeShareSite,
-            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-            //    SiteUrl = this.SiteUrl,
-            //    IncludeSubsites = this.IncludeSubsites,
-
-            //    ListTitle = this.ListTitle,
-
-            //    FolderRelativeUrl = this.FolderRelativeUrl,
-            //};
-
-            //SPOTenantSiteUrlsParameters tSiteParam = new()
-            //{
-            //    IncludePersonalSite = this.IncludePersonalSite,
-            //    IncludeShareSite = this.IncludeShareSite,
-            //    OnlyGroupIdDefined = this.OnlyGroupIdDefined,
-            //    SiteUrl = this.SiteUrl,
-            //    IncludeSubsites = this.IncludeSubsites,
-            //};
-
-            //var listParameters = ListForm.Parameters;
-
-            //SPOTenantListsParameters tListParam = new(tSiteParam, listParameters);
-
-            //var itemParameters = ItemForm.Parameters;
-
-            //CheckInFileAutoParameters parameters = new(tListParam, itemParameters)
-            //{
-            //    ReportMode = this.ReportMode,
-            //    CheckinType = this.CheckinType,
-            //    Comment = this.Comment,
-            //};
-            ////uiLog(LogInfo.ErrorNotification($"CheckinType: {CheckinType}"));
-            ////uiLog(LogInfo.ErrorNotification($"Comment: {Comment}"));
-            //await new CheckInFileAuto(parameters, uiLog, cancelTokenSource).RunAsync();
-
-
-
-
-
-
-
-
-
-
-
             var siteAccParam = AdminF.Parameters;
             var siteParam = SiteF.Parameters;
             siteAccParam.SiteParam = siteParam;

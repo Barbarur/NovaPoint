@@ -111,33 +111,6 @@ namespace NovaPointLibrary.Solutions.Report
             }
         }
 
-        //private async Task UserListOnlyAsync(SPOTenantResults siteResults)
-        //{
-        //    StringBuilder sb = new();
-
-        //    //if (_param.UserParameters.AllUsers)
-        //    //{
-        //    //    var collUsers = await new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _retrievalExpressions);
-
-        //    //    if (collUsers != null)
-        //    //    {
-        //    //        foreach (var oUser in collUsers)
-        //    //        {
-        //    //            sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
-        //    //        }
-        //    //        AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("Site user List", "", sb.ToString(), "", "")));
-        //    //    }
-        //    //}
-        //    //else
-        //    //{
-        //    //}
-        //    await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.UserParameters, _retrievalExpressions))
-        //    {
-        //        sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
-        //        AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("Site user List", "", sb.ToString(), "", "")));
-        //    }
-        //}
-
         private async Task<bool> IsTargetSite(string siteUrl)
         {
             if (_param.UserParam.AllUsers)
