@@ -72,6 +72,8 @@ namespace NovaPointLibrary.Solutions.Automation
                 progress = new(_logger, collSiteCollections.Count);
                 foreach (var oSiteCollection in collSiteCollections)
                 {
+                    _appInfo.IsCancelled();
+
                     await SetAdmin(oSiteCollection.Url);
 
                     progress.ProgressUpdateReport();

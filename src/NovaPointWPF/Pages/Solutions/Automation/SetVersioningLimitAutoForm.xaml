@@ -31,7 +31,7 @@
 
                     <Label
                         Style="{DynamicResource SolutionFormLabel}"
-                        Content="Library major versioning limit"/>
+                        Content="Document Library major versioning limit"/>
 
                     <TextBox
                         Style="{DynamicResource SolutionFormTextBox}"
@@ -39,7 +39,7 @@
 
                     <Label
                         Style="{DynamicResource SolutionFormLabel}"
-                        Content="Library minor versioning limit"/>
+                        Content="Document Library minor versioning limit"/>
 
                     <TextBox
                         Style="{DynamicResource SolutionFormTextBox}"
@@ -47,7 +47,7 @@
 
                     <Label
                         Style="{DynamicResource SolutionFormLabel}"
-                        Content="List major versioning limit"/>
+                        Content="Item List major versioning limit"/>
 
                     <TextBox
                         Style="{DynamicResource SolutionFormTextBox}"

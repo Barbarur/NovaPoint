@@ -99,6 +99,8 @@ namespace NovaPointLibrary.Solutions.Automation
             var spoItem = new SPOListItemCSOM(_logger, _appInfo);
             await foreach (ListItem oItem in spoItem.GetAsync(siteUrl, oList, _param.ItemsParam))
             {
+                _appInfo.IsCancelled();
+
                 if (oItem.FileSystemObjectType.ToString() == "Folder") { continue; }
 
                 try
@@ -175,8 +177,6 @@ namespace NovaPointLibrary.Solutions.Automation
                                     fileVersionCollection.DeleteByID(fileVersionToDelete.ID);
                                 }
                                 clientContext.ExecuteQueryRetry();
-
-
                             }
                         }
                         catch (Exception ex)

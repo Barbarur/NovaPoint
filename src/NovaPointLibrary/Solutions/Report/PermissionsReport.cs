@@ -70,6 +70,7 @@ namespace NovaPointLibrary.Solutions.Report
             SPOSitePermissionsCSOM sitePermissions = new(_logger, _appInfo, _param.PermissionsParam);
             await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsyncNEW())
             {
+                _appInfo.IsCancelled();
 
                 if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
                 {
@@ -84,6 +85,8 @@ namespace NovaPointLibrary.Solutions.Report
                     
                     await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.UserParam, _userRetrievalExpressions))
                     {
+                        _appInfo.IsCancelled();
+
                         sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
                     }
 
@@ -99,6 +102,8 @@ namespace NovaPointLibrary.Solutions.Report
                     {
                         await foreach(var record in sitePermissions.GetAsync(siteResults.SiteUrl, siteResults.Progress))
                         {
+                            _appInfo.IsCancelled();
+
                             FilterRecord(record);
                         }
                     }

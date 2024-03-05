@@ -115,6 +115,8 @@ namespace NovaPointLibrary.Solutions.Automation
             var spoItem = new SPOListItemCSOM(_logger, _appInfo);
             await foreach (ListItem oItem in spoItem.GetAsync(siteUrl, oList, _param.ItemsParam))
             {
+                _appInfo.IsCancelled();
+
                 if (oItem.FileSystemObjectType.ToString() == "Folder") { continue; }
 
                 if (oItem.File.CheckOutType == CheckOutType.None) { continue; }

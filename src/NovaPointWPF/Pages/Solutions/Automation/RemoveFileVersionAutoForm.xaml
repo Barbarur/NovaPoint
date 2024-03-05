@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Automation"
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="1200" d:DesignWidth="600"
+      d:DesignHeight="1000" d:DesignWidth="600"
       Title="RemoveFileVersionAutoForm">
 
     <Grid Background="Transparent">

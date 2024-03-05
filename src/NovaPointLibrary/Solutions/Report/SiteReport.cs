@@ -114,6 +114,8 @@ namespace NovaPointLibrary.Solutions.Report
                 {
                     await foreach (var admins in _sitePermissions.GetAsync(oSiteCollection.Url, progress))
                     {
+                        _appInfo.IsCancelled();
+
                         recordSiteCollection.AddAdmins(admins);
                         _logger.RecordCSV(recordSiteCollection);
                     }
@@ -179,6 +181,8 @@ namespace NovaPointLibrary.Solutions.Report
             ProgressTracker progress = new(parentProgress, collSubsites.Count);
             foreach (var oSubsite in collSubsites)
             {
+                _appInfo.IsCancelled(); 
+                
                 SiteReportRecord siteRecord = new(oSubsite);
 
                 _logger.RecordCSV(siteRecord);
