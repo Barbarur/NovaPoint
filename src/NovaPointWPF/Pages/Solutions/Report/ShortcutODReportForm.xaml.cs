@@ -28,27 +28,27 @@ namespace NovaPointWPF.Pages.Solutions.Report
     /// </summary>
     public partial class ShortcutODReportForm : Page, ISolutionForm
     {
-        private bool _allSiteCollections = false;
-        public bool AllSiteCollections
-        {
-            get { return _allSiteCollections; }
-            set
-            {
-                _allSiteCollections = value;
-                if (value)
-                {
-                    SingleSiteUrl.Visibility = Visibility.Collapsed;
-                    SiteUrl = string.Empty;
-                    SiteUrlTextBox.Text = String.Empty;
-                }
-                else
-                {
-                    SingleSiteUrl.Visibility = Visibility.Visible;
-                }
-            }
-        }
+        //private bool _allSiteCollections = false;
+        //public bool AllSiteCollections
+        //{
+        //    get { return _allSiteCollections; }
+        //    set
+        //    {
+        //        _allSiteCollections = value;
+        //        if (value)
+        //        {
+        //            SingleSiteUrl.Visibility = Visibility.Collapsed;
+        //            SiteUrl = string.Empty;
+        //            SiteUrlTextBox.Text = String.Empty;
+        //        }
+        //        else
+        //        {
+        //            SingleSiteUrl.Visibility = Visibility.Visible;
+        //        }
+        //    }
+        //}
 
-        public string SiteUrl { get; set; }
+        //public string SiteUrl { get; set; }
 
 
         public ShortcutODReportForm()
@@ -65,8 +65,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
             var siteAccParam = AdminF.Parameters;
-            siteAccParam.SiteParam.AllSiteCollections = this.AllSiteCollections;
-            siteAccParam.SiteParam.SiteUrl = this.SiteUrl;
+            siteAccParam.SiteParam = SiteF.Parameters;
 
             SPOListsParameters listParameters = new();
 

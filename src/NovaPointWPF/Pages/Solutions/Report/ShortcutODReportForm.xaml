@@ -21,7 +21,11 @@
                 <designmaterial:AdminForm
                     x:Name="AdminF"/>
 
-                <Label
+                <designmaterial:SiteTenantForm
+                    x:Name="SiteF"
+                    SubsitesVisibility="False"/>
+                
+                <!--<Label
                     Style="{DynamicResource MenuSectionTitleLabel}"
                     Content="Sites filter"/>
 
@@ -44,6 +48,14 @@
                                 Style="{DynamicResource SolutionFormToggleButton}"
                                 Content="Single Site"
                                 IsChecked="True"
+                                DockPanel.Dock="Left"/>
+
+                            <RadioButton
+                                x:Name="ListOfSitesRadioButton"
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="List of Sites"
+                                Width="102"
+                                IsChecked="{Binding ListOfSites, ElementName=root}"
                                 DockPanel.Dock="Left"/>
 
                             <TextBlock
@@ -71,7 +83,7 @@
 
                     </StackPanel>
 
-                </Grid>
+                </Grid>-->
 
             </StackPanel>
 

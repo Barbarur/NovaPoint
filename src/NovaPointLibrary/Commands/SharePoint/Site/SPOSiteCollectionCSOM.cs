@@ -26,7 +26,22 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _appInfo = appInfo;
         }
 
-        internal async Task<List<SiteProperties>> GetAsync(string siteUrl, bool includeShareSite, bool includePersonalSite, bool onlyGroupIdDefined)
+        internal async Task<SiteProperties> GetAsync(string siteUrl)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Getting single site {siteUrl}");
+
+            ClientContext clientContext = await _appInfo.GetContext(_appInfo.AdminUrl);
+            var tenant = new Tenant(clientContext);
+
+            SiteProperties oSiteCollection = tenant.GetSitePropertiesByUrl(siteUrl, true);
+            clientContext.Load(oSiteCollection);
+            clientContext.ExecuteQuery();
+
+            return oSiteCollection;
+        }
+
+        internal async Task<List<SiteProperties>> GetAllAsync(bool includeShareSite, bool includePersonalSite, bool onlyGroupIdDefined)
         {
             _appInfo.IsCancelled();
 
@@ -35,41 +50,28 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             var tenant = new Tenant(clientContext);
             var collSites = new List<SiteProperties>();
 
-            if (!String.IsNullOrWhiteSpace(siteUrl))
-            {
-                _logger.LogTxt(GetType().Name, $"Getting single site {siteUrl}");
+            _logger.LogTxt(GetType().Name, $"Getting Site Collections; IncludePersonalSite '{includePersonalSite}', Group ID Defined '{onlyGroupIdDefined}'");
 
-                SiteProperties oSiteCollection = tenant.GetSitePropertiesByUrl(siteUrl, true);
-                clientContext.Load(oSiteCollection);
+            SPOSitePropertiesEnumerableFilter filter = new()
+            {
+                IncludePersonalSite = includePersonalSite ? PersonalSiteFilter.Include : PersonalSiteFilter.Exclude,
+                IncludeDetail = true,
+            };
+            if (onlyGroupIdDefined) { filter.GroupIdDefined = 1; }
+
+            do
+            {
+                SPOSitePropertiesEnumerable subcollSiteCollections = tenant.GetSitePropertiesFromSharePointByFilters(filter);
+                clientContext.Load(subcollSiteCollections);
                 clientContext.ExecuteQuery();
+                collSites.AddRange(subcollSiteCollections);
+                filter.StartIndex = subcollSiteCollections.NextStartIndexFromSharePoint;
 
-                collSites.Add(oSiteCollection);
-            }
-            else
-            {
-                _logger.LogTxt(GetType().Name, $"Getting Site Collections; IncludePersonalSite '{includePersonalSite}', Group ID Defined '{onlyGroupIdDefined}'");
+                _logger.LogTxt(GetType().Name, $"Collected {collSites.Count} Site Collections...");
 
-                SPOSitePropertiesEnumerableFilter filter = new()
-                {
-                    IncludePersonalSite = includePersonalSite ? PersonalSiteFilter.Include : PersonalSiteFilter.Exclude,
-                    IncludeDetail = true,
-                };
-                if (onlyGroupIdDefined) { filter.GroupIdDefined = 1; }
+                tenant = new Tenant(await _appInfo.GetContext(_appInfo.AdminUrl));
 
-                do
-                {
-                    SPOSitePropertiesEnumerable subcollSiteCollections = tenant.GetSitePropertiesFromSharePointByFilters(filter);
-                    clientContext.Load(subcollSiteCollections);
-                    clientContext.ExecuteQuery();
-                    collSites.AddRange(subcollSiteCollections);
-                    filter.StartIndex = subcollSiteCollections.NextStartIndexFromSharePoint;
-
-                    _logger.LogTxt(GetType().Name, $"Collected {collSites.Count} Site Collections...");
-
-                    tenant = new Tenant(await _appInfo.GetContext(_appInfo.AdminUrl));
-
-                } while (!string.IsNullOrWhiteSpace(filter.StartIndex));
-            }
+            } while (!string.IsNullOrWhiteSpace(filter.StartIndex));
 
             return FilterAddInSites(collSites, includeShareSite);
         }

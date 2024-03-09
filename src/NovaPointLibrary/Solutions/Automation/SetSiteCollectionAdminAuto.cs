@@ -1,9 +1,11 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.AzureAD;
 using NovaPointLibrary.Commands.SharePoint.RecycleBin;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.User;
+using NovaPointLibrary.Commands.Utilities.GraphModel;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -20,19 +22,13 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-SetSiteCollectionAdminAuto";
 
         private SetSiteCollectionAdminAutoParameters _param;
-        public ISolutionParameters Parameters
-        {
-            get { return _param; }
-            set { _param = (SetSiteCollectionAdminAutoParameters)value; }
-        }
-
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
         public SetSiteCollectionAdminAuto(SetSiteCollectionAdminAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            Parameters = parameters;
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
+            _param = parameters;
+            _logger = new(uiAddLog, this.GetType().Name, _param);
             _appInfo = new(_logger, cancelTokenSource);
         }
 
@@ -54,37 +50,44 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _appInfo.IsCancelled();
 
-            ProgressTracker progress;
-            if (!String.IsNullOrWhiteSpace(_param.SiteParam.SiteUrl))
+            GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetUserAsync(_param.TargetUserUPN);
+            _param.TargetUserUPN = signedInUser.UserPrincipalName;
+
+            await foreach (var recordSite in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param.SiteParam).GetAsync())
             {
-                progress = new(_logger, 1);
-
-                Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.SiteUrl);
-
-                await SetAdmin(oSite.Url);
-
-                progress.ProgressUpdateReport();
+                await SetAdmin(recordSite.SiteUrl);
             }
-            else
-            {
-                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.SiteUrl, _param.SiteParam.IncludeShareSite, _param.SiteParam.IncludePersonalSite, _param.SiteParam.OnlyGroupIdDefined);
 
-                progress = new(_logger, collSiteCollections.Count);
-                foreach (var oSiteCollection in collSiteCollections)
-                {
-                    _appInfo.IsCancelled();
+            //ProgressTracker progress;
+            //if (!String.IsNullOrWhiteSpace(_param.SiteParam.SiteUrl))
+            //{
+            //    progress = new(_logger, 1);
 
-                    await SetAdmin(oSiteCollection.Url);
+            //    Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.SiteUrl);
 
-                    progress.ProgressUpdateReport();
-                }
-            }
+            //    await SetAdmin(oSite.Url);
+
+            //    progress.ProgressUpdateReport();
+            //}
+            //else
+            //{
+            //    List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.IncludeShareSite, _param.SiteParam.IncludePersonalSite, _param.SiteParam.OnlyGroupIdDefined);
+
+            //    progress = new(_logger, collSiteCollections.Count);
+            //    foreach (var oSiteCollection in collSiteCollections)
+            //    {
+            //        _appInfo.IsCancelled();
+
+            //        await SetAdmin(oSiteCollection.Url);
+
+            //        progress.ProgressUpdateReport();
+            //    }
+            //}
         }
 
         private async Task SetAdmin(string siteUrl)
         {
             _appInfo.IsCancelled();
-            _logger.LogUI(GetType().Name, $"Processing '{siteUrl}'");
 
             try
             {
@@ -124,7 +127,17 @@ namespace NovaPointLibrary.Solutions.Automation
         public string TargetUserUPN
         {
             get { return _targetUserUPN; }
-            set { _targetUserUPN = value.Trim();}
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new Exception($"User Principal Name cannot be empty");
+                }
+                else
+                {
+                    _targetUserUPN = value.Trim();
+                }
+            }
         }
 
         public bool IsSiteAdmin { get; set; } = false;

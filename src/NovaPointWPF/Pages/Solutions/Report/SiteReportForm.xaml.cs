@@ -56,8 +56,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
             };
 
             var siteAccParam = AdminF.Parameters;
-            var siteParam = SiteF.Parameters;
-            siteAccParam.SiteParam = siteParam;
+            siteAccParam.SiteParam = SiteF.Parameters;
 
             SiteReportParameters parameters = new(siteAccParam, permissionsParameters)
             {

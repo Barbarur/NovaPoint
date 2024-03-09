@@ -21,12 +21,24 @@ namespace NovaPointLibrary.Commands.AzureAD
             _appInfo = appInfo;
         }
 
-        internal async Task<GraphUser> GetSignedInUser()
+        internal async Task<GraphUser> GetSignedInUserAsync()
         {
             _appInfo.IsCancelled();
             _logger.LogTxt(GetType().Name, "Getting Signed-in user");
 
             string url = "/me";
+
+            GraphUser graphUser = await new GraphAPIHandler(_logger, _appInfo).GetObjectAsync<GraphUser>(url);
+
+            return graphUser;
+        }
+
+        internal async Task<GraphUser> GetUserAsync(string userUPN)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Getting Azure AD user {userUPN}");
+
+            string url = $"/users/{userUPN}";
 
             GraphUser graphUser = await new GraphAPIHandler(_logger, _appInfo).GetObjectAsync<GraphUser>(url);
 

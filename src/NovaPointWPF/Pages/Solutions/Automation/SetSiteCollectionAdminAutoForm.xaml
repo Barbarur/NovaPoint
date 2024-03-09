@@ -30,7 +30,7 @@
 
                     <Label
                         Style="{DynamicResource SolutionFormLabel}"
-                        Content="User UPN"/>
+                        Content="User Principal Name"/>
 
                     <TextBox
                         Style="{DynamicResource SolutionFormTextBox}"
@@ -49,6 +49,7 @@
                         <RadioButton
                             Style="{DynamicResource SolutionFormToggleButton}"
                             Content="Remove as Admin"
+                            IsChecked="True"
                             DockPanel.Dock="Left"/>
 
                     </StackPanel>
@@ -58,7 +59,8 @@
 
 
             <designmaterial:SiteTenantForm
-                x:Name="SiteF"/>
+                x:Name="SiteF"
+                SubsitesVisibility="False"/>
 
         </StackPanel>
         

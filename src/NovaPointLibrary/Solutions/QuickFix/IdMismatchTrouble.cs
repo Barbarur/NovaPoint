@@ -85,7 +85,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             _logger.LogUI(GetType().Name, $"Affected user account SID: {userSID}");
 
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsyncNEW())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 

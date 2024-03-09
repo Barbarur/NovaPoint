@@ -15,12 +15,6 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ShortcutODReport";
 
         private ShortcutODReportParameters _param;
-        public ISolutionParameters Parameters
-        {
-            get { return _param; }
-            set { _param = (ShortcutODReportParameters)value; }
-        }
-
         private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
 
@@ -38,7 +32,6 @@ namespace NovaPointLibrary.Solutions.Report
 
         public ShortcutODReport(ShortcutODReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            Parameters = parameters;
             _param.TListsParam.SiteAccParam.SiteParam.IncludePersonalSite = true;
             _param.TListsParam.SiteAccParam.SiteParam.IncludeShareSite = false;
             _param.TListsParam.SiteAccParam.SiteParam.OnlyGroupIdDefined = false;
@@ -49,7 +42,7 @@ namespace NovaPointLibrary.Solutions.Report
             _param.TListsParam.ListParam.ListTitle = "Documents";
             _param.ItemsParam.FileExpresions = _fileExpressions;
 
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
+            _logger = new(uiAddLog, this.GetType().Name, _param);
             _appInfo = new(_logger, cancelTokenSource);
         }
 

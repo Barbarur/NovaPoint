@@ -23,5 +23,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
         public bool IncludeSubsites { get; set; } = false;
 
+        private string _listOfSitesPath = string.Empty;
+        public string ListOfSitesPath
+        {
+            get { return _listOfSitesPath; }
+            set { _listOfSitesPath = value.Trim(); }
+        }
     }
 }

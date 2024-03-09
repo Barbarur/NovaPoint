@@ -22,7 +22,7 @@
 
 
                 <Button
-                    Style="{DynamicResource SolutionFormButton}"
+                    Style="{DynamicResource SolutionMainButton}"
                     DockPanel.Dock="Right"
                     Content="Learn More"
                     Margin="0,6"

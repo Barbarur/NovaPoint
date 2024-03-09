@@ -26,7 +26,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         {
             _appInfo.IsCancelled();
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsyncNEW())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
             {
 
                 if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))

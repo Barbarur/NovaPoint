@@ -40,8 +40,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             var defaultExpressions = new Expression<Func<Web, object>>[]
             {
                 w => w.Id,
+                w => w.LastItemModifiedDate,
+                w => w.ServerRelativeUrl,
                 w => w.Title,
                 w => w.Url,
+                w => w.WebTemplate,
+                w => w.LastItemUserModifiedDate,
             };
 
             var expressions = retrievalExpressions.Union(defaultExpressions).ToArray();

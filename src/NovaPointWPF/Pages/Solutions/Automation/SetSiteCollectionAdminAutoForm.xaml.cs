@@ -24,8 +24,14 @@ namespace NovaPointWPF.Pages.Solutions.Automation
     /// </summary>
     public partial class SetSiteCollectionAdminAutoForm : Page, ISolutionForm
     {
-        public string TargetUserUPN { get; set; }
-        public bool IsSiteAdmin { get; set; }
+        public string TargetUserUPN { get; set; } = string.Empty;
+
+        private bool _isSiteAdmin = false;
+        public bool IsSiteAdmin
+        {
+            get {  return _isSiteAdmin; }
+            set { _isSiteAdmin = value; }
+        }
 
         public SetSiteCollectionAdminAutoForm()
         {
@@ -38,7 +44,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             SolutionHeader.SolutionDocs = SetSiteCollectionAdminAuto.s_SolutionDocs;
 
             this.TargetUserUPN = string.Empty;
-            this.IsSiteAdmin = true;
+            this.IsSiteAdmin = false;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)

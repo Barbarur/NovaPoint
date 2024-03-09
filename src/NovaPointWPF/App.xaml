@@ -154,13 +154,12 @@
             </Style.Triggers>
         </Style>
 
-        
-        <Style x:Key="SolutionFormButton" TargetType="{x:Type Button}">
+        <Style x:Key="SolutionMainButton" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBorderColor}"/>
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
             <Setter Property="FontWeight" Value="Normal"/>
-            
+
 
             <Setter Property="Template">
                 <Setter.Value>
@@ -168,23 +167,23 @@
                         <Grid>
 
                             <Border x:Name="Border"
-                                    Background="{TemplateBinding Background}"
-                                    BorderThickness="2"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    CornerRadius="8"
-                                    Width="{TemplateBinding Width}"
-                                    Height="{TemplateBinding Height}">
+                            Background="{TemplateBinding Background}"
+                            BorderThickness="2"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            CornerRadius="8"
+                            Width="{TemplateBinding Width}"
+                            Height="{TemplateBinding Height}">
 
 
                                 <TextBlock x:Name="ButtonTitle"
-                                           Margin="10, 0, 10, 0"
-                                           VerticalAlignment="Center"
-                                           HorizontalAlignment="Center"
-                                           FontFamily="Segoe UI Variable Text"
-                                           FontSize="14"
-                                           FontWeight="{TemplateBinding FontWeight}"
-                                           Foreground="{TemplateBinding Foreground}"
-                                           Text="{TemplateBinding Content}"/>
+                                   Margin="10, 0, 10, 0"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"
+                                   FontFamily="Segoe UI Variable Text"
+                                   FontSize="14"
+                                   FontWeight="{TemplateBinding FontWeight}"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   Text="{TemplateBinding Content}"/>
 
                             </Border>
 
@@ -209,6 +208,43 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="SolutionFormButton" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="Margin" Value="2, 2, 2, 2"/>
+            <Setter Property="Width" Value="159"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+
+                            <Border
+                                Name="Border"
+                                Style="{DynamicResource SolutionFormControlBorder}"/>
+
+                            <Label
+                                x:Name="NombreTexto"
+                                Margin="10, 0, 10, 0"
+                                Style="{DynamicResource SolutionFormControlText}"
+                                Content="{TemplateBinding Content}"/>
+                            
+                        </Grid>
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource HoverButtonColor}"/>
+                            </Trigger>
+                            
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+        </Style>
 
         <Style x:Key="SolutionFormToggleButton" TargetType="{x:Type ToggleButton}">
             <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
@@ -227,7 +263,7 @@
                                 Margin="10, 0, 10, 0"
                                 Style="{DynamicResource SolutionFormControlText}"
                                 Content="{TemplateBinding Content}"/>
-                            
+
                         </Grid>
                         <ControlTemplate.Triggers>
 
@@ -403,6 +439,8 @@
             </Style.Triggers>
         </Style>
 
+        
+        
 
         <Style x:Key="SolutionFormTextBox" TargetType="{x:Type TextBox}">
             <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
@@ -509,7 +547,6 @@
             </Setter>
         </Style>
 
-
         <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
             <Grid
                 Width="6">
@@ -556,7 +593,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         
         <Style x:Key="ScrollBarThumb" TargetType="{x:Type Thumb}">
             <Setter Property="SnapsToDevicePixels" Value="True" />

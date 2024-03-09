@@ -1,8 +1,11 @@
-﻿using NovaPointLibrary.Commands.SharePoint.List;
+﻿using Microsoft.Graph;
+using Microsoft.Win32;
+using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -34,6 +37,17 @@ namespace NovaPointWPF.UserControls
             {
                 _allSiteCollections = value;
                 Parameters.AllSiteCollections = value;
+                OnPropertyChanged();
+                if (value)
+                {
+                    AllSitesFilter.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    AllSitesFilter.Visibility = Visibility.Collapsed;
+                    IncludePersonalSite = false;
+                    IncludeShareSite = false;
+                }
             }
         }
 
@@ -45,6 +59,11 @@ namespace NovaPointWPF.UserControls
             {
                 _includePersonalSite = value;
                 Parameters.IncludePersonalSite = value;
+                OnPropertyChanged();
+                if (value)
+                {
+                    OnlyGroupIdDefined = false;
+                }
             }
         }
 
@@ -57,6 +76,11 @@ namespace NovaPointWPF.UserControls
             {
                 _includeShareSite = value;
                 Parameters.IncludeShareSite = value;
+                OnPropertyChanged();
+                if (!value)
+                {
+                    OnlyGroupIdDefined = false;
+                }
             }
         }
 
@@ -69,6 +93,12 @@ namespace NovaPointWPF.UserControls
             {
                 _onlyGroupIdDefined = value;
                 Parameters.OnlyGroupIdDefined = value;
+                OnPropertyChanged();
+                if (value)
+                {
+                    IncludeShareSite = true;
+                    IncludePersonalSite = false;
+                }
             }
         }
 
@@ -80,15 +110,14 @@ namespace NovaPointWPF.UserControls
             set
             {
                 _singleSite = value;
+                OnPropertyChanged();
                 if (value)
                 {
-                    AllSitesFilter.Visibility = Visibility.Collapsed;
-                    SingleSiteUrl.Visibility = Visibility.Visible;
+                    SingleSiteForm.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    AllSitesFilter.Visibility = Visibility.Visible;
-                    SingleSiteUrl.Visibility = Visibility.Collapsed;
+                    SingleSiteForm.Visibility = Visibility.Collapsed;
                     SiteUrl = string.Empty;
                 }
             }
@@ -106,6 +135,56 @@ namespace NovaPointWPF.UserControls
             }
         }
 
+        private bool _listOfSites = false;
+        public bool ListOfSites
+        {
+            get { return _listOfSites; }
+            set
+            {
+                _listOfSites = value;
+                OnPropertyChanged();
+                if (value)
+                {
+                    ListOfSitesForm.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    ListOfSitesForm.Visibility = Visibility.Collapsed;
+                    ListOfSitesPath = string.Empty;
+                }
+            }
+        }
+
+        private string _listOfSitesPath = string.Empty;
+        public string ListOfSitesPath
+        {
+            get { return _listOfSitesPath; }
+            set
+            {
+                _listOfSitesPath = value;
+                Parameters.ListOfSitesPath = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool _listOfSitesVisibility = true;
+        public bool ListOfSitesVisibility
+        {
+            get { return _listOfSitesVisibility; }
+            set
+            {
+                _listOfSitesVisibility = value;
+                if (value)
+                {
+                    ListOfSitesRadioButton.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    ListOfSitesRadioButton.Visibility = Visibility.Collapsed;
+                    ListOfSitesPath = string.Empty;
+                }
+            }
+        }
 
 
         private bool _includeSubsites = false;
@@ -138,6 +217,7 @@ namespace NovaPointWPF.UserControls
             }
         }
 
+
         public SiteTenantForm()
         {
             InitializeComponent();
@@ -148,6 +228,13 @@ namespace NovaPointWPF.UserControls
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void OpenFileClick(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            if (openFileDialog.ShowDialog() == true)
+                ListOfSitesPath = openFileDialog.FileName;
         }
     }
 }

@@ -28,12 +28,6 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-SiteReport";
 
         private SiteReportParameters _param;
-        public ISolutionParameters Parameters
-        {
-            get { return _param; }
-            set { _param = (SiteReportParameters)value; }
-        }
-
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
@@ -42,10 +36,13 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly Expression<Func<Web, object>>[] _webExpressions = new Expression<Func<Web, object>>[]
         {
             w => w.Id,
+            w => w.LastItemModifiedDate,
             w => w.ServerRelativeUrl,
             w => w.Title,
             w => w.Url,
             w => w.WebTemplate,
+            w => w.LastItemUserModifiedDate,
+
         };
 
         private readonly Expression<Func<Microsoft.SharePoint.Client.Site, object>>[] _siteExpressions = new Expression<Func<Microsoft.SharePoint.Client.Site, object>>[]
@@ -56,11 +53,11 @@ namespace NovaPointLibrary.Solutions.Report
 
         public SiteReport(SiteReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            Parameters = parameters;
+            _param = parameters;
             _param.PermissionsParam.IncludeSiteAccess = false;
             _param.PermissionsParam.IncludeUniquePermissions = false;
 
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
+            _logger = new(uiAddLog, this.GetType().Name, _param);
             _appInfo = new(_logger, cancelTokenSource);
             _sitePermissions = new(_logger, _appInfo, _param.PermissionsParam);
         }
@@ -83,79 +80,117 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
-            GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetSignedInUser();
-            string adminUPN = signedInUser.UserPrincipalName;
+            if (NeedAccess() || !_param.SitesAccParam.SiteParam.AllSiteCollections)
+            {
+                await ProcessComplexAsync();
+            }
+            else if (_param.SitesAccParam.SiteParam.AllSiteCollections)
+            {
+                await ProcessSimpleReportAsync();
+            }
+            else
+            {
+                throw new Exception("No matching requirements for the report.");
+            }
+        }
 
-            List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SitesAccParam.SiteParam.SiteUrl, _param.SitesAccParam.SiteParam.IncludeShareSite, _param.SitesAccParam.SiteParam.IncludePersonalSite, _param.SitesAccParam.SiteParam.OnlyGroupIdDefined);
+        private async Task ProcessSimpleReportAsync()
+        {
+            _appInfo.IsCancelled();
 
-            ProgressTracker progress = new(_logger, collSiteCollections.Count);
-            foreach (var oSiteCollection in collSiteCollections)
+            await foreach (var recordSite in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param.SitesAccParam.SiteParam).GetAsync())
             {
                 _appInfo.IsCancelled();
-                _logger.LogUI(GetType().Name, $"Processing Site Collection '{oSiteCollection.Url}'");
 
-                try
+                if (recordSite.SiteProperties != null)
                 {
-                    await AddAdmin(oSiteCollection.Url, adminUPN);
-                }
-                catch (Exception ex)
-                {
-                    _logger.ReportError("Site Collection", oSiteCollection.Url, ex);
-
-                    SiteReportRecord record = new(oSiteCollection.Url, ex.Message);
-                    _logger.RecordCSV(record);
-
-                    progress.ProgressUpdateReport();
-                    continue;
-                }
-
-                var recordSiteCollection = await GetSiteCollectionRecord(oSiteCollection);
-                if (_param.PermissionsParam.IncludeAdmins)
-                {
-                    await foreach (var admins in _sitePermissions.GetAsync(oSiteCollection.Url, progress))
-                    {
-                        _appInfo.IsCancelled();
-
-                        recordSiteCollection.AddAdmins(admins);
-                        _logger.RecordCSV(recordSiteCollection);
-                    }
+                    SiteReportRecord siteRecord = new(recordSite.SiteProperties);
+                    _logger.RecordCSV(siteRecord);
                 }
                 else
                 {
-                    _logger.RecordCSV(recordSiteCollection);
+                    throw new Exception("Site properties is empty");
+                }
+            }
+        }
+
+        private async Task ProcessComplexAsync()
+        {
+            _appInfo.IsCancelled();
+
+            await foreach (var recordSite in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SitesAccParam).GetAsync())
+            {
+                _appInfo.IsCancelled();
+
+
+                if (!string.IsNullOrEmpty(recordSite.ErrorMessage))
+                {
+                    SiteReportRecord siteRecord = new(recordSite.SiteUrl, recordSite.ErrorMessage);
+                    _logger.RecordCSV(siteRecord);
                 }
 
-                if (_param.SitesAccParam.SiteParam.IncludeSubsites)
+                
+                else if (recordSite.SiteProperties != null)
                 {
+                    await ProcessSiteCollectionRecord(recordSite.SiteProperties, recordSite.Progress);
+                }
+                
+                
+                else if (recordSite.Web != null)
+                {
+                    SiteReportRecord siteRecord = new(recordSite.Web);
+                    _logger.RecordCSV(siteRecord);
+                }
+                
+
+                else
+                {
+                    Web? oWeb = null;
                     try
                     {
-                        await GetSubsitesAsync(oSiteCollection.Url, progress);
+                        oWeb = await new SPOWebCSOM(_logger, _appInfo).GetAsync(recordSite.SiteUrl, _webExpressions);
                     }
                     catch (Exception ex)
                     {
-                        _logger.ReportError("Site Collection", oSiteCollection.Url, ex);
+                        SiteReportRecord siteRecord = new(recordSite.SiteUrl, ex.Message);
+                        _logger.RecordCSV(siteRecord);
+                    }
 
-                        SiteReportRecord record = new(oSiteCollection.Url, ex.Message);
-                        _logger.RecordCSV(record);
+
+                    if (oWeb == null) { continue;  }
+
+
+                    if (oWeb.IsSubSite())
+                    {
+                        SiteReportRecord siteRecord = new(oWeb);
+                        _logger.RecordCSV(siteRecord);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            await ProcessSiteProperties(recordSite.SiteUrl, recordSite.Progress);
+                        }
+                        catch (Exception ex)
+                        {
+                            SiteReportRecord siteRecord = new(recordSite.SiteUrl, ex.Message);
+                            _logger.RecordCSV(siteRecord);
+                        }
                     }
                 }
-
-                try
-                {
-                    await RemoveAdmin(oSiteCollection.Url, adminUPN);
-                }
-                catch (Exception ex)
-                {
-                    _logger.ReportError("Site Collection", oSiteCollection.Url, ex);
-
-                    SiteReportRecord record = new(oSiteCollection.Url, ex.Message);
-                    _logger.RecordCSV(record);
-                }
-
-                progress.ProgressUpdateReport();
             }
         }
-        private async Task<SiteReportRecord> GetSiteCollectionRecord(SiteProperties oSiteCollection)
+
+        private async Task ProcessSiteProperties(string siteUrl, ProgressTracker progress)
+        {
+            _appInfo.IsCancelled(); 
+            
+            var oSiteProperties = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(siteUrl);
+
+            await ProcessSiteCollectionRecord(oSiteProperties, progress);
+        }
+
+        private async Task ProcessSiteCollectionRecord(SiteProperties oSiteCollection, ProgressTracker progress)
         {
             _appInfo.IsCancelled();
             SiteReportRecord siteRecord = new(oSiteCollection);
@@ -164,48 +199,156 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 var site = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(oSiteCollection.Url, _siteExpressions);
 
-                siteRecord.AddSiteCollectionDetails(site);
-
+                siteRecord.AddSiteDetails(site);
             }
 
-            return siteRecord;
-        }
-
-        private async Task GetSubsitesAsync(string siteUrl, ProgressTracker parentProgress)
-        {
-            _appInfo.IsCancelled();
-            _logger.LogUI(GetType().Name, $"Getting Subsites for '{siteUrl}'");
-
-            List<Web> collSubsites = await new SPOSubsiteCSOM(_logger, _appInfo).GetAsync(siteUrl);
-
-            ProgressTracker progress = new(parentProgress, collSubsites.Count);
-            foreach (var oSubsite in collSubsites)
+            if (_param.PermissionsParam.IncludeAdmins)
             {
-                _appInfo.IsCancelled(); 
-                
-                SiteReportRecord siteRecord = new(oSubsite);
+                await foreach (var admins in _sitePermissions.GetAsync(oSiteCollection.Url, progress))
+                {
+                    _appInfo.IsCancelled();
 
+                    siteRecord.AddAdmins(admins);
+                    _logger.RecordCSV(siteRecord);
+                }
+            }
+            else
+            {
                 _logger.RecordCSV(siteRecord);
+            }
+        }
+
+
+
+
+        //private async Task RunScriptAsyncOLD()
+        //{
+        //    _appInfo.IsCancelled();
+
+        //    GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetSignedInUserAsync();
+        //    string adminUPN = signedInUser.UserPrincipalName;
+
+        //    List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAllAsync(_param.SitesAccParam.SiteParam.IncludeShareSite, _param.SitesAccParam.SiteParam.IncludePersonalSite, _param.SitesAccParam.SiteParam.OnlyGroupIdDefined);
+
+        //    ProgressTracker progress = new(_logger, collSiteCollections.Count);
+        //    foreach (var oSiteCollection in collSiteCollections)
+        //    {
+        //        _appInfo.IsCancelled();
+        //        _logger.LogUI(GetType().Name, $"Processing Site Collection '{oSiteCollection.Url}'");
+
+        //        try
+        //        {
+        //            await AddAdmin(oSiteCollection.Url, adminUPN);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            _logger.ReportError("Site", oSiteCollection.Url, ex);
+
+        //            SiteReportRecord record = new(oSiteCollection.Url, ex.Message);
+        //            _logger.RecordCSV(record);
+
+        //            progress.ProgressUpdateReport();
+        //            continue;
+        //        }
+
+        //        var recordSiteCollection = await GetSiteCollectionRecord(oSiteCollection);
+        //        if (_param.PermissionsParam.IncludeAdmins)
+        //        {
+        //            await foreach (var admins in _sitePermissions.GetAsync(oSiteCollection.Url, progress))
+        //            {
+        //                _appInfo.IsCancelled();
+
+        //                recordSiteCollection.AddAdmins(admins);
+        //                _logger.RecordCSV(recordSiteCollection);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            _logger.RecordCSV(recordSiteCollection);
+        //        }
+
+        //        if (_param.SitesAccParam.SiteParam.IncludeSubsites)
+        //        {
+        //            try
+        //            {
+        //                await GetSubsitesAsync(oSiteCollection.Url, progress);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                _logger.ReportError("Site Collection", oSiteCollection.Url, ex);
+
+        //                SiteReportRecord record = new(oSiteCollection.Url, ex.Message);
+        //                _logger.RecordCSV(record);
+        //            }
+        //        }
+
+        //        try
+        //        {
+        //            await RemoveAdmin(oSiteCollection.Url, adminUPN);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            _logger.ReportError("Site Collection", oSiteCollection.Url, ex);
+
+        //            SiteReportRecord record = new(oSiteCollection.Url, ex.Message);
+        //            _logger.RecordCSV(record);
+        //        }
+
+        //        progress.ProgressUpdateReport();
+        //    }
+        //}
+        //private async Task<SiteReportRecord> GetSiteCollectionRecord(SiteProperties oSiteCollection)
+        //{
+        //    _appInfo.IsCancelled();
+        //    SiteReportRecord siteRecord = new(oSiteCollection);
+
+        //    if (_param.Detailed)
+        //    {
+        //        var site = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(oSiteCollection.Url, _siteExpressions);
+
+        //        siteRecord.AddSiteDetails(site);
+
+        //    }
+
+        //    return siteRecord;
+        //}
+
+        //private async Task GetSubsitesAsync(string siteUrl, ProgressTracker parentProgress)
+        //{
+        //    _appInfo.IsCancelled();
+        //    _logger.LogTxt(GetType().Name, $"Getting Subsites for '{siteUrl}'");
+
+        //    List<Web> collSubsites = await new SPOSubsiteCSOM(_logger, _appInfo).GetAsync(siteUrl, _webExpressions);
+
+        //    ProgressTracker progress = new(parentProgress, collSubsites.Count);
+        //    foreach (var oSubsite in collSubsites)
+        //    {
+        //        _appInfo.IsCancelled();
+        //        _logger.LogUI(GetType().Name, $"Processing Subsite '{oSubsite.Url}'");
+
+        //        SiteReportRecord siteRecord = new(oSubsite);
+
+        //        _logger.RecordCSV(siteRecord);
                     
-                progress.ProgressUpdateReport();
-            }
-        }
+        //        progress.ProgressUpdateReport();
+        //    }
+        //}
 
-        private async Task AddAdmin(string siteUrl, string adminUPN)
-        {
-            if (NeedAccess())
-            {
-                await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(siteUrl, adminUPN);
-            }
-        }
+        //private async Task AddAdmin(string siteUrl, string adminUPN)
+        //{
+        //    if (NeedAccess())
+        //    {
+        //        await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(siteUrl, adminUPN);
+        //    }
+        //}
 
-        private async Task RemoveAdmin(string siteUrl, string adminUPN)
-        {
-            if (NeedAccess() && _param.SitesAccParam.RemoveAdmin)
-            {
-                await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(siteUrl, adminUPN);
-            }
-        }
+        //private async Task RemoveAdmin(string siteUrl, string adminUPN)
+        //{
+        //    if (NeedAccess() && _param.SitesAccParam.RemoveAdmin)
+        //    {
+        //        await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(siteUrl, adminUPN);
+        //    }
+        //}
 
         private bool NeedAccess()
         {
@@ -266,7 +409,7 @@ namespace NovaPointLibrary.Solutions.Report
             SiteUrl = web.Url;
             GroupId = web.Id.ToString();
             Tempalte = web.WebTemplate;
-            IsSubSite = "TRUE";
+            IsSubSite = web.IsSubSite().ToString();
 
             LastContentModifiedDate = web.LastItemUserModifiedDate.ToString();
         }
@@ -276,7 +419,7 @@ namespace NovaPointLibrary.Solutions.Report
             Remarks = errorMessage;
         }
 
-        internal void AddSiteCollectionDetails(Microsoft.SharePoint.Client.Site site)
+        internal void AddSiteDetails(Microsoft.SharePoint.Client.Site site)
         {
             IsHubSite = site.IsHubSite.ToString();
             HubSiteId = site.IsHubSite ? site.HubSiteId.ToString() : string.Empty;

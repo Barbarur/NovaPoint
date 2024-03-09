@@ -12,30 +12,39 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     internal class SPOTenantSiteUrlsRecord
     {
+        internal ProgressTracker Progress { get; set; }
         internal string SiteUrl { get; set; }
         internal string SiteName { get; set; }
-        internal ProgressTracker Progress { get; set; }
+        internal SiteProperties? SiteProperties { get; set; } = null;
+        internal Web? Web { get; set; } = null;
         internal string ErrorMessage { get; set; } = string.Empty;
+        
+        internal SPOTenantSiteUrlsRecord(ProgressTracker progress, SiteProperties oSiteCollection)
+        {
+            Progress = progress;
+            SiteUrl = oSiteCollection.Url;
+            SiteName = oSiteCollection.Title;
+            SiteProperties = oSiteCollection;
+        }
 
         internal SPOTenantSiteUrlsRecord(ProgressTracker progress, Web oWeb)
         {
             Progress = progress;
             SiteUrl = oWeb.Url;
             SiteName = oWeb.Title;
+            Web = oWeb;
         }
 
-        internal SPOTenantSiteUrlsRecord(ProgressTracker progress, SiteProperties oSiteCollection)
+        internal SPOTenantSiteUrlsRecord(ProgressTracker progress, string siteUrl)
         {
             Progress = progress;
-            SiteUrl = oSiteCollection.Url;
-            SiteName = oSiteCollection.Title;
+            SiteUrl = siteUrl;
+            SiteName = "Unknown";
         }
 
-        internal SPOTenantSiteUrlsRecord(SPOTenantSiteUrlsRecord record)
+        internal SPOTenantSiteUrlsRecord ShallowCopy()
         {
-            Progress = record.Progress;
-            SiteUrl = record.SiteUrl;
-            SiteName = record.SiteName;
+            return (SPOTenantSiteUrlsRecord) this.MemberwiseClone();
         }
     }
 }
