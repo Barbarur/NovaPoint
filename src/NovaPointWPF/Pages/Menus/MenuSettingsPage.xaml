@@ -67,7 +67,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Button
-                    Style="{DynamicResource SolutionFormButton}"
+                    Style="{DynamicResource SolutionMainButton}"
                     Content="Save Settings"
                     Click="SaveClick"
                     Grid.Column="0"
@@ -75,7 +75,7 @@
                     Width="120"/>
 
                 <Button
-                    Style="{DynamicResource SolutionFormButton}"
+                    Style="{DynamicResource SolutionMainButton}"
                     Content="Delete Cache"
                     Click="DeleteClick"
                     Grid.Column="1"
@@ -86,7 +86,7 @@
             
             
             <Button
-                Style="{DynamicResource SolutionFormButton}"
+                Style="{DynamicResource SolutionMainButton}"
                 x:Name="UpdateButton"
                 Content="Update"
                 Click="UpdateClick"
