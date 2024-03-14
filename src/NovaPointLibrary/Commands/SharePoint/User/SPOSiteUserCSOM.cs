@@ -175,7 +175,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
 
             try
             {
-                Microsoft.SharePoint.Client.User user = clientContext.Web.SiteUsers.GetByLoginName($"c:0-.f|rolemanager|spo-grid-all-users/{_appInfo._tenantId}");
+                Microsoft.SharePoint.Client.User user = clientContext.Web.SiteUsers.GetByLoginName($"c:0-.f|rolemanager|spo-grid-all-users/{_appInfo.Settings.TenantID}");
 
                 clientContext.Load(user, expressions);
                 clientContext.ExecuteQueryRetry();

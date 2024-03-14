@@ -57,7 +57,9 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 IsSiteAdmin = this.IsSiteAdmin,
             };
 
-            await new SetSiteCollectionAdminAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new SetSiteCollectionAdminAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+
+            await SetSiteCollectionAdminAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }
     }
 }

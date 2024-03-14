@@ -26,7 +26,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private Expression<Func<User, object>>[] _userRetrievalExpressions = new Expression<Func<User, object>>[]
+        private static Expression<Func<User, object>>[] _userRetrievalExpressions = new Expression<Func<User, object>>[]
         {
             u => u.Email,
             u => u.IsSiteAdmin,
@@ -34,26 +34,51 @@ namespace NovaPointLibrary.Solutions.QuickFix
             u => u.UserPrincipalName,
         };
 
-        public IdMismatchTrouble(IdMismatchTroubleParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private IdMismatchTrouble(NPLogger logger, Commands.Authentication.AppInfo appInfo, IdMismatchTroubleParameters parameters)
         {
             _param = parameters;
-            _logger = new(uiAddLog, this.GetType().Name, _param);
-            _appInfo = new(_logger, cancelTokenSource);
+            _logger = logger;
+            _appInfo = appInfo;
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(IdMismatchTroubleParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            NPLogger logger = new(uiAddLog, "IdMismatchTrouble", parameters);
             try
             {
-                await RunScriptAsync();
+                var appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                _logger.ScriptFinish();
+                await new IdMismatchTrouble(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
+
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+
+        //public IdMismatchTrouble(IdMismatchTroubleParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{
+        //    _param = parameters;
+        //    _logger = new(uiAddLog, this.GetType().Name, _param);
+        //    _appInfo = new(_logger, cancelTokenSource);
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+
+        //        _logger.ScriptFinish();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {
@@ -134,7 +159,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 string upnCoded = oUser.UserPrincipalName.Trim().Replace("@", "_").Replace(".", "_");
                 if (siteUrl.Contains(upnCoded, StringComparison.OrdinalIgnoreCase) && siteUrl.Contains("-my.sharepoint.com", StringComparison.OrdinalIgnoreCase))
                 {
-                    _logger.LogUI(GetType().Name, $"Adding user '{oUser.UserPrincipalName}' as Site Collection Admin for OneDrive {siteUrl}");
+                    AddRecord(siteUrl, "Added user as Site Collection Admin");
                     if (!_param.ReportMode) { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(siteUrl, oUser.UserPrincipalName); }
                 }
             }

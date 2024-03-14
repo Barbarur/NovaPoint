@@ -40,7 +40,9 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
             RecycleBinReportParameters parameters = new(RecycleF.Parameters, siteAccParam);
 
-            await new RecycleBinReport(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new RecycleBinReport(parameters, uiLog, cancelTokenSource).RunAsync();
+
+            await RecycleBinReport.RunAsync(parameters, uiLog, cancelTokenSource);
         }
     }
 }

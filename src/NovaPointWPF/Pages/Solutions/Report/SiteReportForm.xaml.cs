@@ -62,7 +62,9 @@ namespace NovaPointWPF.Pages.Solutions.Report
             {
                 Detailed = this.Detailed,
             };
-            await new SiteReport(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new SiteReport(parameters, uiLog, cancelTokenSource).RunAsync();
+
+            await SiteReport.RunAsync(parameters, uiLog, cancelTokenSource);
         }
     }
 }

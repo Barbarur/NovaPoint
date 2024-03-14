@@ -23,26 +23,50 @@ namespace NovaPointLibrary.Solutions.Automation
         private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
 
-        public RestoreRecycleBinAuto(RestoreRecycleBinAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        {;
+        private RestoreRecycleBinAuto(NPLogger logger, AppInfo appInfo, RestoreRecycleBinAutoParameters parameters)
+        {
             _param = parameters;
-            _logger = new(uiAddLog, this.GetType().Name, _param);
-            _appInfo = new(_logger, cancelTokenSource);
+            _logger = logger;
+            _appInfo = appInfo;
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(RestoreRecycleBinAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            NPLogger logger = new(uiAddLog, "RestoreRecycleBinAuto", parameters);
             try
             {
-                await RunScriptAsync();
+                AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                _logger.ScriptFinish();
+                await new RestoreRecycleBinAuto(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
+
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+        //public RestoreRecycleBinAuto(RestoreRecycleBinAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{;
+        //    _param = parameters;
+        //    _logger = new(uiAddLog, this.GetType().Name, _param);
+        //    _appInfo = new(_logger, cancelTokenSource);
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+
+        //        _logger.ScriptFinish();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {

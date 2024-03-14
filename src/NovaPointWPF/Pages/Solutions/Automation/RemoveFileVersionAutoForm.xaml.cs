@@ -83,7 +83,9 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 ReportMode = this.ReportMode,
             };
 
-            await new RemoveFileVersionAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new RemoveFileVersionAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+
+            await RemoveFileVersionAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }
 
 

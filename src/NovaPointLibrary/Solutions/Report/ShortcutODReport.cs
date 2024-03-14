@@ -18,7 +18,7 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
 
-        private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
+        private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
         {
             i => i["A2ODExtendedMetadata"],
             i => i["Author"],
@@ -30,36 +30,70 @@ namespace NovaPointLibrary.Solutions.Report
             i => i["FileRef"],
         };
 
-        public ShortcutODReport(ShortcutODReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private ShortcutODReport(NPLogger logger, AppInfo appInfo, ShortcutODReportParameters parameters)
         {
-            _param.TListsParam.SiteAccParam.SiteParam.IncludePersonalSite = true;
-            _param.TListsParam.SiteAccParam.SiteParam.IncludeShareSite = false;
-            _param.TListsParam.SiteAccParam.SiteParam.OnlyGroupIdDefined = false;
-            _param.TListsParam.SiteAccParam.SiteParam.IncludeSubsites = false;
-            _param.TListsParam.ListParam.AllLists= false;
-            _param.TListsParam.ListParam.IncludeLists = false;
-            _param.TListsParam.ListParam.IncludeLibraries = false;
-            _param.TListsParam.ListParam.ListTitle = "Documents";
-            _param.ItemsParam.FileExpresions = _fileExpressions;
-
-            _logger = new(uiAddLog, this.GetType().Name, _param);
-            _appInfo = new(_logger, cancelTokenSource);
+            _param = parameters;
+            _logger = logger;
+            _appInfo = appInfo;
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(ShortcutODReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            parameters.TListsParam.SiteAccParam.SiteParam.IncludePersonalSite = true;
+            parameters.TListsParam.SiteAccParam.SiteParam.IncludeShareSite = false;
+            parameters.TListsParam.SiteAccParam.SiteParam.OnlyGroupIdDefined = false;
+            parameters.TListsParam.SiteAccParam.SiteParam.IncludeSubsites = false;
+            parameters.TListsParam.ListParam.AllLists = false;
+            parameters.TListsParam.ListParam.IncludeLists = false;
+            parameters.TListsParam.ListParam.IncludeLibraries = false;
+            parameters.TListsParam.ListParam.ListTitle = "Documents";
+            parameters.ItemsParam.FileExpresions = _fileExpressions;
+
+            NPLogger logger = new(uiAddLog, "ShortcutODReport", parameters);
             try
             {
-                await RunScriptAsync();
+                AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                _logger.ScriptFinish();
+                await new ShortcutODReport(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
 
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+        //public ShortcutODReport(ShortcutODReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{
+        //    _param.TListsParam.SiteAccParam.SiteParam.IncludePersonalSite = true;
+        //    _param.TListsParam.SiteAccParam.SiteParam.IncludeShareSite = false;
+        //    _param.TListsParam.SiteAccParam.SiteParam.OnlyGroupIdDefined = false;
+        //    _param.TListsParam.SiteAccParam.SiteParam.IncludeSubsites = false;
+        //    _param.TListsParam.ListParam.AllLists= false;
+        //    _param.TListsParam.ListParam.IncludeLists = false;
+        //    _param.TListsParam.ListParam.IncludeLibraries = false;
+        //    _param.TListsParam.ListParam.ListTitle = "Documents";
+        //    _param.ItemsParam.FileExpresions = _fileExpressions;
+
+        //    _logger = new(uiAddLog, this.GetType().Name, _param);
+        //    _appInfo = new(_logger, cancelTokenSource);
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+
+        //        _logger.ScriptFinish();
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {
@@ -68,6 +102,8 @@ namespace NovaPointLibrary.Solutions.Report
             await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
+
+                if ( !results.SiteUrl.Contains(_appInfo.RootPersonalUrl, StringComparison.OrdinalIgnoreCase) ) { continue; }
 
                 if (!String.IsNullOrWhiteSpace(results.ErrorMessage) || results.List == null)
                 {

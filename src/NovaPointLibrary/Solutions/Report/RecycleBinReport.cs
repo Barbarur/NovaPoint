@@ -24,26 +24,51 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
 
-        public RecycleBinReport(RecycleBinReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private RecycleBinReport(NPLogger logger, AppInfo appInfo, RecycleBinReportParameters parameters)
         {
             _param = parameters;
-            _logger = new(uiAddLog, this.GetType().Name, _param);
-            _appInfo = new(_logger, cancelTokenSource);
+            _logger = logger;
+            _appInfo = appInfo;
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(RecycleBinReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            NPLogger logger = new(uiAddLog, "RecycleBinReport", parameters);
             try
             {
-                await RunScriptAsync();
-                
-                _logger.ScriptFinish();
+                AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
+
+                await new RecycleBinReport(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
+
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+
+        //public RecycleBinReport(RecycleBinReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{
+        //    _param = parameters;
+        //    _logger = new(uiAddLog, this.GetType().Name, _param);
+        //    _appInfo = new(_logger, cancelTokenSource);
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+                
+        //        _logger.ScriptFinish();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {

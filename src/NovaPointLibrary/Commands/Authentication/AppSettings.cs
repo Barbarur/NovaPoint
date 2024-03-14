@@ -11,13 +11,6 @@ namespace NovaPointLibrary.Commands.Authentication
 {
     public class AppSettings
     {
-        private string _domain = String.Empty;
-        public string Domain
-        {
-            get { return _domain; }
-            set { _domain = value.Trim(); }
-        }
-
         private string _tenantId = string.Empty;
         public string TenantID
         {
@@ -39,7 +32,7 @@ namespace NovaPointLibrary.Commands.Authentication
             set { _cachingToken = value; }
         }
 
-        private bool _isUpdated { get; set; } = false;
+        private bool _isUpdated { get; set; } = true;
         public bool IsUpdated
         {
             get { return _isUpdated; }
@@ -126,6 +119,19 @@ namespace NovaPointLibrary.Commands.Authentication
             StreamWriter myWriter = new(new FileStream(GetSettingsPath(), FileMode.Create, FileAccess.Write));
             mySerializer.Serialize(myWriter, this);
             myWriter.Close();
+        }
+
+        public void ValidateSettings()
+        {
+            if (string.IsNullOrWhiteSpace(TenantID) || string.IsNullOrWhiteSpace(ClientId))
+            {
+                throw new Exception("Please go to Settings and fill the App Information");
+            }
+        }
+
+        public static void RemoveTokenCache()
+        {
+            TokenCacheHelper.RemoveCache();
         }
 
     }

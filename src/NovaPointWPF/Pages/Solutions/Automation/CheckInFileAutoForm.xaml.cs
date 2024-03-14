@@ -68,7 +68,9 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 Comment = this.Comment,
             };
 
-            await new CheckInFileAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new CheckInFileAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+
+            await CheckInFileAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }
 
         private void CheckInTypeClick(object sender, RoutedEventArgs e)

@@ -1,6 +1,9 @@
 ﻿using Microsoft.Graph.ExternalConnectors;
 using Microsoft.Identity.Client;
+using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Commands.Utilities.GraphModel;
+using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Solutions;
 using PnP.Framework.Modernization.Functions;
 using System.Reflection;
@@ -42,7 +45,7 @@ namespace NovaPointLibrary.Commands.Authentication
                 _logger.LogTxt(GetType().Name, $"SPO root URL '{value}'");
             }
         }
-        private string _domain = String.Empty;
+        private string _domain = string.Empty;
         internal string Domain
         {
             get { return _domain; }
@@ -55,11 +58,7 @@ namespace NovaPointLibrary.Commands.Authentication
             }
         }
 
-        internal string _tenantId { get; set; } = string.Empty;
-        private string _clientId;
-        private bool _cachingToken;
-
-        internal CancellationTokenSource CancelTokenSource { get; init; }
+        internal AppSettings Settings { get; set; } = new();
         internal CancellationToken CancelToken { get; init; }
 
         private readonly IPublicClientApplication _app;
@@ -72,34 +71,39 @@ namespace NovaPointLibrary.Commands.Authentication
         {
             _logger = logger;
 
-            var appSettings = AppSettings.GetSettings();
-            Domain = appSettings.Domain;
-            _tenantId = appSettings.TenantID;
-            _clientId = appSettings.ClientId;
-            _cachingToken = appSettings.CachingToken;
+            Settings = AppSettings.GetSettings();
+            Settings.ValidateSettings();
 
-            if (string.IsNullOrWhiteSpace(Domain) || string.IsNullOrWhiteSpace(_tenantId) || string.IsNullOrWhiteSpace(_clientId))
-            {
-                throw new Exception("Please go to Settings and fill the App Information");
-            }
-
-            this.CancelTokenSource = cancelTokenSource;
             this.CancelToken = cancelTokenSource.Token;
 
-            Uri authority = new($"https://login.microsoftonline.com/{_tenantId}");
-            _app = PublicClientApplicationBuilder.Create(_clientId)
+            Uri authority = new($"https://login.microsoftonline.com/{Settings.TenantID}");
+            _app = PublicClientApplicationBuilder.Create(Settings.ClientId)
                                                  .WithAuthority(authority)
                                                  .WithDefaultRedirectUri()
                                                  .Build();
         }
 
+        internal static async Task<AppInfo> BuildAsync(NPLogger logger, CancellationTokenSource cancelTokenSource)
+        {
+            AppInfo appInfo = new(logger, cancelTokenSource);
+            appInfo.IsCancelled();
+
+            string url = $"/sites/root";
+            var graphUser = await new GraphAPIHandler(logger, appInfo).GetObjectAsync<GraphSitesRoot>(url);
+            logger.LogTxt("Appinfo", $"Hostname: {graphUser.SiteCollection.Hostname}");
+
+            string domain = graphUser.SiteCollection.Hostname.Remove(graphUser.SiteCollection.Hostname.IndexOf(".sharepoint.com", StringComparison.OrdinalIgnoreCase));
+            logger.LogTxt("Appinfo", $"Domain: {domain}");
+
+            appInfo.Domain = domain;
+
+            return appInfo;
+        }
+
+
         internal void IsCancelled()
         {
             if ( CancelToken.IsCancellationRequested ) { CancelToken.ThrowIfCancellationRequested(); }
-        }
-        public static void RemoveTokenCache()
-        {
-            TokenCacheHelper.RemoveCache();
         }
 
         internal async Task<string> GetGraphAccessToken()
@@ -143,7 +147,7 @@ namespace NovaPointLibrary.Commands.Authentication
             string defaultPermissions = rootUrl + "/.default";
             string[] scopes = new string[] { defaultPermissions };
 
-            _logger.LogTxt(GetType().Name, $"Start getting Access Token for root site {rootUrl}");
+            _logger.LogTxt(GetType().Name, $"Getting Access Token for root site {rootUrl}");
 
             AuthenticationResult? result = null;
             if (rootUrl.Equals(AdminUrl, StringComparison.OrdinalIgnoreCase))
@@ -180,7 +184,6 @@ namespace NovaPointLibrary.Commands.Authentication
         private async Task<AuthenticationResult?> GetAccessTokenFromMemory(AuthenticationResult? cachedResult, string[] scopes)
         {
             this.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start getting Access Token from memory");
 
             AuthenticationResult? result = null;
 
@@ -204,8 +207,6 @@ namespace NovaPointLibrary.Commands.Authentication
         private async Task<AuthenticationResult?> GetAccessToken(string[] scopes)
         {
             this.IsCancelled();
-            string methodName = $"{GetType().Name}.GetAccessToken";
-            _logger.LogTxt(methodName, $"Start getting Access Token");
 
             // Reference: https://johnthiriet.com/cancel-asynchronous-operation-in-csharp/
             var aquireToken = AcquireTokenInteractiveAsync(scopes);
@@ -230,12 +231,10 @@ namespace NovaPointLibrary.Commands.Authentication
         private async Task<AuthenticationResult> AcquireTokenInteractiveAsync(string[] scopes)
         {
             this.IsCancelled();
-            string methodName = $"{GetType().Name}.GetTokenDinamicaly";
-            _logger.LogTxt(methodName, $"Start aquiring Access Token");
 
-            if (_cachingToken)
+            if (Settings.CachingToken)
             {
-                _logger.LogTxt(methodName, "Adding cached access token");
+                _logger.LogTxt(GetType().Name, "Adding cached token");
 
                 var cacheHelper = await TokenCacheHelper.GetCache();
                 cacheHelper.RegisterCache(_app.UserTokenCache);
@@ -244,32 +243,27 @@ namespace NovaPointLibrary.Commands.Authentication
             AuthenticationResult result;
             try
             {
-                _logger.LogTxt(methodName, $"Start aquiring Access Token from Cache");
-
                 var accounts = await _app.GetAccountsAsync();
                 result = await _app.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
                             .ExecuteAsync();
 
-                _logger.LogTxt(methodName, $"Finish aquiring Access Token from Cache");
+                _logger.LogTxt(GetType().Name, $"Finish aquiring new Access Token with Refresh Token.");
             }
             catch (MsalUiRequiredException ex)
             {
-                if (this.CancelToken.IsCancellationRequested) { this.CancelToken.ThrowIfCancellationRequested(); };
-                _logger.LogTxt(methodName, ex.Message);
-                _logger.LogTxt(methodName, $"{ex.StackTrace}");
-                _logger.LogTxt(methodName, $"Start aquiring new Access Token from AAD");
+                this.IsCancelled();
 
                 result = await _app.AcquireTokenInteractive(scopes)
                                   .WithUseEmbeddedWebView(false)
                                   .ExecuteAsync();
 
-                _logger.LogTxt(methodName, $"Finish aquiring new Access Token from AAD");
+                _logger.LogTxt(GetType().Name, $"Finish aquiring new Access Token from AAD");
             }
             catch (MsalServiceException ex)
             {
-                _logger.LogTxt(methodName, $"FAILED aquiring new Access Token from AAD");
-                _logger.LogTxt(methodName, ex.Message);
-                _logger.LogTxt(methodName, $"{ex.StackTrace}");
+                _logger.LogTxt(GetType().Name, $"FAILED aquiring new Access Token");
+                _logger.LogTxt(GetType().Name, ex.Message);
+                _logger.LogTxt(GetType().Name, $"{ex.StackTrace}");
                 throw;
             }
 

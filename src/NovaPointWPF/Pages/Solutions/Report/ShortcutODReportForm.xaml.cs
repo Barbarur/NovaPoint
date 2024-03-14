@@ -74,7 +74,9 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
             ShortcutODReportParameters parameters = new(tListParam, ItemForm.Parameters);
 
-            await new ShortcutODReport(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new ShortcutODReport(parameters, uiLog, cancelTokenSource).RunAsync();
+
+            await ShortcutODReport.RunAsync(parameters, uiLog, cancelTokenSource);
         }
     }
 }

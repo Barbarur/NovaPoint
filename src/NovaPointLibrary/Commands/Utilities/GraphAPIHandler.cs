@@ -19,7 +19,7 @@ namespace NovaPointLibrary.Commands.Utilities
     internal class GraphAPIHandler
     {
         private readonly NPLogger _logger;
-        private AppInfo _appInfo;
+        private readonly AppInfo _appInfo;
 
         private readonly HttpClient HttpsClient;
         private readonly string _graphUrl = "https://graph.microsoft.com/v1.0";
@@ -73,7 +73,7 @@ namespace NovaPointLibrary.Commands.Utilities
             }
         }
 
-        private async Task<string> GetResponseJSONAsync(string url)
+        internal async Task<string> GetResponseJSONAsync(string url)
         {
             _appInfo.IsCancelled(); 
             

@@ -45,8 +45,9 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
             RemoveUserAutoParameters parameters = new(UserF.Parameters, siteAccParam);
 
-            await new RemoveSiteUserAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new RemoveSiteUserAuto(parameters, uiLog, cancelTokenSource).RunAsync();
 
+            await RemoveSiteUserAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }
     }
 }

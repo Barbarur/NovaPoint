@@ -1,10 +1,6 @@
-﻿using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.SharePoint.Item;
-using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Permision;
+﻿using NovaPointLibrary.Commands.SharePoint.Permision;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.User;
-using NovaPointLibrary.Commands.SharePoint.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -23,12 +19,6 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PermissionsReport";
 
         private PermissionsReportParameters _param;
-        public ISolutionParameters Parameters
-        {
-            get { return _param; }
-            set { _param = (PermissionsReportParameters)value; }
-        }
-
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
@@ -42,26 +32,51 @@ namespace NovaPointLibrary.Solutions.Report
             u => u.UserId,
         };
 
-        public PermissionsReport(PermissionsReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private PermissionsReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, PermissionsReportParameters parameters)
         {
-            Parameters = parameters;
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
-            _appInfo = new(_logger, cancelTokenSource);
+            _param = parameters;
+            _logger = logger;
+            _appInfo = appInfo;
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(PermissionsReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            NPLogger logger = new(uiAddLog, "PermissionsReport", parameters);
             try
             {
-                await RunScriptAsync();
+                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                _logger.ScriptFinish();
+                await new PermissionsReport(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
+
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+
+        //public PermissionsReport(PermissionsReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{
+        //    Parameters = parameters;
+        //    _logger = new(uiAddLog, this.GetType().Name, parameters);
+        //    _appInfo = new(_logger, cancelTokenSource);
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+
+        //        _logger.ScriptFinish();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {

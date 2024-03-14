@@ -1,16 +1,7 @@
-﻿using AngleSharp.Css.Dom;
-using Microsoft.Online.SharePoint.TenantAdministration;
+﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.AzureAD;
-using NovaPointLibrary.Commands.SharePoint.Item;
-using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Permision;
-using NovaPointLibrary.Commands.SharePoint.RecycleBin;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Commands.SharePoint.Utilities;
-using NovaPointLibrary.Commands.Utilities.GraphModel;
-using PnP.Core.Model.SharePoint;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -51,30 +42,60 @@ namespace NovaPointLibrary.Solutions.Report
             s => s.HubSiteId,
         };
 
-        public SiteReport(SiteReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private SiteReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, SiteReportParameters parameters)
         {
             _param = parameters;
-            _param.PermissionsParam.IncludeSiteAccess = false;
-            _param.PermissionsParam.IncludeUniquePermissions = false;
-
-            _logger = new(uiAddLog, this.GetType().Name, _param);
-            _appInfo = new(_logger, cancelTokenSource);
+            _logger = logger;
+            _appInfo = appInfo;
             _sitePermissions = new(_logger, _appInfo, _param.PermissionsParam);
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(SiteReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            parameters.PermissionsParam.IncludeSiteAccess = false;
+            parameters.PermissionsParam.IncludeUniquePermissions = false;
+
+            NPLogger logger = new(uiAddLog, "SiteReport", parameters);
             try
             {
-                await RunScriptAsync();
+                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                _logger.ScriptFinish();
+                await new SiteReport(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
+
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+
+
+        //public SiteReport(SiteReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{
+        //    _param = parameters;
+        //    _param.PermissionsParam.IncludeSiteAccess = false;
+        //    _param.PermissionsParam.IncludeUniquePermissions = false;
+
+        //    _logger = new(uiAddLog, this.GetType().Name, _param);
+        //    _appInfo = new(_logger, cancelTokenSource);
+        //    _sitePermissions = new(_logger, _appInfo, _param.PermissionsParam);
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+
+        //        _logger.ScriptFinish();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {

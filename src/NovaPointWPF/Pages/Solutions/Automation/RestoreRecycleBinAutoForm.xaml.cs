@@ -50,8 +50,9 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 RenameFile = this.RenameFile
             };
 
-            await new RestoreRecycleBinAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new RestoreRecycleBinAuto(parameters, uiLog, cancelTokenSource).RunAsync();
 
+            await RestoreRecycleBinAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Solutions.Report;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -28,7 +29,7 @@ namespace NovaPointLibrary.Solutions.Automation
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
+        private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
         {
             f => f.Id,
             f => f["FileRef"],
@@ -43,17 +44,11 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private readonly CheckinType _checkinType;
 
-        public CheckInFileAuto(CheckInFileAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private CheckInFileAuto(NPLogger logger, Commands.Authentication.AppInfo appInfo, CheckInFileAutoParameters parameters)
         {
-            Parameters = parameters;
-            _param.ItemsParam.FileExpresions = _fileExpressions;
-            _param.TListsParam.ListParam.IncludeLibraries = true;
-            _param.TListsParam.ListParam.IncludeLists = false;
-            _param.TListsParam.ListParam.IncludeHiddenLists = false;
-            _param.TListsParam.ListParam.IncludeSystemLists = false;
-
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
-            _appInfo = new(_logger, cancelTokenSource);
+            _param = parameters;
+            _logger = logger;
+            _appInfo = appInfo;
 
             if (_param.CheckinType == "Major") { _checkinType = CheckinType.MajorCheckIn; }
             else if (_param.CheckinType == "Minor") { _checkinType = CheckinType.MinorCheckIn; }
@@ -61,20 +56,63 @@ namespace NovaPointLibrary.Solutions.Automation
             else { throw new("Check in type is incorrect."); }
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(CheckInFileAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            parameters.ItemsParam.FileExpresions = _fileExpressions;
+            parameters.TListsParam.ListParam.IncludeLibraries = true;
+            parameters.TListsParam.ListParam.IncludeLists = false;
+            parameters.TListsParam.ListParam.IncludeHiddenLists = false;
+            parameters.TListsParam.ListParam.IncludeSystemLists = false;
+
+
+            NPLogger logger = new(uiAddLog, "CheckInFileAuto", parameters);
             try
             {
-                await RunScriptAsync();
+                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                _logger.ScriptFinish();
+                await new CheckInFileAuto(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
 
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+
+        //public CheckInFileAuto(CheckInFileAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{
+        //    Parameters = parameters;
+        //    _param.ItemsParam.FileExpresions = _fileExpressions;
+        //    _param.TListsParam.ListParam.IncludeLibraries = true;
+        //    _param.TListsParam.ListParam.IncludeLists = false;
+        //    _param.TListsParam.ListParam.IncludeHiddenLists = false;
+        //    _param.TListsParam.ListParam.IncludeSystemLists = false;
+
+        //    _logger = new(uiAddLog, this.GetType().Name, parameters);
+        //    _appInfo = new(_logger, cancelTokenSource);
+
+        //    if (_param.CheckinType == "Major") { _checkinType = CheckinType.MajorCheckIn; }
+        //    else if (_param.CheckinType == "Minor") { _checkinType = CheckinType.MinorCheckIn; }
+        //    else if (_param.CheckinType == "Discard") { _checkinType = CheckinType.OverwriteCheckIn; }
+        //    else { throw new("Check in type is incorrect."); }
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+
+        //        _logger.ScriptFinish();
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {

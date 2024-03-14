@@ -28,7 +28,7 @@ namespace NovaPointLibrary.Solutions.Automation
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
+        private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
         {
 
             l => l.Hidden,
@@ -44,27 +44,54 @@ namespace NovaPointLibrary.Solutions.Automation
             l => l.MajorWithMinorVersionsLimit,
         };
 
-        public SetVersioningLimitAuto(SetVersioningLimitAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private SetVersioningLimitAuto(NPLogger logger, Commands.Authentication.AppInfo appInfo, SetVersioningLimitAutoParameters parameters)
         {
             _param = parameters;
-            _param.TListsParam.ListParam.ListExpresions = _listExpresions;
-            _logger = new(uiAddLog, this.GetType().Name, _param);
-            _appInfo = new(_logger, cancelTokenSource);
+            _logger = logger;
+            _appInfo = appInfo;
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(SetVersioningLimitAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            parameters.TListsParam.ListParam.ListExpresions = _listExpresions;
+
+            NPLogger logger = new(uiAddLog, "SetVersioningLimitAuto", parameters);
             try
             {
-                await RunScriptAsync();
+                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                _logger.ScriptFinish();
+                await new SetVersioningLimitAuto(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
+
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+
+        //public SetVersioningLimitAuto(SetVersioningLimitAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{
+        //    _param = parameters;
+        //    _param.TListsParam.ListParam.ListExpresions = _listExpresions;
+        //    _logger = new(uiAddLog, this.GetType().Name, _param);
+        //    _appInfo = new(_logger, cancelTokenSource);
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+
+        //        _logger.ScriptFinish();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {
@@ -134,6 +161,20 @@ namespace NovaPointLibrary.Solutions.Automation
 
             if (oList.BaseType == BaseType.DocumentLibrary)
             {
+                //if (enableVersioning && enableMinorVersions)
+                //{
+                //    oList.EnableMinorVersions = enableMinorVersions;
+                //    oList.MajorWithMinorVersionsLimit = (int)minorVersions;
+                //    updateRequired = true;
+                //}
+                //else
+                //{
+                //    oList.EnableMinorVersions = false;
+                //    oList.MajorWithMinorVersionsLimit = 0;
+                //    updateRequired = true;
+                //}
+
+
                 if (enableVersioning && enableMinorVersions != oList.EnableMinorVersions)
                 {
                     oList.EnableMinorVersions = enableMinorVersions;
@@ -149,7 +190,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             if (updateRequired)
             {
-                _logger.LogTxt(GetType().Name, $"Updating '{oList.BaseType}' - '{oList.Title}'");
+                _logger.LogTxt(GetType().Name, $"Updating '{oList.BaseType}' - '{oList.Title}', Major versions {enableVersioning}, Major versions limit {majorVersions}, Minor versions {enableMinorVersions}, Minor versions limit {minorVersions}");
                 oList.Update();
                 clientContext.ExecuteQuery();
             }

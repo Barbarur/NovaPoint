@@ -20,7 +20,7 @@ namespace NovaPointLibrary.Solutions.Automation
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
+        private static readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
         {
             i => i["Author"],
             i => i["Created"],
@@ -36,33 +36,65 @@ namespace NovaPointLibrary.Solutions.Automation
             i => i["_UIVersionString"],
         };
 
-        public RemoveFileVersionAuto(RemoveFileVersionAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private RemoveFileVersionAuto(NPLogger logger, Commands.Authentication.AppInfo appInfo, RemoveFileVersionAutoParameters parameters)
         {
             _param = parameters;
-            _param.ItemsParam.FileExpresions = _fileExpressions;
-            _param.TListsParam.ListParam.IncludeLibraries = true;
-            _param.TListsParam.ListParam.IncludeLists = false;
-            _param.TListsParam.ListParam.IncludeHiddenLists = false;
-            _param.TListsParam.ListParam.IncludeSystemLists = false;
-
-            _logger = new(uiAddLog, this.GetType().Name, _param);
-            _appInfo = new(_logger, cancelTokenSource);
+            _logger = logger;
+            _appInfo = appInfo;
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(RemoveFileVersionAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            parameters.ItemsParam.FileExpresions = _fileExpressions;
+            parameters.TListsParam.ListParam.IncludeLibraries = true;
+            parameters.TListsParam.ListParam.IncludeLists = false;
+            parameters.TListsParam.ListParam.IncludeHiddenLists = false;
+            parameters.TListsParam.ListParam.IncludeSystemLists = false;
+
+            NPLogger logger = new(uiAddLog, "RemoveFileVersionAuto", parameters);
             try
             {
-                await RunScriptAsync();
+                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                _logger.ScriptFinish();
+                await new RemoveFileVersionAuto(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
 
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+
+
+        //public RemoveFileVersionAuto(RemoveFileVersionAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{
+        //    _param = parameters;
+        //    _param.ItemsParam.FileExpresions = _fileExpressions;
+        //    _param.TListsParam.ListParam.IncludeLibraries = true;
+        //    _param.TListsParam.ListParam.IncludeLists = false;
+        //    _param.TListsParam.ListParam.IncludeHiddenLists = false;
+        //    _param.TListsParam.ListParam.IncludeSystemLists = false;
+
+        //    _logger = new(uiAddLog, this.GetType().Name, _param);
+        //    _appInfo = new(_logger, cancelTokenSource);
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+
+        //        _logger.ScriptFinish();
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {

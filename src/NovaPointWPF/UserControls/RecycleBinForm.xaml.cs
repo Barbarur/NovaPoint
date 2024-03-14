@@ -186,8 +186,6 @@ namespace NovaPointWPF.UserControls
             CBAfterHour.SelectedIndex = 0;
             CBBeforeDates.SelectedIndex = 95;
             CBBeforeHour.SelectedIndex = 47;
-            //AllItems = true;
-            //FilterItems = false;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -88,7 +88,9 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 OnlyUserList = this.UserListOnly,
             };
 
-            await new PermissionsReport(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new PermissionsReport(parameters, uiLog, cancelTokenSource).RunAsync();
+
+            await PermissionsReport.RunAsync(parameters, uiLog, cancelTokenSource);
         }
     }
 }

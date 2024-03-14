@@ -23,7 +23,6 @@ namespace NovaPointWPF.Pages.Menus
     public partial class MenuSettingsPage : Page
     {
         public AppSettings AppSettings;
-        public string Domain { get; set; } = string.Empty;
         public string TenantId { get; set; } = string.Empty;
         public string ClientId { get; set; } = string.Empty;
         public bool CachingToken { get; set; } = false;
@@ -35,7 +34,6 @@ namespace NovaPointWPF.Pages.Menus
             DataContext = this;
 
             AppSettings = AppSettings.GetSettings();
-            Domain = AppSettings.Domain;
             TenantId = AppSettings.TenantID;
             ClientId = AppSettings.ClientId;
             CachingToken = AppSettings.CachingToken;
@@ -44,29 +42,28 @@ namespace NovaPointWPF.Pages.Menus
             else { UpdateButton.Visibility = Visibility.Visible; }
         }
 
-        private void Save_Click(object sender, RoutedEventArgs e)
+        private void SaveClick(object sender, RoutedEventArgs e)
         {
-            AppSettings.Domain = Domain;
             AppSettings.TenantID = TenantId;
             AppSettings.ClientId = ClientId;
             AppSettings.CachingToken = CachingToken;
 
             AppSettings.SaveSettings();
 
-            if (!CachingToken) { AppInfo.RemoveTokenCache(); }
+            if (!CachingToken) { AppSettings.RemoveTokenCache(); }
         }
 
-        private void Delete_Click(object sender, RoutedEventArgs e)
+        private void DeleteClick(object sender, RoutedEventArgs e)
         {
-            AppInfo.RemoveTokenCache();
+            AppSettings.RemoveTokenCache();
         }
 
-        private void About_Click(object sender, RoutedEventArgs e)
+        private void AboutClick(object sender, RoutedEventArgs e)
         {
             NavigationService.Content = new AboutPage();
         }
 
-        private void Update_Click(object sender, RoutedEventArgs e)
+        private void UpdateClick(object sender, RoutedEventArgs e)
         {
             string NavigateUri = "https://github.com/Barbarur/NovaPoint/releases/latest";
             Process.Start(new ProcessStartInfo("cmd", $"/c start {NavigateUri}") { CreateNoWindow = true });

@@ -22,16 +22,10 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ListReport";
 
         private ListReportParameters _param;
-        public ISolutionParameters Parameters
-        {
-            get { return _param; }
-            set { _param = (ListReportParameters)value; }
-        }
-
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
+        private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
         {
             l => l.Hidden,
 
@@ -55,27 +49,54 @@ namespace NovaPointLibrary.Solutions.Report
             l => l.ForceCheckout,
         };
 
-        public ListReport(ListReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private ListReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, ListReportParameters parameters)
         {
-            Parameters = parameters;
-            _param.TListsParam.ListParam.ListExpresions = _listExpresions;
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
-            _appInfo = new(_logger, cancelTokenSource);
+            _param = parameters;
+            _logger = logger;
+            _appInfo = appInfo;
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(ListReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            parameters.TListsParam.ListParam.ListExpresions = _listExpresions;
+
+            NPLogger logger = new(uiAddLog, "ListReport", parameters);
             try
             {
-                await RunScriptAsync();
+                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                _logger.ScriptFinish();
+                await new ListReport(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
+
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+
+        //public ListReport(ListReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{
+        //    Parameters = parameters;
+        //    _param.TListsParam.ListParam.ListExpresions = _listExpresions;
+        //    _logger = new(uiAddLog, this.GetType().Name, parameters);
+        //    _appInfo = new(_logger, cancelTokenSource);
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+
+        //        _logger.ScriptFinish();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {

@@ -26,7 +26,7 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
+        private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
         {
             f => f.HasUniqueRoleAssignments,
             f => f["Author"],
@@ -45,7 +45,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         };
 
-        private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _itemExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
+        private static readonly Expression<Func<ListItem, object>>[] _itemExpressions = new Expression<Func<ListItem, object>>[]
         {
             i => i.HasUniqueRoleAssignments,
             i => i.AttachmentFiles,
@@ -63,28 +63,56 @@ namespace NovaPointLibrary.Solutions.Report
             i => i["_UIVersionString"],
         };
 
-        public ItemReport(ItemReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private ItemReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, ItemReportParameters parameters)
         {
-            Parameters = parameters;
-            _param.ItemsParam.FileExpresions = _fileExpressions;
-            _param.ItemsParam.ItemExpresions = _itemExpressions;
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
-            _appInfo = new(_logger, cancelTokenSource);
+            _param = parameters;
+            _logger = logger;
+            _appInfo = appInfo;
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(ItemReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            parameters.ItemsParam.FileExpresions = _fileExpressions;
+            parameters.ItemsParam.ItemExpresions = _itemExpressions;
+
+            NPLogger logger = new(uiAddLog, "ItemReport", parameters);
             try
             {
-                await RunScriptAsync();
+                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                _logger.ScriptFinish();
+                await new ItemReport(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
+
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+
+        //public ItemReport(ItemReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{
+        //    Parameters = parameters;
+        //    _param.ItemsParam.FileExpresions = _fileExpressions;
+        //    _param.ItemsParam.ItemExpresions = _itemExpressions;
+        //    _logger = new(uiAddLog, this.GetType().Name, parameters);
+        //    _appInfo = new(_logger, cancelTokenSource);
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+
+        //        _logger.ScriptFinish();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {

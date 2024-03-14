@@ -22,12 +22,6 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSiteUserAuto";
 
         private RemoveUserAutoParameters _param;
-        public ISolutionParameters Parameters
-        {
-            get { return _param; }
-            set { _param = (RemoveUserAutoParameters)value; }
-        }
-
         private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
 
@@ -39,28 +33,55 @@ namespace NovaPointLibrary.Solutions.Automation
             u => u.UserPrincipalName,
         };
 
-        public RemoveSiteUserAuto(RemoveUserAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private RemoveSiteUserAuto(NPLogger logger, AppInfo appInfo, RemoveUserAutoParameters parameters)
         {
-            Parameters = parameters;
-            _param.SiteAccParam.SiteParam.IncludeSubsites = false;
-
-            _logger = new(uiAddLog, this.GetType().Name, parameters);
-            _appInfo = new(_logger, cancelTokenSource);
+            _param = parameters;
+            _logger = logger;
+            _appInfo = appInfo;
         }
 
-        public async Task RunAsync()
+        public static async Task RunAsync(RemoveUserAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
+            parameters.SiteAccParam.SiteParam.IncludeSubsites = false;
+
+            NPLogger logger = new(uiAddLog, "RemoveSiteUserAuto", parameters);
             try
             {
-                await RunScriptAsync();
+                AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                _logger.ScriptFinish();
+                await new RemoveSiteUserAuto(logger, appInfo, parameters).RunScriptAsync();
+
+                logger.ScriptFinish();
+
             }
             catch (Exception ex)
             {
-                _logger.ScriptFinish(ex);
+                logger.ScriptFinish(ex);
             }
         }
+
+        //public RemoveSiteUserAuto(RemoveUserAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        //{
+        //    Parameters = parameters;
+        //    _param.SiteAccParam.SiteParam.IncludeSubsites = false;
+
+        //    _logger = new(uiAddLog, this.GetType().Name, parameters);
+        //    _appInfo = new(_logger, cancelTokenSource);
+        //}
+
+        //public async Task RunAsync()
+        //{
+        //    try
+        //    {
+        //        await RunScriptAsync();
+
+        //        _logger.ScriptFinish();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ScriptFinish(ex);
+        //    }
+        //}
 
         private async Task RunScriptAsync()
         {

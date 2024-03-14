@@ -55,7 +55,9 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
                 ReportMode = this.ReportMode,
                 UserUpn = this.UserUpn,
             };
-            await new IdMismatchTrouble(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new IdMismatchTrouble(parameters, uiLog, cancelTokenSource).RunAsync();
+
+            await IdMismatchTrouble.RunAsync(parameters, uiLog, cancelTokenSource);
         }
     }
 }

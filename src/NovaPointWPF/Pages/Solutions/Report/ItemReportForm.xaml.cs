@@ -55,7 +55,9 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
             ItemReportParameters parameters = new(tListParam, itemParameters);
 
-            await new ItemReport(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new ItemReport(parameters, uiLog, cancelTokenSource).RunAsync();
+
+            await ItemReport.RunAsync(parameters, uiLog, cancelTokenSource);
         }
     }
 }

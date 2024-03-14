@@ -34,7 +34,9 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
             ClearRecycleBinAutoParameters parameters = new(RecycleF.Parameters, siteAccParam);
 
-            await new ClearRecycleBinAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+            //await new ClearRecycleBinAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+
+            await ClearRecycleBinAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }
     }
 }
