@@ -47,6 +47,8 @@ namespace NovaPointLibrary.Solutions.Report
             l => l.IrmEnabled,
 
             l => l.ForceCheckout,
+
+            l => l.EnableModeration
         };
 
         private ListReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, ListReportParameters parameters)
@@ -136,7 +138,10 @@ namespace NovaPointLibrary.Solutions.Report
 
             dynamicRecord.IRM_Emabled = oList != null ? oList.IrmEnabled.ToString() : string.Empty;
 
-            dynamicRecord.ForceCheckout = oList != null ? oList.ForceCheckout.ToString() : string.Empty;
+            dynamicRecord.RequireCheckOut = oList != null ? oList.ForceCheckout.ToString() : string.Empty;
+
+            dynamicRecord.ContentApproval = oList != null ? oList.EnableModeration.ToString() : string.Empty;
+            
             
             dynamicRecord.Remarks = remarks;
 
