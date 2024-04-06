@@ -27,11 +27,6 @@
 
                 <StackPanel>
 
-                    <!--<Button
-                        Style="{DynamicResource SolutionMenuButton}"
-                        Content="All Site Collections and Subsites (Legacy)"
-                        Click="SiteAllReportFormClick"/>-->
-
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"
                         Content="All Site Collections and Subsites"
@@ -81,6 +76,11 @@
                         Style="{DynamicResource SolutionMenuButton}"
                         Content="OneDrive shortcuts"
                         Click="ShortcutODReportClick"/>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Preservation Hold Library Items"
+                        Click="PHLReportClick"/>
 
                 </StackPanel>
 

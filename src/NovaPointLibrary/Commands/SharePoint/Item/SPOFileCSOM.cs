@@ -80,5 +80,74 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             clientContext.Web.CheckInFile($"{oFile["FileRef"]}", checkinType, comment);
 
         }
+
+        internal async Task<string> FindAvailableNameAsync(string siteUrl, string fileServerRelativeUrl)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Finding available name");
+
+
+            string parentFolderPath = fileServerRelativeUrl.Remove(fileServerRelativeUrl.LastIndexOf("/") + 1);
+
+            string potentialName = fileServerRelativeUrl.Substring(fileServerRelativeUrl.LastIndexOf("/") + 1);
+            string availableName = string.Empty;
+
+            while (string.IsNullOrWhiteSpace(availableName))
+            {
+                string potentialNamePath = parentFolderPath + potentialName;
+                var oFile = await GetFileAsync(siteUrl, potentialNamePath);
+                if (!oFile.Exists)
+                {
+                    availableName = potentialName;
+                }
+                else
+                {
+                    string itemNameOnly = Path.GetFileNameWithoutExtension(potentialName);
+                    if (itemNameOnly[^3] == '('
+                        && int.TryParse(itemNameOnly[^2].ToString(), out int unit)
+                        && itemNameOnly[^1] == ')'
+                        && unit >= 9)
+                    {
+                        throw new Exception($"Too many files with the same name on that location. We couldn't find an available name for the file.");
+                    }
+
+                    potentialName = GetNewName(potentialName);
+                }
+            }
+
+            _logger.LogTxt(GetType().Name, $"File name {availableName} is available.");
+            return availableName;
+        }
+
+        internal string GetNewName(string itemName)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Getting new name for item '{itemName}'");
+
+            string itemNameOnly = Path.GetFileNameWithoutExtension(itemName);
+            var extension = Path.GetExtension(itemName);
+
+            bool isDuplicatedName = false;
+            int unit = 1;
+            if (itemNameOnly[^3] == '(' && int.TryParse(itemNameOnly[^2].ToString(), out unit) && itemNameOnly[^1] == ')')
+            {
+                isDuplicatedName = true;
+            }
+
+            string newName;
+            if (isDuplicatedName)
+            {
+                unit++;
+                string baseName = itemNameOnly.Substring(0, itemNameOnly.Length - 3);
+                newName = baseName + $"({unit})";
+            }
+            else
+            {
+                newName = itemNameOnly + "(1)";
+            }
+
+            return newName + extension;
+        }
+
     }
 }

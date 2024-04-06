@@ -19,14 +19,11 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         private readonly NPLogger _logger;
         private readonly Authentication.AppInfo _appInfo;
 
-
         internal SPOListCSOM(NPLogger logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
         }
-
-
 
         internal async Task<List<Microsoft.SharePoint.Client.List>> GetAsync(string siteUrl,
                                                                              SPOListsParameters parameters)
@@ -85,9 +82,14 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             else
             {
                 Microsoft.SharePoint.Client.List list = clientContext.Web.GetListByTitle(parameters.ListTitle, expressions);
+                if (list == null)
+                {
+                    throw new Exception($"List '{parameters.ListTitle}' not found");
+                }
+
                 List<Microsoft.SharePoint.Client.List> collList = new() { list };
 
-                _logger.LogTxt(GetType().Name, $"Collected list '{parameters.ListTitle}'");
+                _logger.LogTxt(GetType().Name, $"Collected list '{list.Title}'");
                 return collList;
             }
         }

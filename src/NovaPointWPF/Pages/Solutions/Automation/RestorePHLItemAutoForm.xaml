@@ -1,0 +1,78 @@
+﻿<Page x:Class="NovaPointWPF.Pages.Solutions.Automation.RestorePHLItemAutoForm"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Automation"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
+      mc:Ignorable="d" 
+      d:DesignHeight="900" d:DesignWidth="600"
+      Title="RestorePHLItemAutoForm">
+
+    <Grid Background="Transparent">
+
+        <StackPanel>
+
+            <designmaterial:FormHeader
+                x:Name="SolutionHeader"/>
+
+            <Label
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                Content="Restore location"/>
+
+            <Grid
+                Margin="0, 0, 0, 15">
+
+                <Border
+                    Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                <StackPanel
+                    Margin="12">
+
+                    <StackPanel
+                        Orientation="Horizontal">
+
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Original location"
+                            IsChecked="{Binding RestoreOriginalLocation, Mode=TwoWay}"/>
+
+                        <RadioButton
+                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Content="Target location"
+                            IsChecked="False"/>
+
+                        <Label/>
+
+                    </StackPanel>
+
+                    <StackPanel
+                        x:Name="PathTextBoxVisibility"
+                        Visibility="Collapsed">
+
+                        <Label
+                            Style="{DynamicResource SolutionFormLabel}"
+                            Content="Target location path"/>
+
+                        <TextBox
+                            x:Name="PathTextBox"
+                            Style="{DynamicResource SolutionFormTextBox}"
+                            Text="{Binding RestoreTargetLocation, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <designmaterial:PHLForm
+                x:Name="PHLForm"/>
+
+            <designmaterial:AdminForm
+                x:Name="AdminF"/>
+
+            <designmaterial:SiteTenantForm
+                x:Name="SiteF"/>
+
+        </StackPanel>
+
+    </Grid>
+</Page>

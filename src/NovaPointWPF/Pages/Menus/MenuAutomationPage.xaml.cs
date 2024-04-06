@@ -52,13 +52,21 @@ namespace NovaPointWPF.Pages.Menus
 
 
         // ITEMS
+        private void CheckInFileAutoClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new CheckInFileAutoForm());
+        }
         private void RemoveFileVersionAutoClick(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new RemoveFileVersionAutoForm());
         }
-        private void CheckInFileAutoClick(object sender, RoutedEventArgs e)
+        private void RestorePHLItemAutoClick(object sender, RoutedEventArgs e)
         {
-            GoToSolutionForm(new CheckInFileAutoForm());
+            GoToSolutionForm(new RestorePHLItemAutoForm());
+        }
+        private void RemovePHLItemAutoClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new RemovePHLItemAutoForm());
         }
 
 

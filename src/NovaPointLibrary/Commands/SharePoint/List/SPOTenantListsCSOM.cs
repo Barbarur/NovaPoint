@@ -41,7 +41,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 }
 
 
-                SPOTenantListsRecord? errorRRecord = null;
+                SPOTenantListsRecord? errorRecord = null;
                 List<Microsoft.SharePoint.Client.List>? collList = null;
                 try
                 {
@@ -51,16 +51,16 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 {
                     _logger.ReportError("Site", siteResults.SiteUrl, ex);
 
-                    SPOTenantListsRecord record = new(siteResults, siteResults.Progress, null)
+                    errorRecord = new(siteResults, siteResults.Progress, null)
                     {
                         ErrorMessage = ex.Message
                     };
                 }
 
 
-                if (errorRRecord != null)
+                if (errorRecord != null)
                 {
-                    yield return errorRRecord;
+                    yield return errorRecord;
                 }
                 else if (collList != null)
                 {

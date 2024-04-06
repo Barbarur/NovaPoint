@@ -14,6 +14,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
         private readonly Expression<Func<ListItem, object>>[] _defaultExpressions = new Expression<Func<ListItem, object>>[]
         {
+            i => i.Id,
             i => i["FileRef"],
         };
 
@@ -134,5 +135,26 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
             return file;
         }
+
+        internal async Task RemoveAsync(string siteUrl, Microsoft.SharePoint.Client.List oList, ListItem oItem, bool recycle)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Removing ListItem '{oItem["FileLeafRef"]}'");
+
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
+            Microsoft.SharePoint.Client.List list = clientContext.Web.Lists.GetById(oList.Id);
+            ListItem item = list.GetItemById(oItem.Id);
+
+            if (recycle)
+            {
+                item.Recycle();
+            }
+            else
+            {
+                item.DeleteObject();
+            }
+            clientContext.ExecuteQuery();
+        }
+
     }
 }

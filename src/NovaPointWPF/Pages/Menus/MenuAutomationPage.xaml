@@ -69,13 +69,24 @@
 
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"
+                        Content="Check in files"
+                        Click="CheckInFileAutoClick"/>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
                         Content="Delete file versions"
                         Click="RemoveFileVersionAutoClick"/>
 
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"
-                        Content="Check in files"
-                        Click="CheckInFileAutoClick"/>
+                        Content="Restore files from Preservation Hold Library"
+                        Click="RestorePHLItemAutoClick"/>
+                    
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Delete files from Preservation Hold Library"
+                        Click="RemovePHLItemAutoClick"/>
+
 
                     
                 </StackPanel>

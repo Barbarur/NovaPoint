@@ -61,6 +61,12 @@ namespace NovaPointWPF.Pages.Menus
             GoToSolutionForm(new ShortcutODReportForm());
         }
 
+        private void PHLReportClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new PHLItemReportForm());
+        }
+
+
         private void RecycleBinReportClick(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new RecycleBinReportForm());

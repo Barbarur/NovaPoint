@@ -9,7 +9,7 @@ namespace NovaPointLibrary.Solutions
 {
     public interface ISolutionParameters
     {
-        internal void ParametersCheck()
+        public void ParametersCheck()
         {
         }
     }

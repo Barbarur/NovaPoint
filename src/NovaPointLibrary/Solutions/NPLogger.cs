@@ -54,11 +54,11 @@ namespace NovaPointLibrary.Solutions
             LogTxt(GetType().Name, $"Solution properties");
             LogTxt(GetType().Name, $"========== ========== ==========");
 
-            parameters.ParametersCheck();
-
             LogProperties(parameters);
 
             LogTxt(GetType().Name, $"========== ========== ==========");
+
+            parameters.ParametersCheck();
         }
 
         private void LogProperties(ISolutionParameters parameters)

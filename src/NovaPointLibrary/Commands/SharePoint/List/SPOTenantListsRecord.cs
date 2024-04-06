@@ -21,7 +21,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         {
             Progress = progress;
             SiteUrl = recordSite.SiteUrl;
-            SiteName = recordSite.SiteUrl;
+            SiteName = recordSite.SiteName;
             List = oList;
         }
 

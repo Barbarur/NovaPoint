@@ -80,5 +80,15 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 throw new Exception($"Folder '{fileServerRelativeUrl}' doesn't exists.");
             }
         }
+
+        internal async Task CreateAsync(string siteUrl, string folderServerRelativeUrl)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Creating folder '{folderServerRelativeUrl}'");
+
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
+            clientContext.Web.Folders.Add(folderServerRelativeUrl);
+            clientContext.ExecuteQueryRetry();
+        }
     }
 }
