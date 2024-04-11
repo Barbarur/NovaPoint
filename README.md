@@ -4,13 +4,15 @@
 
 Regular users can also find some benefits using **NovaPoint** specially on the *report solutions* to have a better understanding of the overall structure and usage of their site. The final goal of this project is to streamline and improve the user experience when interacting with you data on SharePoint.
 
-&nbsp;
+[![NovaPoint 0.7.0](https://img.youtube.com/vi/Fz0t8NFg8jk/hqdefault.jpg)](https://youtu.be/Fz0t8NFg8jk)
+
+<br>
 
 ## Getting started ##
 
 All Documentation related with this project can be found in our [Wiki](https://github.com/Barbarur/NovaPoint/wiki),. As first step; [Learn how to setup NovaPoint](https://github.com/Barbarur/NovaPoint/wiki/Setup).
 
-&nbsp;
+<br>
 
 ## Package used by this App ##
 
@@ -22,7 +24,7 @@ All Documentation related with this project can be found in our [Wiki](https://g
 - [WPF](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 - [.Net 6](https://learn.microsoft.com/en-us/dotnet)
 
-&nbsp;
+<br>
  
 ## Support ##
 
