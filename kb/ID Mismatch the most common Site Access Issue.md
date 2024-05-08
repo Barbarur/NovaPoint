@@ -30,7 +30,7 @@ It also offers a option to run the solution in **Report Mode**. On this mode you
 
 For more information on how the solution works, you can visit the [**ID Mismatch documentation**](https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-ID-Match).
 
-[![QuickFix ID Mismatch](https://img.youtube.com/vi/nk_8i34vdhU/hqdefault.jpg)](https://youtu.be/nk_8i34vdhU)
+[![QuickFix ID Mismatch](https://img.youtube.com/vi/7--7LQJ-lNY/hqdefault.jpg)](https://youtu.be/7--7LQJ-lNY)
 
 
 ### Option #2: Removing the user from the Site List
