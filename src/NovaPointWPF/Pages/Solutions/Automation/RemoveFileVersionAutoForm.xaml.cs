@@ -71,9 +71,9 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             var siteParam = SiteF.Parameters;
             siteAccParam.SiteParam = siteParam;
 
-            SPOTenantListsParameters tListParam = new(siteAccParam, ListForm.Parameters);
+            //SPOTenantListsParameters tListParam = new(siteAccParam, ListForm.Parameters);
 
-            RemoveFileVersionAutoParameters parameters = new(tListParam, ItemForm.Parameters)
+            RemoveFileVersionAutoParameters parameters = new(siteAccParam, ListForm.Parameters, ItemForm.Parameters)
 
             {
                 DeleteAll = this.DeleteAll,
