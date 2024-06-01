@@ -23,31 +23,16 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private static readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
         {
-            //i => i["Author"],
-            //i => i["Created"],
-            //i => i["Editor"],
-            //i => i["ID"],
             i => i.FileSystemObjectType,
-            //i => i["FileLeafRef"],
-            //i => i["FileRef"],
-            //i => i["File_x0020_Size"],
-            //i => i["Modified"],
             i => i["SMTotalSize"],
-            //i => i["_UIVersionString"],
 
             i => i.Id,
             i => i.File.Name,
             i => i.File.ServerRelativeUrl,
 
-            //i => i.File.UIVersion,
             i => i.File.UIVersionLabel,
             i => i.File.Versions,
-            //i => i.Versions,
             i => i.File.Length,
-            //i => i.File.VersionEvents,
-            //i => i.File.Versions,
-
-
         };
 
         private RemoveFileVersionAuto(NPLogger logger, Commands.Authentication.AppInfo appInfo, RemoveFileVersionAutoParameters parameters)
@@ -114,62 +99,6 @@ namespace NovaPointLibrary.Solutions.Automation
             }
         }
 
-        //private async Task RunScriptAsync()
-        //{
-        //    _appInfo.IsCancelled();
-
-        //    await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
-        //    {
-        //        _appInfo.IsCancelled();
-
-        //        if (!String.IsNullOrWhiteSpace(results.ErrorMessage) || results.List == null)
-        //        {
-        //            AddRecord(results.SiteUrl, results.List, remarks: results.ErrorMessage);
-        //            continue;
-        //        }
-
-        //        try
-        //        {
-        //            await ProcessItems(results.SiteUrl, results.List, results.Progress);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _logger.ReportError(results.List.BaseType.ToString(), results.List.DefaultViewUrl, ex);
-        //            AddRecord(results.SiteUrl, results.List, remarks: ex.Message);
-        //        }
-        //    }
-        //}
-
-        //private async Task ProcessItems(string siteUrl, List oList, ProgressTracker parentProgress)
-        //{
-        //    _appInfo.IsCancelled();
-
-        //    ProgressTracker progress = new(parentProgress, oList.ItemCount);
-
-        //    var spoItem = new SPOListItemCSOM(_logger, _appInfo);
-        //    await foreach (ListItem oItem in spoItem.GetAsync(siteUrl, oList, _param.ItemsParam))
-        //    {
-        //        _appInfo.IsCancelled();
-
-        //        if (oItem.FileSystemObjectType.ToString() == "Folder") { continue; }
-
-        //        try
-        //        {
-        //            await RemoveFileVersions(siteUrl, oList, oItem);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _logger.ReportError("Item", (string)oItem["FileRef"], ex);
-
-        //            AddRecord(siteUrl, oList, oItem, remarks: ex.Message);
-        //        }
-
-        //        progress.ProgressUpdateReport();
-        //    }
-        //}
-
-        //private async Task RemoveFileVersions(string siteUrl, List oList, ListItem oItem)
-        
         private async Task RemoveFileVersions(SPOTenantItemRecord resultItem)
         {
             _appInfo.IsCancelled();
@@ -198,7 +127,6 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 _logger.LogTxt(GetType().Name, $"Deleting all version '{resultItem.Item.File.Name}'");
 
-                //int numberVersionsToDelete = resultItem.Item.Versions.Count - 1;
                 var versionsDeletedMB = Math.Round((Convert.ToDouble(resultItem.Item.File.Length) * numberVersionsToDelete) / Math.Pow(1024, 2), 2);
 
                 if (!_param.ReportMode && numberVersionsToDelete > 0)
@@ -210,12 +138,11 @@ namespace NovaPointLibrary.Solutions.Automation
                 RemoveFileVersionAutoRecord record = new(resultItem);
                 record.AddFileDetails(resultItem.Item, numberVersionsToDelete.ToString(), versionsDeletedMB.ToString());
                 _logger.RecordCSV(record);
-                //AddRecord(siteUrl, oList, oItem, numberVersionsToDelete.ToString(), versionsDeletedMB.ToString());
+                
             }
             else
             {
-                //int numberVersionsToDelete = resultItem.Item.Versions.Count - _param.VersionsToKeep - 1;
-
+                
                 int errorsCount = 0;
                 string remarks = String.Empty;
 
@@ -248,7 +175,6 @@ namespace NovaPointLibrary.Solutions.Automation
 
                         RemoveFileVersionAutoRecord errorRecord = new(resultItem, ex.Message);
                         _logger.RecordCSV(errorRecord);
-                        //AddRecord(siteUrl, oList, oItem, remarks: ex.Message);
 
                         errorsCount++;
                     }
@@ -262,57 +188,10 @@ namespace NovaPointLibrary.Solutions.Automation
                 RemoveFileVersionAutoRecord record = new(resultItem, remarks);
                 record.AddFileDetails(resultItem.Item, numberVersionsToDelete.ToString(), versionsDeletedMB.ToString());
                 _logger.RecordCSV(record);
-                //AddRecord(siteUrl, oList, oItem, versionsDeletedCount.ToString(), versionsDeletedMB.ToString(), remarks);
 
-                //if (numberVersionsToDelete > 0) 
-                //{
-                //}
-                //else
-                //{
-                //    RemoveFileVersionAutoRecord record = new(resultItem, "No versions to delete");
-                //    record.AddFileDetails(resultItem.Item);
-                //    _logger.RecordCSV(record);
-                //    //AddRecord(siteUrl, oList, oItem, remarks: "No versions to delete"); 
-                //}
             }
         }
 
-        //private void AddRecord(string siteUrl,
-        //                       Microsoft.SharePoint.Client.List? oList = null,
-        //                       Microsoft.SharePoint.Client.ListItem? oItem = null,
-        //                       string versionsDeletedCount = "NA",
-        //                       string versionsDeletedMB = "NA",
-        //                       string remarks = "")
-        //{
-            
-        //    dynamic recordItem = new ExpandoObject();
-        //    //recordItem.SiteUrl = siteUrl;
-        //    //recordItem.ListTitle = oList != null ? oList.Title : String.Empty;
-        //    //recordItem.ListType = oList != null ? oList.BaseType.ToString() : String.Empty;
-
-        //    //recordItem.FileID = oItem != null ? oItem["ID"] : string.Empty;
-        //    //recordItem.FileName = oItem != null ? oItem["FileLeafRef"] : string.Empty;
-        //    //recordItem.FilePath = oItem != null ? oItem["FileRef"] : string.Empty;
-
-        //    recordItem.FileVersionNo = oItem != null ? oItem["_UIVersionString"] : string.Empty;
-        //    recordItem.FileVersionsCount = oItem != null ? oItem.Versions.Count.ToString() : string.Empty; ;
-
-        //    recordItem.ItemSizeMb = oItem != null ? Math.Round( Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2 ).ToString() : string.Empty;
-
-        //    if ( oItem != null)
-        //    {
-        //        FieldLookupValue MTotalSize =(FieldLookupValue)oItem["SMTotalSize"];
-        //        recordItem.ItemSizeTotalMB = Math.Round(MTotalSize.LookupId / Math.Pow(1024, 2), 2);
-        //    }
-        //    else { recordItem.ItemSizeTotalMB = String.Empty; }
-
-        //    recordItem.DeletedVersionsCount = versionsDeletedCount;
-        //    recordItem.DeletedVersionsMB = versionsDeletedMB;
-
-        //    recordItem.Remarks = remarks;
-
-        //    _logger.DynamicCSV(recordItem);
-        //}
     }
 
     public class RemoveFileVersionAutoRecord : ISolutionRecord
@@ -357,19 +236,13 @@ namespace NovaPointLibrary.Solutions.Automation
                                      string versionsDeletedCount = "",
                                      string versionsDeletedMB = "")
         {
-            //FileVersionNo = (string)oItem["_UIVersionString"];
             FileVersionNo = oItem.File.UIVersionLabel;
             FileVersionsCount = ( oItem.File.Versions.Count + 1).ToString();
 
-            //ItemSizeMb = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2).ToString();
             ItemSizeMb = Math.Round(Convert.ToDouble(oItem.File.Length) / Math.Pow(1024, 2), 2).ToString();
 
             FieldLookupValue MTotalSize = (FieldLookupValue)oItem["SMTotalSize"];
             ItemSizeTotalMB = Math.Round(MTotalSize.LookupId / Math.Pow(1024, 2), 2).ToString();
-            //if (oItem != null)
-            //{
-            //}
-            //else { ItemSizeTotalMB = String.Empty; }
 
             DeletedVersionsCount = versionsDeletedCount;
             DeletedVersionsMB = versionsDeletedMB;
@@ -384,14 +257,11 @@ namespace NovaPointLibrary.Solutions.Automation
         public int VersionsToKeep { get; set; } = 500;
         public bool Recycle { get; set; } = true;
 
-        //public SPOTenantListsParameters TListsParam {  get; set; }
-        //public SPOItemsParameters ItemsParam {  get; set; }
 
-
-        public SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
-        public SPOListsParameters ListsParam { get; set; }
-        public SPOItemsParameters ItemsParam { get; set; }
-        internal SPOTenantItemsParameters TItemsParam
+        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
+        internal SPOListsParameters ListsParam { get; set; }
+        internal SPOItemsParameters ItemsParam { get; set; }
+        public SPOTenantItemsParameters TItemsParam
         {
             get { return new(SitesAccParam, ListsParam, ItemsParam); }
         }
@@ -405,18 +275,11 @@ namespace NovaPointLibrary.Solutions.Automation
             ItemsParam = itemsParam;
         }
 
-        //public RemoveFileVersionAutoParameters(SPOTenantListsParameters listsParam,
-        //                                       SPOItemsParameters itemsParam)
-        //{
-        //    TListsParam = listsParam;
-        //    ItemsParam = itemsParam;
-        //}
-        internal void ParametersCheck()
+        public void ParametersCheck()
         {
             if (!DeleteAll && string.IsNullOrWhiteSpace(VersionsToKeep.ToString()))
             {
                 throw new Exception($"FORM INCOMPLETED: Number of versions to keep cannot be empty when no deleting all versions");
-
             }
         }
     }
