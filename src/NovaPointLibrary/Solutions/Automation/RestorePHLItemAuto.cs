@@ -244,10 +244,10 @@ namespace NovaPointLibrary.Solutions.Automation
             set { _restoreTargetLocation = value.Trim().TrimEnd('/'); }
         }
         public SPOPreservationHoldLibraryParameters PHLParam { get; set; }
-        public SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
-        public SPOListsParameters ListsParam { get; set; }
-        public SPOItemsParameters ItemsParam { get; set; }
-        internal SPOTenantItemsParameters TItemsParam
+        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
+        internal SPOListsParameters ListsParam { get; set; }
+        internal SPOItemsParameters ItemsParam { get; set; }
+        public SPOTenantItemsParameters TItemsParam
         {
             get { return new(SitesAccParam, ListsParam, ItemsParam); }
         }

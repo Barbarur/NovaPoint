@@ -166,10 +166,10 @@ namespace NovaPointLibrary.Solutions.Automation
     {
         public bool Recycle { get; set; } = true;
         public SPOPreservationHoldLibraryParameters PHLParam { get; set; }
-        public SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
-        public SPOListsParameters ListsParam { get; set; }
-        public SPOItemsParameters ItemsParam { get; set; }
-        internal SPOTenantItemsParameters TItemsParam
+        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
+        internal SPOListsParameters ListsParam { get; set; }
+        internal SPOItemsParameters ItemsParam { get; set; }
+        public SPOTenantItemsParameters TItemsParam
         {
             get { return new(SitesAccParam, ListsParam, ItemsParam); }
         }
