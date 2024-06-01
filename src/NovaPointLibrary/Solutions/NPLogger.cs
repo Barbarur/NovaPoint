@@ -58,7 +58,7 @@ namespace NovaPointLibrary.Solutions
 
             LogTxt(GetType().Name, $"========== ========== ==========");
 
-            parameters.ParametersCheck();
+            //parameters.ParametersCheck();
         }
 
         private void LogProperties(ISolutionParameters parameters)
@@ -79,10 +79,13 @@ namespace NovaPointLibrary.Solutions
                     else
                     {
                         LogTxt(GetType().Name, $"{propertyInfo.Name}: {oProperty}");
+                        // Keep for using during testing
                         //LogUI(GetType().Name, $"{propertyInfo.Name}: {oProperty}");
                     }
                 }
             }
+
+            parameters.ParametersCheck();
         }
 
 
@@ -178,7 +181,9 @@ namespace NovaPointLibrary.Solutions
         {
             ScriptFinishNotice();
             _uiAddLog(LogInfo.ErrorNotification(ex.Message));
-            LogTxt(GetType().Name, ex.Message);
+
+            LogTxt(GetType().Name, $"Exception: {ex.Message}");
+            LogTxt(GetType().Name, $"Trace: {ex.Message}");
         }
 
         private void ScriptFinishNotice()
