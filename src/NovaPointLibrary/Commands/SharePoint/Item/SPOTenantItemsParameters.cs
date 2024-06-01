@@ -27,5 +27,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             ListsParam = listParameters;
             ItemsParam = itemsParam;
         }
+
+        public void ParametersCheck()
+        {
+            if (!String.IsNullOrWhiteSpace(ItemsParam.FolderRelativeUrl) && (String.IsNullOrWhiteSpace(ListsParam.ListTitle) || String.IsNullOrWhiteSpace(SitesAccParam.SiteParam.SiteUrl)))
+            {
+                throw new Exception($"When using Server relative path for filtering the items, you need to add the List name and URL of a single site");
+            }
+        }
     }
 }

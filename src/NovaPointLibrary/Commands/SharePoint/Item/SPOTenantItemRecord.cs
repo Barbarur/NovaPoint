@@ -16,17 +16,15 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal string SiteName { get; set; }
         internal Microsoft.SharePoint.Client.List? List { get; set; } = null;
         internal SPOTenantListsRecord ListRecord { get; set; }
-        internal ProgressTracker Progress { get; set; }
         internal ListItem? Item { get; set; } = null;
         internal string ErrorMessage { get; set; } = string.Empty;
 
-        internal SPOTenantItemRecord(SPOTenantListsRecord listRecord, ProgressTracker progress, ListItem? item)
+        internal SPOTenantItemRecord(SPOTenantListsRecord listRecord, ListItem? item)
         {
             SiteUrl = listRecord.SiteUrl;
             SiteName = listRecord.SiteName;
             List = listRecord.List;
             ListRecord = listRecord;
-            Progress = progress;
             Item = item;
         }
     }

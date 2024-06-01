@@ -15,10 +15,15 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal Expression<Func<ListItem, object>>[] FileExpresions = new Expression<Func<ListItem, object>>[] { };
 
         private string _folderRelativeUrl = String.Empty;
+
         public string FolderRelativeUrl
         {
             get { return _folderRelativeUrl; }
-            set { _folderRelativeUrl = value.Trim(); }
+            set
+            { 
+                if (value.StartsWith("/")) { _folderRelativeUrl = value.Trim(); }
+                else { _folderRelativeUrl = "/" + value.Trim(); }
+            }
         }
     }
 }

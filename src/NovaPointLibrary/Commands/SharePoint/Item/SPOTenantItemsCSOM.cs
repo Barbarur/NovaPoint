@@ -35,13 +35,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async IAsyncEnumerable<SPOTenantItemRecord> GetAsync()
         {
             _appInfo.IsCancelled();
+
             await foreach (var recordList in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
                 if (!String.IsNullOrWhiteSpace(recordList.ErrorMessage) || recordList.List == null)
                 {
-                    SPOTenantItemRecord recordItem = new(recordList, recordList.Progress, null)
+                    SPOTenantItemRecord recordItem = new(recordList, null)
                     {
                         ErrorMessage = recordList.ErrorMessage,
                     };
@@ -52,7 +53,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
                 if (recordList.List.ItemCount == 0)
                 {
-                    SPOTenantItemRecord recordItem = new(recordList, recordList.Progress, null)
+                    SPOTenantItemRecord recordItem = new(recordList, null)
                     {
                         ErrorMessage = $"'{recordList.List.BaseType}' is empty",
                     };
@@ -61,13 +62,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     continue;
                 }
 
-
-                if (recordList.List.ItemCount > 5000)
+                if (String.IsNullOrEmpty(_param.ItemsParam.FolderRelativeUrl))
                 {
-                    _logger.LogUI(GetType().Name, $"'{recordList.List.BaseType}' '{recordList.List.Title}' is a large list with {recordList.List.ItemCount} items. Expect the Solution to take longer to run.");
+                    LongListNotification(recordList.List);
                 }
 
                 CamlQuery camlQuery = CamlQuery.CreateAllItemsQuery();
+                camlQuery.FolderServerRelativeUrl = _param.ItemsParam.FolderRelativeUrl;
 
                 var queryElement = XElement.Parse(camlQuery.ViewXml);
 
@@ -115,6 +116,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 Microsoft.SharePoint.Client.List oList;
                 _logger.LogTxt(GetType().Name, $"Start Loop");
                 ProgressTracker progress = new(recordList.Progress, recordList.List.ItemCount);
+                bool shouldContinue = false;
                 do
                 {
                     _appInfo.IsCancelled();
@@ -131,45 +133,74 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                             sci => sci.Include(expressions));
                         clientContext.ExecuteQueryRetry();
                     }
-                    catch (Exception ex) { anyError = ex.Message;  }
+                    catch (Exception ex) { anyError = ex.Message; }
 
                     if (!string.IsNullOrWhiteSpace(anyError))
                     {
-                        SPOTenantItemRecord recordItem = new(recordList, recordList.Progress, null)
+                        if (anyError.Contains("exceeds the list view threshold"))
                         {
-                            ErrorMessage = anyError,
-                        };
+                            _logger.LogUI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Soution will collect all the items and then filter.");
+                            camlQuery.FolderServerRelativeUrl = null;
+                            LongListNotification(recordList.List);
+                            shouldContinue = true;
+                        }
+                        else
+                        {
+                            SPOTenantItemRecord recordItem = new(recordList, null)
+                            {
+                                ErrorMessage = anyError,
+                            };
 
-                        yield return recordItem;
-                        break;
+                            yield return recordItem;
+                            break;
+                        }
                     }
-
-                    counter += subcollListItem.Count;
-                    if (counter >= 5000) { _logger.LogUI(GetType().Name, $"Collected from '{recordList.List.Title}' {counter} items..."); }
-                    else { _logger.LogTxt(GetType().Name, $"Collected from '{recordList.List.Title}' {counter} items..."); }
-
-                    camlQuery.ListItemCollectionPosition = subcollListItem.ListItemCollectionPosition;
-
-                    foreach (var oItem in subcollListItem)
+                    else
                     {
-                        _appInfo.IsCancelled();
+                        counter += subcollListItem.Count;
+                        if (counter >= 5000) { _logger.LogUI(GetType().Name, $"Collected from '{recordList.List.Title}' {counter} items..."); }
+                        else { _logger.LogTxt(GetType().Name, $"Collected from '{recordList.List.Title}' {counter} items."); }
 
-                        if (String.IsNullOrWhiteSpace(_param.ItemsParam.FolderRelativeUrl))
+
+                        foreach (var oItem in subcollListItem)
                         {
-                            SPOTenantItemRecord recordItem = new(recordList, recordList.Progress, oItem);
-                            yield return recordItem;
+                            _appInfo.IsCancelled();
+
+                            if (String.IsNullOrWhiteSpace(_param.ItemsParam.FolderRelativeUrl))
+                            {
+                                SPOTenantItemRecord recordItem = new(recordList, oItem);
+                                yield return recordItem;
+                            }
+                            else if (!String.IsNullOrWhiteSpace(_param.ItemsParam.FolderRelativeUrl) && oItem["FileRef"].ToString() != null && oItem["FileRef"].ToString().Contains(_param.ItemsParam.FolderRelativeUrl))
+                            {
+                                SPOTenantItemRecord recordItem = new(recordList, oItem);
+                                yield return recordItem;
+                            }
+                            progress.ProgressUpdateReport();
                         }
-                        else if (!String.IsNullOrWhiteSpace(_param.ItemsParam.FolderRelativeUrl) && oItem["FileRef"].ToString() != null && oItem["FileRef"].ToString().Contains(_param.ItemsParam.FolderRelativeUrl))
+
+                        if (subcollListItem.ListItemCollectionPosition != null)
                         {
-                            SPOTenantItemRecord recordItem = new(recordList, recordList.Progress, oItem);
-                            yield return recordItem;
+                            camlQuery.ListItemCollectionPosition = subcollListItem.ListItemCollectionPosition;
+                            shouldContinue = true;
                         }
-                        progress.ProgressUpdateReport();
+                        else
+                        {
+                            shouldContinue = false;
+                        }
                     }
 
                 }
-                while (camlQuery.ListItemCollectionPosition != null);
+                while (shouldContinue);
 
+            }
+        }
+
+        internal void LongListNotification(Microsoft.SharePoint.Client.List oList)
+        {
+            if (oList.ItemCount > 5000)
+            {
+                _logger.LogUI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' is a large list with {oList.ItemCount} items. Expect the Solution to take longer to run.");
             }
         }
     }
