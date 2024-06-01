@@ -36,7 +36,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 foreach (var oSiteCollection in collSiteCollections)
                 {
                     _appInfo.IsCancelled();
-                    _logger.LogUI(GetType().Name, $"Processing Site '{oSiteCollection.Url}'");
+                    _logger.LogTxt(GetType().Name, $"Processing Site '{oSiteCollection.Url}'");
 
                     var record = new SPOTenantSiteUrlsRecord(progress, oSiteCollection);
                     yield return record;
@@ -49,7 +49,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             {
                 ProgressTracker progress = new(_logger, 1);
 
-                _logger.LogUI(GetType().Name, $"Processing Site '{_param.SiteUrl}'");
+                _logger.LogTxt(GetType().Name, $"Processing Site '{_param.SiteUrl}'");
 
                 SPOTenantSiteUrlsRecord record = new(progress, _param.SiteUrl);
                 yield return record;
@@ -71,7 +71,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                     foreach (string line in lines)
                     {
                         _appInfo.IsCancelled();
-                        _logger.LogUI(GetType().Name, $"Processing Site '{line}'");
+                        _logger.LogTxt(GetType().Name, $"Processing Site '{line}'");
 
                         if (string.IsNullOrEmpty(line)) { continue; }
 
