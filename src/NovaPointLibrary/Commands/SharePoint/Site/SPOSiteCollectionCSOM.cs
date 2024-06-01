@@ -45,11 +45,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         {
             _appInfo.IsCancelled();
 
-            ClientContext clientContext = await _appInfo.GetContext(_appInfo.AdminUrl);
-
-            var tenant = new Tenant(clientContext);
-            var collSites = new List<SiteProperties>();
-
             _logger.LogTxt(GetType().Name, $"Getting Site Collections; IncludePersonalSite '{includePersonalSite}', Group ID Defined '{onlyGroupIdDefined}'");
 
             SPOSitePropertiesEnumerableFilter filter = new()
@@ -59,8 +54,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             };
             if (onlyGroupIdDefined) { filter.GroupIdDefined = 1; }
 
+            var collSites = new List<SiteProperties>();
             do
             {
+                ClientContext clientContext = await _appInfo.GetContext(_appInfo.AdminUrl);
+                var tenant = new Tenant(clientContext);
+
                 SPOSitePropertiesEnumerable subcollSiteCollections = tenant.GetSitePropertiesFromSharePointByFilters(filter);
                 clientContext.Load(subcollSiteCollections);
                 clientContext.ExecuteQuery();
@@ -68,8 +67,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 filter.StartIndex = subcollSiteCollections.NextStartIndexFromSharePoint;
 
                 _logger.LogTxt(GetType().Name, $"Collected {collSites.Count} Site Collections...");
-
-                tenant = new Tenant(await _appInfo.GetContext(_appInfo.AdminUrl));
 
             } while (!string.IsNullOrWhiteSpace(filter.StartIndex));
 
