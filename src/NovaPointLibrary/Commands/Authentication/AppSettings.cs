@@ -39,6 +39,8 @@ namespace NovaPointLibrary.Commands.Authentication
             set { _isUpdated = value; }
         }
 
+        private static string _npLocalAppFolder = Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "NovaPoint");
+
         internal static string GetLocalAppPath()
         {
             Version? assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
@@ -53,7 +55,7 @@ namespace NovaPointLibrary.Commands.Authentication
             {
                 version = string.Empty;
             }
-            string localAppPath = Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "NovaPoint", version);
+            string localAppPath = Path.Combine(_npLocalAppFolder, version);
             System.IO.Directory.CreateDirectory(localAppPath);
 
             return localAppPath;
@@ -68,6 +70,8 @@ namespace NovaPointLibrary.Commands.Authentication
         public static AppSettings GetSettings()
         {
             AppSettings appSettings;
+
+            AppSettings.RemoveLegacyData();
 
             string settingsFile = GetSettingsPath();
 
@@ -132,6 +136,20 @@ namespace NovaPointLibrary.Commands.Authentication
         public static void RemoveTokenCache()
         {
             TokenCacheHelper.RemoveCache();
+        }
+
+        private static void RemoveLegacyData()
+        {
+            string localAppPathFolderData = GetLocalAppPath();
+
+            string[] localAppPathFolders = System.IO.Directory.GetDirectories(_npLocalAppFolder);
+            foreach (var folderPath in localAppPathFolders)
+            {
+                if (!String.Equals(localAppPathFolderData, folderPath) && System.IO.Directory.Exists(folderPath))
+                {
+                    System.IO.Directory.Delete(folderPath, recursive: true);
+                }
+            }
         }
 
     }
