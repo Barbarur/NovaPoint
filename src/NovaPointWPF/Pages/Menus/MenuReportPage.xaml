@@ -10,123 +10,128 @@
 
     <Grid Background="Transparent">
 
-        <StackPanel>
+        <ScrollViewer
+            Style="{DynamicResource LeftScrollViewer}"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            Grid.Row="0"
+            Grid.Column="0">
+            <StackPanel>
 
-            <Label
-                Style="{DynamicResource MenuMainTitleLabel}"
-                Content="Reports"
-                Margin="0,0,0,15"/>
+                <Label
+                    Style="{DynamicResource MenuMainTitleLabel}"
+                    Content="Reports"
+                    Margin="0,0,0,15"/>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Site Collections and Subsites"/>
-            
-            <Grid Margin="0,0,0,15">
+                <Label
+                    Style="{DynamicResource MenuSectionTitleLabel}"
+                    Content="Site Collections and Subsites"/>
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Grid Margin="0,0,0,15">
 
-                <StackPanel>
+                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
-                    <Button
-                        Style="{DynamicResource SolutionMenuButton}"
-                        Content="All Site Collections and Subsites"
-                        Click="SiteReportFormClick"/>
+                    <StackPanel>
 
-                </StackPanel>
-                                
-            </Grid>
+                        <Button
+                            Style="{DynamicResource SolutionMenuButton}"
+                            Content="All Site Collections and Subsites"
+                            Click="SiteReportFormClick"/>
 
+                    </StackPanel>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Document Libraries and Item Lists"/>
-
-            <Grid Margin="0,0,0,15">
-
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
-
-                <StackPanel>
-
-                    <Button
-                        Style="{DynamicResource SolutionMenuButton}"
-                        Content="Libraries and Lists"
-                        Click="ListReportClick"/>
-
-                </StackPanel>
-
-            </Grid>
+                </Grid>
 
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Files and Items"/>
+                <Label
+                    Style="{DynamicResource MenuSectionTitleLabel}"
+                    Content="Document Libraries and Item Lists"/>
 
-            <Grid Margin="0,0,0,15">
+                <Grid Margin="0,0,0,15">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
-                <StackPanel>
+                    <StackPanel>
 
-                    <Button
-                        Style="{DynamicResource SolutionMenuButton}"
-                        Content="Files and Items"
-                        Click="ItemReportClick"/>
+                        <Button
+                            Style="{DynamicResource SolutionMenuButton}"
+                            Content="Libraries and Lists"
+                            Click="ListReportClick"/>
 
-                    <Button
-                        Style="{DynamicResource SolutionMenuButton}"
-                        Content="OneDrive shortcuts"
-                        Click="ShortcutODReportClick"/>
+                    </StackPanel>
 
-                    <Button
-                        Style="{DynamicResource SolutionMenuButton}"
-                        Content="Preservation Hold Library Items"
-                        Click="PHLReportClick"/>
+                </Grid>
 
-                </StackPanel>
 
-            </Grid>
+                <Label
+                    Style="{DynamicResource MenuSectionTitleLabel}"
+                    Content="Files and Items"/>
 
-            
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Recycle bin"/>
+                <Grid Margin="0,0,0,15">
 
-            <Grid Margin="0,0,0,15">
+                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                    <StackPanel>
 
-                <StackPanel>
+                        <Button
+                            Style="{DynamicResource SolutionMenuButton}"
+                            Content="Files and Items"
+                            Click="ItemReportClick"/>
 
-                    <Button
-                        Style="{DynamicResource SolutionMenuButton}"
-                        Content="Recycle bin items"
-                        Click="RecycleBinReportClick"/>
+                        <Button
+                            Style="{DynamicResource SolutionMenuButton}"
+                            Content="OneDrive shortcuts"
+                            Click="ShortcutODReportClick"/>
 
-                </StackPanel>
+                        <Button
+                            Style="{DynamicResource SolutionMenuButton}"
+                            Content="Preservation Hold Library Items"
+                            Click="PHLReportClick"/>
 
-            </Grid>
+                    </StackPanel>
 
-            
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Users"/>
+                </Grid>
 
-            <Grid Margin="0,0,0,15">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Label
+                    Style="{DynamicResource MenuSectionTitleLabel}"
+                    Content="Recycle bin"/>
 
-                <StackPanel>
+                <Grid Margin="0,0,0,15">
 
-                    <Button
-                        Style="{DynamicResource SolutionMenuButton}"
-                        Content="User permissions"
-                        Click="PermissionsReportFormClick"/>
+                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
 
-                </StackPanel>
+                    <StackPanel>
 
-            </Grid>
+                        <Button
+                            Style="{DynamicResource SolutionMenuButton}"
+                            Content="Recycle bin items"
+                            Click="RecycleBinReportClick"/>
 
-        </StackPanel>
+                    </StackPanel>
 
+                </Grid>
+
+
+                <Label
+                    Style="{DynamicResource MenuSectionTitleLabel}"
+                    Content="Users"/>
+
+                <Grid Margin="0,0,0,15">
+
+                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+
+                    <StackPanel>
+
+                        <Button
+                            Style="{DynamicResource SolutionMenuButton}"
+                            Content="User permissions"
+                            Click="PermissionsReportFormClick"/>
+
+                    </StackPanel>
+
+                </Grid>
+
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>
