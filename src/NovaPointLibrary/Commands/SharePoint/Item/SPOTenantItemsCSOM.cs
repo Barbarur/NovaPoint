@@ -62,13 +62,22 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     continue;
                 }
 
+                //if (String.IsNullOrEmpty(_param.ItemsParam.FolderRelativeUrl))
+                //{
+                //    LongListNotification(recordList.List);
+                //}
+
+                CamlQuery camlQuery = CamlQuery.CreateAllItemsQuery();
+
                 if (String.IsNullOrEmpty(_param.ItemsParam.FolderRelativeUrl))
                 {
                     LongListNotification(recordList.List);
                 }
+                else
+                {
+                    camlQuery.FolderServerRelativeUrl = _param.ItemsParam.FolderRelativeUrl;
+                }
 
-                CamlQuery camlQuery = CamlQuery.CreateAllItemsQuery();
-                camlQuery.FolderServerRelativeUrl = _param.ItemsParam.FolderRelativeUrl;
 
                 var queryElement = XElement.Parse(camlQuery.ViewXml);
 

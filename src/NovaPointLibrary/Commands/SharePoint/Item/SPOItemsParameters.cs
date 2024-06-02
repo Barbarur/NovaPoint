@@ -21,7 +21,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             get { return _folderRelativeUrl; }
             set
             { 
-                if (value.StartsWith("/")) { _folderRelativeUrl = value.Trim(); }
+                if ( String.IsNullOrWhiteSpace(value)) { _folderRelativeUrl = value.Trim(); }
+                else if (value.StartsWith("/")) { _folderRelativeUrl = value.Trim(); }
                 else { _folderRelativeUrl = "/" + value.Trim(); }
             }
         }
