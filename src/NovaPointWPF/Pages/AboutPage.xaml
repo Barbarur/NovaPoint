@@ -36,6 +36,12 @@
                     Go to Documentation
                 </Hyperlink>
             </TextBlock>
+            <Label
+                x:Name="VersionNo"
+                Style="{DynamicResource MenuSectionTitleLabel}"
+                HorizontalAlignment="Center"
+                FontWeight="Light"
+                FontSize="12"/>
 
             <TextBlock Height="100"/>
 

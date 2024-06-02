@@ -41,6 +41,23 @@ namespace NovaPointLibrary.Commands.Authentication
 
         private static string _npLocalAppFolder = Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "NovaPoint");
 
+        public static string GetVersion()
+        {
+            Version? assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            string version;
+            if (assemblyVersion != null)
+            {
+                version = assemblyVersion.ToString();
+                String[] result = version.Split('.').ToArray();
+                version = string.Join(".", result, 0, 3);
+            }
+            else
+            {
+                version = string.Empty;
+            }
+            return version;
+        }
+
         internal static string GetLocalAppPath()
         {
             Version? assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
