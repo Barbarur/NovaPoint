@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,7 +27,7 @@ namespace NovaPointWPF.Pages
         {
             InitializeComponent();
 
-            string version = AppSettings.GetVersion();
+            string version = VersionControl.GetVersion();
             if (String.IsNullOrWhiteSpace(version)) { VersionNo.Content = String.Empty; }
             else { VersionNo.Content = "v " + version; }
         }

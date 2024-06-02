@@ -11,14 +11,29 @@ namespace NovaPointLibrary.Commands.Utilities
 {
     public class VersionControl
     {
+        public static string GetVersion()
+        {
+            Version? assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            string version;
+            if (assemblyVersion != null)
+            {
+                version = assemblyVersion.ToString();
+                String[] result = version.Split('.').ToArray();
+                version = string.Join(".", result, 0, 3);
+            }
+            else
+            {
+                version = string.Empty;
+            }
+            return version;
+        }
 
         public static async Task<bool> IsUpdated()
         {
-            string? versionAssembly;
+            string versionAssembly = GetVersion();
             string? versionGitHub;
             try
             {
-                versionAssembly = Assembly.GetExecutingAssembly().GetName().Version.ToString();
                 versionGitHub = await GetGithubLatestRelease();
             }
             catch
@@ -26,11 +41,8 @@ namespace NovaPointLibrary.Commands.Utilities
                 return true;
             }
 
-            if (versionAssembly != null && versionGitHub != null)
+            if (versionGitHub != null)
             {
-                String[] result = versionAssembly.Split('.').ToArray();
-                versionAssembly = string.Join(".", result, 0, 3);
-
                 if (String.Equals(versionAssembly, versionGitHub)) { return true; }
                 else { return false; }
             }

@@ -39,40 +39,11 @@ namespace NovaPointLibrary.Commands.Authentication
             set { _isUpdated = value; }
         }
 
-        private static string _npLocalAppFolder = Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "NovaPoint");
-
-        public static string GetVersion()
-        {
-            Version? assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
-            string version;
-            if (assemblyVersion != null)
-            {
-                version = assemblyVersion.ToString();
-                String[] result = version.Split('.').ToArray();
-                version = string.Join(".", result, 0, 3);
-            }
-            else
-            {
-                version = string.Empty;
-            }
-            return version;
-        }
+        private static readonly string _npLocalAppFolder = Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "NovaPoint");
 
         internal static string GetLocalAppPath()
         {
-            Version? assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
-            string version;
-            if (assemblyVersion != null)
-            {
-                version = assemblyVersion.ToString();
-                String[] result = version.Split('.').ToArray();
-                version = string.Join(".", result, 0, 3);
-            }
-            else
-            {
-                version = string.Empty;
-            }
-            string localAppPath = Path.Combine(_npLocalAppFolder, version);
+            string localAppPath = Path.Combine(_npLocalAppFolder, VersionControl.GetVersion());
             System.IO.Directory.CreateDirectory(localAppPath);
 
             return localAppPath;
