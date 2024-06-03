@@ -31,12 +31,12 @@ namespace NovaPointLibrary.Solutions
             _uiAddLog = uiAddLog;
 
             string userDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string folderName = solutionName + "_" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-            string folderPath = Path.Combine(userDocumentsFolder, "NovaPoint", solutionName, folderName);
+            string folderPath = Path.Combine(userDocumentsFolder, "NovaPoint", solutionName, DateTime.UtcNow.ToString("yyMMddHHmmss"));
             Directory.CreateDirectory(folderPath);
 
-            _txtPath = Path.Combine(folderPath, folderName + "_Logs.txt");
-            _csvPath = Path.Combine(folderPath, folderName + "_Report.csv");
+            string fileName = solutionName + "_" + DateTime.UtcNow.ToString("yyMMddHHmmss");
+            _txtPath = Path.Combine(folderPath, fileName + "_Logs.txt");
+            _csvPath = Path.Combine(folderPath, fileName + "_Report.csv");
 
             LogTxt(GetType().Name, $"Logs: {_txtPath}");
             LogTxt(GetType().Name, $"Report: {_csvPath}");
@@ -183,7 +183,7 @@ namespace NovaPointLibrary.Solutions
             _uiAddLog(LogInfo.ErrorNotification(ex.Message));
 
             LogTxt(GetType().Name, $"Exception: {ex.Message}");
-            LogTxt(GetType().Name, $"Trace: {ex.Message}");
+            LogTxt(GetType().Name, $"Trace: {ex.StackTrace}");
         }
 
         private void ScriptFinishNotice()
