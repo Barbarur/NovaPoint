@@ -28,6 +28,17 @@ namespace NovaPointWPF.UserControls
 
         public SPOTenantSiteUrlsWithAccessParameters Parameters { get; set; } = new();
 
+        private bool _addAdmin = true;
+        public bool AddAdmin
+        {
+            get { return _addAdmin; }
+            set
+            {
+                _addAdmin = value;
+                Parameters.AddAdmin = value;
+            }
+        }
+
         private bool _removeAdmin = true;
         public bool RemoveAdmin
         {
