@@ -55,13 +55,11 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            var siteAccParam = AdminF.Parameters;
             var siteParam = SiteF.Parameters;
+            var siteAccParam = AdminF.Parameters;
             siteAccParam.SiteParam = siteParam;
 
-            SPOTenantListsParameters tListParam = new(siteAccParam, ListForm.Parameters);
-
-            CheckInFileAutoParameters parameters = new(tListParam, ItemForm.Parameters)
+            CheckInFileAutoParameters parameters = new(siteAccParam, ListForm.Parameters, ItemForm.Parameters)
             {
                 ReportMode = this.ReportMode,
                 CheckinType = this.CheckinType,

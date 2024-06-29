@@ -90,7 +90,7 @@
                 FilterTarget="Library"
                 ListsFilterVisibility="False"/>
 
-            <designmaterial:ItemTenantForm
+            <designmaterial:ItemForm
                 x:Name="ItemForm"
                 FilterTarget="Library"/>
 

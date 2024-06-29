@@ -80,10 +80,6 @@ namespace NovaPointLibrary.Solutions.Automation
                     _logger.RecordCSV(record);
                     continue;
                 }
-
-                if (resultItem.Item == null || resultItem.List == null) { continue; }
-
-                if (resultItem.Item.FileSystemObjectType.ToString() == "Folder") { continue; }
                 
                 try
                 {
@@ -102,6 +98,10 @@ namespace NovaPointLibrary.Solutions.Automation
         private async Task RemoveFileVersions(SPOTenantItemRecord resultItem)
         {
             _appInfo.IsCancelled();
+
+            if (resultItem.Item == null || resultItem.List == null) { return; }
+            if (resultItem.Item.FileSystemObjectType.ToString() == "Folder") { return; }
+
             _logger.LogTxt(GetType().Name, $"Start processing File '{resultItem.Item.File.Name}'");
             
             ClientContext clientContext = await _appInfo.GetContext(resultItem.SiteUrl);
