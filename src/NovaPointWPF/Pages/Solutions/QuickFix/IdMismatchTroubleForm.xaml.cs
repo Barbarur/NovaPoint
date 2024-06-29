@@ -25,8 +25,6 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
     /// </summary>
     public partial class IdMismatchTroubleForm : Page, ISolutionForm
     {
-        public bool ReportMode { get; set; }
-
         public string UserUpn { get; set; }
 
         public IdMismatchTroubleForm()
@@ -39,8 +37,6 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
             SolutionHeader.SolutionCode = nameof(IdMismatchTrouble);
             SolutionHeader.SolutionDocs = IdMismatchTrouble._solutionDocs;
 
-            this.ReportMode = true;
-
             this.UserUpn = string.Empty;
         }
 
@@ -52,10 +48,9 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
 
             IdMismatchTroubleParameters parameters = new(siteAccParam)
             {
-                ReportMode = this.ReportMode,
+                ReportMode = Mode.ReportMode,
                 UserUpn = this.UserUpn,
             };
-            //await new IdMismatchTrouble(parameters, uiLog, cancelTokenSource).RunAsync();
 
             await IdMismatchTrouble.RunAsync(parameters, uiLog, cancelTokenSource);
         }

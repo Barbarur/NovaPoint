@@ -26,8 +26,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
     /// </summary>
     public partial class CheckInFileAutoForm : Page, ISolutionForm
     {
-        public bool ReportMode { get; set; }
-
         public string CheckinType { get; set; }
         public bool Major {  get; set; }
         public bool Minor { get; set; }
@@ -44,8 +42,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             SolutionHeader.SolutionCode = nameof(CheckInFileAuto);
             SolutionHeader.SolutionDocs = CheckInFileAuto.s_SolutionDocs;
 
-            this.ReportMode = true;
-
             this.CheckinType = "Major";
             this.Major = true;
             this.Minor = false;
@@ -61,12 +57,10 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
             CheckInFileAutoParameters parameters = new(siteAccParam, ListForm.Parameters, ItemForm.Parameters)
             {
-                ReportMode = this.ReportMode,
+                ReportMode = Mode.ReportMode,
                 CheckinType = this.CheckinType,
                 Comment = this.Comment,
             };
-
-            //await new CheckInFileAuto(parameters, uiLog, cancelTokenSource).RunAsync();
 
             await CheckInFileAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }

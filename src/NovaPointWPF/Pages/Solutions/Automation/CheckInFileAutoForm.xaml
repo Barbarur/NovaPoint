@@ -14,14 +14,10 @@
         <StackPanel>
 
             <designmaterial:FormHeader
-            x:Name="SolutionHeader"/>
+                x:Name="SolutionHeader"/>
 
-            <ToggleButton
-                Style="{DynamicResource SolutionFormToggleButton}"
-                Content="Report Mode"
-                IsChecked="{Binding ReportMode, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                Margin="0, 0, 0, 15"
-                HorizontalAlignment="Left"/>
+            <designmaterial:ReportModeForm
+                x:Name="Mode"/>
 
             <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
