@@ -126,17 +126,18 @@ namespace NovaPointLibrary.Solutions
                     // https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject?redirectedfrom=MSDN&view=net-7.0#enumerating-and-deleting-members
                     foreach (var property in (IDictionary<String, Object>)o)
                     {
-                        sb.Append($"{property.Key},");
+                        sb.Append($"\"{property.Key}\",");
                     }
-
+                    if (sb.Length > 0) { sb.Length--; }
                     csv.WriteLine(sb.ToString());
                     sb.Clear();
                 }
 
                 foreach (var property in (IDictionary<String, Object>)o)
                 {
-                    sb.Append($"{property.Value},");
+                    sb.Append($"\"{property.Value}\",");
                 }
+                if (sb.Length > 0) { sb.Length--; }
 
                 csv.WriteLine(sb.ToString());
             }
@@ -155,8 +156,9 @@ namespace NovaPointLibrary.Solutions
                 {
                     foreach (var propertyInfo in properties)
                     {
-                        sb.Append($"{propertyInfo.Name},");
+                        sb.Append($"\"{propertyInfo.Name}\",");
                     }
+                    if (sb.Length > 0) { sb.Length--; }
 
                     csv.WriteLine(sb.ToString());
                     sb.Clear();
@@ -164,8 +166,9 @@ namespace NovaPointLibrary.Solutions
 
                 foreach (var propertyInfo in properties)
                 {
-                    sb.Append($"{propertyInfo.GetValue(record)},");
+                    sb.Append($"\"{propertyInfo.GetValue(record)}\",");
                 }
+                if (sb.Length > 0) { sb.Length--; }
 
                 csv.WriteLine(sb.ToString());
             }
