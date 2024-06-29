@@ -1,12 +1,8 @@
-﻿using Microsoft.Online.SharePoint.TenantAdministration;
-using Microsoft.SharePoint.Client;
-using Microsoft.SharePoint.News.DataModel;
+﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using System;
-using System.Dynamic;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Report
@@ -91,178 +87,164 @@ namespace NovaPointLibrary.Solutions.Report
             }
         }
 
-        //public ItemReport(ItemReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        //{
-        //    Parameters = parameters;
-        //    _param.ItemsParam.FileExpresions = _fileExpressions;
-        //    _param.ItemsParam.ItemExpresions = _itemExpressions;
-        //    _logger = new(uiAddLog, this.GetType().Name, parameters);
-        //    _appInfo = new(_logger, cancelTokenSource);
-        //}
-
-        //public async Task RunAsync()
-        //{
-        //    try
-        //    {
-        //        await RunScriptAsync();
-
-        //        _logger.ScriptFinish();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.ScriptFinish(ex);
-        //    }
-        //}
-
         private async Task RunScriptAsync()
         {
             _appInfo.IsCancelled();
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
+            await foreach (var resultItem in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetNEWAsync())
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(results.ErrorMessage) || results.List == null)
+                if (!String.IsNullOrWhiteSpace(resultItem.ErrorMessage))
                 {
-                    AddRecord(results.SiteUrl, results.List, remarks: results.ErrorMessage);
+                    ItemReportRecord record = new(resultItem);
+                    _logger.RecordCSV(record);
+                    continue;
+                }
+
+                if (resultItem.Item == null || resultItem.List == null)
+                {
+                    ItemReportRecord record = new(resultItem)
+                    {
+                        Remarks = "Item or List is null",
+                    };
+                    _logger.RecordCSV(record);
                     continue;
                 }
 
                 try
                 {
-                    await ProcessItems(results.SiteUrl, results.List, results.Progress);
+                    ItemReportRecord record = new(resultItem);
+                    await record.AddDetails(_logger, _appInfo, resultItem.Item);
+                    _logger.RecordCSV(record);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(results.List.BaseType.ToString(), results.List.DefaultViewUrl, ex);
-                    AddRecord(results.SiteUrl, results.List, remarks: ex.Message);
+                    _logger.ReportError("Item", (string)resultItem.Item["FileRef"], ex);
+
+                    ItemReportRecord record = new(resultItem, ex.Message);
+                    _logger.RecordCSV(record);
                 }
             }
         }
 
-        private async Task ProcessItems(string siteUrl, List oList, ProgressTracker parentProgress)
+    }
+
+    public class ItemReportRecord : ISolutionRecord
+    {
+        internal string SiteUrl { get; set; } = String.Empty;
+        internal string ListTitle { get; set; } = String.Empty;
+        internal string ListType { get; set; } = String.Empty;
+
+        internal string ItemID { get; set; } = String.Empty;
+        internal string ItemTitle { get; set; } = String.Empty;
+        internal string ItemPath { get; set; } = String.Empty;
+        internal string ItemType { get; set; } = String.Empty;
+
+        internal DateTime ItemCreated { get; set; } = DateTime.MinValue;
+        internal string ItemCreatedBy { get; set; } = String.Empty;
+        internal DateTime ItemModified { get; set; } = DateTime.MinValue;
+        internal string ItemModifiedBy { get; set; } = String.Empty;
+
+        internal string ItemVersion { get; set; } = String.Empty;
+        internal string ItemVersionsCount { get; set; } = String.Empty;
+        internal string ItemSizeMb { get; set; } = String.Empty;
+        internal string ItemSizeTotalMB { get; set; } = String.Empty;
+
+        internal string FileCheckOut { get; set; } = String.Empty;
+
+        internal string Remarks { get; set; } = String.Empty;
+
+        internal ItemReportRecord(SPOTenantItemRecord resultItem,
+                                  string remarks = "")
         {
-            _appInfo.IsCancelled();
+            SiteUrl = resultItem.SiteUrl;
+            if (String.IsNullOrWhiteSpace(remarks)) { Remarks = resultItem.ErrorMessage; }
+            else { Remarks = remarks; }
 
-            ProgressTracker progress = new(parentProgress, oList.ItemCount);
-
-            if(oList.ItemCount == 0)
+            if (resultItem.List != null)
             {
-                AddRecord(siteUrl, oList, remarks: $"'{oList.BaseType}' is empty");
+                ListTitle = resultItem.List.Title;
+                ListType = resultItem.List.BaseType.ToString();
+            }
+
+            if (resultItem.Item != null)
+            {
+                ItemID = resultItem.Item.Id.ToString();
+                ItemPath = (string)resultItem.Item["FileRef"];
+                ItemType = resultItem.Item.FileSystemObjectType.ToString();
+
+                if (resultItem.Item.ParentList.BaseType == BaseType.DocumentLibrary || resultItem.Item.FileSystemObjectType.ToString() == "Folder")
+                {
+                    ItemTitle = (string)resultItem.Item["FileLeafRef"];
+                }
+                else if (resultItem.Item.ParentList.BaseType == BaseType.GenericList)
+                {
+                    ItemTitle = (string)resultItem.Item["Title"];
+                }
+            }
+        }
+
+        internal async Task AddDetails(NPLogger logger, AppInfo appInfo, ListItem oItem)
+        {
+            ItemCreated = (DateTime)oItem["Created"];
+            FieldUserValue author = (FieldUserValue)oItem["Author"];
+            ItemCreatedBy = author.Email;
+
+            ItemModified = (DateTime)oItem["Modified"];
+            FieldUserValue editor = (FieldUserValue)oItem["Editor"];
+            ItemModifiedBy = editor.Email;
+
+            ItemVersion = (string)oItem["_UIVersionString"];
+            ItemVersionsCount = oItem.Versions.Count.ToString();
+
+            if (oItem.FileSystemObjectType.ToString() == "Folder")
+            {
                 return;
             }
-
-            if (oList.ItemCount > 5000)
+            else if (oItem.ParentList.BaseType == BaseType.DocumentLibrary)
             {
-                _logger.LogUI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' is a large list with {oList.ItemCount} items. Expect the Solution to take longer to run.");
+                ItemSizeMb = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]), 2).ToString();
+                FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)oItem["SMTotalSize"];
+                ItemSizeTotalMB = Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2).ToString();
+
+                FileCheckOut = oItem.File.CheckOutType.ToString();
+            }
+            else if (oItem.ParentList.BaseType == BaseType.GenericList)
+            {
+                int itemSizeTotalBytes = 0;
+                foreach (var oAttachment in oItem.AttachmentFiles)
+                {
+                    var oFileAttachment = await new SPOListItemCSOM(logger, appInfo).GetAttachmentFileAsync(SiteUrl, oAttachment.ServerRelativeUrl);
+
+                    itemSizeTotalBytes += (int)oFileAttachment.Length;
+                }
+                float itemSizeTotalMb = (float)Math.Round(itemSizeTotalBytes / Math.Pow(1024, 2), 2);
+
+                ItemSizeMb = itemSizeTotalMb.ToString();
+                ItemSizeTotalMB = itemSizeTotalMb.ToString();
             }
 
-            var spoItem = new SPOListItemCSOM(_logger, _appInfo);
-            await foreach (ListItem oItem in spoItem.GetAsync(siteUrl, oList, _param.ItemsParam))
-            {
-                _appInfo.IsCancelled();
-
-                try
-                {
-                    if (oItem.FileSystemObjectType.ToString() == "Folder")
-                    {
-                        // NEED TEST; if Folder name change depending on being located in a Library or a List
-                        AddRecord(siteUrl, oList, oItem, (string)oItem["FileLeafRef"], "0", "0");
-
-                        continue;
-                    }
-
-                    if (oList.BaseType == BaseType.DocumentLibrary)
-                    {
-                        string itemName = (string)oItem["FileLeafRef"];
-
-                        float itemSizeMb = (float)Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2);
-
-                        FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)oItem["SMTotalSize"];
-                        float itemSizeTotalMb = (float)Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2);
-
-                        AddRecord(siteUrl, oList, oItem, itemName, itemSizeMb.ToString(), itemSizeTotalMb.ToString(), oItem.File.CheckOutType.ToString(), "");
-                    }
-                    else if (oList.BaseType == BaseType.GenericList)
-                    {
-                        string itemName = (string)oItem["Title"];
-
-                        int itemSizeTotalBytes = 0;
-                        foreach (var oAttachment in oItem.AttachmentFiles)
-                        {
-                            var oFileAttachment = await spoItem.GetAttachmentFileAsync(siteUrl, oAttachment.ServerRelativeUrl);
-
-                            itemSizeTotalBytes += (int)oFileAttachment.Length;
-                        }
-                        float itemSizeTotalMb = (float)Math.Round(itemSizeTotalBytes / Math.Pow(1024, 2), 2);
-
-                        AddRecord(siteUrl, oList, oItem, itemName, itemSizeTotalMb.ToString(), itemSizeTotalMb.ToString(), "");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.ReportError("Item", (string)oItem["FileRef"], ex);
-
-                    AddRecord(siteUrl, oList, oItem, remarks: ex.Message);
-                }
-
-                progress.ProgressUpdateReport();
-            }
         }
 
-
-        private void AddRecord(string siteUrl,
-                               Microsoft.SharePoint.Client.List? oList = null,
-                               Microsoft.SharePoint.Client.ListItem? oItem = null,
-                               string itemName = "",
-                               string itemSizeMb = "",
-                               string itemSizeTotalMb = "",
-                               string checkOut = "",
-                               string remarks = "")
-        {
-
-            dynamic recordItem = new ExpandoObject();
-            recordItem.SiteUrl = siteUrl;
-            recordItem.ListTitle = oList != null ? oList.Title : String.Empty;
-            recordItem.ListType = oList != null ? oList.BaseType.ToString() : String.Empty;
-            recordItem.ListDefaultViewUrl = oList != null ? oList.DefaultViewUrl : string.Empty;
-
-            recordItem.ItemID = oItem != null ? oItem["ID"] : string.Empty;
-            recordItem.ItemName = oItem != null ? itemName : string.Empty;
-            recordItem.ItemPath = oItem != null ? oItem["FileRef"] : string.Empty;
-            recordItem.ItemType = oItem != null ? oItem.FileSystemObjectType.ToString() : string.Empty;
-
-            recordItem.ItemCreated = oItem != null ? oItem["Created"] : string.Empty;
-            FieldUserValue? author = oItem != null ? (FieldUserValue)oItem["Author"] : null;
-            recordItem.ItemCreatedBy = author?.Email;
-
-            recordItem.ItemModified = oItem != null ? oItem["Modified"] : string.Empty;
-            FieldUserValue? editor = oItem != null ? (FieldUserValue)oItem["Editor"] : null;
-            recordItem.ItemModifiedBy = editor?.Email;
-
-            recordItem.ItemVersion = oItem != null ? oItem["_UIVersionString"] : string.Empty;
-            recordItem.ItemVersionsCount = oItem != null ? oItem.Versions.Count.ToString() : string.Empty;
-
-            recordItem.ItemSizeMb = oItem != null ? itemSizeMb : string.Empty;
-            recordItem.ItemSizeTotalMB = oItem != null ? itemSizeTotalMb : string.Empty;
-
-            recordItem.FileCheckOut = checkOut;
-
-            recordItem.Remarks = remarks;
-
-            _logger.DynamicCSV(recordItem);
-        }
     }
 
     public class ItemReportParameters : ISolutionParameters
     {
-        public SPOTenantListsParameters TListsParam {  get; set; }
-        public SPOItemsParameters ItemsParam {  get; set; }
+        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
+        internal SPOListsParameters ListsParam { get; set; }
+        internal SPOItemsParameters ItemsParam { get; set; }
+        public SPOTenantItemsParameters TItemsParam
+        {
+            get { return new(SitesAccParam, ListsParam, ItemsParam); }
+        }
 
-        public ItemReportParameters(SPOTenantListsParameters listsParam,
+        public ItemReportParameters(SPOTenantSiteUrlsWithAccessParameters sitesParam,
+                                    SPOListsParameters listsParam,
                                     SPOItemsParameters itemsParam)
         {
-            TListsParam = listsParam;
+            SitesAccParam = sitesParam;
+            ListsParam = listsParam;
             ItemsParam = itemsParam;
         }
     }
