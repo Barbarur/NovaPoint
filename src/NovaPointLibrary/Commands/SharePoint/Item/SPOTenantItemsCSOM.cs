@@ -1,14 +1,7 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Commands.SharePoint.Utilities;
 using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace NovaPointLibrary.Commands.SharePoint.Item
@@ -23,6 +16,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             i => i.Id,
             i => i["FileRef"],
+            i => i.ParentList.Title,
+            i => i.ParentList.BaseType,
+            i => i.ParentList.ParentWeb.Url,
         };
 
         internal SPOTenantItemsCSOM(NPLogger logger, Authentication.AppInfo appInfo, SPOTenantItemsParameters parameters)
@@ -62,14 +58,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     continue;
                 }
 
-                //if (String.IsNullOrEmpty(_param.ItemsParam.FolderRelativeUrl))
-                //{
-                //    LongListNotification(recordList.List);
-                //}
 
                 CamlQuery camlQuery = CamlQuery.CreateAllItemsQuery();
 
-                if (String.IsNullOrEmpty(_param.ItemsParam.FolderRelativeUrl))
+                if (_param.ItemsParam.AllItems)
                 {
                     LongListNotification(recordList.List);
                 }
@@ -78,9 +70,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     camlQuery.FolderServerRelativeUrl = _param.ItemsParam.FolderRelativeUrl;
                 }
 
-
                 var queryElement = XElement.Parse(camlQuery.ViewXml);
-
                 var rowLimit = queryElement.Descendants("RowLimit").FirstOrDefault();
                 if (rowLimit != null)
                 {
@@ -97,28 +87,26 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
                 camlQuery.ViewXml = queryElement.ToString();
 
-                Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] requestedExpressions;
+                Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] expressions;
 
                 if (recordList.List.BaseType == BaseType.DocumentLibrary)
                 {
-                    requestedExpressions = _defaultExpressions.Union(_param.ItemsParam.FileExpresions).ToArray();
+                    expressions = _defaultExpressions.Union(_param.ItemsParam.FileExpresions).ToArray();
                 }
                 else if (recordList.List.BaseType == BaseType.GenericList)
                 {
-                    requestedExpressions = _defaultExpressions.Union(_param.ItemsParam.ItemExpresions).ToArray();
+                    expressions = _defaultExpressions.Union(_param.ItemsParam.ItemExpresions).ToArray();
                 }
                 else
                 {
-                    throw new Exception("This is not an Item List neither a Document Library");
+                    SPOTenantItemRecord recordItem = new(recordList, null)
+                    {
+                        ErrorMessage = "This is not an Item List neither a Document Library",
+                    };
+
+                    yield return recordItem;
+                    continue;
                 }
-
-                var defaultExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
-                {
-                i => i.ParentList.Title,
-                i => i.ParentList.ParentWeb.Url,
-                };
-
-                var expressions = requestedExpressions.Union(defaultExpressions).ToArray();
 
                 int counter = 0;
                 ClientContext clientContext;
@@ -134,7 +122,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     oList = clientContext.Web.Lists.GetById(recordList.List.Id);
                     ListItemCollection subcollListItem = oList.GetItems(camlQuery);
 
-                    string anyError = string.Empty;
+                    string exceptionMessage = string.Empty;
                     try
                     {
                         clientContext.Load(subcollListItem,
@@ -142,11 +130,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                             sci => sci.Include(expressions));
                         clientContext.ExecuteQueryRetry();
                     }
-                    catch (Exception ex) { anyError = ex.Message; }
+                    catch (Exception ex) { exceptionMessage = ex.Message; }
 
-                    if (!string.IsNullOrWhiteSpace(anyError))
+                    if (!string.IsNullOrWhiteSpace(exceptionMessage))
                     {
-                        if (anyError.Contains("exceeds the list view threshold"))
+                        if (exceptionMessage.Contains("exceeds the list view threshold"))
                         {
                             _logger.LogUI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Soution will collect all the items and then filter.");
                             camlQuery.FolderServerRelativeUrl = null;
@@ -157,7 +145,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                         {
                             SPOTenantItemRecord recordItem = new(recordList, null)
                             {
-                                ErrorMessage = anyError,
+                                ErrorMessage = exceptionMessage,
                             };
 
                             yield return recordItem;
@@ -175,7 +163,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                         {
                             _appInfo.IsCancelled();
 
-                            if (String.IsNullOrWhiteSpace(_param.ItemsParam.FolderRelativeUrl))
+                            if (_param.ItemsParam.AllItems)
                             {
                                 SPOTenantItemRecord recordItem = new(recordList, oItem);
                                 yield return recordItem;
@@ -212,5 +200,68 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 _logger.LogUI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' is a large list with {oList.ItemCount} items. Expect the Solution to take longer to run.");
             }
         }
+
+
+        internal async IAsyncEnumerable<SPOTenantItemRecord> GetNEWAsync()
+        {
+            _appInfo.IsCancelled();
+
+            await foreach (var recordList in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
+            {
+                _appInfo.IsCancelled();
+
+                if (!String.IsNullOrWhiteSpace(recordList.ErrorMessage) || recordList.List == null)
+                {
+                    SPOTenantItemRecord recordItem = new(recordList, null)
+                    {
+                        ErrorMessage = recordList.ErrorMessage,
+                    };
+
+                    yield return recordItem;
+                    continue;
+                }
+
+                if (recordList.List.ItemCount == 0)
+                {
+                    SPOTenantItemRecord recordItem = new(recordList, null)
+                    {
+                        ErrorMessage = $"'{recordList.List.BaseType}' is empty",
+                    };
+
+                    yield return recordItem;
+                    continue;
+                }
+
+                var collListItems = new SPOListItemCSOM(_logger, _appInfo).GetAsync(recordList.SiteUrl, recordList.List, _param.ItemsParam).GetAsyncEnumerator();
+                while (true)
+                {
+                    ListItem? oItem = null;
+                    string exceptionMessage = string.Empty;
+                    try
+                    {
+                        if (!await collListItems.MoveNextAsync()) { break; }
+                        oItem = collListItems.Current;
+                    }
+                    catch (Exception ex) { exceptionMessage = ex.Message; }
+
+                    if (!string.IsNullOrWhiteSpace(exceptionMessage))
+                    {
+                        SPOTenantItemRecord recordItem = new(recordList, null)
+                        {
+                            ErrorMessage = exceptionMessage,
+                        };
+
+                        yield return recordItem;
+                        break;
+                    }
+                    else
+                    {
+                        SPOTenantItemRecord recordItem = new(recordList, oItem);
+                        yield return recordItem;
+                    }
+                }
+            }
+        }
+
     }
 }
