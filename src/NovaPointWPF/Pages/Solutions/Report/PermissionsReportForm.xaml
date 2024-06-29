@@ -35,7 +35,7 @@
             <designmaterial:ListTenantForm
                 x:Name="ListForm"/>
 
-            <designmaterial:ItemTenantForm
+            <designmaterial:ItemForm
                 x:Name="ItemForm"/>
 
         </StackPanel>

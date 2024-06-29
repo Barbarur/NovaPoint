@@ -1,31 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NovaPointLibrary.Commands.SharePoint.Item;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace NovaPointWPF.UserControls
 {
     /// <summary>
     /// Interaction logic for ItemForm.xaml
     /// </summary>
-    public partial class ItemForm : UserControl
+    public partial class ItemForm : UserControl, INotifyPropertyChanged
     {
-        public ItemForm()
-        {
-            InitializeComponent();
-
-        }
-
+        
         private string _filterTarget = "Both";
         public string FilterTarget
         {
@@ -51,13 +37,21 @@ namespace NovaPointWPF.UserControls
             }
         }
 
+        public SPOItemsParameters Parameters { get; set; } = new();
+
+
+        private bool _itemsAll = true;
         public bool ItemsAll
         {
-            get { return (bool)GetValue(ItemsAllProperty); }
-            set { SetValue(ItemsAllProperty, value); }
+            get { return _itemsAll; }
+            set
+            {
+                _itemsAll = value;
+                Parameters.AllItems = value;
+                OnPropertyChanged();
+            }
         }
-        public static readonly DependencyProperty ItemsAllProperty =
-            DependencyProperty.Register("ItemsAll", typeof(bool), typeof(ItemForm), new FrameworkPropertyMetadata(defaultValue: false));
+
 
         private bool _relativeUrl;
         public bool RelativeUrl
@@ -78,14 +72,31 @@ namespace NovaPointWPF.UserControls
             }
         }
 
-
+        private string _folderRelativeUrl = string.Empty;
         public string FolderRelativeUrl
         {
-            get { return (string)GetValue(FolderRelativeUrlProperty); }
-            set { SetValue(FolderRelativeUrlProperty, value); }
+            get { return _folderRelativeUrl; }
+            set
+            {
+                _folderRelativeUrl = value;
+                Parameters.FolderRelativeUrl = value;
+                OnPropertyChanged();
+            }
         }
-        public static readonly DependencyProperty FolderRelativeUrlProperty =
-            DependencyProperty.Register("FolderRelativeUrl", typeof(string), typeof(ItemForm), new PropertyMetadata(string.Empty));
+
+
+        public ItemForm()
+        {
+            InitializeComponent();
+
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
     }
 }

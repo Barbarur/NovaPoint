@@ -24,70 +24,10 @@
                 <designmaterial:SiteTenantForm
                     x:Name="SiteF"
                     SubsitesVisibility="False"/>
-                
-                <!--<Label
-                    Style="{DynamicResource MenuSectionTitleLabel}"
-                    Content="Sites filter"/>
-
-                <Grid>
-
-                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
-
-                    <StackPanel
-                        Margin="12">
-
-                        <DockPanel>
-
-                            <RadioButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="All OneDrive"
-                                IsChecked="{Binding AllSiteCollections, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                                DockPanel.Dock="Left"/>
-
-                            <RadioButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Single Site"
-                                IsChecked="True"
-                                DockPanel.Dock="Left"/>
-
-                            <RadioButton
-                                x:Name="ListOfSitesRadioButton"
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="List of Sites"
-                                Width="102"
-                                IsChecked="{Binding ListOfSites, ElementName=root}"
-                                DockPanel.Dock="Left"/>
-
-                            <TextBlock
-                                DockPanel.Dock="Left"
-                                Height="Auto"/>
-
-                        </DockPanel>
-
-                        <StackPanel
-                            x:Name="SingleSiteUrl"
-                            Visibility="Visible"
-                            Margin="9, 0, 0, 0">
-
-                            <Label
-                                Style="{DynamicResource SolutionFormLabel}"
-                                Content="Site URL"/>
-
-                            <TextBox
-                                x:Name="SiteUrlTextBox"
-                                Style="{DynamicResource SolutionFormTextBox}"
-                                Text="{Binding SiteUrl, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                                />
-
-                        </StackPanel>
-
-                    </StackPanel>
-
-                </Grid>-->
 
             </StackPanel>
 
-            <designmaterial:ItemTenantForm
+            <designmaterial:ItemForm
                 x:Name="ItemForm"
                 FilterTarget="Library"/>
 

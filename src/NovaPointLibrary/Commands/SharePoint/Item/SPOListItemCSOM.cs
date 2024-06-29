@@ -1,5 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Xml.Linq;
@@ -16,6 +17,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             i => i.Id,
             i => i["FileRef"],
+            f => f["FileLeafRef"],
+            i => i.ParentList.Title,
+            i => i.ParentList.BaseType,
+            i => i.ParentList.ParentWeb.Url,
         };
 
         internal SPOListItemCSOM(NPLogger logger, Authentication.AppInfo appInfo)
@@ -25,7 +30,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         }
 
         private async IAsyncEnumerable<ListItemCollection> GetBatchAsync(string siteUrl,
-                                                                         Microsoft.SharePoint.Client.List TargetList,
+                                                                         Microsoft.SharePoint.Client.List list,
                                                                          SPOItemsParameters parameters)
         {
             _appInfo.IsCancelled();
@@ -33,8 +38,16 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
             CamlQuery camlQuery = CamlQuery.CreateAllItemsQuery();
 
-            var queryElement = XElement.Parse(camlQuery.ViewXml);
+            if (parameters.AllItems)
+            {
+                LongListNotification(list);
+            }
+            else
+            {
+                camlQuery.FolderServerRelativeUrl = parameters.FolderRelativeUrl;
+            }
 
+            var queryElement = XElement.Parse(camlQuery.ViewXml);
             var rowLimit = queryElement.Descendants("RowLimit").FirstOrDefault();
             if (rowLimit != null)
             {
@@ -51,55 +64,78 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
             camlQuery.ViewXml = queryElement.ToString();
 
-            Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] requestedExpressions;
-            if (TargetList.BaseType == BaseType.DocumentLibrary)
+            Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] expressions;
+            if (list.BaseType == BaseType.DocumentLibrary)
             {
-                requestedExpressions = _defaultExpressions.Union(parameters.FileExpresions).ToArray();
+                expressions = _defaultExpressions.Union(parameters.FileExpresions).ToArray();
             }
-            else if (TargetList.BaseType == BaseType.GenericList)
+            else if (list.BaseType == BaseType.GenericList)
             {
-                requestedExpressions = _defaultExpressions.Union(parameters.ItemExpresions).ToArray();
+                expressions = _defaultExpressions.Union(parameters.ItemExpresions).ToArray();
             }
             else
             {
-                throw new Exception("This is not a List neither a Library");
+                throw new Exception("This is not an Item List neither a Document Library");
             }
-
-            var defaultExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
-            {
-                i => i.ParentList.Title,
-                i => i.ParentList.ParentWeb.Url,
-            };
-
-            var expressions = requestedExpressions.Union(defaultExpressions).ToArray();
 
             int counter = 0;
             ClientContext clientContext;
             Microsoft.SharePoint.Client.List oList;
             _logger.LogTxt(GetType().Name, $"Start Loop");
+            bool shouldContinue = false;
             do
             {
                 _appInfo.IsCancelled();
 
                 clientContext = await _appInfo.GetContext(siteUrl);
-                oList = clientContext.Web.Lists.GetById(TargetList.Id);
+                oList = clientContext.Web.Lists.GetById(list.Id);
                 ListItemCollection subcollListItem = oList.GetItems(camlQuery);
 
-                clientContext.Load(subcollListItem,
-                    sci => sci.ListItemCollectionPosition,
-                    sci => sci.Include(expressions));
+                string exceptionMessage = string.Empty;
+                try
+                {
+                    clientContext.Load(subcollListItem,
+                        sci => sci.ListItemCollectionPosition,
+                        sci => sci.Include(expressions));
+                    clientContext.ExecuteQueryRetry();
+                }
+                catch (Exception ex) { exceptionMessage = ex.Message; }
 
-                clientContext.ExecuteQueryRetry();
+                if (!string.IsNullOrWhiteSpace(exceptionMessage))
+                {
+                    if (exceptionMessage.Contains("exceeds the list view threshold"))
+                    {
+                        _logger.LogUI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Soution will collect all the items and then filter.");
+                        camlQuery.FolderServerRelativeUrl = null;
+                        LongListNotification(list);
+                        shouldContinue = true;
+                    }
+                    else
+                    {
+                        throw new(exceptionMessage);
+                    }
+                }
+                else
+                {
+                    counter += subcollListItem.Count;
+                    if (counter >= 5000) { _logger.LogUI(GetType().Name, $"Collected from '{list.Title}' {counter} items..."); }
+                    else { _logger.LogTxt(GetType().Name, $"Collected from '{list.Title}' {counter} items."); }
 
-                counter += subcollListItem.Count;
-                if (counter >= 5000) { _logger.LogUI(GetType().Name, $"Collected from '{TargetList.Title}' {counter} items..."); }
-                else { _logger.LogTxt(GetType().Name, $"Collected from '{TargetList.Title}' {counter} items..."); }
-                
-                camlQuery.ListItemCollectionPosition = subcollListItem.ListItemCollectionPosition;
+                    yield return subcollListItem;
 
-                yield return subcollListItem;
+                    if (subcollListItem.ListItemCollectionPosition != null)
+                    {
+                        camlQuery.ListItemCollectionPosition = subcollListItem.ListItemCollectionPosition;
+                        shouldContinue = true;
+                    }
+                    else
+                    {
+                        shouldContinue = false;
+                    }
+                }
+
             }
-            while (camlQuery.ListItemCollectionPosition != null);
+            while (shouldContinue);
 
         }
 
@@ -111,7 +147,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             {
                 foreach (var oItem in listItemCollection)
                 {
-                    if (String.IsNullOrWhiteSpace(parameters.FolderRelativeUrl))
+                    if (parameters.AllItems)
                     {
                         yield return oItem;
                     }
@@ -120,6 +156,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                         yield return oItem;
                     }
                 }
+            }
+        }
+
+        internal void LongListNotification(Microsoft.SharePoint.Client.List oList)
+        {
+            if (oList.ItemCount > 5000)
+            {
+                _logger.LogUI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' is a large list with {oList.ItemCount} items. Expect the Solution to take longer to run.");
             }
         }
 

@@ -4,7 +4,6 @@ using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using System.Dynamic;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Report
@@ -39,14 +38,14 @@ namespace NovaPointLibrary.Solutions.Report
 
         public static async Task RunAsync(ShortcutODReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            parameters.TListsParam.SiteAccParam.SiteParam.IncludePersonalSite = true;
-            parameters.TListsParam.SiteAccParam.SiteParam.IncludeShareSite = false;
-            parameters.TListsParam.SiteAccParam.SiteParam.OnlyGroupIdDefined = false;
-            parameters.TListsParam.SiteAccParam.SiteParam.IncludeSubsites = false;
-            parameters.TListsParam.ListParam.AllLists = false;
-            parameters.TListsParam.ListParam.IncludeLists = false;
-            parameters.TListsParam.ListParam.IncludeLibraries = false;
-            parameters.TListsParam.ListParam.ListTitle = "Documents";
+            parameters.SitesAccParam.SiteParam.IncludePersonalSite = true;
+            parameters.SitesAccParam.SiteParam.IncludeShareSite = false;
+            parameters.SitesAccParam.SiteParam.OnlyGroupIdDefined = false;
+            parameters.SitesAccParam.SiteParam.IncludeSubsites = false;
+            parameters.ListsParam.AllLists = false;
+            parameters.ListsParam.IncludeLists = false;
+            parameters.ListsParam.IncludeLibraries = false;
+            parameters.ListsParam.ListTitle = "Documents";
             parameters.ItemsParam.FileExpresions = _fileExpressions;
 
             NPLogger logger = new(uiAddLog, "ShortcutODReport", parameters);
@@ -64,129 +63,112 @@ namespace NovaPointLibrary.Solutions.Report
                 logger.ScriptFinish(ex);
             }
         }
-        //public ShortcutODReport(ShortcutODReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        //{
-        //    _param.TListsParam.SiteAccParam.SiteParam.IncludePersonalSite = true;
-        //    _param.TListsParam.SiteAccParam.SiteParam.IncludeShareSite = false;
-        //    _param.TListsParam.SiteAccParam.SiteParam.OnlyGroupIdDefined = false;
-        //    _param.TListsParam.SiteAccParam.SiteParam.IncludeSubsites = false;
-        //    _param.TListsParam.ListParam.AllLists= false;
-        //    _param.TListsParam.ListParam.IncludeLists = false;
-        //    _param.TListsParam.ListParam.IncludeLibraries = false;
-        //    _param.TListsParam.ListParam.ListTitle = "Documents";
-        //    _param.ItemsParam.FileExpresions = _fileExpressions;
-
-        //    _logger = new(uiAddLog, this.GetType().Name, _param);
-        //    _appInfo = new(_logger, cancelTokenSource);
-        //}
-
-        //public async Task RunAsync()
-        //{
-        //    try
-        //    {
-        //        await RunScriptAsync();
-
-        //        _logger.ScriptFinish();
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.ScriptFinish(ex);
-        //    }
-        //}
 
         private async Task RunScriptAsync()
         {
             _appInfo.IsCancelled();
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
+            await foreach (var resultItem in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
-                if ( !results.SiteUrl.Contains(_appInfo.RootPersonalUrl, StringComparison.OrdinalIgnoreCase) ) { continue; }
-
-                if (!String.IsNullOrWhiteSpace(results.ErrorMessage) || results.List == null)
+                if (!String.IsNullOrWhiteSpace(resultItem.ErrorMessage))
                 {
-                    AddRecord(results.SiteUrl, results.List, remarks: results.ErrorMessage);
+                    ItemReportRecord record = new(resultItem);
+                    _logger.RecordCSV(record);
                     continue;
                 }
 
+                if (resultItem.Item == null || resultItem.List == null)
+                {
+                    ItemReportRecord record = new(resultItem)
+                    {
+                        Remarks = "Item or List is null",
+                    };
+                    _logger.RecordCSV(record);
+                    continue;
+                }
+
+                if (resultItem.List.BaseType != BaseType.DocumentLibrary) { continue; }
+
+                if (resultItem.Item.FileSystemObjectType.ToString() == "Folder") { continue; }
+
                 try
                 {
-                    await ProcessItems(results.SiteUrl, results.List, results.Progress);
+                    var shortcutData = JsonConvert.DeserializeObject<OneDriveShortcutProperties>((string)resultItem.Item["A2ODExtendedMetadata"]);
+
+                    ShortcutODReportRecord record = new(resultItem);
+                    record.AddTargetSite(shortcutData.riwu);
+                    _logger.RecordCSV(record);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(results.List.BaseType.ToString(), results.List.DefaultViewUrl, ex);
-                    AddRecord(results.SiteUrl, results.List, remarks: ex.Message);
+                    _logger.ReportError("Item", (string)resultItem.Item["FileRef"], ex);
+
+                    ShortcutODReportRecord record = new(resultItem, ex.Message);
+                    _logger.RecordCSV(record);
                 }
             }
         }
 
-        private async Task ProcessItems(string siteUrl, List oList, ProgressTracker parentProgress)
+    }
+
+    internal class ShortcutODReportRecord : ISolutionRecord
+    {
+        internal string SiteUrl { get; set; } = String.Empty;
+        internal string ListTitle { get; set; } = String.Empty;
+        internal string ListType { get; set; } = String.Empty;
+
+        internal string ItemID { get; set; } = String.Empty;
+        internal string ShortcutName { get; set; } = String.Empty;
+        internal string ShortcutPath { get; set; } = String.Empty;
+
+        internal string TargetSite { get; set; } = String.Empty;
+
+        internal string Remarks { get; set; } = String.Empty;
+
+        internal ShortcutODReportRecord(SPOTenantItemRecord resultItem, string remarks = "")
         {
-            _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start getting Items for {oList.BaseType} '{oList.Title}' in '{siteUrl}'");
+            SiteUrl = resultItem.SiteUrl;
+            if (String.IsNullOrWhiteSpace(remarks)) { Remarks = resultItem.ErrorMessage; }
+            else { Remarks = remarks; }
 
-            if (oList.BaseType != BaseType.DocumentLibrary) { return; }
-
-            ProgressTracker progress = new(parentProgress, oList.ItemCount);
-            await foreach (ListItem oItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(siteUrl, oList, _param.ItemsParam))
+            if (resultItem.List != null)
             {
-                _appInfo.IsCancelled();
+                ListTitle = resultItem.List.Title;
+                ListType = resultItem.List.BaseType.ToString();
+            }
 
-                if (!String.IsNullOrWhiteSpace((string)oItem["A2ODExtendedMetadata"]))
-                {
-                    try
-                    {
-                        var shortcutData = JsonConvert.DeserializeObject<OneDriveShortcutProperties>((string)oItem["A2ODExtendedMetadata"]);
-
-                        AddRecord(siteUrl, oList, oItem, shortcutData.riwu);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.ReportError("Item", $"{oItem["FileRef"]}", ex);
-                        AddRecord(siteUrl, oList, remarks: ex.Message);
-                    }
-                }
-
-                progress.ProgressUpdateReport();
+            if (resultItem.Item != null)
+            {
+                ItemID = resultItem.Item.Id.ToString();
+                ShortcutName = (string)resultItem.Item["FileLeafRef"];
+                ShortcutPath = (string)resultItem.Item["FileRef"];
             }
         }
 
-        private void AddRecord(string siteUrl,
-                               Microsoft.SharePoint.Client.List? oList = null,
-                               Microsoft.SharePoint.Client.ListItem? oItem = null,
-                               string targetSite = "",
-                               string remarks = "")
+        internal void AddTargetSite(string targetSite)
         {
-
-            dynamic recordItem = new ExpandoObject();
-            recordItem.SiteUrl = siteUrl;
-            recordItem.ListTitle = oList != null ? oList.Title : String.Empty;
-            recordItem.ListType = oList != null ? oList.BaseType.ToString() : String.Empty;
-
-            recordItem.ID = oItem != null ? oItem["ID"] : string.Empty;
-            recordItem.ShortcutName = oItem != null ? oItem["FileLeafRef"] : string.Empty;
-            recordItem.ShortcutPath = oItem != null ? oItem["FileRef"] : string.Empty;
-
-            recordItem.TargetSite = targetSite;
-
-            recordItem.Remarks = remarks;
-
-            _logger.DynamicCSV(recordItem);
+            TargetSite = targetSite;
         }
     }
 
     public class ShortcutODReportParameters : ISolutionParameters
     {
-        public SPOTenantListsParameters TListsParam {  get; set; }
-        public SPOItemsParameters ItemsParam {  get; set; }
+        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
+        internal SPOListsParameters ListsParam { get; set; }
+        internal SPOItemsParameters ItemsParam { get; set; }
+        public SPOTenantItemsParameters TItemsParam
+        {
+            get { return new(SitesAccParam, ListsParam, ItemsParam); }
+        }
 
-        public ShortcutODReportParameters(SPOTenantListsParameters listsParameters,
+        public ShortcutODReportParameters(SPOTenantSiteUrlsWithAccessParameters sitesParam,
+                                          SPOListsParameters listsParam,
                                           SPOItemsParameters itemsParameters)
         {
-            TListsParam = listsParameters;
+            SitesAccParam = sitesParam;
+            ListsParam = listsParam;
             ItemsParam = itemsParameters;
         }
     }

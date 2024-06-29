@@ -41,26 +41,25 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 }
 
 
-                SPOTenantListsRecord? errorRecord = null;
+                string exceptionMessage = string.Empty;
                 List<Microsoft.SharePoint.Client.List>? collList = null;
                 try
                 {
                     collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.ListParam);
                 }
-                catch (Exception ex)
-                {
-                    _logger.ReportError("Site", siteResults.SiteUrl, ex);
+                catch (Exception ex) { exceptionMessage = ex.Message; }
 
-                    errorRecord = new(siteResults, siteResults.Progress, null)
+
+                if (!string.IsNullOrWhiteSpace(exceptionMessage))
+                {
+                    _logger.ReportError("Site", siteResults.SiteUrl, exceptionMessage);
+
+                    SPOTenantListsRecord recordList = new(siteResults, siteResults.Progress, null)
                     {
-                        ErrorMessage = ex.Message
+                        ErrorMessage = exceptionMessage
                     };
-                }
 
-
-                if (errorRecord != null)
-                {
-                    yield return errorRecord;
+                    yield return recordList;
                 }
                 else if (collList != null)
                 {
