@@ -42,9 +42,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 else { KeepVersionsForm.Visibility = Visibility.Collapsed; }
             }
         }
-
-        public bool ReportMode { get; set; }
-
+        public bool Recycle { get; set; }
 
         public RemoveFileVersionAutoForm()
         {
@@ -59,8 +57,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             this.DeleteAll = false;
             this.KeepVersions = true;
             this.VersionsToKeep = 500;
-
-            this.ReportMode = true;
+            this.Recycle = true;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
@@ -74,9 +71,9 @@ namespace NovaPointWPF.Pages.Solutions.Automation
             {
                 DeleteAll = this.DeleteAll,
                 VersionsToKeep = this.VersionsToKeep,
-                Recycle = Mode.ReportMode,
-
-                ReportMode = this.ReportMode,
+                Recycle = this.Recycle,
+                
+                ReportMode = Mode.ReportMode,
             };
 
             await RemoveFileVersionAuto.RunAsync(parameters, uiLog, cancelTokenSource);
