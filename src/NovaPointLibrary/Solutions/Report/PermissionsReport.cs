@@ -57,27 +57,6 @@ namespace NovaPointLibrary.Solutions.Report
             }
         }
 
-        //public PermissionsReport(PermissionsReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        //{
-        //    Parameters = parameters;
-        //    _logger = new(uiAddLog, this.GetType().Name, parameters);
-        //    _appInfo = new(_logger, cancelTokenSource);
-        //}
-
-        //public async Task RunAsync()
-        //{
-        //    try
-        //    {
-        //        await RunScriptAsync();
-
-        //        _logger.ScriptFinish();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.ScriptFinish(ex);
-        //    }
-        //}
-
         private async Task RunScriptAsync()
         {
             _appInfo.IsCancelled();
@@ -95,7 +74,6 @@ namespace NovaPointLibrary.Solutions.Report
 
                 if (_param.OnlyUserList)
                 {
-                    //await UserListOnlyAsync(siteResults);
                     StringBuilder sb = new();
                     
                     await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.UserParam, _userRetrievalExpressions))
