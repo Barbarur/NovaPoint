@@ -105,15 +105,16 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
             else if (collSubsites != null)
             {
-                recordSite.Progress.IncreaseTotalCount(collSubsites.Count);
+                ProgressTracker progress = new(recordSite.Progress, collSubsites.Count + 1);
+                progress.ProgressUpdateReport();
                 foreach (var oSubsite in collSubsites)
                 {
-                    _logger.LogUI(GetType().Name, $"Processing Subsite '{oSubsite.Url}'");
+                    _logger.LogTxt(GetType().Name, $"Processing Subsite '{oSubsite.Url}'");
 
-                    SPOTenantSiteUrlsRecord resultsSubsite = new(recordSite.Progress, oSubsite);
+                    SPOTenantSiteUrlsRecord resultsSubsite = new(progress, oSubsite);
                     yield return resultsSubsite;
 
-                    recordSite.Progress.ProgressUpdateReport();
+                    progress.ProgressUpdateReport();
                 }
             }
         }

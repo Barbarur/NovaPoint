@@ -136,23 +136,23 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             string permissionLevels = "Site Collection Administrator";
 
             IEnumerable<Microsoft.SharePoint.Client.User>? collSiteCollAdmins = null;
-            string failedTry = string.Empty;
+            string exceptionMessage = string.Empty;
             try
             {
                 collSiteCollAdmins = await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).GetAsync(oSite.Url);
 
                 if(!collSiteCollAdmins.Any())
                 {
-                    failedTry = "No Site Collection Admins found";
+                    exceptionMessage = "No Site Collection Admins found";
                 }
             }
             catch (Exception ex)
             {
                 _logger.ReportError("Site", oSite.Url, ex);
-                failedTry = ex.Message;
+                exceptionMessage = ex.Message;
             }
 
-            if(String.IsNullOrWhiteSpace(failedTry) && collSiteCollAdmins != null)
+            if(String.IsNullOrWhiteSpace(exceptionMessage) && collSiteCollAdmins != null)
             {
                 string users = String.Join(" ", collSiteCollAdmins.Where(sca => sca.PrincipalType.ToString() == "User").Select(sca => sca.UserPrincipalName).ToList());
                 if (!string.IsNullOrWhiteSpace(users))
@@ -169,7 +169,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             else
             {
-                yield return new("Site", oSite.Title, oSite.Url, new("", "", "", "", failedTry));
+                yield return new("Site", oSite.Title, oSite.Url, new("", "", "", "", exceptionMessage));
                 yield break;
             }
             
@@ -193,7 +193,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             _logger.LogTxt(GetType().Name, $"Getting Unique permissions for Site '{oSite.Url}'");
 
             List<Microsoft.SharePoint.Client.List>? collLists = null;
-            string failedTry = string.Empty;
+            string exceptionMessage = string.Empty;
             try
             {
                 collLists = await new SPOListCSOM(_logger, _appInfo).GetAsync(oSite.Url, _param.ListsParam);
@@ -201,10 +201,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             catch (Exception ex)
             {
                 _logger.ReportError("Site", oSite.Url, ex);
-                failedTry = ex.Message;
+                exceptionMessage = ex.Message;
             }
 
-            if (String.IsNullOrEmpty(failedTry) && collLists != null)
+            if (String.IsNullOrEmpty(exceptionMessage) && collLists != null)
             {
                 await foreach(var record in GetListsPermissionsAsync(oSite, collLists, parentProgress))
                 {
@@ -213,7 +213,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             else
             {
-                yield return new("Site", oSite.Title, oSite.Url, new("", "", "", "", failedTry));
+                yield return new("Site", oSite.Title, oSite.Url, new("", "", "", "", exceptionMessage));
                 yield break;
             }
         }
@@ -236,7 +236,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 }
                 else
                 {
-                    yield return new($"{oList.BaseType}", oList.Title, $"{oList.DefaultViewUrl}", new("", "", "", "", "Inherits permissions"));
+                    yield return new($"{oList.BaseType}", oList.Title, $"{oList.DefaultViewUrl}", new("Inherits permissions", "Inherits permissions", "Inherits permissions", "Inherits permissions", "Inherits permissions"));
                 }
 
                 foreach(var record in await GetItemsPermissionsAsync(oSite, oList, progress))
@@ -254,9 +254,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
 
             List<SPOLocationPermissionsRecord> recordsList = new() { };
 
-            ProgressTracker progress = new(parentProgress, oList.ItemCount);
             try
             {
+                ProgressTracker progress = new(parentProgress, oList.ItemCount);
                 await foreach (ListItem oItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(oSite.Url, oList, _param.ItemsParam))
                 {
                     if (oItem.HasUniqueRoleAssignments)
@@ -269,9 +269,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                             recordsList.Add(new($"{oItem.FileSystemObjectType}", $"{oItem["FileLeafRef"]}", $"{oItem["FileRef"]}", role));
                         }
                     }
-                }
 
-                progress.ProgressUpdateReport();
+                    progress.ProgressUpdateReport();
+                }
             }
             catch (Exception ex)
             {
