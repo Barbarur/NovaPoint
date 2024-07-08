@@ -61,7 +61,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 }
                 else if (role.Member.PrincipalType.ToString() == "SharePointGroup")
                 {
-                    await foreach (var record in GetSharePointGroupUsersAsync(siteUrl, role.Member.Title, permissionLevels))
+                    await foreach (var record in GetSharePointGroupUsersAsync(siteUrl, role.Member, permissionLevels))
                     {
                         yield return record;
                     }
@@ -82,14 +82,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
         }
 
-        internal async IAsyncEnumerable<SPORoleAssignmentUserRecord> GetSharePointGroupUsersAsync(string siteUrl, string groupName, string permissionLevels)
+        internal async IAsyncEnumerable<SPORoleAssignmentUserRecord> GetSharePointGroupUsersAsync(string siteUrl, Principal spGroup, string permissionLevels)
         {
             _aAppInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start getting users from SharePoint Group '{groupName}'");
+            _logger.LogTxt(GetType().Name, $"Start getting users from SharePoint Group '{spGroup.Title}'");
 
-            string accessType = SharePointGroupName(groupName);
+            string accessType = SharePointGroupName(spGroup);
 
-            List<SPOKnownSharePointGroupUsers> collKnownGroups = _knownGroups.FindSharePointGroups(siteUrl, groupName);
+            List<SPOKnownSharePointGroupUsers> collKnownGroups = _knownGroups.FindSharePointGroups(siteUrl, spGroup.Title);
             if (collKnownGroups.Any())
             {
                 foreach (var oKnowngroup in collKnownGroups)
@@ -101,34 +101,40 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
 
 
             UserCollection? groupMembers = null;
-            string failedTry = string.Empty;
+            string exeptionMessage = string.Empty;
             try
             {
-                groupMembers = await new SPOSiteGroupUsersCSOM(_logger, _aAppInfo).GetAsync(siteUrl, groupName);
+                groupMembers = await new SPOSiteGroupUsersCSOM(_logger, _aAppInfo).GetAsync(siteUrl, spGroup.Title);
 
                 if (!groupMembers.Any())
                 {
                     groupMembers = null;
-                    failedTry = "SharePoint group with no users";
+                    exeptionMessage = "SharePoint group with no users";
                 }
             }
             catch (Exception ex)
             {
-                _logger.ReportError("SharePoint Group", groupName, ex);
+                _logger.ReportError("SharePoint Group", spGroup.Title, ex);
 
-                failedTry = ex.Message;
+                exeptionMessage = ex.Message;
             }
 
-            if(string.IsNullOrWhiteSpace(failedTry) && groupMembers != null)
+
+            if (!string.IsNullOrWhiteSpace(exeptionMessage) || groupMembers == null)
+            {
+                _knownGroups._groupsSharePoint.Add(new(siteUrl, spGroup.Title, "", "", exeptionMessage));
+                yield return new(accessType, "", "", permissionLevels, exeptionMessage);
+                yield break;
+            }
+            else  if (string.IsNullOrWhiteSpace(exeptionMessage) && groupMembers != null)
             {
                 var users = String.Join(" ", groupMembers.Where(gm => gm.PrincipalType.ToString() == "User").Select(m => m.UserPrincipalName).ToList());
                 if (!string.IsNullOrWhiteSpace(users))
                 {
                     yield return new(accessType, "User", users, permissionLevels, "");
 
-                    _knownGroups._groupsSharePoint.Add(new(siteUrl, groupName, "Users", users, ""));
+                    _knownGroups._groupsSharePoint.Add(new(siteUrl, spGroup.Title, "Users", users, ""));
                 }
-
 
                 var collSecurityGroups = groupMembers.Where(gm => gm.PrincipalType.ToString() == "SecurityGroup").ToList();
                 foreach (var securityGroup in collSecurityGroups)
@@ -137,14 +143,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                     {
                         var sysGroup = GetSystemGroup(accessType, "", securityGroup.Title, permissionLevels);
 
-                        _knownGroups._groupsSharePoint.Add(new(siteUrl, groupName, sysGroup.AccountType, sysGroup.Users, ""));
+                        _knownGroups._groupsSharePoint.Add(new(siteUrl, spGroup.Title, sysGroup.AccountType, sysGroup.Users, ""));
 
                         yield return sysGroup;
                         continue;
                     }
 
                     SPOKnownRoleAssignmentGroupHeaders headers = new();
-                    headers._groupsSharePoint.Add(new(siteUrl, groupName, "", "", ""));
+                    headers._groupsSharePoint.Add(new(siteUrl, spGroup.Title, "", "", ""));
 
                     await foreach (var record in GetSecurityGroupUsersAsync(securityGroup.Title, securityGroup.AadObjectId.NameId, accessType, permissionLevels, headers))
                     {
@@ -152,31 +158,29 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                     }
                 }
             }
-            else
-            {
-                _knownGroups._groupsSharePoint.Add(new(siteUrl, groupName, "", "", failedTry));
-                yield return new(accessType, "", "", permissionLevels, failedTry);
-                yield break;
-            }
         }
 
-        internal string SharePointGroupName(string groupName)
+        internal string SharePointGroupName(Principal spGroup)
         {
-            if (groupName.Contains("SharingLinks") && groupName.Contains("Anonymous"))
+            if (!spGroup.Title.Contains("SharingLinks"))
+            {
+                return $"SharePoint Group '{spGroup.Title}' ({spGroup.Id})";
+            }
+            else if (spGroup.Title.Contains("Anonymous"))
             {
                 return $"Sharing Link 'Anyone'";
             }
-            else if (groupName.Contains("SharingLinks") && groupName.Contains("Flexible"))
+            else if (spGroup.Title.Contains("Flexible"))
             {
                 return $"Sharing Link 'Specific People'";
             }
-            else if (groupName.Contains("SharingLinks") && groupName.Contains("Organization"))
+            else if (spGroup.Title.Contains("Organization"))
             {
                 return $"Sharing Link 'People in your organization'";
             }
             else
             {
-                return $"SharePoint Group '{groupName}'";
+                return $"SharePoint Group '{spGroup.Title}'";
             }
         }
 
@@ -262,7 +266,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 groupUsersToCollect = "Owners";
             }
 
-            groupHeaders._accountType += $"Security Group '{groupName}' holds ";
+            groupHeaders._accountType += $"Security Group '{groupName}' ({groupID}) holds ";
 
             List<SPOKnownSecurityGroupUsers> collKnownGroups = _knownGroups.FindSecurityGroups(groupID, groupName);
             if (collKnownGroups.Any())
@@ -280,7 +284,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
 
 
             IEnumerable<Microsoft365User>? groupUsers = null;
-            string failedTry = string.Empty;
+            string exceptionMessage = string.Empty;
             try
             {
                 if (groupUsersToCollect == "Owners") { groupUsers = await new AADGroup(_logger, _aAppInfo).GetOwnersAsync(groupID); }
@@ -289,17 +293,17 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 if (!groupUsers.Any())
                 {
                     groupUsers = null;
-                    failedTry = "Security group with no users";
+                    exceptionMessage = "Security group with no users";
                 }
             }
             catch (Exception ex)
             {
                 _logger.ReportError("Security Group", $"{groupName}' with ID {groupID}", ex);
 
-                failedTry = ex.Message;
+                exceptionMessage = ex.Message;
             }
 
-            if (string.IsNullOrWhiteSpace(failedTry) && groupUsers != null)
+            if (string.IsNullOrWhiteSpace(exceptionMessage) && groupUsers != null)
             {
                 string users = string.Join(" ", groupUsers.Where(com => com.Type.ToString() == "user").Select(com => com.UserPrincipalName).ToList());
                 _knownGroups.AddNewGroupsFromHeaders(groupHeaders, users, "");
@@ -327,9 +331,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             else
             {
-                _knownGroups.AddNewGroupsFromHeaders(groupHeaders, "", failedTry);
+                _knownGroups.AddNewGroupsFromHeaders(groupHeaders, "", exceptionMessage);
 
-                yield return new(accessType, groupHeaders._accountType, "", permissionLevels, failedTry);
+                yield return new(accessType, groupHeaders._accountType, "", permissionLevels, exceptionMessage);
                 yield break;
             }
         }
