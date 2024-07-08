@@ -98,6 +98,35 @@ namespace NovaPointLibrary.Commands.Utilities
             }
         }
 
+        internal async Task DeleteAsync(string url)
+        {
+            _appInfo.IsCancelled();
+
+            _logger.LogTxt(GetType().Name, $"Graph API Request Delete '{url}'");
+
+            HttpRequestMessage requestMessage = await GetMessage(url, HttpMethod.Delete);
+
+            var sendMessage = SendMessageAsync(requestMessage);
+
+            TaskCompletionSource taskCompletionSource = new();
+
+            _appInfo.CancelToken.Register(() => taskCompletionSource.TrySetCanceled());
+
+            var completedTask = await Task.WhenAny(sendMessage, taskCompletionSource.Task);
+
+            if (completedTask != sendMessage || _appInfo.CancelToken.IsCancellationRequested)
+            {
+                _appInfo.CancelToken.ThrowIfCancellationRequested();
+                throw new Exception("Operation canceled.");
+            }
+            else
+            {
+                string response = await sendMessage;
+                _logger.LogTxt(GetType().Name, response);
+            }
+        }
+
+
         private async Task<HttpRequestMessage> GetMessage(string url, HttpMethod method)
         {
             _appInfo.IsCancelled();

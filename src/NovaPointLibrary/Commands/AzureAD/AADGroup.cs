@@ -63,5 +63,15 @@ namespace NovaPointLibrary.Commands.AzureAD
             return collMembers;
         }
 
+        internal async Task RemoveGroupAsync(string groupId)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Removing Group '{groupId}'");
+
+            string url = $"/groups/{groupId}";
+
+            await new GraphAPIHandler(_logger, _appInfo).DeleteAsync(url);
+        }
+
     }
 }
