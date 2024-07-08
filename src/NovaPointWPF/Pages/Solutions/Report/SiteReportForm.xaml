@@ -28,8 +28,7 @@
                 <StackPanel
                         Margin="12">
 
-                    <DockPanel
-                            Margin="0,0,0,9">
+                    <DockPanel>
 
                         <RadioButton
                                 Style="{DynamicResource SolutionFormToggleButton}"
@@ -41,12 +40,6 @@
                                 Content="Detailed"
                                 IsChecked="{Binding Detailed, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                                 DockPanel.Dock="Left"/>
-
-                        <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Include Site Admins"
-                                IsChecked="{Binding IncludeAdmins, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                                DockPanel.Dock="Right"/>
 
                         <TextBlock
                                 DockPanel.Dock="Left"

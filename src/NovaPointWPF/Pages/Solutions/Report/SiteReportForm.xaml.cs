@@ -30,8 +30,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
     {
         public bool Detailed { get; set; }
 
-        public bool IncludeAdmins {  get; set; }
-
         public SiteReportForm()
         {
             InitializeComponent();
@@ -43,26 +41,14 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionDocs = SiteReport.s_SolutionDocs;
 
             this.Detailed = true;
-            this.IncludeAdmins = false;
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOListsParameters l = new();
-            SPOItemsParameters i = new();
-            SPOSitePermissionsCSOMParameters permissionsParameters = new(l, i)
-            {
-                IncludeAdmins = this.IncludeAdmins,
-            };
-
             var siteAccParam = AdminF.Parameters;
             siteAccParam.SiteParam = SiteF.Parameters;
 
-            SiteReportParameters parameters = new(siteAccParam, permissionsParameters)
-            {
-                Detailed = this.Detailed,
-            };
-            //await new SiteReport(parameters, uiLog, cancelTokenSource).RunAsync();
+            SiteReportParameters parameters = new(siteAccParam, this.Detailed);
 
             await SiteReport.RunAsync(parameters, uiLog, cancelTokenSource);
         }

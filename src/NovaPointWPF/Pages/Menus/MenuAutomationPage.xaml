@@ -37,6 +37,11 @@
                             Content="Set or Remove a User as Site Collection Admin"
                             Click="GoSetSiteCollectionAdminAutoForm"/>
 
+                        <Button
+                            Style="{DynamicResource SolutionMenuButton}"
+                            Content="Delete Site Collections and Subsites"
+                            Click="GoRemoveSiteAutoForm"/>
+
                     </StackPanel>
 
                 </Grid>

@@ -43,6 +43,11 @@ namespace NovaPointWPF.Pages.Menus
             GoToSolutionForm(new SetSiteCollectionAdminAutoForm());
         }
 
+        private void GoRemoveSiteAutoForm(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new RemoveSiteAutoForm());
+        }
+
 
         // LISTS
         private void SetVersioningLimitAutoClick(object sender, RoutedEventArgs e)
