@@ -10,7 +10,7 @@
     <Grid Background="Transparent"
       Margin="0, 0, 0, 15">
 
-        <StackPanel>
+        <!--<StackPanel>
 
             <Label
             Style="{DynamicResource MenuSectionTitleLabel}"
@@ -29,7 +29,7 @@
 
                         <ToggleButton
                             Content="All users"
-                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
                             Width="120"
                             Click="AllUsersClick"
                             IsChecked="{Binding AllUsers, ElementName=root}"/>
@@ -37,22 +37,19 @@
                         
                         <ToggleButton
                             Content="Single User"
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Width="120"
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
                             Click="SingleUserClick"
                             IsChecked="{Binding SingleUser, ElementName=root}"/>
 
                         <ToggleButton
                             Content="All guests"
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Width="120"
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
                             Click="ExternalUsersClick"
                             IsChecked="{Binding IncludeExternalUsers, ElementName=root}"/>
 
                         <ToggleButton
                             Content="System group"
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Width="120"
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
                             Click="SystemGroupsClick"
                             IsChecked="{Binding IncludeSystemGroups, ElementName=root}"/>
 
@@ -118,7 +115,7 @@
 
             </Grid>
 
-        </StackPanel>
+        </StackPanel>-->
 
     </Grid>
 </UserControl>

@@ -5,11 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NovaPointWPF"
         mc:Ignorable="d"
-        Title="NovaPoint" Height="700" Width="1300"
+        Title="NovaPoint" Height="700" Width="1400"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         Background="#030615">
 
     <Grid Background="Transparent"
-          Margin="12">
+          Margin="24">
 
         <Frame x:Name="MainWindowMainFrame"
                NavigationUIVisibility="Hidden"/>

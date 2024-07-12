@@ -5,23 +5,24 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:NovaPointWPF.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="800" d:DesignWidth="800"
       Title="MainPage">
     
     <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="20"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
 
-        <Grid Margin="0,0,12,0">
+        <Grid>
 
-            <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+            <Border Style="{DynamicResource BorderPrimaryBackgroud}"/>
 
             <DockPanel
                 Background="Transparent"
-                Margin="6">
+                Margin="12">
 
                 <RadioButton
                     Style="{DynamicResource MainPageToggleButton}"
@@ -62,17 +63,24 @@
             
         </Grid>
 
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="2">
             
             <Border
                 Background="#101214"
                 CornerRadius="10"/>
 
-            <Frame x:Name="SolutionListFrame"
-                   Source="/Pages/AboutPage.xaml"
-                   Width="600"
-                   Margin="6,6,6,6"
-                   NavigationUIVisibility="Hidden"/>
+            <ScrollViewer
+                Style="{DynamicResource LeftScrollViewer}"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                Width="600">
+
+                <Frame
+                    x:Name="SolutionListFrame"
+                    Source="/Pages/AboutPage.xaml"
+                    Margin="12,24,12,12"
+                    NavigationUIVisibility="Hidden"/>
+                
+            </ScrollViewer>
 
         </Grid>
 

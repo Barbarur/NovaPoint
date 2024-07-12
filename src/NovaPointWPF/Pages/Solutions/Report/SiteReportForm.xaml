@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report"
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="900" d:DesignWidth="600"
+      d:DesignHeight="900" d:DesignWidth="800"
       Title="SiteReportForm">
 
     <Grid>
@@ -16,38 +16,35 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <Label
-                    Style="{DynamicResource MenuSectionTitleLabel}"
-                    Content="Report type"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Report type"/>
 
-            <Grid
-                Margin="0, 0, 0, 15">
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
-
-                <StackPanel
-                        Margin="12">
-
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+                    
                     <DockPanel>
 
                         <RadioButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Standard"
-                                DockPanel.Dock="Left"/>
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
+                            Content="Standard"
+                            DockPanel.Dock="Left"
+                            Margin="0,0,8,0"/>
 
                         <RadioButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Detailed"
-                                IsChecked="{Binding Detailed, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                                DockPanel.Dock="Left"/>
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
+                            Content="Detailed"
+                            IsChecked="{Binding Detailed, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                            DockPanel.Dock="Left"/>
 
                         <TextBlock
-                                DockPanel.Dock="Left"
-                                Height="Auto"/>
+                            DockPanel.Dock="Left"
+                            Height="Auto"/>
 
                     </DockPanel>
-
-                </StackPanel>
+                    
+                </Border>
 
             </Grid>
 

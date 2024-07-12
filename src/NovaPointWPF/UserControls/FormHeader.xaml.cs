@@ -51,7 +51,7 @@ namespace NovaPointWPF.UserControls
             Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
         }
 
-        private void RedTheDocsClick(object sender, RoutedEventArgs e)
+        private void ReadTheDocsClick(object sender, RoutedEventArgs e)
         {
             Process.Start(new ProcessStartInfo("cmd", $"/c start {SolutionDocs}") { CreateNoWindow = true });
         }

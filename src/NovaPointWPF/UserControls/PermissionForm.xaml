@@ -13,68 +13,71 @@
         
         <StackPanel>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Permissions filter"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Permissions filter"/>
 
-            <Grid>
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
 
-                <StackPanel
-                    Margin="12">
-
-                    <StackPanel
-                        Orientation="Horizontal"
-                        Margin="0,0,0,9">
-
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Site user list only"
-                            IsChecked="{Binding UserListOnly, ElementName=root}"/>
-
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Detailed report"
-                            IsChecked="{Binding DetailedReport, ElementName=root}"/>
-
-                    </StackPanel>
-
-                    <StackPanel
-                        x:Name="DetailPanel"
-                        Orientation="Vertical"
-                        Margin="9,0,0,9">
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Select which permissions to include on the report"/>
+                    <StackPanel>
 
                         <StackPanel
-                                    Orientation="Horizontal">
-                            <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Site Collection Admin"
-                                Width="168"
-                                IsChecked="{Binding IncludeAdmins, ElementName=root}"/>
+                            Orientation="Horizontal">
 
-                            <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Site Permissions"
-                                Width="168"
-                                IsChecked="{Binding IncludeSiteAccess, ElementName=root}"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Site user list only"
+                                IsChecked="{Binding UserListOnly, ElementName=root}"
+                                Margin="0,0,8,0"/>
 
-                            <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Unique permissions"
-                                Width="168"
-                                IsChecked="{Binding IncludeUniquePermissions, ElementName=root}"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Detailed report"
+                                IsChecked="{Binding DetailedReport, ElementName=root}"/>
+
+                        </StackPanel>
+
+                        <StackPanel
+                            x:Name="DetailPanel"
+                            Orientation="Vertical">
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Select which permissions to include on the report"
+                                Margin="0,16,0,0"/>
+
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Margin="0,8,0,0">
+                                
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Site Collection Admin"
+                                    Width="168"
+                                    IsChecked="{Binding IncludeAdmins, ElementName=root}"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Site Permissions"
+                                    Width="168"
+                                    IsChecked="{Binding IncludeSiteAccess, ElementName=root}"
+                                    Margin="8,0"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Unique permissions"
+                                    Width="168"
+                                    IsChecked="{Binding IncludeUniquePermissions, ElementName=root}"/>
                             
+                            </StackPanel>
+
                         </StackPanel>
 
                     </StackPanel>
 
-                </StackPanel>
-
+                </Border>
             </Grid>
         </StackPanel>
 

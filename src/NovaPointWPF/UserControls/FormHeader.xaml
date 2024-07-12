@@ -5,53 +5,46 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NovaPointWPF.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
+             d:DesignHeight="200" d:DesignWidth="800"
              x:Name="root">
 
-    <Grid Background="Transparent"
-          Margin="0,0,0,15">
+    <Grid
+        Background="Transparent">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="160"/>
+        </Grid.ColumnDefinitions>
+
 
         <StackPanel
-            VerticalAlignment="Top">
+            Grid.Column="0">
+                
+            <TextBlock
+                Style="{DynamicResource TextBlockTitle}"
+                Text="{Binding SolutionTitle, ElementName=root}"/>
 
-            <DockPanel>
+            <TextBlock
+                Style="{DynamicResource TextBlockBody}"
+                Margin="0,8,0,28">
 
-                <Label
-                    Style="{DynamicResource MenuMainTitleLabel}"
-                    Content="{Binding SolutionTitle, ElementName=root}"/>
+                <TextBlock.Inlines>
+                    <Run Text="Solution Code: "/>
+                    <Run FontStyle="Italic" Text="{Binding SolutionCode, ElementName=root}"/>
+                </TextBlock.Inlines>
 
-
-                <Button
-                    Style="{DynamicResource SolutionMainButton}"
-                    DockPanel.Dock="Right"
-                    Content="Learn More"
-                    Margin="0,6"
-                    Click="RedTheDocsClick"/>
-
-                <TextBlock DockPanel.Dock="Left"
-                            Width="Auto"/>
-
-            </DockPanel>
-
-
-            <StackPanel
-                Orientation="Horizontal">
-
-                <Label
-                    Style="{DynamicResource SolutionFormLabel}"
-                    Content="Solution Code:"
-                    FontWeight="Bold"/>
-            
-                <Label
-                    Style="{DynamicResource SolutionFormLabel}"
-                    Content="{Binding SolutionCode, ElementName=root}"
-                    VerticalAlignment="Bottom"
-                    FontStyle="Italic"
-                    Foreground="{DynamicResource PrimaryTextColor}"
-                    Margin="0,-6,0,0"/>
-
-            </StackPanel>
-
+            </TextBlock>
         </StackPanel>
+
+        <Button
+            Grid.Column="1"
+            Style="{DynamicResource ButtonSolutionMainAction}"
+            DockPanel.Dock="Right"
+            Content="Learn More"
+            FontWeight="Normal"
+            Click="ReadTheDocsClick"
+            Margin="16, 0, 0, 32"/>
+
+
     </Grid>
 </UserControl>

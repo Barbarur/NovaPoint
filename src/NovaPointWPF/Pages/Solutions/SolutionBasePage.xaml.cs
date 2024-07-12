@@ -55,8 +55,8 @@ namespace NovaPointWPF.Pages.Solutions
         private void ResetProgress()
         {
             Progress.Value = 0;
-            PercentageCompleted.Content = "Percentage completed";
-            PendingTime.Content = "Pending time to complete";
+            PercentageCompleted.Text = "Percentage completed";
+            PendingTime.Text = "Pending time to complete";
             BoxText.Text = String.Empty;
         }
 
@@ -156,8 +156,8 @@ namespace NovaPointWPF.Pages.Solutions
                 if (Progress.Dispatcher.CheckAccess())
                 {
                     Progress.Value = logInfo.PercentageProgress;
-                    PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
-                    PendingTime.Content = $"{logInfo.PendingTime}";
+                    PercentageCompleted.Text = $"{logInfo.PercentageProgress}%";
+                    PendingTime.Text = $"{logInfo.PendingTime}";
                 }
                 else
                 {
@@ -165,8 +165,8 @@ namespace NovaPointWPF.Pages.Solutions
                     new Action(() =>
                     {
                         Progress.Value = logInfo.PercentageProgress;
-                        PercentageCompleted.Content = $"{logInfo.PercentageProgress}%";
-                        PendingTime.Content = $"{logInfo.PendingTime}";
+                        PercentageCompleted.Text = $"{logInfo.PercentageProgress}%";
+                        PendingTime.Text = $"{logInfo.PendingTime}";
                     }));
                 }
             }

@@ -8,39 +8,39 @@
              d:DesignHeight="600" d:DesignWidth="600"
              x:Name="root">
     
-    <Grid Background="Transparent"
-      Margin="0, 0, 0, 15">
+    <Grid Background="Transparent">
 
         <StackPanel>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Mode"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Mode"/>
 
-            <Grid>
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+                    
+                    <StackPanel>
 
-                <StackPanel
-                    Margin="12">
+                        <StackPanel
+                            Orientation="Horizontal">
 
-                    <StackPanel
-                        Orientation="Horizontal">
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Action Mode"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,8,0"/>
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Action Mode"
-                            HorizontalAlignment="Left"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Report Mode"
+                                IsChecked="{Binding ReportMode, ElementName=root}"
+                                HorizontalAlignment="Left"/>
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Report Mode"
-                            IsChecked="{Binding ReportMode, ElementName=root}"
-                            HorizontalAlignment="Left"/>
+                        </StackPanel>
 
                     </StackPanel>
-
-                </StackPanel>
+                </Border>
 
             </Grid>
 

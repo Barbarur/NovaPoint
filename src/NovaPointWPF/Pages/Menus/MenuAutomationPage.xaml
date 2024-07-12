@@ -10,143 +10,146 @@
 
     <Grid Background="Transparent">
 
-        <ScrollViewer
-            Style="{DynamicResource LeftScrollViewer}"
-            ScrollViewer.VerticalScrollBarVisibility="Auto"
-            Grid.Row="0"
-            Grid.Column="0">
-            <StackPanel>
 
-                <Label
-                    Style="{DynamicResource MenuMainTitleLabel}"
-                    Content="Automation"
-                    Margin="0,0,0,15"/>
+        <StackPanel>
 
-                <Label
-                    Style="{DynamicResource MenuSectionTitleLabel}"
-                    Content="Site Collections and Subsites"/>
+            <TextBlock
+                    Style="{DynamicResource TextBlockTitle}"
+                    Text="Automation"
+                    Margin="0, 0, 0, 24"/>
 
-                <Grid Margin="0,0,0,15">
+            <TextBlock
+                    Style="{DynamicResource TextBlockBodyStrong}"
+                    Text="Site Collections and Subsites"/>
 
-                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+            <Grid
+                    Style="{DynamicResource SolutionMenuGrid}">
 
-                    <StackPanel>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}"/>
 
-                        <Button
+                <StackPanel>
+
+                    <Button
                             Style="{DynamicResource SolutionMenuButton}"
                             Content="Set or Remove a User as Site Collection Admin"
                             Click="GoSetSiteCollectionAdminAutoForm"/>
 
-                        <Button
+                    <Button
                             Style="{DynamicResource SolutionMenuButton}"
                             Content="Delete Site Collections and Subsites"
                             Click="GoRemoveSiteAutoForm"/>
 
-                    </StackPanel>
+                </StackPanel>
 
-                </Grid>
-
-
-                <Label
-                    Style="{DynamicResource MenuSectionTitleLabel}"
-                    Content="Document Libraries and Item Lists"/>
-
-                <Grid Margin="0,0,0,15">
-
-                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
-
-                    <StackPanel>
-
-                        <Button
-                            Style="{DynamicResource SolutionMenuButton}"
-                            Content="Set versioning limit"
-                            Click="SetVersioningLimitAutoClick"/>
-
-                    </StackPanel>
-
-                </Grid>
+            </Grid>
 
 
-                <Label
-                    Style="{DynamicResource MenuSectionTitleLabel}"
-                    Content="Files and Items"/>
+            <TextBlock
+                    Style="{DynamicResource TextBlockBodyStrong}"
+                    Text="Document Libraries and Item Lists"/>
 
-                <Grid Margin="0,0,0,15">
+            <Grid
+                Style="{DynamicResource SolutionMenuGrid}">
 
-                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}"/>
 
-                    <StackPanel>
+                <StackPanel>
 
-                        <Button
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Set versioning limit"
+                        Click="SetVersioningLimitAutoClick"/>
+
+                </StackPanel>
+
+            </Grid>
+
+
+            <TextBlock
+                    Style="{DynamicResource TextBlockBodyStrong}"
+                    Text="Files and Items"/>
+
+            <Grid
+                    Style="{DynamicResource SolutionMenuGrid}">
+
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}"/>
+
+                <StackPanel>
+
+                    <Button
                             Style="{DynamicResource SolutionMenuButton}"
                             Content="Check in files"
                             Click="CheckInFileAutoClick"/>
 
-                        <Button
+                    <Button
                             Style="{DynamicResource SolutionMenuButton}"
                             Content="Delete file versions"
                             Click="RemoveFileVersionAutoClick"/>
 
-                        <Button
+                    <Button
                             Style="{DynamicResource SolutionMenuButton}"
                             Content="Restore files from Preservation Hold Library"
                             Click="RestorePHLItemAutoClick"/>
 
-                        <Button
+                    <Button
                             Style="{DynamicResource SolutionMenuButton}"
                             Content="Delete files from Preservation Hold Library"
                             Click="RemovePHLItemAutoClick"/>
 
 
 
-                    </StackPanel>
+                </StackPanel>
 
-                </Grid>
+            </Grid>
 
-                <Label
-                    Style="{DynamicResource MenuSectionTitleLabel}"
-                    Content="Recycle bin"/>
 
-                <Grid Margin="0,0,0,15">
+            <TextBlock
+                    Style="{DynamicResource TextBlockBodyStrong}"
+                    Text="Recycle bin"/>
 
-                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+            <Grid
+                    Style="{DynamicResource SolutionMenuGrid}">
 
-                    <StackPanel>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}"/>
 
-                        <Button
+                <StackPanel>
+
+                    <Button
                             Style="{DynamicResource SolutionMenuButton}"
                             Content="Clear recycle bin"
                             Click="ClearRecycleBinAutoClick"/>
 
-                        <Button
+                    <Button
                             Style="{DynamicResource SolutionMenuButton}"
                             Content="Restore recycle bin"
                             Click="RestoreRecycleBinAutoClick"/>
 
-                    </StackPanel>
+                </StackPanel>
 
-                </Grid>
+            </Grid>
 
-                <Label
-                    Style="{DynamicResource MenuSectionTitleLabel}"
-                    Content="Users"/>
 
-                <Grid Margin="0,0,0,15">
+            <TextBlock
+                    Style="{DynamicResource TextBlockBodyStrong}"
+                    Text="Users"/>
 
-                    <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+            <Grid
+                    Style="{DynamicResource SolutionMenuGrid}">
 
-                    <StackPanel>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}"/>
 
-                        <Button
+                <StackPanel>
+
+                    <Button
                             Style="{DynamicResource SolutionMenuButton}"
                             Content="Remove a User"
                             Click="GoRemoveSiteUserAutoFormForm"/>
 
-                    </StackPanel>
+                </StackPanel>
 
-                </Grid>
+            </Grid>
 
-            </StackPanel>
-        </ScrollViewer>
+        </StackPanel>
+
     </Grid>
 </Page>

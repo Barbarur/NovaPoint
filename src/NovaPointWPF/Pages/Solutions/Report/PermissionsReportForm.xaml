@@ -32,7 +32,7 @@
             <designmaterial:SiteTenantForm
                 x:Name="SiteF"/>
 
-            <designmaterial:ListTenantForm
+            <designmaterial:ListForm
                 x:Name="ListForm"/>
 
             <designmaterial:ItemForm

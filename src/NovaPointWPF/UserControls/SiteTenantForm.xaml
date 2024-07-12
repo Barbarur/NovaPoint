@@ -5,146 +5,147 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NovaPointWPF.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="600"
+             d:DesignHeight="450" d:DesignWidth="800"
              x:Name="root">
     
-    <Grid Background="Transparent"
-      Margin="0, 0, 0, 15">
+    <Grid
+        Background="Transparent">
 
         <StackPanel>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Sites filter"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Sites filter"/>
 
-            <Grid>
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
 
-                <StackPanel
-                   Margin="12">
+                    <StackPanel>
 
-                    <DockPanel
-                       Margin="0,0,0,9">
+                        <DockPanel
+                           Margin="0,0,0,16">
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="All Sites Collections"
-                            IsChecked="{Binding AllSiteCollections, ElementName=root}"
-                            DockPanel.Dock="Left"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="All Sites Collections"
+                                IsChecked="{Binding AllSiteCollections, ElementName=root}"
+                                DockPanel.Dock="Left"
+                                Margin="0,0,8,0"/>
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Single Site"
-                            Width="102"
-                            IsChecked="{Binding SingleSite, ElementName=root}"
-                            DockPanel.Dock="Left"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Single Site"
+                                IsChecked="{Binding SingleSite, ElementName=root}"
+                                DockPanel.Dock="Left"
+                                Margin="0,0,8,0"/>
                         
-                        <RadioButton
-                            x:Name="ListOfSitesRadioButton"
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="List of Sites"
-                            Width="102"
-                            IsChecked="{Binding ListOfSites, ElementName=root}"
-                            DockPanel.Dock="Left"/>
-
-                        <ToggleButton
-                            x:Name="SubsiteToggleButton"
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Include Subsites"
-                            Width="132"
-                            IsChecked="{Binding IncludeSubsites, ElementName=root}"
-                            DockPanel.Dock="Right"
-                            Visibility="Visible"/>
-
-                        <TextBlock
-                            DockPanel.Dock="Left"
-                            Height="Auto"/>
-
-                    </DockPanel>
-
-                    <StackPanel
-                        x:Name="AllSitesFilter"
-                        Visibility="Collapsed"
-                        Margin="9, 0, 0, 0">
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Sites to Include"/>
-
-                        <StackPanel
-                            Orientation="Horizontal">
+                            <RadioButton
+                                x:Name="ListOfSitesRadioButton"
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="List of Sites"
+                                IsChecked="{Binding ListOfSites, ElementName=root}"
+                                DockPanel.Dock="Left"/>
 
                             <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Include OneDrive"
-                                IsChecked="{Binding IncludePersonalSite, ElementName=root}"/>
-
-                            <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Include Sites"
-                                IsChecked="{Binding IncludeShareSite, ElementName=root}"/>
-
-                            <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Only Teams Sites"
-                                IsChecked="{Binding OnlyGroupIdDefined, ElementName=root}"/>
-
-                        </StackPanel>
-
-                    </StackPanel>
-
-                    <StackPanel
-                        x:Name="SingleSiteForm"
-                        Visibility="Visible"
-                        Margin="9, 0, 0, 0">
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Site URL"/>
-
-                        <TextBox
-                            x:Name="SiteUrlTextBox"
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding SiteUrl, ElementName=root}"/>
-
-                    </StackPanel>
-
-                    <StackPanel
-                        x:Name="ListOfSitesForm"
-                        Visibility="Collapsed"
-                        Margin="9, 0, 0, 0">
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="File with list of sites"/>
-
-                        <StackPanel
-                            Orientation="Horizontal">
-
-                            <Button
-                                Style="{DynamicResource SolutionFormButton}"
-                                Width="90"
-                                Content="Open File"
-                                Click="OpenFileClick"/>
+                                x:Name="SubsiteToggleButton"
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Include Subsites"
+                                IsChecked="{Binding IncludeSubsites, ElementName=root}"
+                                DockPanel.Dock="Right"
+                                Visibility="Visible"/>
 
                             <TextBlock
-                                MaxWidth="420"
-                                Margin="6, 0, 0, 0"
-                                TextWrapping="Wrap"
-                                FontFamily="Calibri"
-                                FontSize="14"
-                                LineHeight="21"
-                                FontStyle="Italic"
-                                VerticalAlignment="Center"
-                                Foreground="{DynamicResource PrimaryTextColor}"
-                                Text="{Binding ListOfSitesPath, ElementName=root}"/>
+                                DockPanel.Dock="Left"
+                                Height="Auto"/>
+
+                        </DockPanel>
+
+                        <StackPanel
+                            x:Name="AllSitesFilter"
+                            Visibility="Collapsed">
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Select the sites collections to include"
+                                Margin="0,0,0,12"/>
+
+                            <StackPanel
+                                Orientation="Horizontal">
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Include OneDrive"
+                                    IsChecked="{Binding IncludePersonalSite, ElementName=root}"
+                                    Margin="0,0,8,0"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Include Sites"
+                                    IsChecked="{Binding IncludeShareSite, ElementName=root}"
+                                    Margin="0,0,8,0"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Only Teams Sites"
+                                    IsChecked="{Binding OnlyGroupIdDefined, ElementName=root}"/>
+
+                            </StackPanel>
+
+                        </StackPanel>
+
+                        <StackPanel
+                            x:Name="SingleSiteForm"
+                            Visibility="Visible">
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Site URL"
+                                Margin="0,0,0,12"/>
+
+                            <TextBox
+                                x:Name="SiteUrlTextBox"
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding SiteUrl, ElementName=root}"/>
+
+                        </StackPanel>
+
+                        <StackPanel
+                            x:Name="ListOfSitesForm"
+                            Visibility="Collapsed">
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="File with the list of sites"
+                                Margin="0,0,0,12"/>
+
+                            <StackPanel
+                                Orientation="Horizontal">
+
+                                <Button
+                                    Style="{DynamicResource ButtonSolutionForm}"
+                                    Content="Open file"
+                                    Click="OpenFileClick"/>
+
+                                <TextBlock
+                                    MaxWidth="420"
+                                    Margin="6, 0, 0, 0"
+                                    TextWrapping="Wrap"
+                                    FontFamily="Calibri"
+                                    FontSize="14"
+                                    LineHeight="21"
+                                    FontStyle="Italic"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource PrimaryTextColor}"
+                                    Text="{Binding ListOfSitesPath, ElementName=root}"/>
+
+                            </StackPanel>
 
                         </StackPanel>
 
                     </StackPanel>
 
-                </StackPanel>
+                </Border>
 
             </Grid>
 

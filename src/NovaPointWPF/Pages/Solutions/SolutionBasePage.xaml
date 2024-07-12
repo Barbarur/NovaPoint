@@ -10,20 +10,21 @@
     
     <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="600"/>
-            <ColumnDefinition Width="15"/>
-            <ColumnDefinition MinWidth="600"/>
+            <ColumnDefinition MinWidth="800"/>
+            <ColumnDefinition Width="16"/>
+            <ColumnDefinition MinWidth="500"/>
         </Grid.ColumnDefinitions>
 
         <Grid Background="Transparent"
               Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition/>
-                <RowDefinition Height="90"/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="100"/>
             </Grid.RowDefinitions>
 
             <Border
-                Style="{DynamicResource BackBackgroudBorder}"
+                Style="{DynamicResource BorderSecondaryBackgroud}"
                 Grid.Row="0"
                 Grid.Column="0"/>
 
@@ -36,152 +37,139 @@
                 <Frame
                     x:Name="SolutionFormFrame"
                     NavigationUIVisibility="Hidden"
-                    Margin="15,8"/>
+                    Margin="16,16,16,-20"/>
 
             </ScrollViewer>
 
-            <Grid Background="Transparent"
-                  Grid.Row="1"
-                  Margin="0,12,0,0">
+            <Grid
+                Grid.Row="2">
 
                 <Border
-                    Style="{DynamicResource MenuBackgroudBorder}"/>
+                    Style="{DynamicResource BorderPrimaryBackgroud}">
+
+                    <DockPanel
+                        HorizontalAlignment="Stretch">
+
+                        <Button
+                            Style="{DynamicResource ButtonSolutionMainAction}"
+                            x:Name="BackButton"
+                            Content="Back to Menu"
+                            Click="Back_Click"
+                            Width="150"
+                            DockPanel.Dock="Left"/>
+
+                        <Button
+                            Style="{DynamicResource ButtonSolutionMainAction}"
+                            x:Name="CancelButton"
+                            Content="Cancel Solution"
+                            Click="CancelButton_ClickAsync"
+                            Width="150"
+                            IsEnabled="False"
+                            DockPanel.Dock="Right"/>
+
+                        <Label DockPanel.Dock="Right"/>
+
+                        <Button
+                            Style="{DynamicResource ButtonSolutionMainAction}"
+                            x:Name="RunButton"
+                            Content="Run Solution"
+                            Click="RunButton_ClickAsync"
+                            Width="150"
+                            DockPanel.Dock="Right"/>
+
+                        <Label DockPanel.Dock="Right"/>
 
 
-                <DockPanel
-                    HorizontalAlignment="Stretch"
-                    Margin="12">
-
-                    <Button
-                        Style="{DynamicResource SolutionMainButton}"
-                        x:Name="BackButton"
-                        Content="Back to Menu"
-                        Click="Back_Click"
-                        Width="150"
-                        DockPanel.Dock="Left"/>
-
-                    <Button
-                        Style="{DynamicResource SolutionMainButton}"
-                        x:Name="CancelButton"
-                        Content="Cancel Solution"
-                        Click="CancelButton_ClickAsync"
-                        Width="150"
-                        IsEnabled="False"
-                        DockPanel.Dock="Right"/>
-
-                    <Label DockPanel.Dock="Right"/>
-
-                    <Button
-                        Style="{DynamicResource SolutionMainButton}"
-                        x:Name="RunButton"
-                        Content="Run Solution"
-                        Click="RunButton_ClickAsync"
-                        Width="150"
-                        DockPanel.Dock="Right"/>
-
-                    <Label DockPanel.Dock="Right"/>
-
-
-                </DockPanel>
+                    </DockPanel>
                 
+                </Border>
             </Grid>
 
         </Grid>
 
         <Border
-            Style="{DynamicResource BackBackgroudBorder}"
+            Style="{DynamicResource BorderSecondaryBackgroud}"
             Grid.Column="2"/>
 
 
-        <Grid Background="Transparent"
-              ScrollViewer.VerticalScrollBarVisibility="Auto"
-              Grid.Column="2"
-              Margin="15,8">
-            
-            <Grid.RowDefinitions>
-                <RowDefinition Height="90"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
 
-            <StackPanel
-                Margin="0, 0, 0, 15">
+        <StackPanel
+            Grid.Column="2"
+            Margin="16">
 
-                <DockPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="160"/>
+                </Grid.ColumnDefinitions>
 
-                    <Label
-                        DockPanel.Dock="Left"
-                        Content="Solution Progress"
-                        VerticalAlignment="Bottom"
-                        FontWeight="SemiBold"
-                        FontSize="30"
-                        Foreground="White"/>
+                <StackPanel
+                    Grid.Column="0">
+                        
+                    <TextBlock
+                        Style="{DynamicResource TextBlockTitle}"
+                        Text="Solution Progress"/>
 
-                    <Button
-                        x:Name="FilesButton"
-                        Style="{DynamicResource SolutionMainButton}"
-                        Content="Solution folder"
-                        Click="FilesButton_Click"
-                        DockPanel.Dock="Right"
-                        IsEnabled="false"
-                        Margin="0,6"/>
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Margin="0,8,0,0">
+                            
+                        <TextBlock
+                            x:Name="PercentageCompleted"
+                            Style="{DynamicResource TextBlockBody}"
+                            Margin="0,0,8,0"
+                            Text="Percentage completed"/>
 
-                    <TextBlock DockPanel.Dock="Left"
-                               Width="Auto"/>
+                        <TextBlock
+                            x:Name="PendingTime"
+                            Style="{DynamicResource TextBlockBody}"
+                            Margin="0,0,0,0"
+                            Text="Pending time to complete"/>
 
-                </DockPanel>
-
-                <StackPanel Orientation="Horizontal"
-                            Margin="0,-7,0,0">
-
-                    <Label x:Name="PercentageCompleted"
-                           Content="Percentage completed"
-                           FontSize="12"
-                           FontWeight="Regular"
-                           Foreground="White"/>
-
-                    <Label x:Name="PendingTime"
-                           Content="Pending time to complete"
-                           FontSize="12"
-                           FontWeight="Regular"
-                           Foreground="White"/>
-
+                    </StackPanel>
                 </StackPanel>
 
-                <ProgressBar
-                    x:Name="Progress"
-                    Margin="6,3,6,0"
-                    Height="6"
-                    Orientation="Horizontal"
-                    Minimum="0"
-                    Maximum="100"
-                    Value="0"
-                    BorderThickness="0"
-                    Foreground="{DynamicResource LogoPinkColor}"
-                    Background="{DynamicResource PrimaryBorderColor}"/>
+                <Button
+                    x:Name="FilesButton"
+                    Grid.Column="1"
+                    Style="{DynamicResource ButtonSolutionMainAction}"
+                    Content="Solution folder"
+                    Click="FilesButton_Click"
+                    DockPanel.Dock="Right"
+                    IsEnabled="false"
+                    Margin="16,0,0,2"/>
+                
+            </Grid>
 
+            <ProgressBar
+                x:Name="Progress"
+                Margin="0,16,0,0"
+                Height="6"
+                Orientation="Horizontal"
+                Minimum="0"
+                Maximum="100"
+                Value="0"
+                BorderThickness="0"
+                Foreground="{DynamicResource LogoPinkColor}"
+                Background="{DynamicResource PrimaryBorderColor}"/>
 
-
-            </StackPanel>
-            
             <ScrollViewer
                 Style="{DynamicResource LeftScrollViewer}"
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                Margin="6"
-                Grid.Row="1">
+                Margin="0,28,0,0">
 
                 <TextBlock
                     x:Name="BoxText"
-                    Grid.Row="0"
+                    Style="{DynamicResource TextBlockBody}"
                     Text="{Binding Notification, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                    TextWrapping="Wrap"
-                    FontFamily="Calibri"
-                    FontSize="14"
-                    LineHeight="21"
-                    Foreground="{DynamicResource PrimaryTextColor}"/>
+                    TextWrapping="Wrap"/>
 
             </ScrollViewer>
+                
+                
+        </StackPanel>
+            
 
-        </Grid>
 
     </Grid>
     

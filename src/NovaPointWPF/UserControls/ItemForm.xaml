@@ -9,55 +9,58 @@
              x:Name="root">
 
     <Grid
-        Background="Transparent"
-        Margin="0, 0, 0, 15">
+        Background="Transparent">
 
         <StackPanel>
 
-            <Label
+            <TextBlock
                 x:Name="MainLabel"
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Files and Items filter"/>
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Files and Items filter"/>
 
-            <Grid>
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+                    
+                    <StackPanel>
 
-                <StackPanel
-                    Margin="12">
+                        <StackPanel
+                            Orientation="Horizontal">
 
-                    <StackPanel
-                        Orientation="Horizontal">
+                            <RadioButton
+                                x:Name="AllButton"
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="All files and items"
+                                IsChecked="{Binding ItemsAll, ElementName=root}"
+                                Margin="0,0,8,0"/>
 
-                        <RadioButton
-                            x:Name="AllButton"
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="All files and items"
-                            IsChecked="{Binding ItemsAll, ElementName=root}"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Specific location"
+                                IsChecked="{Binding RelativeUrl, ElementName=root}"/>
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Specific location"
-                            IsChecked="{Binding RelativeUrl, ElementName=root}"/>
+                        </StackPanel>
 
+                        <StackPanel
+                            x:Name="SpecificRelativeUrl"
+                            Visibility="Collapsed"
+                            Margin="0,16,0,0">
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Server relative path"
+                                Margin="0,0,0,12"/>
+
+                            <TextBox
+                                x:Name="SiteUrlTextBox"
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding FolderRelativeUrl, ElementName=root}"/>
+
+                        </StackPanel>
                     </StackPanel>
+                        
+                </Border>
 
-                    <StackPanel
-                        x:Name="SpecificRelativeUrl"
-                        Visibility="Collapsed"
-                        Margin="9, 9, 0, 0">
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Server relative path"/>
-
-                        <TextBox
-                            x:Name="SiteUrlTextBox"
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding FolderRelativeUrl, ElementName=root}"/>
-
-                    </StackPanel>
-                </StackPanel>
             </Grid>
         </StackPanel>
     </Grid>

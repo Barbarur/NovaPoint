@@ -14,46 +14,46 @@
         
         <StackPanel Background="Transparent">
 
-            <Label
-                Style="{DynamicResource MenuMainTitleLabel}"
-                Content="Settings"
-                Margin="0,0,0,15"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockTitle}"
+                Text="Settings"
+                Margin="0,0,0,24"/>
 
-            <Grid
-                Margin="0, 0, 0, 15">
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
 
-                <StackPanel
-                    Margin="12">
+                    <StackPanel>
 
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="Tenant ID"/>
+                        <TextBlock
+                            Style="{DynamicResource TextBlockBody}"
+                            Text="Tenant ID"/>
 
-                    <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding TenantId, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                        Margin="0,0,0,8"/>
+                        <TextBox
+                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                            Text="{Binding TenantId, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                            Margin="0,8,0,0"/>
 
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="Client ID"/>
+                        <TextBlock
+                            Style="{DynamicResource TextBlockBody}"
+                            Text="Client ID"
+                            Margin="0,16,0,0"/>
 
-                    <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding ClientId, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                        Margin="0,0,0,8"/>
+                        <TextBox
+                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                            Text="{Binding ClientId, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                            Margin="0,8,0,0"/>
 
-                    <ToggleButton
-                        Style="{DynamicResource SolutionFormToggleButton}"
-                        Content="Save Access Token"
-                        IsChecked="{Binding CachingToken, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                        Margin="0, 8, 0, 8"
-                        HorizontalAlignment="Left"/>
+                        <ToggleButton
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
+                            Content="Save Access Token"
+                            IsChecked="{Binding CachingToken, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                            Margin="0, 16, 0, 0"
+                            HorizontalAlignment="Left"/>
 
 
-                </StackPanel>
+                    </StackPanel>
+                </Border>
 
             </Grid>
 
@@ -67,30 +67,31 @@
                 </Grid.ColumnDefinitions>
 
                 <Button
-                    Style="{DynamicResource SolutionMainButton}"
+                    Style="{DynamicResource ButtonSolutionMainAction}"
                     Content="Save Settings"
                     Click="SaveClick"
                     Grid.Column="0"
                     Height="60"
-                    Width="120"/>
+                    Width="160"/>
 
                 <Button
-                    Style="{DynamicResource SolutionMainButton}"
+                    Style="{DynamicResource ButtonSolutionMainAction}"
                     Content="Delete Cache"
                     Click="DeleteClick"
                     Grid.Column="1"
                     Height="60"
-                    Width="120"/>
+                    Width="160"/>
 
             </Grid>
             
             
             <Button
-                Style="{DynamicResource SolutionMainButton}"
+                Style="{DynamicResource ButtonSolutionMainAction}"
                 x:Name="UpdateButton"
                 Content="Update"
                 Click="UpdateClick"
                 Background="DarkRed"
+                BorderThickness="0"
                 Height="60"
                 Width="120"
                 Margin="0, 42, 0, 0"

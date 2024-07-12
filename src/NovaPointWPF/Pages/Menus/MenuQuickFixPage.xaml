@@ -7,38 +7,24 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="MenuQuickFixPage">
-    <Page.Resources>
-        <Style TargetType="Button">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Margin" Value="6"/>
-            <Setter Property="Height" Value="39"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        </Style>
-        <Style TargetType="Label">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        </Style>
-    </Page.Resources>
 
     <Grid Background="Transparent">
 
         <StackPanel>
 
-            <Label
-                Style="{DynamicResource MenuMainTitleLabel}"
-                Content="Quick Fix"
-                Margin="0,0,0,15"/>
-            
-            
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Users"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockTitle}"
+                Text="Quick Fix"
+                Margin="0, 0, 0, 24"/>
 
-            <Grid Margin="0,0,0,15">
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Users"/>
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+            <Grid
+                Style="{DynamicResource SolutionMenuGrid}">
+
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}"/>
 
                 <StackPanel>
 
@@ -51,7 +37,7 @@
 
             </Grid>
 
-            
+
         </StackPanel>
 
     </Grid>

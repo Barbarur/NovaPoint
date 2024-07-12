@@ -5,112 +5,115 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NovaPointWPF.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="600"
+             d:DesignHeight="450" d:DesignWidth="800"
              x:Name="root">
 
     <Grid
-        Background="Transparent"
-        Margin="0, 0, 0, 15">
+    Background="Transparent"
+    Margin="0, 0, 0, 15">
 
-        
+
         <StackPanel>
 
-            <Label
+            <TextBlock
                 x:Name="MainLabel"
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Library and List filter"/>
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Library and List filter"/>
 
-            <Grid>
-                
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
-                
-                <StackPanel Margin="12">
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
+
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+                    
+                    <StackPanel>
+                        <StackPanel
+                            Orientation="Horizontal">
+
+                            <RadioButton
+                                x:Name="AllButton"
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                IsChecked="{Binding AllLists, ElementName=root}"
+                                Content="All libraries and lists"
+                                Margin=" 0, 0, 8, 0"/>
+
+                            <RadioButton
+                                x:Name="SingleButton"
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Single library or list"
+                                IsChecked="{Binding SingleList, ElementName=root}"/>
+                    
+                        </StackPanel>
 
 
-                    <StackPanel
-                        Orientation="Horizontal">
-
-                        <RadioButton
-                            x:Name="AllButton"
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            IsChecked="True"
-                            Content="All libraries and lists"/>
-
-                        <RadioButton
-                            x:Name="SingleButton"
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Single library or list"
-                            IsChecked="{Binding SingleList, ElementName=root}"/>
+                        <StackPanel
+                            x:Name="AllFilterStack"
+                            Margin="0, 16, 0, 0"
+                            Visibility="Visible">
 
 
+                            <TextBlock
+                                x:Name="AllFilterLabel"
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Select the lists and libraries to include"
+                                Margin="0,0,0,12"/>
+
+                            <DockPanel>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Item Lists"
+                                    DockPanel.Dock="Left"
+                                    IsChecked="{Binding IncludeLists, ElementName=root}"
+                                    Margin="0 ,0, 8, 0"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Document Libraries"
+                                    DockPanel.Dock="Left"
+                                    IsChecked="{Binding IncludeLibraries, ElementName=root}"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Hidden lists"
+                                    DockPanel.Dock="Right"
+                                    IsChecked="{Binding IncludeHiddenLists, ElementName=root}"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="System lists"
+                                    DockPanel.Dock="Right"
+                                    IsChecked="{Binding IncludeSystemLists, ElementName=root}"
+                                    Margin="0 ,0, 8, 0"/>
+
+                                <Label
+                                    DockPanel.Dock="Right"/>
+
+
+                            </DockPanel>
+
+                        </StackPanel>
+
+
+                        <StackPanel
+                            x:Name="SingleListTitle"
+                            Visibility="Collapsed"
+                            Margin="0, 16, 0, 0">
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Title"
+                                Margin="0,0,0,12"/>
+
+                            <TextBox
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding ListTitle, ElementName=root}"/>
+
+                        </StackPanel>
                     </StackPanel>
+                        
+                </Border>
 
-                    <StackPanel
-                        x:Name="AllFilterStack"
-                        Margin="9, 9, 0, 0"
-                        Visibility="Visible">
-
-
-                        <Label
-                            x:Name="AllFilterLabel"
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Lists and libraries to include"/>
-
-                        <DockPanel>
-
-                            <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Lists"
-                                Width="120"
-                                DockPanel.Dock="Left"
-                                IsChecked="{Binding IncludeLibraries, ElementName=root}"/>
-
-                            <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Libraries"
-                                Width="120"
-                                DockPanel.Dock="Left"
-                                IsChecked="{Binding IncludeLists, ElementName=root}"/>
-
-                            <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Hidden lists"
-                                Width="120"
-                                DockPanel.Dock="Right"
-                                IsChecked="{Binding IncludeHiddenLists, ElementName=root}"/>
-
-                            <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="System lists"
-                                Width="120"
-                                DockPanel.Dock="Right"
-                                IsChecked="{Binding IncludeSystemLists, ElementName=root}"/>
-
-                            <Label
-                                DockPanel.Dock="Right"/>
-
-
-                        </DockPanel>
-
-                    </StackPanel>
-
-                    <StackPanel
-                        x:Name="SingleListTitle"
-                        Visibility="Collapsed"
-                        Margin="9, 9, 0, 0">
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Title"/>
-
-                        <TextBox
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding ListTitle, ElementName=root}"/>
-
-                    </StackPanel>
-
-                </StackPanel>
             </Grid>
+
         </StackPanel>
     </Grid>
 </UserControl>

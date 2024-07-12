@@ -1,6 +1,9 @@
-﻿using System;
+﻿using NovaPointLibrary.Commands.SharePoint.List;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,12 +21,9 @@ namespace NovaPointWPF.UserControls
     /// <summary>
     /// Interaction logic for ListForm.xaml
     /// </summary>
-    public partial class ListForm : UserControl
+    public partial class ListForm : UserControl, INotifyPropertyChanged
     {
-        public ListForm()
-        {
-            InitializeComponent();
-        }
+        public SPOListsParameters Parameters { get; set; } = new();
 
         private string _filterTarget = "Both";
         public string FilterTarget
@@ -34,47 +34,49 @@ namespace NovaPointWPF.UserControls
                 _filterTarget = value;
                 if (value == "List")
                 {
-                    MainLabel.Content = "List filter";
+                    MainLabel.Text= "List filter";
                     AllButton.Content = "All lists";
                     SingleButton.Content = "Single list";
                 }
-                else if(value == "Library")
+                else if (value == "Library")
                 {
-                    MainLabel.Content = "Library filter";
+                    MainLabel.Text = "Library filter";
                     AllButton.Content = "All libraries";
                     SingleButton.Content = "Single library";
                 }
                 else
                 {
-                    MainLabel.Content = "Library and List filter";
+                    MainLabel.Text = "Library and List filter";
                     AllButton.Content = "All libraries and lists";
                     SingleButton.Content = "Single library or list";
                 }
             }
         }
 
-        private bool _singleList = false;
-        public bool SingleList
+        private bool _allLists = true;
+        public bool AllLists
         {
-            get { return _singleList; }
+            get { return _allLists; }
             set
             {
-                _singleList = value;
+                _allLists = value;
+                Parameters.AllLists = value;
                 if (value)
                 {
-                    AllFilterStack.Visibility = Visibility.Collapsed;
-
-                    SingleListTitle.Visibility = Visibility.Visible;
+                    if (ListsFilterVisibility) { AllFilterStack.Visibility = Visibility.Visible; }
                 }
                 else
                 {
-                    if (ListsFilterVisibility) { AllFilterStack.Visibility = Visibility.Visible; }
-
-                    SingleListTitle.Visibility = Visibility.Collapsed;
-                    ListTitle = string.Empty;
+                    AllFilterStack.Visibility = Visibility.Collapsed;
+                    IncludeLists = false;
+                    IncludeLibraries = false;
+                    IncludeHiddenLists = false;
+                    IncludeSystemLists = false;
                 }
+                OnPropertyChanged();
             }
         }
+
 
         private bool _listsFilterVisibility = true;
         public bool ListsFilterVisibility
@@ -95,46 +97,95 @@ namespace NovaPointWPF.UserControls
         }
 
 
+        public bool _includeLibraries = true;
         public bool IncludeLibraries
         {
-            get { return (bool)GetValue(IncludeLibrariesProperty); }
-            set { SetValue(IncludeLibrariesProperty, value); }
+            get { return _includeLibraries; }
+            set
+            {
+                _includeLibraries = value;
+                Parameters.IncludeLibraries = value;
+                OnPropertyChanged();
+            }
         }
-        public static readonly DependencyProperty IncludeLibrariesProperty =
-            DependencyProperty.Register("IncludeLibraries", typeof(bool), typeof(ListForm), new FrameworkPropertyMetadata(defaultValue: true));
 
+        private bool _includeLists = true;
         public bool IncludeLists
         {
-            get { return (bool)GetValue(IncludeListsProperty); }
-            set { SetValue(IncludeListsProperty, value); }
+            get { return _includeLists; }
+            set
+            {
+                _includeLists = value;
+                Parameters.IncludeLists = value;
+                OnPropertyChanged();
+            }
         }
-        public static readonly DependencyProperty IncludeListsProperty =
-            DependencyProperty.Register("IncludeLists", typeof(bool), typeof(ListForm), new FrameworkPropertyMetadata(defaultValue: true));
 
+        private bool _includeHiddenLists = false;
         public bool IncludeHiddenLists
         {
-            get { return (bool)GetValue(IncludeHiddenListsProperty); }
-            set { SetValue(IncludeHiddenListsProperty, value); }
+            get { return _includeHiddenLists; }
+            set
+            {
+                _includeHiddenLists = value;
+                Parameters.IncludeHiddenLists = value;
+                OnPropertyChanged();
+            }
         }
-        public static readonly DependencyProperty IncludeHiddenListsProperty =
-            DependencyProperty.Register("IncludeHiddenLists", typeof(bool), typeof(ListForm), new FrameworkPropertyMetadata(defaultValue: false));
 
+        private bool _includeSystemLists = false;
         public bool IncludeSystemLists
         {
-            get { return (bool)GetValue(IncludeSystemListsProperty); }
-            set { SetValue(IncludeSystemListsProperty, value); }
+            get { return _includeSystemLists; }
+            set
+            {
+                _includeSystemLists = value;
+                Parameters.IncludeSystemLists = value;
+                OnPropertyChanged();
+            }
         }
-        public static readonly DependencyProperty IncludeSystemListsProperty =
-            DependencyProperty.Register("IncludeSystemLists", typeof(bool), typeof(ListForm), new FrameworkPropertyMetadata(defaultValue: false));
 
-        
+
+
+        private bool _singleList = false;
+        public bool SingleList
+        {
+            get { return _singleList; }
+            set
+            {
+                _singleList = value;
+                if (value) { SingleListTitle.Visibility = Visibility.Visible; }
+                else
+                {
+                    ListTitle = string.Empty;
+                    SingleListTitle.Visibility = Visibility.Collapsed;
+                }
+                OnPropertyChanged();
+            }
+        }
+
+        private string _listTitle = string.Empty;
         public string ListTitle
         {
-            get { return (string)GetValue(ListTitleProperty); }
-            set { SetValue(ListTitleProperty, value); }
+            get { return _listTitle; }
+            set
+            {
+                _listTitle = value;
+                Parameters.ListTitle = value;
+                OnPropertyChanged();
+            }
         }
-        public static readonly DependencyProperty ListTitleProperty =
-            DependencyProperty.Register("ListTitle", typeof(string), typeof(ListForm), new PropertyMetadata(string.Empty));
 
+        public ListForm()
+        {
+            InitializeComponent();
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

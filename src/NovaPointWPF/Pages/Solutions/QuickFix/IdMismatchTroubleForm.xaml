@@ -19,30 +19,21 @@
 
             <designmaterial:ReportModeForm
                 x:Name="Mode"/>
-            
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Affected user"/>
 
-            <Grid
-                Margin="0, 0, 0, 15">
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Affected user UPN"/>
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <StackPanel
-                    Margin="12">
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+                    
+                <TextBox
+                    Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                    Text="{Binding UserUpn, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="User UPN"/>
-
-                    <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding UserUpn, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                </StackPanel>
-
+                </Border>
             </Grid>
 
 

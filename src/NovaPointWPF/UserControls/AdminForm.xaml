@@ -8,68 +8,79 @@
              d:DesignHeight="450" d:DesignWidth="600"
              x:Name="root">
     
-    <Grid Background="Transparent"
-          Margin="0, 0, 0, 15">
+    <Grid
+        Background="Transparent">
 
         <StackPanel>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Your account need to be Site Collection Administrator"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Site Collection Administrator is required to run the Solution"/>
 
-            <Grid>
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Border
+                    Style="{DynamicResource BorderPrimaryBackgroud}">
 
-                <StackPanel
-                    Margin="12">
+                    <StackPanel>
+                        <TextBlock
+                            Style="{DynamicResource TextBlockBody}">
+                            <TextBlock.Inlines>
+                                <Run Text="Should the solution "/>
+                                <Run FontWeight="Bold" TextDecorations="Underline" Text="add"/>
+                                <Run Text=" your account as Site Collection Admin?"/>
+                            </TextBlock.Inlines>
 
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="Should the solution add your account as Site Collection Admin?"/>
+                        </TextBlock>
 
-                    <StackPanel
-                        Orientation="Horizontal"
-                        Margin="0,0,0,9">
+                        <StackPanel
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Margin="0,12,0,16">
+
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Yes"
+                                IsChecked="{Binding AddAdmin, ElementName=root}"
+                                Margin="0,0,8,0"/>
+
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="No"/>
+
+                        </StackPanel>
+
+                        <TextBlock
+                            Style="{DynamicResource TextBlockBody}">
+                            <TextBlock.Inlines>
+                                <Run Text="Once the solution finishes, should it "/>
+                                <Run FontWeight="Bold" TextDecorations="Underline" Text="remove"/>
+                                <Run Text=" your account as Site Collection Admin?"/>
+                            </TextBlock.Inlines>
+                            
+                        </TextBlock>
                         
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Yes, add me as Admin"
-                            IsChecked="{Binding AddAdmin, ElementName=root}"
-                            HorizontalAlignment="Left"
-                            Width="180"/>
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Margin="0,12,0,0">
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="No, I am already Admin"
-                            HorizontalAlignment="Left"
-                            Width="180"/>
-                        
-                    </StackPanel>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Yes"
+                                IsChecked="{Binding RemoveAdmin, ElementName=root}"
+                                Margin="0,0,8,0"/>
 
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="What to do when the solution finishes?"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="No"/>
 
-                    <StackPanel
-                        Orientation="Horizontal">
-
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Remove me as Admin"
-                            IsChecked="{Binding RemoveAdmin, ElementName=root}"
-                            HorizontalAlignment="Left"
-                            Width="180"/>
-
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Keep me as Admin"
-                            HorizontalAlignment="Left"
-                            Width="180"/>
+                        </StackPanel>
 
                     </StackPanel>
+                
+                </Border>
 
-                </StackPanel>
+
 
             </Grid>
 

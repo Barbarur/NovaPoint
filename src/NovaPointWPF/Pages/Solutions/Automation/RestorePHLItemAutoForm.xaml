@@ -16,51 +16,53 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Restore location"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Restore location"/>
 
-            <Grid
-                Margin="0, 0, 0, 15">
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
                 <Border
-                    Style="{DynamicResource MenuBackgroudBorder}"/>
+                    Style="{DynamicResource BorderPrimaryBackgroud}">
 
-                <StackPanel
-                    Margin="12">
+                    <StackPanel>
 
-                    <StackPanel
-                        Orientation="Horizontal">
+                        <StackPanel
+                            Orientation="Horizontal">
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Original location"
-                            IsChecked="{Binding RestoreOriginalLocation, Mode=TwoWay}"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Original location"
+                                IsChecked="{Binding RestoreOriginalLocation, Mode=TwoWay}"
+                                Margin="0,0,8,0"/>
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Target location"
-                            IsChecked="False"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Target location"
+                                IsChecked="False"/>
 
-                        <Label/>
+                            <Label/>
 
+                        </StackPanel>
+
+                        <StackPanel
+                            x:Name="PathTextBoxVisibility"
+                            Visibility="Collapsed">
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Target location path"
+                                Margin="0,16,0,8"/>
+
+                            <TextBox
+                                x:Name="PathTextBox"
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding RestoreTargetLocation, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                        </StackPanel>
                     </StackPanel>
 
-                    <StackPanel
-                        x:Name="PathTextBoxVisibility"
-                        Visibility="Collapsed">
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Target location path"/>
-
-                        <TextBox
-                            x:Name="PathTextBox"
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding RestoreTargetLocation, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                    </StackPanel>
-                </StackPanel>
+                </Border>
             </Grid>
 
             <designmaterial:PHLForm

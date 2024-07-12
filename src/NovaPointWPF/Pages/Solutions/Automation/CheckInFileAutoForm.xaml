@@ -19,61 +19,62 @@
             <designmaterial:ReportModeForm
                 x:Name="Mode"/>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Check in action"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Check in action"/>
 
-            <Grid
-                Margin="0, 0, 0, 15">
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
                 <Border
-                    Style="{DynamicResource MenuBackgroudBorder}"/>
+                    Style="{DynamicResource BorderPrimaryBackgroud}">
 
-                <StackPanel
-                    Margin="12">
+                    <StackPanel>
 
-                    <DockPanel>
+                        <DockPanel>
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Major version"
-                            IsChecked="{Binding Major, Mode=TwoWay}"
-                            Click="CheckInTypeClick"
-                            DockPanel.Dock="Left"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Major version"
+                                IsChecked="{Binding Major, Mode=TwoWay}"
+                                Click="CheckInTypeClick"
+                                DockPanel.Dock="Left"
+                                Margin="0,0,8,0"/>
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Minor version"
-                            IsChecked="{Binding Minor, Mode=TwoWay}"
-                            Click="CheckInTypeClick"
-                            DockPanel.Dock="Left"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Minor version"
+                                IsChecked="{Binding Minor, Mode=TwoWay}"
+                                Click="CheckInTypeClick"
+                                DockPanel.Dock="Left"/>
 
                         
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Discard check out"
-                            IsChecked="{Binding Discard, Mode=TwoWay}"
-                            Click="CheckInTypeClick"
-                            DockPanel.Dock="Right"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Discard check out"
+                                IsChecked="{Binding Discard, Mode=TwoWay}"
+                                Click="CheckInTypeClick"
+                                DockPanel.Dock="Right"/>
 
-                        <Label/>
+                            <Label/>
 
-                    </DockPanel>
+                        </DockPanel>
 
-                    <StackPanel
-                        x:Name="CheckInCommentForm">
+                        <StackPanel
+                            x:Name="CheckInCommentForm">
 
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Check in comment"/>
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Check in comment"
+                                Margin="0,16,0,8"/>
 
-                        <TextBox
-                            x:Name="CommentTextBox"
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding Comment, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                            <TextBox
+                                x:Name="CommentTextBox"
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding Comment, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Border>
             </Grid>
 
             <designmaterial:AdminForm
@@ -82,7 +83,7 @@
             <designmaterial:SiteTenantForm
                 x:Name="SiteF"/>
 
-            <designmaterial:ListTenantForm
+            <designmaterial:ListForm
                 x:Name="ListForm"
                 FilterTarget="Library"
                 ListsFilterVisibility="False"/>

@@ -5,8 +5,19 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:NovaPointWPF.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="900" d:DesignWidth="800"
       Title="AboutPage">
+
+    <Page.Resources>
+        <Style x:Key="AboutPageButton" BasedOn="{StaticResource ButtonSolutionMainAction}" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="140"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Margin" Value="12,0,12,12"/>
+
+        </Style>
+
+    </Page.Resources>
 
     <Grid Background="Transparent">
         
@@ -15,27 +26,23 @@
 
             <Image Source="\Resources\NovaPoint.png"
                    Width="150"
-                   Height="200"/>
+                   Height="150"/>
 
             <Label
                 Style="{DynamicResource MenuMainTitleLabel}"
                 Content="NovaPoint"
                 HorizontalAlignment="Center"
                 FontWeight="Heavy"
-                Margin="0,0,0,15"/>
+                FontSize="40"
+                Margin="0,0,0,9"/>
 
             <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
                 Content="Open source app for SharePoint Admins"
                 HorizontalAlignment="Center"
-                FontWeight="Light"/>
+                FontWeight="Light"
+                FontSize="18"/>
 
-            <TextBlock Margin="6"
-                       HorizontalAlignment="Center">
-                <Hyperlink Click="GoToDocumentation">
-                    Go to Documentation
-                </Hyperlink>
-            </TextBlock>
             <Label
                 x:Name="VersionNo"
                 Style="{DynamicResource MenuSectionTitleLabel}"
@@ -43,7 +50,33 @@
                 FontWeight="Light"
                 FontSize="12"/>
 
-            <TextBlock Height="100"/>
+            <StackPanel
+                Margin="9"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center">
+                <Button
+                    Style="{DynamicResource AboutPageButton}"
+                    Content="GitHub"
+                    Click="GoToGitHub"/>
+
+                <Button
+                    Style="{DynamicResource AboutPageButton}"
+                    Content="Docs"
+                    Click="GoToDocumentation"/>
+
+                <Button
+                    Style="{DynamicResource AboutPageButton}"
+                    Content="LinkedIn"
+                    Click="GoToLinkedIn"/>
+                
+            </StackPanel>
+
+            <Button
+                Style="{DynamicResource AboutPageButton}"
+                Content="Funding"
+                Click="GoToFund"/>
+
+            <TextBlock Height="50"/>
 
         </StackPanel>
 

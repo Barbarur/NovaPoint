@@ -13,165 +13,193 @@
 
         <StackPanel>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Preservation Hold Library items"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Preservation Hold Library items"/>
 
-            <Grid>
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+                    
+                    <Grid>
 
-                <StackPanel
-                    Margin="12">
+                        <DockPanel
+                            VerticalAlignment="Top">
 
-                    <DockPanel>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="All items"
+                                IsChecked="{Binding AllItems, ElementName=root}"
+                                DockPanel.Dock="Left"
+                                Margin="0,0,8,0"/>
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="All items"
-                            IsChecked="{Binding AllItems, ElementName=root}"
-                            DockPanel.Dock="Left"/>
+                            <RadioButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Filter items"
+                                IsChecked="{Binding FilterItems, ElementName=root}"
+                                DockPanel.Dock="Left"/>
 
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Filter items"
-                            IsChecked="{Binding FilterItems, ElementName=root}"
-                            DockPanel.Dock="Left"/>
+                            <TextBlock
+                                DockPanel.Dock="Left"
+                                Height="Auto"/>
 
-                        <TextBlock
-                            DockPanel.Dock="Left"
-                            Height="Auto"/>
-
-                    </DockPanel>
-
-                    <StackPanel
-                        x:Name="FilterPanel"
-                        Margin="9,9,9,0"
-                        Visibility="Collapsed">
-
-                        <ToggleButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Filter by date"
-                            IsChecked="{Binding RetainedByDate, ElementName=root}"
-                            HorizontalAlignment="Left"/>
+                        </DockPanel>
 
                         <StackPanel
-                            x:Name="DateFilter"
+                            x:Name="FilterPanel"
                             Visibility="Collapsed">
-                            
+
+                            <ToggleButton
+                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Content="Filter by date"
+                                IsChecked="{Binding RetainedByDate, ElementName=root}"
+                                HorizontalAlignment="Right"/>
+
                             <StackPanel
-                                Margin="0,0,0,9">
+                                x:Name="DateFilter"
+                                Visibility="Collapsed"
+                                Orientation="Horizontal">
+                            
+                                <StackPanel>
 
-                                <Label
-                                    Style="{DynamicResource SolutionFormLabel}"
-                                    Content="Retained after"/>
+                                    <TextBlock
+                                        Style="{DynamicResource TextBlockBody}"
+                                        Text="Retained after"
+                                        Margin="0,16,0,0"/>
 
-                                <StackPanel
-                                    Orientation="Horizontal">
+                                    <StackPanel
+                                        Orientation="Horizontal"
+                                        Margin="0,8,16,0">
 
-                                    <ComboBox
-                                        x:Name="CBAfterYear"
-                                        Style="{DynamicResource SolutionFormComboBox}"
-                                        Width="99"
-                                        SelectionChanged="DateTimeAfterSelectionChanged"/>
+                                        <ComboBox
+                                            x:Name="CBAfterYear"
+                                            Style="{DynamicResource SolutionFormComboBox}"
+                                            Width="60"
+                                            SelectionChanged="DateTimeAfterSelectionChanged"/>
 
-                                    <ComboBox
-                                        x:Name="CBAfterMonth"
-                                        Style="{DynamicResource SolutionFormComboBox}"
-                                        SelectionChanged="DateTimeAfterSelectionChanged"/>
+                                        <ComboBox
+                                            x:Name="CBAfterMonth"
+                                            Style="{DynamicResource SolutionFormComboBox}"
+                                            SelectionChanged="DateTimeAfterSelectionChanged"
+                                            Width="90"/>
 
-                                    <ComboBox
-                                        x:Name="CBAfterDay"
-                                        Style="{DynamicResource SolutionFormComboBox}"
-                                        Width="99"
-                                        SelectionChanged="DateTimeAfterSelectionChanged"/>
+                                        <ComboBox
+                                            x:Name="CBAfterDay"
+                                            Style="{DynamicResource SolutionFormComboBox}"
+                                            Width="45"
+                                            SelectionChanged="DateTimeAfterSelectionChanged"/>
 
-                                    <ComboBox
-                                        x:Name="CBAfterHour"
-                                        Style="{DynamicResource SolutionFormComboBox}"
-                                        Width="99"
-                                        SelectionChanged="DateTimeAfterSelectionChanged"/>
+                                        <ComboBox
+                                            x:Name="CBAfterHour"
+                                            Style="{DynamicResource SolutionFormComboBox}"
+                                            Width="65"
+                                            SelectionChanged="DateTimeAfterSelectionChanged"/>
 
+                                    </StackPanel>
+
+                                </StackPanel>
+
+                                <StackPanel>
+
+                                    <TextBlock
+                                        Style="{DynamicResource TextBlockBody}"
+                                        Text="Retained before"
+                                        Margin="0,16,0,0"/>
+
+                                    <StackPanel
+                                        Orientation="Horizontal"
+                                        Margin="0,8,0,0">
+
+                                        <ComboBox
+                                            x:Name="CBBeforeYear"
+                                            Style="{DynamicResource SolutionFormComboBox}"
+                                            Width="60"
+                                            SelectionChanged="DateTimeBeforeSelectionChanged"/>
+
+                                        <ComboBox
+                                            x:Name="CBBeforeMonth"
+                                            Style="{DynamicResource SolutionFormComboBox}"
+                                            SelectionChanged="DateTimeBeforeSelectionChanged"
+                                            Width="90"/>
+
+                                        <ComboBox
+                                            x:Name="CBBeforeDay"
+                                            Style="{DynamicResource SolutionFormComboBox}"
+                                            Width="45"
+                                            SelectionChanged="DateTimeBeforeSelectionChanged"/>
+
+                                        <ComboBox
+                                            x:Name="CBBeforeHour"
+                                            Style="{DynamicResource SolutionFormComboBox}"
+                                            Width="65"
+                                            SelectionChanged="DateTimeBeforeSelectionChanged"/>
+
+                                    </StackPanel>
+
+                                </StackPanel>
+                            
+                            </StackPanel>
+
+                            <StackPanel
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Stretch">
+                                
+                                <StackPanel>
+                                    
+                                    <TextBlock
+                                        Style="{DynamicResource TextBlockBody}"
+                                        Text="Item name"
+                                        Margin="0,16,0,0"/>
+                                    <TextBox
+                                        Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                        Text="{Binding ItemName, ElementName=root}"
+                                        Width="398"
+                                        Margin="0,8,16,0"/>
+                                    
+                                </StackPanel>
+
+                                <StackPanel>
+                                    <TextBlock
+                                        Style="{DynamicResource TextBlockBody}"
+                                        Text="Modified by"
+                                        Margin="0,16,0,0"/>
+                                    <TextBox
+                                        Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                        Text="{Binding ModifiedByEmail, ElementName=root}"
+                                        Width="300"
+                                        Margin="0,8,0,0"/>
                                 </StackPanel>
 
                             </StackPanel>
 
-                            <StackPanel
-                                Margin="0,0,0,9">
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Original location path"
+                                Margin="0,16,0,0"/>
+                            <TextBox
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding OriginalLocation, ElementName=root}"
+                                Margin="0,8,0,0"/>
 
-                                <Label
-                                    Style="{DynamicResource SolutionFormLabel}"
-                                    Content="Retained before"/>
-
-                                <StackPanel
-                                    Orientation="Horizontal">
-
-                                    <ComboBox
-                                        x:Name="CBBeforeYear"
-                                        Style="{DynamicResource SolutionFormComboBox}"
-                                        Width="99"
-                                        SelectionChanged="DateTimeBeforeSelectionChanged"/>
-
-                                    <ComboBox
-                                        x:Name="CBBeforeMonth"
-                                        Style="{DynamicResource SolutionFormComboBox}"
-                                        SelectionChanged="DateTimeBeforeSelectionChanged"/>
-
-                                    <ComboBox
-                                        x:Name="CBBeforeDay"
-                                        Style="{DynamicResource SolutionFormComboBox}"
-                                        Width="99"
-                                        SelectionChanged="DateTimeBeforeSelectionChanged"/>
-
-                                    <ComboBox
-                                        x:Name="CBBeforeHour"
-                                        Style="{DynamicResource SolutionFormComboBox}"
-                                        Width="99"
-                                        SelectionChanged="DateTimeBeforeSelectionChanged"/>
-
-                                </StackPanel>
-
-                            </StackPanel>
                             
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="File size Mb"
+                                Margin="0,16,0,0"/>
+                            <TextBox
+                                Width="150"
+                                HorizontalAlignment="Left"
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding AboveFileSizeMb, ElementName=root}"
+                                Margin="0,8,0,0"/>
+
                         </StackPanel>
 
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Item name"/>
-                        <TextBox
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding ItemName, ElementName=root}"
-                            Margin="0,0,0,9"/>
+                    </Grid>
+                    
+                </Border>
 
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Original location path"/>
-                        <TextBox
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding OriginalLocation, ElementName=root}"
-                            Margin="0,0,0,9"/>
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Modified by"/>
-                        <TextBox
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding ModifiedByEmail, ElementName=root}"
-                            Margin="0,0,0,9"/>
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="File size Mb"/>
-                        <TextBox
-                            Width="150"
-                            HorizontalAlignment="Left"
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding AboveFileSizeMb, ElementName=root}"
-                            Margin="0,0,0,9"/>
-
-                    </StackPanel>
-
-                </StackPanel>
 
             </Grid>
 

@@ -19,60 +19,63 @@
             <designmaterial:ReportModeForm
                 x:Name="Mode"/>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Versions to Delete"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Versions to Delete"/>
 
-            <Grid
-                Margin="0, 0, 0, 15">
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
                 <Border
-                    Style="{DynamicResource MenuBackgroudBorder}"/>
+                    Style="{DynamicResource BorderPrimaryBackgroud}">
 
-                <StackPanel
-                    Margin="12">
-
-                    <StackPanel
-                        Orientation="Horizontal">
-
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Delete all versions"
-                            IsChecked="{Binding DeleteAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                        <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
-                            Content="Keep few versions"
-                            IsChecked="{Binding KeepVersions, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                    </StackPanel>
-
-                    <StackPanel
-                        x:Name="KeepVersionsForm">
-
-                        <Label
-                            Style="{DynamicResource SolutionFormLabel}"
-                            Content="Number of versions to Keep"/>
-
-                        <TextBox
-                            Style="{DynamicResource SolutionFormTextBox}"
-                            Text="{Binding VersionsToKeep, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                    <StackPanel>
 
                         <StackPanel
                             Orientation="Horizontal">
 
                             <RadioButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Recycle"
-                                IsChecked="{Binding Recycle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Delete all versions"
+                                IsChecked="{Binding DeleteAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                                Margin="0,0,8,0"/>
 
                             <RadioButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
-                                Content="Delete"/>
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Keep few versions"
+                                IsChecked="{Binding KeepVersions, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
                         </StackPanel>
 
+                        <StackPanel
+                            x:Name="KeepVersionsForm">
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Number of versions to Keep"
+                                Margin="0,16,0,8"/>
+
+                            <TextBox
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding VersionsToKeep, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Margin="0,16,0,0">
+
+                                <RadioButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Recycle"
+                                    IsChecked="{Binding Recycle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                                    Margin="0,0,8,0"/>
+
+                                <RadioButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Delete"/>
+                            </StackPanel>
+
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Border>
             </Grid>
 
             <designmaterial:AdminForm
@@ -81,7 +84,7 @@
             <designmaterial:SiteTenantForm
                 x:Name="SiteF"/>
 
-            <designmaterial:ListTenantForm
+            <designmaterial:ListForm
                 x:Name="ListForm"
                 FilterTarget="Library"
                 ListsFilterVisibility="False"/>

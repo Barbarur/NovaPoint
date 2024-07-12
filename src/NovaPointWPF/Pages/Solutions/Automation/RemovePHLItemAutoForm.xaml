@@ -23,7 +23,7 @@
             <Grid
                 Margin="0, 0, 0, 15">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}"/>
 
                 <StackPanel
                     Margin="12">

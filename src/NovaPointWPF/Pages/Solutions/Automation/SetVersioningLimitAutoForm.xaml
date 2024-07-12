@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Automation"
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="900" d:DesignWidth="600"
+      d:DesignHeight="900" d:DesignWidth="800"
       Title="SetVersioningLimitAutoForm">
 
     <Grid Background="Transparent">
@@ -16,45 +16,46 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Versioning limits"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Versioning limits"/>
 
-            <Grid
-                Margin="0, 0, 0, 15">
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
 
-                <StackPanel
-                    Margin="12">
+                    <StackPanel>
+
+                        <TextBlock
+                            Style="{DynamicResource TextBlockBody}"
+                            Text="Document Library major versioning limit"
+                            Margin="0,0,0,8"/>
+
+                        <TextBox
+                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                            Text="{Binding LibraryMajorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                        <TextBlock
+                            Style="{DynamicResource TextBlockBody}"
+                            Text="Document Library minor versioning limit"
+                            Margin="0,16,0,8"/>
+
+                        <TextBox
+                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                            Text="{Binding LibraryMinorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                        <TextBlock
+                            Style="{DynamicResource TextBlockBody}"
+                            Text="Item List major versioning limit"
+                            Margin="0,16,0,8"/>
+
+                        <TextBox
+                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                            Text="{Binding ListMajorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
 
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="Document Library major versioning limit"/>
-
-                    <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding LibraryMajorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="Document Library minor versioning limit"/>
-
-                    <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding LibraryMinorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                    <Label
-                        Style="{DynamicResource SolutionFormLabel}"
-                        Content="Item List major versioning limit"/>
-
-                    <TextBox
-                        Style="{DynamicResource SolutionFormTextBox}"
-                        Text="{Binding ListMajorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-
-                </StackPanel>
+                    </StackPanel>
+                </Border>
 
             </Grid>
 
@@ -64,7 +65,7 @@
             <designmaterial:SiteTenantForm
                 x:Name="SiteF"/>
 
-            <designmaterial:ListTenantForm
+            <designmaterial:ListForm
                 x:Name="ListForm"
                 FilterTarget="Library"/>
 

@@ -16,30 +16,30 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Action when conflict"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Action when conflict"/>
 
-            <Grid
-                Margin="0, 0, 0, 15">
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <Border Style="{DynamicResource MenuBackgroudBorder}"/>
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
 
-                <StackPanel
-                    Margin="12"
-                    Orientation="Horizontal">
+                    <StackPanel
+                        Orientation="Horizontal">
 
-                    <RadioButton
-                        Style="{DynamicResource SolutionFormToggleButton}"
-                        Content="Do nothing"
-                        IsChecked="True"/>
+                        <RadioButton
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
+                            Content="Do nothing"
+                            IsChecked="True"
+                            Margin="0,0,8,0"/>
 
-                    <RadioButton
-                        Style="{DynamicResource SolutionFormToggleButton}"
-                        Content="Rename original"
-                        IsChecked="{Binding RenameFile, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+                        <RadioButton
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
+                            Content="Rename original"
+                            IsChecked="{Binding RenameFile, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
 
-                </StackPanel>
+                    </StackPanel>
+                </Border>
 
             </Grid>
 

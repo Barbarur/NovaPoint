@@ -32,11 +32,33 @@ namespace NovaPointWPF.Pages
             else { VersionNo.Content = "v " + version; }
         }
 
+        private void GoToGitHub(object sender, RoutedEventArgs e)
+        {
+            string NavigateUri = "https://github.com/Barbarur/NovaPoint";
+            var url = NavigateUri.Replace("&", "^&");
+            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+        }
+
         private void GoToDocumentation(object sender, RoutedEventArgs e)
         {
             string NavigateUri = "https://github.com/Barbarur/NovaPoint/wiki";
             var url = NavigateUri.Replace("&", "^&");
             Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
         }
+        
+        private void GoToLinkedIn(object sender, RoutedEventArgs e)
+        {
+            string NavigateUri = "https://www.linkedin.com/company/novapointopen";
+            var url = NavigateUri.Replace("&", "^&");
+            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+        }
+        
+        private void GoToFund(object sender, RoutedEventArgs e)
+        {
+            string NavigateUri = "https://buymeacoffee.com/novapoint";
+            var url = NavigateUri.Replace("&", "^&");
+            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+        }
+
     }
 }
