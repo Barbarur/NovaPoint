@@ -68,20 +68,20 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
-            await foreach (var resultItem in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
+            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(resultItem.ErrorMessage))
+                if (tenantItemRecord.Ex != null)
                 {
-                    ItemReportRecord record = new(resultItem);
+                    ItemReportRecord record = new(tenantItemRecord);
                     _logger.RecordCSV(record);
                     continue;
                 }
 
-                if (resultItem.Item == null || resultItem.List == null)
+                if (tenantItemRecord.Item == null || tenantItemRecord.List == null)
                 {
-                    ItemReportRecord record = new(resultItem)
+                    ItemReportRecord record = new(tenantItemRecord)
                     {
                         Remarks = "Item or List is null",
                     };
@@ -89,23 +89,23 @@ namespace NovaPointLibrary.Solutions.Report
                     continue;
                 }
 
-                if (resultItem.List.BaseType != BaseType.DocumentLibrary) { continue; }
+                if (tenantItemRecord.List.BaseType != BaseType.DocumentLibrary) { continue; }
 
-                if (resultItem.Item.FileSystemObjectType.ToString() == "Folder") { continue; }
+                if (tenantItemRecord.Item.FileSystemObjectType.ToString() == "Folder") { continue; }
 
                 try
                 {
-                    var shortcutData = JsonConvert.DeserializeObject<OneDriveShortcutProperties>((string)resultItem.Item["A2ODExtendedMetadata"]);
+                    var shortcutData = JsonConvert.DeserializeObject<OneDriveShortcutProperties>((string)tenantItemRecord.Item["A2ODExtendedMetadata"]);
 
-                    ShortcutODReportRecord record = new(resultItem);
+                    ShortcutODReportRecord record = new(tenantItemRecord);
                     record.AddTargetSite(shortcutData.riwu);
                     _logger.RecordCSV(record);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Item", (string)resultItem.Item["FileRef"], ex);
+                    _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
-                    ShortcutODReportRecord record = new(resultItem, ex.Message);
+                    ShortcutODReportRecord record = new(tenantItemRecord, ex.Message);
                     _logger.RecordCSV(record);
                 }
             }
@@ -127,23 +127,23 @@ namespace NovaPointLibrary.Solutions.Report
 
         internal string Remarks { get; set; } = String.Empty;
 
-        internal ShortcutODReportRecord(SPOTenantItemRecord resultItem, string remarks = "")
+        internal ShortcutODReportRecord(SPOTenantItemRecord tenantItemRecord, string remarks = "")
         {
-            SiteUrl = resultItem.SiteUrl;
-            if (String.IsNullOrWhiteSpace(remarks)) { Remarks = resultItem.ErrorMessage; }
+            SiteUrl = tenantItemRecord.SiteUrl;
+            if (tenantItemRecord.Ex != null) { Remarks = tenantItemRecord.Ex.Message; }
             else { Remarks = remarks; }
 
-            if (resultItem.List != null)
+            if (tenantItemRecord.List != null)
             {
-                ListTitle = resultItem.List.Title;
-                ListType = resultItem.List.BaseType.ToString();
+                ListTitle = tenantItemRecord.List.Title;
+                ListType = tenantItemRecord.List.BaseType.ToString();
             }
 
-            if (resultItem.Item != null)
+            if (tenantItemRecord.Item != null)
             {
-                ItemID = resultItem.Item.Id.ToString();
-                ShortcutName = (string)resultItem.Item["FileLeafRef"];
-                ShortcutPath = (string)resultItem.Item["FileRef"];
+                ItemID = tenantItemRecord.Item.Id.ToString();
+                ShortcutName = (string)tenantItemRecord.Item["FileLeafRef"];
+                ShortcutPath = (string)tenantItemRecord.Item["FileRef"];
             }
         }
 

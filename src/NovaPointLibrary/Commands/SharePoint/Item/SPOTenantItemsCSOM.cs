@@ -32,27 +32,21 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
 
-            await foreach (var recordList in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
+            await foreach (var tenantListRecord in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(recordList.ErrorMessage) || recordList.List == null)
+                if (tenantListRecord.Ex != null || tenantListRecord.List == null)
                 {
-                    SPOTenantItemRecord recordItem = new(recordList, null)
-                    {
-                        ErrorMessage = recordList.ErrorMessage,
-                    };
-
+                    SPOTenantItemRecord recordItem = new(tenantListRecord);
                     yield return recordItem;
                     continue;
                 }
 
-                if (recordList.List.ItemCount == 0)
+                if (tenantListRecord.List.ItemCount == 0)
                 {
-                    SPOTenantItemRecord recordItem = new(recordList, null)
-                    {
-                        ErrorMessage = $"'{recordList.List.BaseType}' is empty",
-                    };
+                    Exception ex = new($"'{tenantListRecord.List.BaseType}' is empty");
+                    SPOTenantItemRecord recordItem = new(tenantListRecord, ex);
 
                     yield return recordItem;
                     continue;
@@ -63,7 +57,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
                 if (_param.ItemsParam.AllItems)
                 {
-                    LongListNotification(recordList.List);
+                    LongListNotification(tenantListRecord.List);
                 }
                 else
                 {
@@ -89,20 +83,18 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
                 Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] expressions;
 
-                if (recordList.List.BaseType == BaseType.DocumentLibrary)
+                if (tenantListRecord.List.BaseType == BaseType.DocumentLibrary)
                 {
                     expressions = _defaultExpressions.Union(_param.ItemsParam.FileExpresions).ToArray();
                 }
-                else if (recordList.List.BaseType == BaseType.GenericList)
+                else if (tenantListRecord.List.BaseType == BaseType.GenericList)
                 {
                     expressions = _defaultExpressions.Union(_param.ItemsParam.ItemExpresions).ToArray();
                 }
                 else
                 {
-                    SPOTenantItemRecord recordItem = new(recordList, null)
-                    {
-                        ErrorMessage = "This is not an Item List neither a Document Library",
-                    };
+                    Exception ex = new("This is not an Item List neither a Document Library");
+                    SPOTenantItemRecord recordItem = new(tenantListRecord, ex);
 
                     yield return recordItem;
                     continue;
@@ -112,17 +104,17 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 ClientContext clientContext;
                 Microsoft.SharePoint.Client.List oList;
                 _logger.LogTxt(GetType().Name, $"Start Loop");
-                ProgressTracker progress = new(recordList.Progress, recordList.List.ItemCount);
+                ProgressTracker progress = new(tenantListRecord.Progress, tenantListRecord.List.ItemCount);
                 bool shouldContinue = false;
                 do
                 {
                     _appInfo.IsCancelled();
 
-                    clientContext = await _appInfo.GetContext(recordList.SiteUrl);
-                    oList = clientContext.Web.Lists.GetById(recordList.List.Id);
+                    clientContext = await _appInfo.GetContext(tenantListRecord.SiteUrl);
+                    oList = clientContext.Web.Lists.GetById(tenantListRecord.List.Id);
                     ListItemCollection subcollListItem = oList.GetItems(camlQuery);
 
-                    string exceptionMessage = string.Empty;
+                    Exception? exception = null;
                     try
                     {
                         clientContext.Load(subcollListItem,
@@ -130,23 +122,20 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                             sci => sci.Include(expressions));
                         clientContext.ExecuteQueryRetry();
                     }
-                    catch (Exception ex) { exceptionMessage = ex.Message; }
+                    catch (Exception ex) { exception = ex; }
 
-                    if (!string.IsNullOrWhiteSpace(exceptionMessage))
+                    if ( exception != null)
                     {
-                        if (exceptionMessage.Contains("exceeds the list view threshold"))
+                        if (exception.Message.Contains("exceeds the list view threshold"))
                         {
                             _logger.LogUI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Soution will collect all the items and then filter.");
                             camlQuery.FolderServerRelativeUrl = null;
-                            LongListNotification(recordList.List);
+                            LongListNotification(tenantListRecord.List);
                             shouldContinue = true;
                         }
                         else
                         {
-                            SPOTenantItemRecord recordItem = new(recordList, null)
-                            {
-                                ErrorMessage = exceptionMessage,
-                            };
+                            SPOTenantItemRecord recordItem = new(tenantListRecord, exception);
 
                             yield return recordItem;
                             break;
@@ -155,8 +144,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     else
                     {
                         counter += subcollListItem.Count;
-                        if (counter >= 5000) { _logger.LogUI(GetType().Name, $"Collected from '{recordList.List.Title}' {counter} items..."); }
-                        else { _logger.LogTxt(GetType().Name, $"Collected from '{recordList.List.Title}' {counter} items."); }
+                        if (counter >= 5000) { _logger.LogUI(GetType().Name, $"Collected from '{tenantListRecord.List.Title}' {counter} items..."); }
+                        else { _logger.LogTxt(GetType().Name, $"Collected from '{tenantListRecord.List.Title}' {counter} items."); }
 
 
                         foreach (var oItem in subcollListItem)
@@ -165,12 +154,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
                             if (_param.ItemsParam.AllItems)
                             {
-                                SPOTenantItemRecord recordItem = new(recordList, oItem);
+                                SPOTenantItemRecord recordItem = new(tenantListRecord, oItem);
                                 yield return recordItem;
                             }
                             else if (!String.IsNullOrWhiteSpace(_param.ItemsParam.FolderRelativeUrl) && oItem["FileRef"].ToString() != null && oItem["FileRef"].ToString().Contains(_param.ItemsParam.FolderRelativeUrl))
                             {
-                                SPOTenantItemRecord recordItem = new(recordList, oItem);
+                                SPOTenantItemRecord recordItem = new(tenantListRecord, oItem);
                                 yield return recordItem;
                             }
                             progress.ProgressUpdateReport();
@@ -206,57 +195,48 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
 
-            await foreach (var recordList in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
+            await foreach (var tenantListRecord in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(recordList.ErrorMessage) || recordList.List == null)
+                if (tenantListRecord.Ex != null || tenantListRecord.List == null)
                 {
-                    SPOTenantItemRecord recordItem = new(recordList, null)
-                    {
-                        ErrorMessage = recordList.ErrorMessage,
-                    };
+                    SPOTenantItemRecord recordItem = new(tenantListRecord);
+                    yield return recordItem;
+                    continue;
+                }
+
+                if (tenantListRecord.List.ItemCount == 0)
+                {
+                    Exception ex = new($"'{tenantListRecord.List.BaseType}' is empty");
+                    SPOTenantItemRecord recordItem = new(tenantListRecord, ex);
 
                     yield return recordItem;
                     continue;
                 }
 
-                if (recordList.List.ItemCount == 0)
-                {
-                    SPOTenantItemRecord recordItem = new(recordList, null)
-                    {
-                        ErrorMessage = $"'{recordList.List.BaseType}' is empty",
-                    };
-
-                    yield return recordItem;
-                    continue;
-                }
-
-                var collListItems = new SPOListItemCSOM(_logger, _appInfo).GetAsync(recordList.SiteUrl, recordList.List, _param.ItemsParam).GetAsyncEnumerator();
+                var collListItems = new SPOListItemCSOM(_logger, _appInfo).GetAsync(tenantListRecord.SiteUrl, tenantListRecord.List, _param.ItemsParam).GetAsyncEnumerator();
                 while (true)
                 {
                     ListItem? oItem = null;
-                    string exceptionMessage = string.Empty;
+                    Exception? exception = null;
                     try
                     {
                         if (!await collListItems.MoveNextAsync()) { break; }
                         oItem = collListItems.Current;
                     }
-                    catch (Exception ex) { exceptionMessage = ex.Message; }
+                    catch (Exception ex) { exception = ex; }
 
-                    if (!string.IsNullOrWhiteSpace(exceptionMessage))
+                    if (exception != null)
                     {
-                        SPOTenantItemRecord recordItem = new(recordList, null)
-                        {
-                            ErrorMessage = exceptionMessage,
-                        };
+                        SPOTenantItemRecord recordItem = new(tenantListRecord, exception);
 
                         yield return recordItem;
                         break;
                     }
                     else
                     {
-                        SPOTenantItemRecord recordItem = new(recordList, oItem);
+                        SPOTenantItemRecord recordItem = new(tenantListRecord, oItem);
                         yield return recordItem;
                     }
                 }

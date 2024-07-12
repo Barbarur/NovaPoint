@@ -48,13 +48,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 catch (Exception ex)
                 {
                     _logger.ReportError("Site", record.SiteUrl, ex);
-                    record.ErrorMessage = ex.Message;
+                    record.Ex = ex;
                 }
             }
 
             yield return record;
 
-            if (!string.IsNullOrWhiteSpace(record.ErrorMessage)) { yield break; }
+            if ( record.Ex != null ) { yield break; }
 
             if (_param.SiteParam.IncludeSubsites)
             {
@@ -66,14 +66,15 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
             if (_param.RemoveAdmin)
             {
-                string exceptionMessage = string.Empty;
                 try { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(record.SiteUrl, adminUPN); }
-                catch (Exception ex) { exceptionMessage = ex.Message; }
+                catch (Exception ex)
+                { 
+                    record.Ex = ex;
+                }
 
-                if (!string.IsNullOrWhiteSpace(exceptionMessage))
+                if (record.Ex != null)
                 {
-                    _logger.ReportError("Site", record.SiteUrl, exceptionMessage);
-                    record.ErrorMessage = exceptionMessage;
+                    _logger.ReportError("Site", record.SiteUrl, record.Ex);
                     yield return record;
                 }
             }
@@ -94,10 +95,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             {
                 _logger.ReportError("Site", recordSite.SiteUrl, ex);
 
-                recordSite.ErrorMessage = ex.Message;
+                recordSite.Ex = ex;
             }
 
-            if (!string.IsNullOrWhiteSpace(recordSite.ErrorMessage))
+            if (recordSite.Ex != null)
             {
                 yield return recordSite;
                 yield break;

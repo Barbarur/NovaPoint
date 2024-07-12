@@ -83,33 +83,33 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _appInfo.IsCancelled();
 
-            await foreach (var resultItem in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
+            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(resultItem.ErrorMessage))
+                if (tenantItemRecord.Ex != null)
                 {
-                    AddRecord(resultItem.ListRecord.SiteUrl, resultItem.ListRecord.List, remarks: resultItem.ErrorMessage);
+                    AddRecord(tenantItemRecord.ListRecord.SiteUrl, tenantItemRecord.ListRecord.List, remarks: tenantItemRecord.Ex.Message);
                     continue;
                 }
 
-                if (resultItem.Item == null || resultItem.ListRecord.List == null) { continue; }
+                if (tenantItemRecord.Item == null || tenantItemRecord.ListRecord.List == null) { continue; }
 
                 try
                 {
-                    if (resultItem.Item.FileSystemObjectType.ToString() == "Folder") { continue; }
+                    if (tenantItemRecord.Item.FileSystemObjectType.ToString() == "Folder") { continue; }
 
-                    if (_param.PHLParam.MatchParameters(resultItem.Item))
+                    if (_param.PHLParam.MatchParameters(tenantItemRecord.Item))
                     {
-                        await new SPOListItemCSOM(_logger, _appInfo).RemoveAsync(resultItem.ListRecord.SiteUrl, resultItem.ListRecord.List, resultItem.Item, _param.Recycle);
-                        AddRecord(resultItem.ListRecord.SiteUrl, resultItem.ListRecord.List, resultItem.Item, "Deleted");
+                        await new SPOListItemCSOM(_logger, _appInfo).RemoveAsync(tenantItemRecord.ListRecord.SiteUrl, tenantItemRecord.ListRecord.List, tenantItemRecord.Item, _param.Recycle);
+                        AddRecord(tenantItemRecord.ListRecord.SiteUrl, tenantItemRecord.ListRecord.List, tenantItemRecord.Item, "Deleted");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Item", (string)resultItem.Item["FileRef"], ex);
+                    _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
-                    AddRecord(resultItem.ListRecord.SiteUrl, resultItem.ListRecord.List, resultItem.Item, remarks: ex.Message);
+                    AddRecord(tenantItemRecord.ListRecord.SiteUrl, tenantItemRecord.ListRecord.List, tenantItemRecord.Item, remarks: ex.Message);
                 }
             }
         }

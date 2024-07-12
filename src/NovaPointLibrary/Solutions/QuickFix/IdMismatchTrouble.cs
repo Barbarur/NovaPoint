@@ -114,9 +114,9 @@ namespace NovaPointLibrary.Solutions.QuickFix
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
+                if (siteResults.Ex != null)
                 {
-                    AddRecord(siteResults.SiteUrl, remarks: siteResults.ErrorMessage);
+                    AddRecord(siteResults.SiteUrl, remarks: siteResults.Ex.Message);
                     continue;
                 }
 

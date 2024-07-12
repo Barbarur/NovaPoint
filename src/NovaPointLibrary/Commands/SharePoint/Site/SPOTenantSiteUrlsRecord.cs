@@ -17,7 +17,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         internal string SiteName { get; set; }
         internal SiteProperties? SiteProperties { get; set; } = null;
         internal Web? Web { get; set; } = null;
-        internal string ErrorMessage { get; set; } = string.Empty;
+        internal Exception? Ex { get; set; } = null;
         
         internal SPOTenantSiteUrlsRecord(ProgressTracker progress, SiteProperties oSiteCollection)
         {

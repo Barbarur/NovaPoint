@@ -17,15 +17,33 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal Microsoft.SharePoint.Client.List? List { get; set; } = null;
         internal SPOTenantListsRecord ListRecord { get; set; }
         internal ListItem? Item { get; set; } = null;
-        internal string ErrorMessage { get; set; } = string.Empty;
+        internal Exception? Ex { get; } = null;
 
-        internal SPOTenantItemRecord(SPOTenantListsRecord listRecord, ListItem? item)
+        internal SPOTenantItemRecord(SPOTenantListsRecord listRecord)
+        {
+            SiteUrl = listRecord.SiteUrl;
+            SiteName = listRecord.SiteName;
+            List = listRecord.List;
+            ListRecord = listRecord;
+            Ex = listRecord.Ex;
+        }
+
+        internal SPOTenantItemRecord(SPOTenantListsRecord listRecord, ListItem item)
         {
             SiteUrl = listRecord.SiteUrl;
             SiteName = listRecord.SiteName;
             List = listRecord.List;
             ListRecord = listRecord;
             Item = item;
+        }
+
+        internal SPOTenantItemRecord(SPOTenantListsRecord listRecord, Exception exception)
+        {
+            SiteUrl = listRecord.SiteUrl;
+            SiteName = listRecord.SiteName;
+            List = listRecord.List;
+            ListRecord = listRecord;
+            Ex = exception;
         }
     }
 }

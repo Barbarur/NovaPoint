@@ -15,7 +15,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         internal string SiteName { get; set; }
         internal ProgressTracker Progress { get; set; }
         internal Microsoft.SharePoint.Client.List? List { get; set; }
-        internal string ErrorMessage { get; set; } = string.Empty;
+        internal Exception? Ex { get; set; } = null;
 
         internal SPOTenantListsRecord(SPOTenantSiteUrlsRecord recordSite, ProgressTracker progress, Microsoft.SharePoint.Client.List? oList)
         {
@@ -23,6 +23,15 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             SiteUrl = recordSite.SiteUrl;
             SiteName = recordSite.SiteName;
             List = oList;
+        }
+
+        internal SPOTenantListsRecord(SPOTenantSiteUrlsRecord recordSite, ProgressTracker progress, Exception ex)
+        {
+            Progress = progress;
+            SiteUrl = recordSite.SiteUrl;
+            SiteName = recordSite.SiteName;
+            List = null;
+            Ex = ex;
         }
 
     }

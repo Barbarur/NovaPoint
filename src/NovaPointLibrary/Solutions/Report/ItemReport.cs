@@ -91,20 +91,20 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
-            await foreach (var resultItem in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetNEWAsync())
+            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetNEWAsync())
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(resultItem.ErrorMessage))
+                if (tenantItemRecord.Ex != null)
                 {
-                    ItemReportRecord record = new(resultItem);
+                    ItemReportRecord record = new(tenantItemRecord);
                     _logger.RecordCSV(record);
                     continue;
                 }
 
-                if (resultItem.Item == null || resultItem.List == null)
+                if (tenantItemRecord.Item == null || tenantItemRecord.List == null)
                 {
-                    ItemReportRecord record = new(resultItem)
+                    ItemReportRecord record = new(tenantItemRecord)
                     {
                         Remarks = "Item or List is null",
                     };
@@ -114,15 +114,15 @@ namespace NovaPointLibrary.Solutions.Report
 
                 try
                 {
-                    ItemReportRecord record = new(resultItem);
-                    await record.AddDetails(_logger, _appInfo, resultItem.Item);
+                    ItemReportRecord record = new(tenantItemRecord);
+                    await record.AddDetails(_logger, _appInfo, tenantItemRecord.Item);
                     _logger.RecordCSV(record);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Item", (string)resultItem.Item["FileRef"], ex);
+                    _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
-                    ItemReportRecord record = new(resultItem, ex.Message);
+                    ItemReportRecord record = new(tenantItemRecord, ex.Message);
                     _logger.RecordCSV(record);
                 }
             }
@@ -155,32 +155,32 @@ namespace NovaPointLibrary.Solutions.Report
 
         internal string Remarks { get; set; } = String.Empty;
 
-        internal ItemReportRecord(SPOTenantItemRecord resultItem,
+        internal ItemReportRecord(SPOTenantItemRecord tenantItemRecord,
                                   string remarks = "")
         {
-            SiteUrl = resultItem.SiteUrl;
-            if (String.IsNullOrWhiteSpace(remarks)) { Remarks = resultItem.ErrorMessage; }
+            SiteUrl = tenantItemRecord.SiteUrl;
+            if (tenantItemRecord.Ex != null) { Remarks = tenantItemRecord.Ex.Message; }
             else { Remarks = remarks; }
 
-            if (resultItem.List != null)
+            if (tenantItemRecord.List != null)
             {
-                ListTitle = resultItem.List.Title;
-                ListType = resultItem.List.BaseType.ToString();
+                ListTitle = tenantItemRecord.List.Title;
+                ListType = tenantItemRecord.List.BaseType.ToString();
             }
 
-            if (resultItem.Item != null)
+            if (tenantItemRecord.Item != null)
             {
-                ItemID = resultItem.Item.Id.ToString();
-                ItemPath = (string)resultItem.Item["FileRef"];
-                ItemType = resultItem.Item.FileSystemObjectType.ToString();
+                ItemID = tenantItemRecord.Item.Id.ToString();
+                ItemPath = (string)tenantItemRecord.Item["FileRef"];
+                ItemType = tenantItemRecord.Item.FileSystemObjectType.ToString();
 
-                if (resultItem.Item.ParentList.BaseType == BaseType.DocumentLibrary || resultItem.Item.FileSystemObjectType.ToString() == "Folder")
+                if (tenantItemRecord.Item.ParentList.BaseType == BaseType.DocumentLibrary || tenantItemRecord.Item.FileSystemObjectType.ToString() == "Folder")
                 {
-                    ItemTitle = (string)resultItem.Item["FileLeafRef"];
+                    ItemTitle = (string)tenantItemRecord.Item["FileLeafRef"];
                 }
-                else if (resultItem.Item.ParentList.BaseType == BaseType.GenericList)
+                else if (tenantItemRecord.Item.ParentList.BaseType == BaseType.GenericList)
                 {
-                    ItemTitle = (string)resultItem.Item["Title"];
+                    ItemTitle = (string)tenantItemRecord.Item["Title"];
                 }
             }
         }

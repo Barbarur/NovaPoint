@@ -89,9 +89,9 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(result.ErrorMessage))
+                if (result.Ex != null)
                 {
-                    AddRecord(result.ListRecord.SiteUrl, result.ListRecord.List, remarks: result.ErrorMessage);
+                    AddRecord(result.ListRecord.SiteUrl, result.ListRecord.List, remarks: result.Ex.Message);
                     continue;
                 }
 

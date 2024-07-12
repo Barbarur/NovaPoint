@@ -78,20 +78,20 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _appInfo.IsCancelled();
 
-            await foreach (var resultItem in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
+            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(resultItem.ErrorMessage))
+                if (tenantItemRecord.Ex != null)
                 {
-                    ItemReportRecord record = new(resultItem);
+                    ItemReportRecord record = new(tenantItemRecord);
                     _logger.RecordCSV(record);
                     continue;
                 }
 
-                if (resultItem.Item == null || resultItem.List == null)
+                if (tenantItemRecord.Item == null || tenantItemRecord.List == null)
                 {
-                    ItemReportRecord record = new(resultItem)
+                    ItemReportRecord record = new(tenantItemRecord)
                     {
                         Remarks = "Item or List is null",
                     };
@@ -99,19 +99,19 @@ namespace NovaPointLibrary.Solutions.Automation
                     continue;
                 }
 
-                if (resultItem.Item.FileSystemObjectType.ToString() == "Folder") { continue; }
+                if (tenantItemRecord.Item.FileSystemObjectType.ToString() == "Folder") { continue; }
 
-                if (resultItem.Item.File.CheckOutType == CheckOutType.None) { continue; }
+                if (tenantItemRecord.Item.File.CheckOutType == CheckOutType.None) { continue; }
 
                 try
                 {
-                    await ProcessItem(resultItem);
+                    await ProcessItem(tenantItemRecord);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Item", (string)resultItem.Item["FileRef"], ex);
+                    _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
-                    CheckInFileAutoRecord record = new(resultItem, ex.Message);
+                    CheckInFileAutoRecord record = new(tenantItemRecord, ex.Message);
                     _logger.RecordCSV(record);
                 }
             }
@@ -162,23 +162,23 @@ namespace NovaPointLibrary.Solutions.Automation
 
         internal string Remarks { get; set; } = String.Empty;
 
-        internal CheckInFileAutoRecord(SPOTenantItemRecord resultItem, string remarks = "")
+        internal CheckInFileAutoRecord(SPOTenantItemRecord tenantItemRecord, string remarks = "")
         {
-            SiteUrl = resultItem.SiteUrl;
-            if (String.IsNullOrWhiteSpace(remarks)) { Remarks = resultItem.ErrorMessage; }
+            SiteUrl = tenantItemRecord.SiteUrl;
+            if (tenantItemRecord.Ex != null) { Remarks = tenantItemRecord.Ex.Message; }
             else { Remarks = remarks; }
 
-            if (resultItem.List != null)
+            if (tenantItemRecord.List != null)
             {
-                ListTitle = resultItem.List.Title;
-                ListType = resultItem.List.BaseType.ToString();
+                ListTitle = tenantItemRecord.List.Title;
+                ListType = tenantItemRecord.List.BaseType.ToString();
             }
 
-            if (resultItem.Item != null)
+            if (tenantItemRecord.Item != null)
             {
-                ItemID = resultItem.Item.Id.ToString();
-                ItemTitle = resultItem.Item.File.Name;
-                ItemPath = resultItem.Item.File.ServerRelativeUrl;
+                ItemID = tenantItemRecord.Item.Id.ToString();
+                ItemTitle = tenantItemRecord.Item.File.Name;
+                ItemPath = tenantItemRecord.Item.File.ServerRelativeUrl;
             }
         }
 

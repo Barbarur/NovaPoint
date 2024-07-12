@@ -97,24 +97,24 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _appInfo.IsCancelled();
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
+            await foreach (var tenantListRecord in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(results.ErrorMessage) || results.List == null)
+                if ( tenantListRecord.Ex != null || tenantListRecord.List == null)
                 {
-                    AddRecord(results.SiteUrl, results.List, remarks: results.ErrorMessage);
+                    AddRecord(tenantListRecord.SiteUrl, tenantListRecord.List, remarks: tenantListRecord.Ex.Message);
                     continue;
                 }
 
                 try
                 {
-                    await SetVersioning(results.SiteUrl, results.List);
+                    await SetVersioning(tenantListRecord.SiteUrl, tenantListRecord.List);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(results.List.BaseType.ToString(), results.List.DefaultViewUrl, ex);
-                    AddRecord(results.SiteUrl, results.List, remarks: ex.Message);
+                    _logger.ReportError(tenantListRecord.List.BaseType.ToString(), tenantListRecord.List.DefaultViewUrl, ex);
+                    AddRecord(tenantListRecord.SiteUrl, tenantListRecord.List, remarks: ex.Message);
                 }
             }
 

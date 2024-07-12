@@ -79,10 +79,10 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 _appInfo.IsCancelled();
                 
-                if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
+                if (siteResults.Ex != null)
                 {
-                    _logger.ReportError("Site", siteResults.SiteUrl, siteResults.ErrorMessage);
-                    AddRecord(siteResults.SiteUrl, remarks: siteResults.ErrorMessage);
+                    _logger.ReportError("Site", siteResults.SiteUrl, siteResults.Ex);
+                    AddRecord(siteResults.SiteUrl, remarks: siteResults.Ex.Message);
                     continue;
                 }
 

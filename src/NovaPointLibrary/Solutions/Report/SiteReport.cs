@@ -113,9 +113,9 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 _appInfo.IsCancelled();
 
-                if (!string.IsNullOrEmpty(siteRecord.ErrorMessage))
+                if (siteRecord.Ex != null)
                 {
-                    SiteReportRecord siteReportRecord = new(siteRecord.SiteUrl, siteRecord.ErrorMessage);
+                    SiteReportRecord siteReportRecord = new(siteRecord.SiteUrl, siteRecord.Ex.Message);
                     _logger.RecordCSV(siteReportRecord);
                     continue;
                 }

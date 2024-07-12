@@ -70,26 +70,26 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _appInfo.IsCancelled();
 
-            await foreach (var resultItem in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
+            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(resultItem.ErrorMessage))
+                if (tenantItemRecord.Ex != null)
                 {
-                    RemoveFileVersionAutoRecord record = new(resultItem);
+                    RemoveFileVersionAutoRecord record = new(tenantItemRecord);
                     _logger.RecordCSV(record);
                     continue;
                 }
                 
                 try
                 {
-                    await RemoveFileVersions(resultItem);
+                    await RemoveFileVersions(tenantItemRecord);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Item", (string)resultItem.Item["FileRef"], ex);
+                    _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
                     
-                    RemoveFileVersionAutoRecord record = new(resultItem, ex.Message);
+                    RemoveFileVersionAutoRecord record = new(tenantItemRecord, ex.Message);
                     _logger.RecordCSV(record);
                 }
             }
@@ -212,23 +212,23 @@ namespace NovaPointLibrary.Solutions.Automation
 
         internal string Remarks { get; set; } = String.Empty;
 
-        internal RemoveFileVersionAutoRecord(SPOTenantItemRecord resultItem,
+        internal RemoveFileVersionAutoRecord(SPOTenantItemRecord tenantItemRecord,
                                              string remarks = "")
         {
-            SiteUrl = resultItem.SiteUrl;
-            if (String.IsNullOrWhiteSpace(remarks)) { Remarks = resultItem.ErrorMessage; }
+            SiteUrl = tenantItemRecord.SiteUrl;
+            if (tenantItemRecord.Ex != null) { Remarks = tenantItemRecord.Ex.Message; }
             else { Remarks = remarks; }
             
-            if (resultItem.List != null)
+            if (tenantItemRecord.List != null)
             {
-                ListTitle = resultItem.List.Title;
+                ListTitle = tenantItemRecord.List.Title;
             }
             
-            if (resultItem.Item != null)
+            if (tenantItemRecord.Item != null)
             {
-                FileID = resultItem.Item.Id.ToString();
-                FileTitle = resultItem.Item.File.Name;
-                FilePath = resultItem.Item.File.ServerRelativeUrl;
+                FileID = tenantItemRecord.Item.Id.ToString();
+                FileTitle = tenantItemRecord.Item.File.Name;
+                FilePath = tenantItemRecord.Item.File.ServerRelativeUrl;
             }
         }
 

@@ -66,9 +66,9 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 _appInfo.IsCancelled();
 
-                if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
+                if (siteResults.Ex != null)
                 {
-                    AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("", "", "", "", siteResults.ErrorMessage)));
+                    AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("", "", "", "", siteResults.Ex.Message)));
                     continue;
                 }
 

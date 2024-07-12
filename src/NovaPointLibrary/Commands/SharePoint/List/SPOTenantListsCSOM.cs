@@ -29,35 +29,29 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
             {
 
-                if (!String.IsNullOrWhiteSpace(siteResults.ErrorMessage))
+                if (siteResults.Ex != null)
                 {
-                    SPOTenantListsRecord record = new(siteResults, siteResults.Progress, null)
-                    {
-                        ErrorMessage = siteResults.ErrorMessage,
-                    };
+                    SPOTenantListsRecord record = new(siteResults, siteResults.Progress, siteResults.Ex);
 
                     yield return record;
                     continue;
                 }
 
 
-                string exceptionMessage = string.Empty;
+                Exception? tryException = null;
                 List<Microsoft.SharePoint.Client.List>? collList = null;
                 try
                 {
                     collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.ListParam);
                 }
-                catch (Exception ex) { exceptionMessage = ex.Message; }
+                catch (Exception ex) { tryException = ex; }
 
 
-                if (!string.IsNullOrWhiteSpace(exceptionMessage))
+                if (tryException != null)
                 {
-                    _logger.ReportError("Site", siteResults.SiteUrl, exceptionMessage);
+                    _logger.ReportError("Site", siteResults.SiteUrl, tryException);
 
-                    SPOTenantListsRecord recordList = new(siteResults, siteResults.Progress, null)
-                    {
-                        ErrorMessage = exceptionMessage
-                    };
+                    SPOTenantListsRecord recordList = new(siteResults, siteResults.Progress, tryException);
 
                     yield return recordList;
                 }
