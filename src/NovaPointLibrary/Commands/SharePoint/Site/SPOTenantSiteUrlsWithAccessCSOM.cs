@@ -42,7 +42,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         {
             _appInfo.IsCancelled();
 
-            if (_param.AddAdmin)
+            if (_param.AdminAccess.AddAdmin)
             {
                 try { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(record.SiteUrl, adminUPN); }
                 catch (Exception ex)
@@ -64,7 +64,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 }
             }
 
-            if (_param.RemoveAdmin)
+            if (_param.AdminAccess.RemoveAdmin)
             {
                 try { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(record.SiteUrl, adminUPN); }
                 catch (Exception ex)

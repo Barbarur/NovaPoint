@@ -48,8 +48,8 @@ namespace NovaPointLibrary.Solutions.Automation
             param.SiteParam.SiteUrl = String.Empty;
             param.SiteParam.AllSiteCollections = false;
             param.SiteParam.ListOfSitesPath = parameters.ListOfSitesPath;
-            param.AddAdmin = true;
-            param.RemoveAdmin = false;
+            param.AdminAccess.AddAdmin = true;
+            param.AdminAccess.RemoveAdmin = false;
 
             NPLogger logger = new(uiAddLog, "RemoveSiteAuto", param);
             try

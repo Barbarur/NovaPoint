@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Report;
 using System;
@@ -34,9 +35,11 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            var siteAccParam = AdminF.Parameters;
-            var siteParam = SiteF.Parameters;
-            siteAccParam.SiteParam = siteParam;
+            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
+            {
+                AdminAccess = AdminF.Parameters,
+                SiteParam = SiteF.Parameters,
+            };
 
             RecycleBinReportParameters parameters = new(RecycleF.Parameters, siteAccParam);
 

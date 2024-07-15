@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NovaPointLibrary.Solutions.Automation;
+using NovaPointLibrary.Commands.SharePoint.Site;
 
 namespace NovaPointWPF.Pages.Solutions.Automation
 {
@@ -40,9 +41,11 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            var siteAccParam = AdminF.Parameters;
-            var siteParam = SiteF.Parameters;
-            siteAccParam.SiteParam = siteParam;
+            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
+            {
+                AdminAccess = AdminF.Parameters,
+                SiteParam = SiteF.Parameters,
+            };
 
             RemovePHLItemAutoParameters parameters = new(PHLForm.Parameters, siteAccParam, new(), new())
             {

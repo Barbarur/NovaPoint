@@ -26,7 +26,7 @@ namespace NovaPointWPF.UserControls
             InitializeComponent();
         }
 
-        public SPOTenantSiteUrlsWithAccessParameters Parameters { get; set; } = new();
+        public SPOAdminAccessParameters Parameters { get; set; } = new();
 
         private bool _addAdmin = true;
         public bool AddAdmin

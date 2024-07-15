@@ -9,9 +9,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     public class SPOTenantSiteUrlsWithAccessParameters : ISolutionParameters
     {
-        public bool AddAdmin { get; set; } = true;
-        public bool RemoveAdmin { get; set; } = true;
-
+        public SPOAdminAccessParameters AdminAccess { get; set; } = new();
         public SPOTenantSiteUrlsParameters SiteParam { get; set; } = new();
 
     }

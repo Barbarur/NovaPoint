@@ -50,9 +50,11 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            var siteAccParam = AdminF.Parameters;
-            var siteParam = SiteF.Parameters;
-            siteAccParam.SiteParam = siteParam;
+            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
+            {
+                AdminAccess = AdminF.Parameters,
+                SiteParam = SiteF.Parameters,
+            };
 
             SPOTenantListsParameters tListParam = new(siteAccParam, ListForm.Parameters);
 
