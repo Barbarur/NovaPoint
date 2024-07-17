@@ -1,19 +1,6 @@
-﻿using CamlBuilder;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.SharePoint.Client;
-using Newtonsoft.Json.Linq;
-using NovaPointLibrary.Solutions.Automation;
-using NovaPointLibrary.Solutions.Report;
-using PnP.Framework.Diagnostics;
-using PnP.Framework.Modernization.Telemetry;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions
 {
@@ -23,8 +10,12 @@ namespace NovaPointLibrary.Solutions
 
         private readonly string _txtPath;
         private readonly string _csvPath;
+        private readonly string _errorPath;
 
         private readonly Stopwatch SW = new();
+
+        static ReaderWriterLockSlim txtRWL = new();
+        static ReaderWriterLockSlim csvRWL = new();
 
         public NPLogger(Action<LogInfo> uiAddLog, string solutionName, ISolutionParameters parameters)
         {
@@ -37,6 +28,7 @@ namespace NovaPointLibrary.Solutions
             string fileName = solutionName + "_" + DateTime.UtcNow.ToString("yyMMddHHmmss");
             _txtPath = Path.Combine(folderPath, fileName + "_Logs.txt");
             _csvPath = Path.Combine(folderPath, fileName + "_Report.csv");
+            _errorPath = Path.Combine(folderPath, fileName + "_error.txt");
 
             LogTxt(GetType().Name, $"Logs: {_txtPath}");
             LogTxt(GetType().Name, $"Report: {_csvPath}");
@@ -57,8 +49,6 @@ namespace NovaPointLibrary.Solutions
             LogProperties(parameters);
 
             LogTxt(GetType().Name, $"========== ========== ==========");
-
-            //parameters.ParametersCheck();
         }
 
         private void LogProperties(ISolutionParameters parameters)
@@ -91,8 +81,23 @@ namespace NovaPointLibrary.Solutions
 
         internal void LogTxt(string classMethod, string log)
         {
-            using StreamWriter txt = new(new FileStream(_txtPath, FileMode.Append, FileAccess.Write));
-            txt.WriteLine($"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} - [{classMethod}] - {log}");
+            string logLine = $"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} - [{classMethod}] - {log}";
+            try
+            {
+                if (!txtRWL.IsWriteLockHeld) { txtRWL.TryEnterWriteLock(3000); }
+                try
+                {
+                    var x = new FileStream(_txtPath, FileMode.Append, FileAccess.Write);
+                    using StreamWriter txt = new(x);
+
+                    txt.WriteLine(logLine);
+                }
+                finally { txtRWL.ExitWriteLock(); }
+            }
+            catch (Exception ex)
+            {
+                LogError(logLine, ex);
+            };
         }
 
         internal void LogUI(string classMethod, string log)
@@ -117,60 +122,103 @@ namespace NovaPointLibrary.Solutions
 
         internal void DynamicCSV(dynamic o)
         {
-            StringBuilder sb = new();
-            using StreamWriter csv = new(new FileStream(_csvPath, FileMode.Append, FileAccess.Write));
+            try
             {
-                var csvFileLenth = new System.IO.FileInfo(_csvPath).Length;
-                if (csvFileLenth == 0)
+                csvRWL.TryEnterWriteLock(3000);
+                try
                 {
-                    // https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject?redirectedfrom=MSDN&view=net-7.0#enumerating-and-deleting-members
-                    foreach (var property in (IDictionary<String, Object>)o)
+                    StringBuilder sb = new();
+                    using StreamWriter csv = new(new FileStream(_csvPath, FileMode.Append, FileAccess.Write));
                     {
-                        sb.Append($"\"{property.Key}\",");
+                        var csvFileLenth = new System.IO.FileInfo(_csvPath).Length;
+                        if (csvFileLenth == 0)
+                        {
+                            // https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject?redirectedfrom=MSDN&view=net-7.0#enumerating-and-deleting-members
+                            foreach (var property in (IDictionary<String, Object>)o)
+                            {
+                                sb.Append($"\"{property.Key}\",");
+                            }
+                            if (sb.Length > 0) { sb.Length--; }
+                            csv.WriteLine(sb.ToString());
+                            sb.Clear();
+                        }
+
+                        foreach (var property in (IDictionary<String, Object>)o)
+                        {
+                            sb.Append($"\"{property.Value}\",");
+                        }
+                        if (sb.Length > 0) { sb.Length--; }
+
+                        csv.WriteLine(sb.ToString());
                     }
-                    if (sb.Length > 0) { sb.Length--; }
-                    csv.WriteLine(sb.ToString());
-                    sb.Clear();
                 }
-
-                foreach (var property in (IDictionary<String, Object>)o)
-                {
-                    sb.Append($"\"{property.Value}\",");
-                }
-                if (sb.Length > 0) { sb.Length--; }
-
-                csv.WriteLine(sb.ToString());
+                finally { csvRWL.EnterWriteLock(); ; }
+            }
+            catch (Exception ex)
+            {
+                LogError("Error while writting CSV file", ex);
             }
         }
 
         internal void RecordCSV(ISolutionRecord record)
         {
-            Type solutiontype = record.GetType();
-            PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
-
-            StringBuilder sb = new();
-            using StreamWriter csv = new(new FileStream(_csvPath, FileMode.Append, FileAccess.Write));
+            try
             {
-                var csvFileLenth = new System.IO.FileInfo(_csvPath).Length;
-                if (csvFileLenth == 0)
+                csvRWL.TryEnterWriteLock(3000);
+                try
                 {
-                    foreach (var propertyInfo in properties)
+                    Type solutiontype = record.GetType();
+                    PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
+
+                    StringBuilder sb = new();
+                    using StreamWriter csv = new(new FileStream(_csvPath, FileMode.Append, FileAccess.Write));
                     {
-                        sb.Append($"\"{propertyInfo.Name}\",");
+                        var csvFileLenth = new System.IO.FileInfo(_csvPath).Length;
+                        if (csvFileLenth == 0)
+                        {
+                            foreach (var propertyInfo in properties)
+                            {
+                                sb.Append($"\"{propertyInfo.Name}\",");
+                            }
+                            if (sb.Length > 0) { sb.Length--; }
+
+                            csv.WriteLine(sb.ToString());
+                            sb.Clear();
+                        }
+
+                        foreach (var propertyInfo in properties)
+                        {
+                            sb.Append($"\"{propertyInfo.GetValue(record)}\",");
+                        }
+                        if (sb.Length > 0) { sb.Length--; }
+
+                        csv.WriteLine(sb.ToString());
                     }
-                    if (sb.Length > 0) { sb.Length--; }
-
-                    csv.WriteLine(sb.ToString());
-                    sb.Clear();
                 }
+                finally { csvRWL.ExitWriteLock(); }
+            }
+            catch (Exception ex)
+            {
+                LogError("Error while writting CSV file", ex);
+            }
+        }
 
-                foreach (var propertyInfo in properties)
-                {
-                    sb.Append($"\"{propertyInfo.GetValue(record)}\",");
-                }
-                if (sb.Length > 0) { sb.Length--; }
+        static ReaderWriterLockSlim errorRWL = new();
+        private void LogError(string log, Exception ex)
+        {
+            errorRWL.TryEnterWriteLock(3000);
+            try
+            {
+                var fileStream = new FileStream(_errorPath, FileMode.Append, FileAccess.Write);
+                using StreamWriter streamWriter = new(fileStream);
 
-                csv.WriteLine(sb.ToString());
+                streamWriter.WriteLine(log);
+                streamWriter.WriteLine($"Exception: {ex.Message}");
+                streamWriter.WriteLine($"Trace: {ex.StackTrace}");
+            }
+            finally
+            {
+                errorRWL.ExitWriteLock();
             }
         }
 
