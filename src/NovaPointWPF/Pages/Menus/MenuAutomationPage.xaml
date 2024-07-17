@@ -77,6 +77,11 @@
                 <StackPanel>
 
                     <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Copy files across sites"
+                        Click="CopyFilesAutoClick"/>
+
+                    <Button
                             Style="{DynamicResource SolutionMenuButton}"
                             Content="Check in files"
                             Click="CheckInFileAutoClick"/>

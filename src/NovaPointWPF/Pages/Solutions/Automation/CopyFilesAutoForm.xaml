@@ -1,0 +1,126 @@
+﻿<Page x:Class="NovaPointWPF.Pages.Solutions.Automation.CopyFilesAutoForm"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Automation"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
+      mc:Ignorable="d" 
+      d:DesignHeight="1500" d:DesignWidth="800"
+      Title="CopyFilesAutoForm">
+
+    <Grid>
+
+        <StackPanel>
+
+            <designmaterial:FormHeader
+                x:Name="SolutionHeader"/>
+
+            <designmaterial:ReportModeForm
+                x:Name="ModeF"/>
+
+            <designmaterial:AdminForm
+                x:Name="AdminF"/>
+
+            <StackPanel>
+
+                <TextBlock
+                    Style="{DynamicResource TextBlockBodyStrong}"
+                    Text="Source location"/>
+
+                <Grid Style="{DynamicResource SolutionMenuGrid}">
+
+                    <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+
+                        <StackPanel>
+
+                            <StackPanel>
+
+                                <TextBlock
+                                    Style="{DynamicResource TextBlockBody}"
+                                    Text="Site URL"
+                                    Margin="0,0,0,12"/>
+
+                                <TextBox
+                                    Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                    Text="{Binding SourceSiteURL, Mode=TwoWay}"/>
+
+
+                            </StackPanel>
+
+                            <StackPanel
+                                Margin="0,16,0,0">
+
+                                <TextBlock
+                                    Style="{DynamicResource TextBlockBody}"
+                                    Text="Document Library Title"
+                                    Margin="0,0,0,12"/>
+
+                                <TextBox
+                                    Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                    Text="{Binding SourceListTitle, Mode=TwoWay}"/>
+
+                            </StackPanel>
+                        </StackPanel>
+
+                    </Border>
+
+                </Grid>
+            </StackPanel>
+
+            <designmaterial:ItemForm
+                x:Name="ItemF"
+                FilterTarget="Library"/>
+
+            <StackPanel>
+
+                <TextBlock
+                    Style="{DynamicResource TextBlockBodyStrong}"
+                    Text="Destination location"/>
+
+                <Grid Style="{DynamicResource SolutionMenuGrid}">
+
+                    <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+
+                        <StackPanel>
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Site URL"/>
+
+                            <TextBox
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding DestinationSiteURL, Mode=TwoWay}"
+                                Margin="0,12,0,0"/>
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Document Library Title"
+                                Margin="0,16,0,0"/>
+
+                            <TextBox
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding DestinationListTitle, Mode=TwoWay}"
+                                Margin="0,12,0,0"/>
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="Folder server relative path"
+                                Margin="0,16,0,0"/>
+
+                            <TextBox
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding DestinationFolderServerRelativeUrl, Mode=TwoWay}"
+                                Margin="0,12,0,0"/>
+
+                        </StackPanel>
+
+                    </Border>
+
+                </Grid>
+            </StackPanel>
+
+        </StackPanel>
+        
+    </Grid>
+</Page>

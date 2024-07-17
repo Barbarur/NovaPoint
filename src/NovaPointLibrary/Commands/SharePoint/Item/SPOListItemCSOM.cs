@@ -20,6 +20,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             f => f["FileLeafRef"],
             i => i.ParentList.Title,
             i => i.ParentList.BaseType,
+            i => i.ParentList.RootFolder.ServerRelativeUrl,
             i => i.ParentList.ParentWeb.Url,
         };
 
