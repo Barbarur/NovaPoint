@@ -19,7 +19,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task<Folder?> GetFolderAsync(string siteUrl, string folderServerRelativeUrl, Expression<Func<Folder, object>>[]? retrievalExpressions = null)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start getting Item '{folderServerRelativeUrl}' from '{siteUrl}'");
+            _logger.LogTxt(GetType().Name, $"Start getting Folder '{folderServerRelativeUrl}' from '{siteUrl}'");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -84,11 +84,35 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task CreateAsync(string siteUrl, string folderServerRelativeUrl)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Creating folder '{folderServerRelativeUrl}'");
+
+            if (!folderServerRelativeUrl.StartsWith("/"))
+            {
+                folderServerRelativeUrl = folderServerRelativeUrl.Insert(0, "/");
+            }
+
+            _logger.LogTxt(GetType().Name, $"Creating folder '{folderServerRelativeUrl}' on site {siteUrl}");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
             clientContext.Web.Folders.Add(folderServerRelativeUrl);
             clientContext.ExecuteQueryRetry();
         }
+
+
+        internal async Task EnsureFolderPathExistAsync(string siteUrl, string folderServerRelativeUrl)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Ensuring folder path exists '{folderServerRelativeUrl}'");
+
+            var folder = await new SPOFolderCSOM(_logger, _appInfo).GetFolderAsync(siteUrl, folderServerRelativeUrl);
+
+            if (folder == null)
+            {
+                string parentPath = folderServerRelativeUrl.Remove(folderServerRelativeUrl.LastIndexOf("/"));
+                await EnsureFolderPathExistAsync(siteUrl, parentPath);
+
+                await new SPOFolderCSOM(_logger, _appInfo).CreateAsync(siteUrl, folderServerRelativeUrl);
+            }
+        }
+
     }
 }
