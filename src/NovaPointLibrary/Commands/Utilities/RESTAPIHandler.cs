@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using AngleSharp.Css.Dom;
+using Newtonsoft.Json;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
@@ -26,7 +27,7 @@ namespace NovaPointLibrary.Commands.Utilities
             HttpsClient = new();
         }
 
-        internal async Task Post(string apiUrl, string content)
+        internal async Task<string> PostAsync(string apiUrl, string content)
         {
             _appInfo.IsCancelled();
             _logger.LogTxt(GetType().Name, $"HTTP Request Post API '{apiUrl}' content '{content}'");
@@ -44,11 +45,13 @@ namespace NovaPointLibrary.Commands.Utilities
             if (completedTask != sendMessage || _appInfo.CancelToken.IsCancellationRequested)
             {
                 _appInfo.CancelToken.ThrowIfCancellationRequested();
+                throw new("Unknow error");
             }
             else
             {
                 string response = await sendMessage;
                 _logger.LogTxt(GetType().Name, response);
+                return response;
             }
         }
 
@@ -65,7 +68,7 @@ namespace NovaPointLibrary.Commands.Utilities
             request.Method = method;
             request.RequestUri = new Uri(apiUrl);
                         
-            request.Headers.Add("Accept", "application/json;odata=verbose");
+            request.Headers.Add("Accept", "application/json");
             //message.Version = new Version(2, 0);
             
             request.Content = new StringContent(content, System.Text.Encoding.UTF8);
@@ -100,6 +103,10 @@ namespace NovaPointLibrary.Commands.Utilities
                 if (response.StatusCode == (HttpStatusCode)503)
                 {
                     throw new Exception("Error 503. The service is unavailable.");
+                }
+                else if (response.StatusCode == (HttpStatusCode)401)
+                {
+                    throw new Exception("Error 401. Unauthorized.");
                 }
                 else
                 {

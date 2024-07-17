@@ -28,7 +28,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
 
             string content = $"{{'ids':['{oRecycleBinItem.Id}']}}";
 
-            await new RESTAPIHandler(_logger, _appInfo).Post(api, content);
+            await new RESTAPIHandler(_logger, _appInfo).PostAsync(api, content);
         }
 
         internal async Task RestoreAsync(string siteUrl, RecycleBinItem oRecycleBinItem)
@@ -40,7 +40,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
 
             string content = $"{{'ids':['{oRecycleBinItem.Id}']}}";
 
-            await new RESTAPIHandler(_logger, _appInfo).Post(api, content);
+            await new RESTAPIHandler(_logger, _appInfo).PostAsync(api, content);
         }
     }
 }
