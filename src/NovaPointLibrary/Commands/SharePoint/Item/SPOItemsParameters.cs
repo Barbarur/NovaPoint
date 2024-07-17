@@ -21,10 +21,16 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             get { return _folderRelativeUrl; }
             set
-            { 
-                if ( String.IsNullOrWhiteSpace(value)) { _folderRelativeUrl = value.Trim(); }
-                else if (value.StartsWith("/")) { _folderRelativeUrl = value.Trim(); }
-                else { _folderRelativeUrl = "/" + value.Trim(); }
+            {
+                _folderRelativeUrl = value.Trim();
+                if (!_folderRelativeUrl.StartsWith("/"))
+                {
+                    _folderRelativeUrl = "/" + _folderRelativeUrl;
+                }
+                if (_folderRelativeUrl.EndsWith("/"))
+                {
+                    _folderRelativeUrl = _folderRelativeUrl.Remove(_folderRelativeUrl.LastIndexOf("/"));
+                }
             }
         }
     }
