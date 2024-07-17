@@ -111,6 +111,11 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
 
+        <Style x:Key="TextBlockSubtitle" BasedOn="{StaticResource TextBlockBase}" TargetType="{x:Type TextBlock}">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        
         <Style x:Key="TextBlockTitle" BasedOn="{StaticResource TextBlockBase}" TargetType="{x:Type TextBlock}">
             <Setter Property="FontSize" Value="30"/>
             <Setter Property="FontWeight" Value="SemiBold"/>

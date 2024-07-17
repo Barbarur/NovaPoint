@@ -26,9 +26,9 @@
                         <TextBlock
                             Style="{DynamicResource TextBlockBody}">
                             <TextBlock.Inlines>
-                                <Run Text="Should the solution "/>
+                                <Run Text="Should the solution"/>
                                 <Run FontWeight="Bold" TextDecorations="Underline" Text="add"/>
-                                <Run Text=" your account as Site Collection Admin?"/>
+                                <Run Text="your account as Site Collection Admin?"/>
                             </TextBlock.Inlines>
 
                         </TextBlock>
@@ -53,9 +53,9 @@
                         <TextBlock
                             Style="{DynamicResource TextBlockBody}">
                             <TextBlock.Inlines>
-                                <Run Text="Once the solution finishes, should it "/>
+                                <Run Text="Once the solution finishes, should it"/>
                                 <Run FontWeight="Bold" TextDecorations="Underline" Text="remove"/>
-                                <Run Text=" your account as Site Collection Admin?"/>
+                                <Run Text="your account as Site Collection Admin?"/>
                             </TextBlock.Inlines>
                             
                         </TextBlock>
