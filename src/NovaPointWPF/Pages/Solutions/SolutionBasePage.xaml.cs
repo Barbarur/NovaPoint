@@ -18,6 +18,7 @@ namespace NovaPointWPF.Pages.Solutions
     /// </summary>
     public partial class SolutionBasePage : Page
     {
+        static ReaderWriterLock rwl = new ReaderWriterLock();
         private readonly ISolutionForm _solutionForm;
 
         private string _solutionFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -127,48 +128,55 @@ namespace NovaPointWPF.Pages.Solutions
         private void UILog(LogInfo logInfo)
         {
             // Reference: https://stackoverflow.com/questions/2382663/ensuring-that-things-run-on-the-ui-thread-in-wpf
-
-            if (!string.IsNullOrWhiteSpace(logInfo.TextBase) || !string.IsNullOrWhiteSpace(logInfo.TextError) || !string.IsNullOrEmpty(logInfo.SolutionFolder))
+            rwl.AcquireWriterLock(3000);
+            try
             {
-                if (BoxText.Dispatcher.CheckAccess())
+                if (!string.IsNullOrWhiteSpace(logInfo.TextBase) || !string.IsNullOrWhiteSpace(logInfo.TextError) || !string.IsNullOrEmpty(logInfo.SolutionFolder))
                 {
-                    if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { BoxText.Inlines.Add(new Run($"{logInfo.TextBase} \n") ); }
-
-                    if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { BoxText.Inlines.Add(new Run($"{logInfo.TextError} \n") { Foreground = Brushes.IndianRed, FontWeight = FontWeights.Medium }); }
-
-                }
-                else
-                {
-                    BoxText.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
-                    new Action(() =>
+                    if (BoxText.Dispatcher.CheckAccess())
                     {
-                        if (!string.IsNullOrEmpty(logInfo.SolutionFolder)) { SolutionFolder = logInfo.SolutionFolder; }
-
                         if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { BoxText.Inlines.Add(new Run($"{logInfo.TextBase} \n") ); }
 
                         if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { BoxText.Inlines.Add(new Run($"{logInfo.TextError} \n") { Foreground = Brushes.IndianRed, FontWeight = FontWeights.Medium }); }
-                    }));
-                }
-            }
 
-            if (logInfo.PercentageProgress != -1)
-            {
-                if (Progress.Dispatcher.CheckAccess())
-                {
-                    Progress.Value = logInfo.PercentageProgress;
-                    PercentageCompleted.Text = $"{logInfo.PercentageProgress}%";
-                    PendingTime.Text = $"{logInfo.PendingTime}";
+                    }
+                    else
+                    {
+                        BoxText.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                        new Action(() =>
+                        {
+                            if (!string.IsNullOrEmpty(logInfo.SolutionFolder)) { SolutionFolder = logInfo.SolutionFolder; }
+
+                            if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { BoxText.Inlines.Add(new Run($"{logInfo.TextBase} \n") ); }
+
+                            if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { BoxText.Inlines.Add(new Run($"{logInfo.TextError} \n") { Foreground = Brushes.IndianRed, FontWeight = FontWeights.Medium }); }
+                        }));
+                    }
                 }
-                else
+
+                if (logInfo.PercentageProgress != -1)
                 {
-                    Progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
-                    new Action(() =>
+                    if (Progress.Dispatcher.CheckAccess())
                     {
                         Progress.Value = logInfo.PercentageProgress;
                         PercentageCompleted.Text = $"{logInfo.PercentageProgress}%";
                         PendingTime.Text = $"{logInfo.PendingTime}";
-                    }));
+                    }
+                    else
+                    {
+                        Progress.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                        new Action(() =>
+                        {
+                            Progress.Value = logInfo.PercentageProgress;
+                            PercentageCompleted.Text = $"{logInfo.PercentageProgress}%";
+                            PendingTime.Text = $"{logInfo.PendingTime}";
+                        }));
+                    }
                 }
+            }
+            finally
+            {
+                rwl.ReleaseLock();
             }
 
         }
