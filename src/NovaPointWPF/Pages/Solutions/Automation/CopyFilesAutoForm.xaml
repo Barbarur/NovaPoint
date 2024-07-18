@@ -105,7 +105,7 @@
 
                             <TextBlock
                                 Style="{DynamicResource TextBlockBody}"
-                                Text="Folder server relative path"
+                                Text="Folder server relative path (Optional)"
                                 Margin="0,16,0,0"/>
 
                             <TextBox
