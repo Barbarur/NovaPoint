@@ -22,8 +22,20 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _appInfo = appInfo;
         }
 
+        internal async Task AddPrimarySiteCollectionAdminAsync(string siteUrl, string userAdmin)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Processing '{userAdmin}' ad Primary Site Collection Admin for '{siteUrl}'");
 
-        internal async Task SetAsync(string siteUrl, string userAdmin)
+            var siteContext = await _appInfo.GetContext(siteUrl);
+            var user = siteContext.Web.EnsureUser(userAdmin);
+            siteContext.ExecuteQueryRetry();
+
+            siteContext.Site.Owner = user;
+            siteContext.ExecuteQueryRetry();
+        }
+
+        internal async Task AddAsync(string siteUrl, string userAdmin)
         {
             await SetAsync(siteUrl, userAdmin, true);
         }
@@ -34,7 +46,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
             if (siteUrl.Contains(upnCoded, StringComparison.OrdinalIgnoreCase) && siteUrl.Contains("-my.sharepoint.com", StringComparison.OrdinalIgnoreCase))
             {
-                throw new Exception("This is user's OneDrive. User will not be removed as Site Admin.");
+                throw new Exception("This is user's OneDrive. User will not be removed as Site Collection Admin.");
             }
             else
             {

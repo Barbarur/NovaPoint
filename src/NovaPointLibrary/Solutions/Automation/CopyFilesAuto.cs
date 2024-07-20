@@ -98,9 +98,9 @@ namespace NovaPointLibrary.Solutions.Automation
             if (_param.AdminAccess.AddAdmin)
             {
                 _logger.LogUI(GetType().Name, "Adding Site Collection Admin to source site.");
-                await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(_param.SourceSiteURL, adminUPN);
+                await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).AddAsync(_param.SourceSiteURL, adminUPN);
                 _logger.LogUI(GetType().Name, "Adding Site Collection Admin to destination site.");
-                await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(_param.DestinationSiteURL, adminUPN);
+                await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).AddAsync(_param.DestinationSiteURL, adminUPN);
             }
 
             _logger.LogUI(GetType().Name, "Getting source site.");

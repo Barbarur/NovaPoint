@@ -59,27 +59,6 @@ namespace NovaPointLibrary.Solutions.QuickFix
             }
         }
 
-        //public IdMismatchTrouble(IdMismatchTroubleParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        //{
-        //    _param = parameters;
-        //    _logger = new(uiAddLog, this.GetType().Name, _param);
-        //    _appInfo = new(_logger, cancelTokenSource);
-        //}
-
-        //public async Task RunAsync()
-        //{
-        //    try
-        //    {
-        //        await RunScriptAsync();
-
-        //        _logger.ScriptFinish();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.ScriptFinish(ex);
-        //    }
-        //}
-
         private async Task RunScriptAsync()
         {
             _appInfo.IsCancelled();
@@ -159,8 +138,8 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 string upnCoded = oUser.UserPrincipalName.Trim().Replace("@", "_").Replace(".", "_");
                 if (siteUrl.Contains(upnCoded, StringComparison.OrdinalIgnoreCase) && siteUrl.Contains("-my.sharepoint.com", StringComparison.OrdinalIgnoreCase))
                 {
-                    AddRecord(siteUrl, "Added user as Site Collection Admin");
-                    if (!_param.ReportMode) { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(siteUrl, oUser.UserPrincipalName); }
+                    if (!_param.ReportMode) { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).AddPrimarySiteCollectionAdminAsync(siteUrl, oUser.UserPrincipalName); }
+                    AddRecord(siteUrl, "Added user as Primary Site Collection Admin");
                 }
             }
             catch (Exception ex)

@@ -51,27 +51,6 @@ namespace NovaPointLibrary.Solutions.Automation
             }
         }
 
-        //public SetSiteCollectionAdminAuto(SetSiteCollectionAdminAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        //{
-        //    _param = parameters;
-        //    _logger = new(uiAddLog, this.GetType().Name, _param);
-        //    _appInfo = new(_logger, cancelTokenSource);
-        //}
-
-        //public async Task RunAsync()
-        //{
-        //    try
-        //    {
-        //        await RunScriptAsync();
-
-        //        _logger.ScriptFinish();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.ScriptFinish(ex);
-        //    }
-        //}
-
         private async Task RunScriptAsync()
         {
             _appInfo.IsCancelled();
@@ -84,31 +63,6 @@ namespace NovaPointLibrary.Solutions.Automation
                 await SetAdmin(recordSite.SiteUrl);
             }
 
-            //ProgressTracker progress;
-            //if (!String.IsNullOrWhiteSpace(_param.SiteParam.SiteUrl))
-            //{
-            //    progress = new(_logger, 1);
-
-            //    Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.SiteUrl);
-
-            //    await SetAdmin(oSite.Url);
-
-            //    progress.ProgressUpdateReport();
-            //}
-            //else
-            //{
-            //    List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(_param.SiteParam.IncludeShareSite, _param.SiteParam.IncludePersonalSite, _param.SiteParam.OnlyGroupIdDefined);
-
-            //    progress = new(_logger, collSiteCollections.Count);
-            //    foreach (var oSiteCollection in collSiteCollections)
-            //    {
-            //        _appInfo.IsCancelled();
-
-            //        await SetAdmin(oSiteCollection.Url);
-
-            //        progress.ProgressUpdateReport();
-            //    }
-            //}
         }
 
         private async Task SetAdmin(string siteUrl)
@@ -119,7 +73,7 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 if (_param.IsSiteAdmin)
                 {
-                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(siteUrl, _param.TargetUserUPN);
+                    await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).AddAsync(siteUrl, _param.TargetUserUPN);
                     AddRecord(siteUrl, $"User '{_param.TargetUserUPN}' added as Site Collection Admin");
                 }
                 else
@@ -149,22 +103,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
     public class SetSiteCollectionAdminAutoParameters : ISolutionParameters
     {
-        private string _targetUserUPN = string.Empty;
-        public string TargetUserUPN
-        {
-            get { return _targetUserUPN; }
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new Exception($"User Principal Name cannot be empty");
-                }
-                else
-                {
-                    _targetUserUPN = value.Trim();
-                }
-            }
-        }
+        public string TargetUserUPN { get; set; } = string.Empty;
 
         public bool IsSiteAdmin { get; set; } = false;
 
@@ -172,6 +111,14 @@ namespace NovaPointLibrary.Solutions.Automation
         public SetSiteCollectionAdminAutoParameters(SPOTenantSiteUrlsParameters siteParam)
         {
             SiteParam = siteParam;
+        }
+
+        public void ParametersCheck()
+        {
+            if (!String.IsNullOrWhiteSpace(TargetUserUPN))
+            {
+                throw new Exception($"User Principal Name cannot be empty");
+            }
         }
     }
 }

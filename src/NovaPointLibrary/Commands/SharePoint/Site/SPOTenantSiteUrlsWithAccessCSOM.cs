@@ -44,7 +44,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
             if (_param.AdminAccess.AddAdmin)
             {
-                try { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).SetAsync(record.SiteUrl, adminUPN); }
+                try { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).AddAsync(record.SiteUrl, adminUPN); }
                 catch (Exception ex)
                 {
                     _logger.ReportError("Site", record.SiteUrl, ex);
