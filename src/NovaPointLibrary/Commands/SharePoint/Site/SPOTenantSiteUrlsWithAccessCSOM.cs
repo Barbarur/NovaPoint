@@ -1,7 +1,6 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.AzureAD;
-using NovaPointLibrary.Commands.SharePoint.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Solutions;
 using System;

@@ -96,7 +96,7 @@ namespace NovaPointLibrary.Solutions.Report
                 if (recordSite.SiteProperties != null)
                 {
                     SiteReportRecord siteRecord = new(recordSite.SiteProperties);
-                    _logger.RecordCSV(siteRecord);
+                    RecordCSV(siteRecord);
                 }
                 else
                 {
@@ -116,7 +116,7 @@ namespace NovaPointLibrary.Solutions.Report
                 if (siteRecord.Ex != null)
                 {
                     SiteReportRecord siteReportRecord = new(siteRecord.SiteUrl, siteRecord.Ex.Message);
-                    _logger.RecordCSV(siteReportRecord);
+                    RecordCSV(siteReportRecord);
                     continue;
                 }
 
@@ -127,7 +127,7 @@ namespace NovaPointLibrary.Solutions.Report
                 catch (Exception ex)
                 {
                     SiteReportRecord siteReportRecord = new(siteRecord.SiteUrl, ex.Message);
-                    _logger.RecordCSV(siteReportRecord);
+                    RecordCSV(siteReportRecord);
                 }
             }
         }
@@ -144,7 +144,7 @@ namespace NovaPointLibrary.Solutions.Report
             else if (siteRecord.Web != null)
             {
                 SiteReportRecord siteReportRecord = new(siteRecord.Web);
-                _logger.RecordCSV(siteReportRecord);
+                RecordCSV(siteReportRecord);
             }
 
             else
@@ -154,12 +154,12 @@ namespace NovaPointLibrary.Solutions.Report
                 if (oWeb == null)
                 {
                     SiteReportRecord siteReportRecord = new(siteRecord.SiteUrl, "Site wasn't found.");
-                    _logger.RecordCSV(siteReportRecord);
+                    RecordCSV(siteReportRecord);
                 }
                 else if (oWeb.IsSubSite())
                 {
                     SiteReportRecord siteReportRecord = new(oWeb);
-                    _logger.RecordCSV(siteReportRecord);
+                    RecordCSV(siteReportRecord);
                 }
                 else
                 {
@@ -190,7 +190,7 @@ namespace NovaPointLibrary.Solutions.Report
                 siteRecord.AddSiteDetails(site);
             }
 
-            _logger.RecordCSV(siteRecord);
+            RecordCSV(siteRecord);
         }
 
         private bool NeedAccess()
@@ -201,7 +201,11 @@ namespace NovaPointLibrary.Solutions.Report
             }
             else { return false; }
         }
-    
+
+        private void RecordCSV(SiteReportRecord record)
+        {
+            _logger.RecordCSV(record);
+        }
     }
 
 

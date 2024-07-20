@@ -115,7 +115,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public void ParametersCheck()
         {
-            if (!String.IsNullOrWhiteSpace(TargetUserUPN))
+            if (String.IsNullOrWhiteSpace(TargetUserUPN))
             {
                 throw new Exception($"User Principal Name cannot be empty");
             }

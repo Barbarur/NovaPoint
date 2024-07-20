@@ -152,7 +152,7 @@ namespace NovaPointLibrary.Solutions
                         csv.WriteLine(sb.ToString());
                     }
                 }
-                finally { csvRWL.EnterWriteLock(); ; }
+                finally { csvRWL.ExitWriteLock(); }
             }
             catch (Exception ex)
             {

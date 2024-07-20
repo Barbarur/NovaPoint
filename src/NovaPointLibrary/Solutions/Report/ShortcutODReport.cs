@@ -74,18 +74,18 @@ namespace NovaPointLibrary.Solutions.Report
 
                 if (tenantItemRecord.Ex != null)
                 {
-                    ItemReportRecord record = new(tenantItemRecord);
-                    _logger.RecordCSV(record);
+                    ShortcutODReportRecord record = new(tenantItemRecord);
+                    RecordCSV(record);
                     continue;
                 }
 
                 if (tenantItemRecord.Item == null || tenantItemRecord.List == null)
                 {
-                    ItemReportRecord record = new(tenantItemRecord)
+                    ShortcutODReportRecord record = new(tenantItemRecord)
                     {
                         Remarks = "Item or List is null",
                     };
-                    _logger.RecordCSV(record);
+                    RecordCSV(record);
                     continue;
                 }
 
@@ -99,18 +99,22 @@ namespace NovaPointLibrary.Solutions.Report
 
                     ShortcutODReportRecord record = new(tenantItemRecord);
                     record.AddTargetSite(shortcutData.riwu);
-                    _logger.RecordCSV(record);
+                    RecordCSV(record);
                 }
                 catch (Exception ex)
                 {
                     _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     ShortcutODReportRecord record = new(tenantItemRecord, ex.Message);
-                    _logger.RecordCSV(record);
+                    RecordCSV(record);
                 }
             }
         }
 
+        private void RecordCSV(ShortcutODReportRecord record)
+        {
+            _logger.RecordCSV(record);
+        }
     }
 
     internal class ShortcutODReportRecord : ISolutionRecord

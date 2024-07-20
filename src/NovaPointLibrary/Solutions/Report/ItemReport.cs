@@ -3,6 +3,7 @@ using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Solutions.Automation;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Report
@@ -98,7 +99,7 @@ namespace NovaPointLibrary.Solutions.Report
                 if (tenantItemRecord.Ex != null)
                 {
                     ItemReportRecord record = new(tenantItemRecord);
-                    _logger.RecordCSV(record);
+                    RecordCSV(record);
                     continue;
                 }
 
@@ -108,7 +109,7 @@ namespace NovaPointLibrary.Solutions.Report
                     {
                         Remarks = "Item or List is null",
                     };
-                    _logger.RecordCSV(record);
+                    RecordCSV(record);
                     continue;
                 }
 
@@ -116,16 +117,21 @@ namespace NovaPointLibrary.Solutions.Report
                 {
                     ItemReportRecord record = new(tenantItemRecord);
                     await record.AddDetails(_logger, _appInfo, tenantItemRecord.Item);
-                    _logger.RecordCSV(record);
+                    RecordCSV(record);
                 }
                 catch (Exception ex)
                 {
                     _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     ItemReportRecord record = new(tenantItemRecord, ex.Message);
-                    _logger.RecordCSV(record);
+                    RecordCSV(record);
                 }
             }
+        }
+
+        private void RecordCSV(ItemReportRecord record)
+        {
+            _logger.RecordCSV(record);
         }
 
     }

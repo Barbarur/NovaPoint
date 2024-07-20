@@ -77,7 +77,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 if (tenantItemRecord.Ex != null)
                 {
                     RemoveFileVersionAutoRecord record = new(tenantItemRecord);
-                    _logger.RecordCSV(record);
+                    RecordCSV(record);
                     continue;
                 }
                 
@@ -90,7 +90,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
                     
                     RemoveFileVersionAutoRecord record = new(tenantItemRecord, ex.Message);
-                    _logger.RecordCSV(record);
+                    RecordCSV(record);
                 }
             }
         }
@@ -119,7 +119,7 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 RemoveFileVersionAutoRecord record = new(resultItem, "No versions to delete");
                 record.AddFileDetails(resultItem.Item);
-                _logger.RecordCSV(record);
+                RecordCSV(record);
                 return;
             }
 
@@ -137,7 +137,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 RemoveFileVersionAutoRecord record = new(resultItem);
                 record.AddFileDetails(resultItem.Item, numberVersionsToDelete.ToString(), versionsDeletedMB.ToString());
-                _logger.RecordCSV(record);
+                RecordCSV(record);
                 
             }
             else
@@ -174,7 +174,7 @@ namespace NovaPointLibrary.Solutions.Automation
                         _logger.ReportError("Item", resultItem.Item.File.Name, ex);
 
                         RemoveFileVersionAutoRecord errorRecord = new(resultItem, ex.Message);
-                        _logger.RecordCSV(errorRecord);
+                        RecordCSV(errorRecord);
 
                         errorsCount++;
                     }
@@ -187,9 +187,14 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 RemoveFileVersionAutoRecord record = new(resultItem, remarks);
                 record.AddFileDetails(resultItem.Item, numberVersionsToDelete.ToString(), versionsDeletedMB.ToString());
-                _logger.RecordCSV(record);
+                RecordCSV(record);
 
             }
+        }
+
+        private void RecordCSV(RemoveFileVersionAutoRecord record)
+        {
+            _logger.RecordCSV(record);
         }
 
     }

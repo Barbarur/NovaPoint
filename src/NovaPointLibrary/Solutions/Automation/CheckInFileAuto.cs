@@ -84,18 +84,18 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 if (tenantItemRecord.Ex != null)
                 {
-                    ItemReportRecord record = new(tenantItemRecord);
-                    _logger.RecordCSV(record);
+                    CheckInFileAutoRecord record = new(tenantItemRecord);
+                    RecordCSV(record);
                     continue;
                 }
 
                 if (tenantItemRecord.Item == null || tenantItemRecord.List == null)
                 {
-                    ItemReportRecord record = new(tenantItemRecord)
+                    CheckInFileAutoRecord record = new(tenantItemRecord)
                     {
                         Remarks = "Item or List is null",
                     };
-                    _logger.RecordCSV(record);
+                    RecordCSV(record);
                     continue;
                 }
 
@@ -112,7 +112,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     CheckInFileAutoRecord record = new(tenantItemRecord, ex.Message);
-                    _logger.RecordCSV(record);
+                    RecordCSV(record);
                 }
             }
         }
@@ -134,14 +134,19 @@ namespace NovaPointLibrary.Solutions.Automation
                     CheckinType = _param.CheckinType,
                     Comment = _param.Comment,
                 };
-                _logger.RecordCSV(record);
+                RecordCSV(record);
             }
             catch (Exception ex)
             {
                 CheckInFileAutoRecord record = new(resultItem, ex.Message);
-                _logger.RecordCSV(record);
+                RecordCSV(record);
             }
 
+        }
+
+        private void RecordCSV(CheckInFileAutoRecord record)
+        {
+            _logger.RecordCSV(record);
         }
 
     }

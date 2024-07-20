@@ -1,7 +1,4 @@
-﻿using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Commands.SharePoint.Utilities;
-using NovaPointLibrary.Solutions;
+﻿using NovaPointLibrary.Solutions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
