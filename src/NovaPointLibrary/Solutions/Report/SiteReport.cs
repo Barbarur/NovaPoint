@@ -22,8 +22,6 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private readonly SPOSitePermissionsCSOM _sitePermissions;
-
         private readonly Expression<Func<Web, object>>[] _webExpressions = new Expression<Func<Web, object>>[]
         {
             w => w.Id,
@@ -126,6 +124,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
+                    _logger.ReportError("Site", siteRecord.SiteUrl, ex);
                     SiteReportRecord siteReportRecord = new(siteRecord.SiteUrl, ex.Message);
                     RecordCSV(siteReportRecord);
                 }
@@ -186,8 +185,28 @@ namespace NovaPointLibrary.Solutions.Report
             if (_param.Detailed)
             {
                 var site = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(oSiteCollection.Url, _siteExpressions);
+                
+                string parentHubSiteId = string.Empty;
+                if (site.IsHubSite)
+                {
+                    try
+                    {
+                        Tenant tenantContext = new(await _appInfo.GetContext(_appInfo.AdminUrl));
+                        HubSiteProperties hubSiteProperties = tenantContext.GetHubSitePropertiesById(oSiteCollection.SiteId);
 
-                siteRecord.AddSiteDetails(site);
+                        tenantContext.Context.Load(hubSiteProperties);
+                        tenantContext.Context.ExecuteQueryRetry();
+
+                        parentHubSiteId = hubSiteProperties.ParentHubSiteId.ToString();
+                    }
+                    catch (Exception ex) 
+                    {
+                        _logger.ReportError("Site", oSiteCollection.Url, ex);
+                        siteRecord.Remarks = ex.Message;
+                    }
+                }
+
+                siteRecord.AddHubDetails(site, parentHubSiteId);
             }
 
             RecordCSV(siteRecord);
@@ -226,7 +245,8 @@ namespace NovaPointLibrary.Solutions.Report
 
         internal string IsHubSite { get; set; } = String.Empty;
         internal string HubSiteId { get; set; } = String.Empty;
-        
+        internal string ParentHubSiteId { get; set; } = String.Empty;
+
         internal string Remarks { get; set; } = String.Empty;
 
         internal SiteReportRecord(SiteProperties oSiteCollection)
@@ -261,10 +281,11 @@ namespace NovaPointLibrary.Solutions.Report
             Remarks = errorMessage;
         }
 
-        internal void AddSiteDetails(Microsoft.SharePoint.Client.Site site)
+        internal void AddHubDetails(Site site, string parentHubSiteId)
         {
             IsHubSite = site.IsHubSite.ToString();
-            HubSiteId = site.IsHubSite ? site.HubSiteId.ToString() : string.Empty;
+            if (site.HubSiteId.ToString() != "00000000-0000-0000-0000-000000000000") { HubSiteId = site.HubSiteId.ToString(); }
+            if (parentHubSiteId != "00000000-0000-0000-0000-000000000000") { ParentHubSiteId = parentHubSiteId; }
         }
 
     }

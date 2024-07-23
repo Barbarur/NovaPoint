@@ -124,7 +124,7 @@
 
                                 <Button
                                     Style="{DynamicResource ButtonSolutionForm}"
-                                    Content="Open file"
+                                    Content="Select file"
                                     Click="OpenFileClick"/>
 
                                 <TextBlock
