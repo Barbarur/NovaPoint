@@ -43,6 +43,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 l => l.Id,
                 l => l.ItemCount,
                 l => l.Title,
+                l => l.RootFolder.ServerRelativeUrl,
             };
 
             var expressions = defaultExpressions.Union(parameters.ListExpresions).ToArray();

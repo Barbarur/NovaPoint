@@ -124,7 +124,7 @@ namespace NovaPointLibrary.Solutions.Automation
             recordItem.SiteUrl = siteUrl;
             recordItem.ListTitle = oList != null ? oList.Title : String.Empty;
             recordItem.ListType = oList != null ? oList.BaseType.ToString() : String.Empty;
-            recordItem.ListDefaultViewUrl = oList != null ? oList.DefaultViewUrl : string.Empty;
+            recordItem.ListServerRelativeUrl = oList != null ? oList.RootFolder.ServerRelativeUrl : string.Empty;
 
             recordItem.ItemID = oItem != null ? oItem["ID"] : string.Empty;
 

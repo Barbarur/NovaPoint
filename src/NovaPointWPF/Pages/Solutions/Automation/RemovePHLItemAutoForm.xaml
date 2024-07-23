@@ -36,13 +36,14 @@
                         Orientation="Horizontal">
 
                         <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
                             Content="Delete"
                             IsChecked="False"
-                            DockPanel.Dock="Left"/>
+                            DockPanel.Dock="Left"
+                            Margin="0,0,8,0"/>
 
                         <RadioButton
-                            Style="{DynamicResource SolutionFormToggleButton}"
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
                             Content="Recycle"
                             IsChecked="{Binding Recycle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                             DockPanel.Dock="Left"/>

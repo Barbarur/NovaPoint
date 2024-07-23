@@ -127,7 +127,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             dynamicRecord.ListTitle = oList != null ? oList.Title : String.Empty;
             dynamicRecord.ListType = oList != null ? oList.BaseType.ToString() : string.Empty;
-            dynamicRecord.ListDefaultViewUrl = oList != null ? oList.DefaultViewUrl : string.Empty;
+            dynamicRecord.ListServerRelativeUrl = oList != null ? oList.RootFolder.ServerRelativeUrl : string.Empty;
             dynamicRecord.ListID = oList != null ? oList.Id.ToString() : string.Empty;
 
             dynamicRecord.Hidden = oList != null ? oList.Hidden.ToString() : string.Empty;
