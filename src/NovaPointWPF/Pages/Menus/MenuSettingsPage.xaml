@@ -8,7 +8,7 @@
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="800"
       Title="MenuSettingsPage">
-
+   
 
     <Grid>
         
@@ -57,7 +57,12 @@
 
             </Grid>
 
-            
+            <TextBlock
+                x:Name="NotificationMessage"
+                Style="{DynamicResource TextBlockBody}"
+                Opacity="0"
+                HorizontalAlignment="Center"/>
+
             <Label Height="15"/>
             <Grid Background="Transparent"
                   Grid.Row="1">

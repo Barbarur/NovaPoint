@@ -1,8 +1,11 @@
-﻿using NovaPointLibrary.Commands.Authentication;
+﻿using Microsoft.Graph;
+using NovaPointLibrary.Commands.Authentication;
+using NovaPointWPF.Properties;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,6 +14,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -51,11 +55,15 @@ namespace NovaPointWPF.Pages.Menus
             AppSettings.SaveSettings();
 
             if (!CachingToken) { AppSettings.RemoveTokenCache(); }
+
+            TriggerNotification("Settings saved");
         }
 
         private void DeleteClick(object sender, RoutedEventArgs e)
         {
             AppSettings.RemoveTokenCache();
+
+            TriggerNotification("Cache deleted");
         }
 
         private void AboutClick(object sender, RoutedEventArgs e)
@@ -66,7 +74,22 @@ namespace NovaPointWPF.Pages.Menus
         private void UpdateClick(object sender, RoutedEventArgs e)
         {
             string NavigateUri = "https://github.com/Barbarur/NovaPoint/releases/latest";
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {NavigateUri}") { CreateNoWindow = true });
+            System.Diagnostics.Process.Start(new ProcessStartInfo("cmd", $"/c start {NavigateUri}") { CreateNoWindow = true });
+        }
+
+        private void TriggerNotification(string notification)
+        {
+            NotificationMessage.Text = notification;
+
+            DoubleAnimation doubleAnimation = new()
+            {
+                From = 0,
+                To = 1,
+                Duration = TimeSpan.FromSeconds(1),
+                AutoReverse = true,
+            };
+
+            NotificationMessage.BeginAnimation(TextBlock.OpacityProperty, doubleAnimation);
         }
 
     }
