@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="1500"
+      d:DesignHeight="900" d:DesignWidth="1600"
       Title="SolutionBasePage">
     
     <Grid Background="Transparent">
@@ -166,6 +166,7 @@
 
             <ScrollViewer
                 Grid.Row="2"
+                VerticalAlignment="Top"
                 Style="{DynamicResource LeftScrollViewer}"
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 Margin="0,28,0,8">
