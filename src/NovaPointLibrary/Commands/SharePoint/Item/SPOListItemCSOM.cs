@@ -92,7 +92,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 oList = clientContext.Web.Lists.GetById(list.Id);
                 ListItemCollection subcollListItem = oList.GetItems(camlQuery);
 
-                string exceptionMessage = string.Empty;
+                Exception? exception = null;
                 try
                 {
                     clientContext.Load(subcollListItem,
@@ -100,11 +100,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                         sci => sci.Include(expressions));
                     clientContext.ExecuteQueryRetry();
                 }
-                catch (Exception ex) { exceptionMessage = ex.Message; }
+                catch (Exception ex) { exception = ex; }
 
-                if (!string.IsNullOrWhiteSpace(exceptionMessage))
+                if (exception != null)
                 {
-                    if (exceptionMessage.Contains("exceeds the list view threshold"))
+                    if (exception.Message.Contains("exceeds the list view threshold"))
                     {
                         _logger.LogUI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Soution will collect all the items and then filter.");
                         camlQuery.FolderServerRelativeUrl = null;
@@ -113,7 +113,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     }
                     else
                     {
-                        throw new(exceptionMessage);
+                        throw exception;
                     }
                 }
                 else
@@ -165,6 +165,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             if (oList.ItemCount > 5000)
             {
                 _logger.LogUI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' is a large list with {oList.ItemCount} items. Expect the Solution to take longer to run.");
+            }
+            else
+            {
+                _logger.LogUI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' has {oList.ItemCount} items.");
             }
         }
 

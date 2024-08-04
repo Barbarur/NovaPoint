@@ -84,7 +84,7 @@ namespace NovaPointLibrary.Solutions.Automation
             }
             catch (Exception ex)
             {
-                _logger.ReportError("Site", siteUrl, ex);
+                _logger.ReportError(GetType().Name, "Site", siteUrl, ex);
                 AddRecord(siteUrl, ex.Message);
             }
 

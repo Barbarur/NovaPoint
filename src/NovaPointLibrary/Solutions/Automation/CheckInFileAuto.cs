@@ -109,7 +109,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _logger.ReportError(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     CheckInFileAutoRecord record = new(tenantItemRecord, ex.Message);
                     RecordCSV(record);

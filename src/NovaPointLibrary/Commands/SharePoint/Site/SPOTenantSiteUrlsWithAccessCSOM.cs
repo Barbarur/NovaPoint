@@ -46,7 +46,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 try { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).AddAsync(record.SiteUrl, adminUPN); }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Site", record.SiteUrl, ex);
+                    _logger.ReportError(GetType().Name, "Site", record.SiteUrl, ex);
                     record.Ex = ex;
                 }
             }
@@ -73,7 +73,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
                 if (record.Ex != null)
                 {
-                    _logger.ReportError("Site", record.SiteUrl, record.Ex);
+                    _logger.ReportError(GetType().Name, "Site", record.SiteUrl, record.Ex);
                     yield return record;
                 }
             }
@@ -92,7 +92,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             }
             catch (Exception ex)
             {
-                _logger.ReportError("Site", recordSite.SiteUrl, ex);
+                _logger.ReportError(GetType().Name, "Site", recordSite.SiteUrl, ex);
 
                 recordSite.Ex = ex;
             }

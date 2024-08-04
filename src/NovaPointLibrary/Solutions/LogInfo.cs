@@ -17,7 +17,7 @@ namespace NovaPointLibrary.Solutions
 
         public string MainClassInfo { get; set; } = string.Empty;
         public double PercentageProgress { get; set; } = -1;
-        public string PendingTime { get; set; } = string.Empty;
+        public TimeSpan PendingTime { get; set; } = TimeSpan.Zero;
         public string SolutionFolder { get; set; } = string.Empty;
 
         public static LogInfo FolderInfo(string folder)
@@ -47,7 +47,7 @@ namespace NovaPointLibrary.Solutions
             return li;
         }
 
-        public static LogInfo ProgressUpdate(double percentageProgress, string pendingTime)
+        public static LogInfo ProgressUpdate(double percentageProgress, TimeSpan pendingTime)
         {
             LogInfo li = new()
             {

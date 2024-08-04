@@ -87,7 +87,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _logger.ReportError(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
                     
                     RemoveFileVersionAutoRecord record = new(tenantItemRecord, ex.Message);
                     RecordCSV(record);
@@ -171,7 +171,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     }
                     catch (Exception ex)
                     {
-                        _logger.ReportError("Item", resultItem.Item.File.Name, ex);
+                        _logger.ReportError(GetType().Name, "Item", resultItem.Item.File.Name, ex);
 
                         RemoveFileVersionAutoRecord errorRecord = new(resultItem, ex.Message);
                         RecordCSV(errorRecord);

@@ -16,8 +16,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             i => i.Id,
             i => i["FileRef"],
+            f => f["FileLeafRef"],
             i => i.ParentList.Title,
             i => i.ParentList.BaseType,
+            i => i.ParentList.RootFolder.ServerRelativeUrl,
             i => i.ParentList.ParentWeb.Url,
         };
 
@@ -124,7 +126,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     }
                     catch (Exception ex) { exception = ex; }
 
-                    if ( exception != null)
+                    if ( exception != null )
                     {
                         if (exception.Message.Contains("exceeds the list view threshold"))
                         {
@@ -136,6 +138,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                         else
                         {
                             SPOTenantItemRecord recordItem = new(tenantListRecord, exception);
+                            _logger.ReportError(GetType().Name, $"{tenantListRecord.List.BaseType}", $"{tenantListRecord.List.Title}", exception);
 
                             yield return recordItem;
                             break;
@@ -216,6 +219,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 }
 
                 var collListItems = new SPOListItemCSOM(_logger, _appInfo).GetAsync(tenantListRecord.SiteUrl, tenantListRecord.List, _param.ItemsParam).GetAsyncEnumerator();
+                ProgressTracker progress = new(tenantListRecord.Progress, tenantListRecord.List.ItemCount);
                 while (true)
                 {
                     ListItem? oItem = null;
@@ -227,18 +231,20 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     }
                     catch (Exception ex) { exception = ex; }
 
-                    if (exception != null)
-                    {
-                        SPOTenantItemRecord recordItem = new(tenantListRecord, exception);
-
-                        yield return recordItem;
-                        break;
-                    }
-                    else
+                    if (exception == null)
                     {
                         SPOTenantItemRecord recordItem = new(tenantListRecord, oItem);
                         yield return recordItem;
                     }
+                    else
+                    {
+                        SPOTenantItemRecord recordItem = new(tenantListRecord, exception);
+                        _logger.ReportError(GetType().Name, $"{tenantListRecord.List.BaseType}", $"{tenantListRecord.List.RootFolder.ServerRelativeUrl}", exception);
+
+                        yield return recordItem;
+                        break;
+                    }
+                    progress.ProgressUpdateReport();
                 }
             }
         }

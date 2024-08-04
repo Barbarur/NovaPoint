@@ -121,7 +121,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _logger.ReportError(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     ItemReportRecord record = new(tenantItemRecord, ex.Message);
                     RecordCSV(record);
@@ -141,6 +141,7 @@ namespace NovaPointLibrary.Solutions.Report
         internal string SiteUrl { get; set; } = String.Empty;
         internal string ListTitle { get; set; } = String.Empty;
         internal string ListType { get; set; } = String.Empty;
+        internal string ListServerRelativeUrl { get; set; } = String.Empty;
 
         internal string ItemID { get; set; } = String.Empty;
         internal string ItemTitle { get; set; } = String.Empty;
@@ -172,6 +173,7 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 ListTitle = tenantItemRecord.List.Title;
                 ListType = tenantItemRecord.List.BaseType.ToString();
+                ListServerRelativeUrl = tenantItemRecord.List.RootFolder.ServerRelativeUrl;
             }
 
             if (tenantItemRecord.Item != null)
@@ -210,7 +212,7 @@ namespace NovaPointLibrary.Solutions.Report
             }
             else if (oItem.ParentList.BaseType == BaseType.DocumentLibrary)
             {
-                ItemSizeMb = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]), 2).ToString();
+                ItemSizeMb = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2).ToString();
                 FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)oItem["SMTotalSize"];
                 ItemSizeTotalMB = Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2).ToString();
 

@@ -168,7 +168,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Item", (string)result.Item["FileRef"], ex);
+                    _logger.ReportError(GetType().Name, "Item", (string)result.Item["FileRef"], ex);
 
                     AddRecord(result.ListRecord.SiteUrl, result.ListRecord.List, result.Item, remarks: ex.Message);
                 }

@@ -148,7 +148,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError("Site", oSite.Url, ex);
+                _logger.ReportError(GetType().Name, "Site", oSite.Url, ex);
                 exceptionMessage = ex.Message;
             }
 
@@ -200,7 +200,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError("Site", oSite.Url, ex);
+                _logger.ReportError(GetType().Name, "Site", oSite.Url, ex);
                 exceptionMessage = ex.Message;
             }
 
@@ -275,7 +275,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError($"{oList.BaseType}", oList.Title, ex);
+                _logger.ReportError(GetType().Name, $"{oList.BaseType}", oList.Title, ex);
 
                 recordsList.Add(new($"{oList.BaseType}", oList.Title, $"{oList.DefaultViewUrl}", new("", "", "", "", ex.Message)));
             }

@@ -78,7 +78,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 if ( siteResults.Ex != null)
                 {
-                    _logger.ReportError("Site", siteResults.SiteUrl, siteResults.Ex);
+                    _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, siteResults.Ex);
                     AddRecord(siteResults.SiteUrl, remarks: siteResults.Ex.Message);
                     continue;
                 }
@@ -104,7 +104,7 @@ namespace NovaPointLibrary.Solutions.Automation
                         }
                         else
                         {
-                            _logger.ReportError("Site", siteResults.SiteUrl, ex);
+                            _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
                             AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                         }
                     }
@@ -118,7 +118,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     }
                     catch (Exception ex)
                     {
-                        _logger.ReportError("Site", siteResults.SiteUrl, ex);
+                        _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
                         AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                     }
                 }
@@ -155,7 +155,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Recycle bin item", oRecycleBinItem.Title, ex);
+                    _logger.ReportError(GetType().Name, "Recycle bin item", oRecycleBinItem.Title, ex);
                     remarks = ex.Message;
                 }
 

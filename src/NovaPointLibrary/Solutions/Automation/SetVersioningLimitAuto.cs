@@ -113,7 +113,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(tenantListRecord.List.BaseType.ToString(), tenantListRecord.List.DefaultViewUrl, ex);
+                    _logger.ReportError(GetType().Name, tenantListRecord.List.BaseType.ToString(), tenantListRecord.List.DefaultViewUrl, ex);
                     AddRecord(tenantListRecord.SiteUrl, tenantListRecord.List, remarks: ex.Message);
                 }
             }

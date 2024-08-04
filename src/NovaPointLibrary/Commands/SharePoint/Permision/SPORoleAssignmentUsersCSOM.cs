@@ -114,7 +114,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError("SharePoint Group", spGroup.Title, ex);
+                _logger.ReportError(GetType().Name, "SharePoint Group", spGroup.Title, ex);
 
                 exeptionMessage = ex.Message;
             }
@@ -298,7 +298,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError("Security Group", $"{groupName}' with ID {groupID}", ex);
+                _logger.ReportError(GetType().Name, "Security Group", $"{groupName}' with ID {groupID}", ex);
 
                 exceptionMessage = ex.Message;
             }

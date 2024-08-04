@@ -105,7 +105,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Site", siteResults.SiteUrl, ex);
+                    _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
                     AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                 }
             }
@@ -144,7 +144,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             }
             catch (Exception ex)
             {
-                _logger.ReportError("Site", siteUrl, ex);
+                _logger.ReportError(GetType().Name, "Site", siteUrl, ex);
                 AddRecord(siteUrl, $"Error while processing the site: {ex.Message}");
             }
         }

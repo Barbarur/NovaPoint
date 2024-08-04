@@ -103,7 +103,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _logger.ReportError(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     ShortcutODReportRecord record = new(tenantItemRecord, ex.Message);
                     RecordCSV(record);

@@ -124,7 +124,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError("Site", siteRecord.SiteUrl, ex);
+                    _logger.ReportError(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     SiteReportRecord siteReportRecord = new(siteRecord.SiteUrl, ex.Message);
                     RecordCSV(siteReportRecord);
                 }
@@ -201,7 +201,7 @@ namespace NovaPointLibrary.Solutions.Report
                     }
                     catch (Exception ex) 
                     {
-                        _logger.ReportError("Site", oSiteCollection.Url, ex);
+                        _logger.ReportError(GetType().Name, "Site", oSiteCollection.Url, ex);
                         siteRecord.Remarks = ex.Message;
                     }
                 }

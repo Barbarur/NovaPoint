@@ -48,7 +48,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
                 if (tryException != null)
                 {
-                    _logger.ReportError("Site", siteResults.SiteUrl, tryException);
+                    _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, tryException);
 
                     SPOTenantListsRecord recordList = new(siteResults, siteResults.Progress, tryException);
 
@@ -59,7 +59,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                     ProgressTracker progress = new(siteResults.Progress, collList.Count);
                     foreach (var oList in collList)
                     {
-                        _logger.LogTxt(GetType().Name, $"Processing {oList.BaseType} '{oList.Title}'");
+                        _logger.LogTxt(GetType().Name, $"Processing '{oList.BaseType}' '{oList.Title}'");
 
                         SPOTenantListsRecord record = new(siteResults, siteResults.Progress, oList);
                         yield return record;

@@ -38,6 +38,33 @@ namespace NovaPointWPF.Pages.Solutions
             }
         }
 
+        private TimeSpan _pendingTimeSpan = TimeSpan.Zero;
+        private TimeSpan PendingTimeSpan
+        {
+            get
+            {
+                return _pendingTimeSpan;
+            }
+            set
+            {
+                _pendingTimeSpan = value;
+
+                string x = $"Pending Time: {_pendingTimeSpan.Hours}h:{_pendingTimeSpan.Minutes}m:{_pendingTimeSpan.Seconds}s";
+                if (PendingTime.Dispatcher.CheckAccess())
+                {
+                    PendingTime.Text = x;
+                }
+                else
+                {
+                    PendingTime.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                    new Action(() =>
+                    {
+                        PendingTime.Text = x;
+                    }));
+                }
+            }
+        }
+
         public CancellationTokenSource CancelTokenSource { get; set; } = new();
 
         public SolutionBasePage(ISolutionForm solutionForm)
@@ -77,7 +104,12 @@ namespace NovaPointWPF.Pages.Solutions
             RunButton.IsEnabled = false;
             CancelButton.IsEnabled = true;
 
+
+            Timer timer = new(CountDown, null, 0, 1000);
+
             ResetProgress();
+            PercentageCompleted.Text = "0%";
+            PendingTime.Text = "Pending Time: Calculating...";
 
             try
             {
@@ -89,6 +121,8 @@ namespace NovaPointWPF.Pages.Solutions
             {
                 UILog(LogInfo.ErrorNotification(ex.Message));
             }
+
+            timer.Dispose();
 
             BackButton.IsEnabled = true;
             RunButton.IsEnabled = true;
@@ -111,7 +145,6 @@ namespace NovaPointWPF.Pages.Solutions
             this.CancelTokenSource.Dispose();
             CancelButton.IsEnabled = false;
         }
-
 
         private void FilesButton_Click(object sender, RoutedEventArgs e)
         {
@@ -156,11 +189,12 @@ namespace NovaPointWPF.Pages.Solutions
 
                 if (logInfo.PercentageProgress != -1)
                 {
+                    PendingTimeSpan = logInfo.PendingTime;
+
                     if (Progress.Dispatcher.CheckAccess())
                     {
                         Progress.Value = logInfo.PercentageProgress;
                         PercentageCompleted.Text = $"{logInfo.PercentageProgress}%";
-                        PendingTime.Text = $"{logInfo.PendingTime}";
                     }
                     else
                     {
@@ -169,16 +203,34 @@ namespace NovaPointWPF.Pages.Solutions
                         {
                             Progress.Value = logInfo.PercentageProgress;
                             PercentageCompleted.Text = $"{logInfo.PercentageProgress}%";
-                            PendingTime.Text = $"{logInfo.PendingTime}";
                         }));
                     }
                 }
             }
+
             finally
             {
                 rwl.ReleaseLock();
             }
 
         }
+
+        private void CountDown(object? state)
+        {
+            rwl.AcquireWriterLock(3000);
+            try
+            {
+                
+                if (PendingTimeSpan > TimeSpan.Zero)
+                {
+                    PendingTimeSpan = PendingTimeSpan.Subtract(TimeSpan.FromSeconds(1));
+                }
+            }
+            finally
+            {
+                rwl.ReleaseWriterLock();
+            } 
+        }
+
     }
 }

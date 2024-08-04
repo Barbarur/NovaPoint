@@ -102,7 +102,7 @@ namespace NovaPointLibrary.Solutions.Report
                     }
                     catch (Exception ex)
                     {
-                        _logger.ReportError("Site", siteResults.SiteUrl, ex);
+                        _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
                         AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("", "", "", "", ex.Message)));
                     }
                 }
