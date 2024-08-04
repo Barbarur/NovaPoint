@@ -148,7 +148,12 @@
                     <Button
                             Style="{DynamicResource SolutionMenuButton}"
                             Content="Remove a User"
-                            Click="GoRemoveSiteUserAutoFormForm"/>
+                            Click="GoRemoveSiteUserAutoClick"/>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Remove Sharing Links"
+                        Click="GoRemoveSharingLinksAutoClick"/>
 
                 </StackPanel>
 

@@ -91,9 +91,14 @@ namespace NovaPointWPF.Pages.Menus
 
 
         // USER
-        private void GoRemoveSiteUserAutoFormForm(object sender, RoutedEventArgs e)
+        private void GoRemoveSiteUserAutoClick(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new RemoveSiteUserAutoForm());
+        }
+
+        private void GoRemoveSharingLinksAutoClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new RemoveSharingLinksAutoForm());
         }
 
     }
