@@ -135,15 +135,23 @@ namespace NovaPointLibrary.Commands.Utilities
             {
                 url = url.Substring(1);
             }
-
-            string accessToken = await _appInfo.GetGraphAccessToken();
+            string apiUrl = !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? $"{_graphUrl}/{url}" : url;
+            _logger.LogTxt(GetType().Name, $"Writing message for '{method}' in '{apiUrl}'");
 
             HttpRequestMessage message = new();
             message.Method = method;
-            message.RequestUri = !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? new Uri($"{_graphUrl}/{url}") : new Uri(url);
+
+            string accessToken = await _appInfo.GetGraphAccessToken();
             message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
-            _logger.LogTxt(GetType().Name, $"Request Message Uir {message.RequestUri}");
+            message.RequestUri = new Uri(apiUrl);
+
+            // MISSING:
+            // Header.Accept
+            // Content
+            // Additional Headers
+            // Content header content type
+
 
             return message;
         }
@@ -157,6 +165,7 @@ namespace NovaPointLibrary.Commands.Utilities
             while (response.StatusCode == (HttpStatusCode)429)
             {
                 var retryAfter = response.Headers.RetryAfter;
+                if (retryAfter == null || retryAfter.Delta == null) { break; }
                 await Task.Delay(retryAfter.Delta.Value.Seconds * 1000);
                 response = await HttpsClient.SendAsync(message);
             }
@@ -169,47 +178,12 @@ namespace NovaPointLibrary.Commands.Utilities
             }
             else
             {
-                _logger.LogTxt(GetType().Name, $"Error response");
+                string responseContent = await response.Content.ReadAsStringAsync();
+                string exceptionMessage = $"Request to SharePoint REST API {message.RequestUri} failed with status code {response.StatusCode} and response content: {responseContent}";
 
-                string content = await response.Content.ReadAsStringAsync();
-                _logger.LogTxt(GetType().Name,$"Error Content:{content}");
-
-                var oErrorContent = JsonConvert.DeserializeObject<GraphErrorContent>(content);
-                string errorMessage = oErrorContent.Error.Message.ToString();
-
-                throw new Exception(errorMessage);
+                throw new Exception(exceptionMessage);
             }
         }
     }
 
-    internal class GraphtResultContent<T>
-    {
-        /// <summary>
-        /// Context information detailing the type of message returned
-        /// </summary>
-        [JsonProperty("@odata.context")]
-        public string Context { get; set; }
-
-        /// <summary>
-        /// NextLink detailing the link to query to fetch the next batch of results
-        /// </summary>
-        [JsonProperty("nextLink")]
-        public string NextLink { get; set; }
-
-        /// <summary>
-        /// OData NextLink detailing the link to query to fetch the next batch of results
-        /// </summary>
-        [JsonProperty("@odata.nextLink")]
-        public string ODataNextLink // { get; set; }
-        {
-            get { return NextLink; }
-            set { NextLink = value; }
-        }
-
-        /// <summary>
-        /// The items contained in the results
-        /// </summary>
-        [JsonProperty("value")]
-        public IEnumerable<T> Items { get; set; }
-    }
 }
