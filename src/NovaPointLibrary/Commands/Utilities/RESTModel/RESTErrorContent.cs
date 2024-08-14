@@ -9,7 +9,7 @@ namespace NovaPointLibrary.Commands.Utilities.RESTModel
 {
     public class RESTErrorContent
     {
-        [JsonProperty("error")]
+        [JsonProperty("odata.error")]
         public Error Error { get; set; }
     }
     public class Error

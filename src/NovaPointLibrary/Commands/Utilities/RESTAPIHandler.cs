@@ -1,4 +1,5 @@
 ﻿using AngleSharp.Css.Dom;
+using Microsoft.Graph;
 using Newtonsoft.Json;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
@@ -61,18 +62,22 @@ namespace NovaPointLibrary.Commands.Utilities
             _logger.LogTxt(GetType().Name, $"Writing message for '{method}' in '{apiUrl}'");
 
             HttpRequestMessage request = new();
-
-            string spoAccessToken = await _appInfo.GetSPOAccessToken(apiUrl);
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", spoAccessToken);
-            
             request.Method = method;
+
+            string accessToken = await _appInfo.GetSPOAccessToken(apiUrl);
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            
             request.RequestUri = new Uri(apiUrl);
                         
-            request.Headers.Add("Accept", "application/json");
-            //message.Version = new Version(2, 0);
-            
-            request.Content = new StringContent(content, System.Text.Encoding.UTF8);
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+
+            if (method == HttpMethod.Post || method == HttpMethod.Put || method.Method == "PATCH")
+            {
+                request.Content = new StringContent(content, System.Text.Encoding.UTF8);
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            }
+
 
             return request;
         }
@@ -80,17 +85,16 @@ namespace NovaPointLibrary.Commands.Utilities
         private async Task<string> SendMessageAsync(HttpRequestMessage message)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Sending HTTP request message");
 
             HttpResponseMessage response = await HttpsClient.SendAsync(message, _appInfo.CancelToken);
-            //HttpResponseMessage response = await HttpsClient.SendAsync(message);
-
-            //while (response.StatusCode == (HttpStatusCode)429)
-            //{
-            //    var retryAfter = response.Headers.RetryAfter;
-            //    await Task.Delay(retryAfter.Delta.Value.Seconds * 1000);
-            //    response = await HttpsClient.SendAsync(message);
-            //}
+            
+            while (response.StatusCode == (HttpStatusCode)429)
+            {
+                var retryAfter = response.Headers.RetryAfter;
+                if (retryAfter == null || retryAfter.Delta == null) { break; }
+                await Task.Delay(retryAfter.Delta.Value.Seconds * 1000);
+                response = await HttpsClient.SendAsync(message);
+            }
 
             if (response.IsSuccessStatusCode)
             {
@@ -110,13 +114,10 @@ namespace NovaPointLibrary.Commands.Utilities
                 }
                 else
                 {
-                    string content = await response.Content.ReadAsStringAsync();
-                    _logger.LogTxt(GetType().Name, $"Error response:{content}");
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    string exceptionMessage = $"Request to SharePoint REST API {message.RequestUri} failed with status code {response.StatusCode} and response content: {responseContent}";
 
-                    RESTErrorContent? oErrorContent = JsonConvert.DeserializeObject<RESTErrorContent>(content);
-                    string errorMessage = oErrorContent?.Error.Message.Value != null ? oErrorContent.Error.Message.Value.ToString() : "Unknown Error";
-
-                    throw new Exception(errorMessage);
+                    throw new Exception(exceptionMessage);
                 }
             }
         }
