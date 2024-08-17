@@ -123,6 +123,12 @@
                         Content="User permissions"
                         Click="PermissionsReportFormClick"/>
 
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Sharing Links"
+                        Click="SharingLinksReportFormClick"/>
+
+
                 </StackPanel>
 
             </Grid>

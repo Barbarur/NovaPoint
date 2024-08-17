@@ -79,5 +79,10 @@ namespace NovaPointWPF.Pages.Menus
             GoToSolutionForm(new PermissionsReportForm());
         }
 
+        private void SharingLinksReportFormClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new SharingLinksReportForm());
+        }
+
     }
 }
