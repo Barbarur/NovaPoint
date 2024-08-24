@@ -50,7 +50,7 @@
                             Visibility="Collapsed">
 
                             <ToggleButton
-                                Style="{DynamicResource SolutionFormToggleButton}"
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
                                 Content="Filter by date"
                                 IsChecked="{Binding RetainedByDate, ElementName=root}"
                                 HorizontalAlignment="Right"/>

@@ -1,13 +1,7 @@
-﻿using Microsoft.Online.SharePoint.TenantAdministration;
-using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
+﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.PreservationHoldLibrary;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Solutions.Report;
-using System;
-using System.Dynamic;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -127,7 +121,11 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 _logger.LogTxt(GetType().Name, $"Deleting all version '{resultItem.Item.File.Name}'");
 
-                var versionsDeletedMB = Math.Round((Convert.ToDouble(resultItem.Item.File.Length) * numberVersionsToDelete) / Math.Pow(1024, 2), 2);
+                double fileSize = resultItem.Item.File.Length;
+                FieldLookupValue MTotalSize = (FieldLookupValue)resultItem.Item["SMTotalSize"];
+                
+                double versionsDeletedMB = MTotalSize.LookupId - fileSize;
+                versionsDeletedMB = Math.Round(versionsDeletedMB / Math.Pow(1024, 2), 2);
 
                 if (!_param.ReportMode && numberVersionsToDelete > 0)
                 {
@@ -145,6 +143,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 
                 int errorsCount = 0;
                 string remarks = String.Empty;
+                double versionsDeletedMB = 0;
 
                 for (int i = 0; i < numberVersionsToDelete; i++)
                 {
@@ -152,9 +151,10 @@ namespace NovaPointLibrary.Solutions.Automation
 
                     try
                     {
+                        FileVersion fileVersionToDelete = fileVersionCollection.ElementAt(i);
+
                         if (!_param.ReportMode)
                         {
-                            FileVersion fileVersionToDelete = fileVersionCollection.ElementAt(i);
 
                             if (_param.Recycle)
                             {
@@ -168,6 +168,8 @@ namespace NovaPointLibrary.Solutions.Automation
                             }
                             clientContext.ExecuteQueryRetry();
                         }
+
+                        versionsDeletedMB += fileVersionToDelete.Length;
                     }
                     catch (Exception ex)
                     {
@@ -181,7 +183,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
 
                 int versionsDeletedCount = numberVersionsToDelete - errorsCount;
-                var versionsDeletedMB = Math.Round( (Convert.ToDouble(resultItem.Item.File.Length) * versionsDeletedCount) / Math.Pow(1024, 2), 2);
+                versionsDeletedMB = Math.Round(versionsDeletedMB / Math.Pow(1024, 2), 2);
 
                 if (errorsCount > 0) { remarks = $"Error while deleting {errorsCount} versions"; }
 
@@ -247,7 +249,7 @@ namespace NovaPointLibrary.Solutions.Automation
             ItemSizeMb = Math.Round(Convert.ToDouble(oItem.File.Length) / Math.Pow(1024, 2), 2).ToString();
 
             FieldLookupValue MTotalSize = (FieldLookupValue)oItem["SMTotalSize"];
-            ItemSizeTotalMB = Math.Round(MTotalSize.LookupId / Math.Pow(1024, 2), 2).ToString();
+            ItemSizeTotalMB = Math.Round(Convert.ToDouble(MTotalSize.LookupId) / Math.Pow(1024, 2), 2).ToString();
 
             DeletedVersionsCount = versionsDeletedCount;
             DeletedVersionsMB = versionsDeletedMB;
