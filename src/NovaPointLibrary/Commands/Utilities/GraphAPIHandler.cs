@@ -172,8 +172,8 @@ namespace NovaPointLibrary.Commands.Utilities
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogTxt(GetType().Name, $"Successful response");
                 var responseContent = await response.Content.ReadAsStringAsync();
+                _logger.LogTxt(GetType().Name, $"Successful response {responseContent}");
                 return responseContent;
             }
             else

@@ -28,6 +28,31 @@ namespace NovaPointLibrary.Commands.Utilities
             HttpsClient = new();
         }
 
+        internal async Task<string> GetAsync(string apiUrl)
+        {
+            _appInfo.IsCancelled();
+
+            HttpRequestMessage requestMessage = await GetRequestMessage(HttpMethod.Get, apiUrl);
+
+            var sendMessage = SendMessageAsync(requestMessage);
+
+            TaskCompletionSource taskCompletionSource = new();
+
+            _appInfo.CancelToken.Register(() => taskCompletionSource.TrySetCanceled());
+
+            var completedTask = await Task.WhenAny(sendMessage, taskCompletionSource.Task);
+
+            if (completedTask != sendMessage || _appInfo.CancelToken.IsCancellationRequested)
+            {
+                _appInfo.CancelToken.ThrowIfCancellationRequested();
+                throw new Exception("Operation canceled.");
+            }
+            else
+            {
+                return await sendMessage;
+            }
+        }
+
         internal async Task<string> PostAsync(string apiUrl, string content)
         {
             _appInfo.IsCancelled();
@@ -56,7 +81,7 @@ namespace NovaPointLibrary.Commands.Utilities
             }
         }
 
-        private async Task<HttpRequestMessage> GetRequestMessage(HttpMethod method, string apiUrl, string content)
+        private async Task<HttpRequestMessage> GetRequestMessage(HttpMethod method, string apiUrl, string content = "")
         {
             _appInfo.IsCancelled();
             _logger.LogTxt(GetType().Name, $"Writing message for '{method}' in '{apiUrl}'");
@@ -78,7 +103,6 @@ namespace NovaPointLibrary.Commands.Utilities
                 request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             }
 
-
             return request;
         }
 
@@ -98,8 +122,8 @@ namespace NovaPointLibrary.Commands.Utilities
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogTxt(GetType().Name, $"Successful response");
                 var responseContent = await response.Content.ReadAsStringAsync();
+                _logger.LogTxt(GetType().Name, $"Successful response {responseContent}");
                 return responseContent;
             }
             else
