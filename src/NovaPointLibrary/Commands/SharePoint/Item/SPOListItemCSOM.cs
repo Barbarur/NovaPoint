@@ -1,4 +1,5 @@
-﻿using Microsoft.SharePoint.Client;
+﻿
+using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
 using System;
 using System.Linq;
@@ -17,11 +18,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             i => i.Id,
             i => i["FileRef"],
-            f => f["FileLeafRef"],
+            i => i["FileLeafRef"],
+            i => i["Title"],
+            i => i.FileSystemObjectType,
             i => i.ParentList.Title,
             i => i.ParentList.BaseType,
             i => i.ParentList.RootFolder.ServerRelativeUrl,
             i => i.ParentList.ParentWeb.Url,
+            i => i.ParentList.Id,
         };
 
         internal SPOListItemCSOM(NPLogger logger, Authentication.AppInfo appInfo)
@@ -170,6 +174,18 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             {
                 _logger.LogUI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' has {oList.ItemCount} items.");
             }
+        }
+
+        internal async Task<ListItem> GetBySiteRelativePath(string siteUrl, string itemSiteRelativeUrl)
+        {
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
+
+            ListItem oListItem = clientContext.Web.GetListItemUsingPath(ResourcePath.FromDecodedUrl(itemSiteRelativeUrl));
+
+            clientContext.Load(oListItem, _defaultExpressions);
+            clientContext.ExecuteQueryRetry();
+
+            return oListItem;
         }
 
         internal async Task<Microsoft.SharePoint.Client.File> GetAttachmentFileAsync(string siteUrl, string attachmentServerRelativeUrl)

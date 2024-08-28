@@ -1,6 +1,9 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Solutions;
+using NovaPointLibrary.Solutions.Report;
+using System.Text;
+using System;
 
 namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
 {
@@ -41,6 +44,25 @@ namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
 
             return group;
 
+        }
+
+        internal async Task<List<Group>> GetSharingLinksAsync(string siteUrl)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Getting all Sharing Links from site '{siteUrl}'");
+
+            var collGroups = await GetAsync(siteUrl);
+
+            List<Group> collSharingLinks = new();
+            foreach (Group group in collGroups)
+            {
+                if (group.Title.Contains("SharingLinks"))
+                {
+                    collSharingLinks.Add(group);
+                }
+            }
+
+            return collSharingLinks;
         }
 
         internal async Task RemoveAsync(string siteUrl, Group group)
