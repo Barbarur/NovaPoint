@@ -215,6 +215,8 @@ namespace NovaPointLibrary.Solutions
 
         internal void ProgressUI(double progress)
         {
+            if (progress < 0.01) { return; }
+
             TimeSpan timeSpan = TimeSpan.FromMilliseconds( (SW.Elapsed.TotalMilliseconds * 100 / progress - SW.Elapsed.TotalMilliseconds) );
 
             _uiAddLog(LogInfo.ProgressUpdate(progress, timeSpan));

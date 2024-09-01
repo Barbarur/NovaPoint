@@ -49,17 +49,24 @@ namespace NovaPointWPF.Pages.Solutions
             {
                 _pendingTimeSpan = value;
 
-                string x = $"Pending Time: {_pendingTimeSpan.Hours}h:{_pendingTimeSpan.Minutes}m:{_pendingTimeSpan.Seconds}s";
+                string pendingTime = $"Pending Time: ";
+
+                if (_pendingTimeSpan.Days > 0)
+                {
+                    pendingTime += $"{_pendingTimeSpan.Days}d:";
+                }
+                pendingTime += $"{_pendingTimeSpan.Hours}h:{_pendingTimeSpan.Minutes}m:{_pendingTimeSpan.Seconds}s";
+
                 if (PendingTime.Dispatcher.CheckAccess())
                 {
-                    PendingTime.Text = x;
+                    PendingTime.Text = pendingTime;
                 }
                 else
                 {
                     PendingTime.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
                     new Action(() =>
                     {
-                        PendingTime.Text = x;
+                        PendingTime.Text = pendingTime;
                     }));
                 }
             }

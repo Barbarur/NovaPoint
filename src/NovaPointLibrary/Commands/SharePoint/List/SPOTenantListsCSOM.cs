@@ -61,7 +61,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                     {
                         _logger.LogTxt(GetType().Name, $"Processing '{oList.BaseType}' '{oList.Title}'");
 
-                        SPOTenantListsRecord record = new(siteResults, siteResults.Progress, oList);
+                        SPOTenantListsRecord record = new(siteResults, progress, oList);
                         yield return record;
 
                         progress.ProgressUpdateReport();

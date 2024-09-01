@@ -57,28 +57,28 @@ namespace NovaPointLibrary.Solutions
         {
             _counter++;
             double progressValue = Math.Round(_counter * _counterStep, 4);
-            
+
             ProgressUpdateReport(progressValue);
         }
         
-        private void ProgressUpdateReport(double progressvalue)
+        private void ProgressUpdateReport(double progressValue)
         {
             if (_parentProgress == null)
             {
-                double progress = Math.Round(progressvalue * 100, 2);
+                double progress = Math.Round(progressValue * 100, 2);
 
                 _logger.ProgressUI(progress);
             }
             else
             {
-                _parentProgress.ProgressUpdateFromChild(progressvalue);
+                _parentProgress.ProgressUpdateFromChild(progressValue);
             }
         }
 
         private void ProgressUpdateFromChild(double childProgressvalue)
         {
             double progressValue = Math.Round((_counter + childProgressvalue) * _counterStep, 4);
-            
+
             ProgressUpdateReport(progressValue);
         }
     }
