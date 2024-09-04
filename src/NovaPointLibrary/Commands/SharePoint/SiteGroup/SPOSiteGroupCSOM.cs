@@ -40,6 +40,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
 
             var group = clientContext.Web.SiteGroups.GetById(groupId);
             clientContext.Load(group);
+            clientContext.Load(group.Users);
             clientContext.ExecuteQueryRetry();
 
             return group;
