@@ -105,9 +105,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
 
             if (_param.IncludeSiteAccess)
             {
-                if(oSite.IsSubSite() && oSite.HasUniqueRoleAssignments)
+                if(oSite.IsSubSite() && !oSite.HasUniqueRoleAssignments)
                 {
-                    yield return new("Site", oSite.Title, oSite.Url, new("", "", "", "", "This Subsite inherits permissions from parent Site."));
+                    yield return new("Site", oSite.Title, oSite.Url, SPORoleAssignmentUserRecord.GetRecordInherits());
                 }
                 else
                 {
@@ -157,7 +157,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 string users = String.Join(" ", collSiteCollAdmins.Where(sca => sca.PrincipalType.ToString() == "User").Select(sca => sca.UserPrincipalName).ToList());
                 if (!string.IsNullOrWhiteSpace(users))
                 {
-                    yield return new("Site", oSite.Title, oSite.Url, new(accessType, "User", users, permissionLevels, ""));
+                    yield return new("Site", oSite.Title, oSite.Url, SPORoleAssignmentUserRecord.GetRecordUserDirectPermissions(users, permissionLevels));
                 }
 
 
@@ -169,7 +169,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             else
             {
-                yield return new("Site", oSite.Title, oSite.Url, new("", "", "", "", exceptionMessage));
+                yield return new("Site", oSite.Title, oSite.Url, SPORoleAssignmentUserRecord.GetRecordBlankException(exceptionMessage));
                 yield break;
             }
             
@@ -213,7 +213,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             else
             {
-                yield return new("Site", oSite.Title, oSite.Url, new("", "", "", "", exceptionMessage));
+                yield return new("Site", oSite.Title, oSite.Url, SPORoleAssignmentUserRecord.GetRecordBlankException(exceptionMessage));
                 yield break;
             }
         }
@@ -236,7 +236,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 }
                 else
                 {
-                    yield return new($"{oList.BaseType}", oList.Title, $"{oList.DefaultViewUrl}", new("Inherits permissions", "Inherits permissions", "Inherits permissions", "Inherits permissions", "Inherits permissions"));
+                    yield return new($"{oList.BaseType}", oList.Title, $"{oList.DefaultViewUrl}", SPORoleAssignmentUserRecord.GetRecordInherits());
                 }
 
                 foreach(var record in await GetItemsPermissionsAsync(oSite, oList, progress))
@@ -277,7 +277,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             {
                 _logger.ReportError(GetType().Name, $"{oList.BaseType}", oList.Title, ex);
 
-                recordsList.Add(new($"{oList.BaseType}", oList.Title, $"{oList.DefaultViewUrl}", new("", "", "", "", ex.Message)));
+                recordsList.Add(new($"{oList.BaseType}", oList.Title, $"{oList.DefaultViewUrl}", SPORoleAssignmentUserRecord.GetRecordBlankException(ex.Message)));
             }
 
             return recordsList;

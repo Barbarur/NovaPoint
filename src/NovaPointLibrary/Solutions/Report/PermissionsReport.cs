@@ -1,14 +1,11 @@
 ﻿using NovaPointLibrary.Commands.SharePoint.Permision;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.User;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
+
 using System.Dynamic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using System.Threading.Tasks;
+
 
 
 namespace NovaPointLibrary.Solutions.Report
@@ -68,7 +65,7 @@ namespace NovaPointLibrary.Solutions.Report
 
                 if (siteResults.Ex != null)
                 {
-                    AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("", "", "", "", siteResults.Ex.Message)));
+                    AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, SPORoleAssignmentUserRecord.GetRecordBlankException(siteResults.Ex.Message)));
                     continue;
                 }
 
@@ -84,8 +81,9 @@ namespace NovaPointLibrary.Solutions.Report
                     }
 
                     if (string.IsNullOrWhiteSpace(sb.ToString())) { continue; }
-                    AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("Site user List", "", sb.ToString(), "", "")));
-                
+
+                    SPORoleAssignmentUserRecord record = new("Site user List", "NA", "");
+                    AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, record.GetRecordWithUsers("Site user List", sb.ToString())));
                 }
                 else
                 {
@@ -103,7 +101,7 @@ namespace NovaPointLibrary.Solutions.Report
                     catch (Exception ex)
                     {
                         _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
-                        AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, new("", "", "", "", ex.Message)));
+                        AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, SPORoleAssignmentUserRecord.GetRecordBlankException(ex.Message)));
                     }
                 }
             }
@@ -159,8 +157,8 @@ namespace NovaPointLibrary.Solutions.Report
             dynamicRecord.LocationName = record._locationName;
             dynamicRecord.LocationUrl = record._locationUrl;
 
-
             dynamicRecord.AccessType = record._role.AccessType;
+            dynamicRecord.GroupId = record._role.GroupId;
             dynamicRecord.AccountType = record._role.AccountType;
             dynamicRecord.Users = record._role.Users;
             dynamicRecord.PermissionLevels = record._role.PermissionLevels;
@@ -179,9 +177,7 @@ namespace NovaPointLibrary.Solutions.Report
         public SPOSiteUserParameters UserParam {  get; set; }
         public SPOTenantSiteUrlsWithAccessParameters SiteAccParam {  get; set; }
         public SPOSitePermissionsCSOMParameters PermissionsParam {  get; set; }
-        public PermissionsReportParameters(SPOSiteUserParameters userParam,
-                                           SPOTenantSiteUrlsWithAccessParameters siteParam,
-                                           SPOSitePermissionsCSOMParameters permissionParam)
+        public PermissionsReportParameters(SPOSiteUserParameters userParam, SPOTenantSiteUrlsWithAccessParameters siteParam, SPOSitePermissionsCSOMParameters permissionParam)
         {
             UserParam = userParam;
             SiteAccParam = siteParam;
