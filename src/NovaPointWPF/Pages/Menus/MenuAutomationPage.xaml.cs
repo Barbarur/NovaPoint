@@ -57,9 +57,9 @@ namespace NovaPointWPF.Pages.Menus
 
 
         // ITEMS
-        private void CopyFilesAutoClick(object sender, RoutedEventArgs e)
+        private void CopyDuplicateFileAutoClick(object sender, RoutedEventArgs e)
         {
-            GoToSolutionForm(new CopyFilesAutoForm());
+            GoToSolutionForm(new CopyDuplicateFileAutoForm());
         }
         private void CheckInFileAutoClick(object sender, RoutedEventArgs e)
         {

@@ -78,8 +78,8 @@
 
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"
-                        Content="Copy files across sites"
-                        Click="CopyFilesAutoClick"/>
+                        Content="Copy/Duplicate files across sites"
+                        Click="CopyDuplicateFileAutoClick"/>
 
                     <Button
                             Style="{DynamicResource SolutionMenuButton}"
