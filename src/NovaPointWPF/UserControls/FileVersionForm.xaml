@@ -41,32 +41,23 @@
                             x:Name="KeepVersionsForm"
                             Visibility="Visible">
 
-                            <StackPanel
-                                Orientation="Horizontal"
-                                Margin="0,16,0,0">
-
-                                <RadioButton
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Recycle"
-                                    IsChecked="{Binding Recycle, ElementName=root}"
-                                    Margin="0,0,8,0"/>
-
-                                <RadioButton
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Delete"/>
-                            </StackPanel>
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="The most conservative condition will be honored per file."
+                                Margin="0,8,0,0"/>
 
                             <StackPanel 
                                 Orientation="Horizontal"
                                 Margin="0,16,0,0">
 
+                                
                                 <StackPanel
                                     Width="240"
                                     Margin="0,0,16,0">
                                     
                                     <TextBlock
                                         Style="{DynamicResource TextBlockBody}"
-                                        Text="Number of versions to Keep"
+                                        Text="Keep number of versions"
                                         Margin="0,0,0,8"/>
 
                                     <TextBox
@@ -79,7 +70,7 @@
 
                                     <TextBlock
                                         Style="{DynamicResource TextBlockBody}"
-                                        Text="Versions created before (UTC)"/>
+                                        Text="Keep versions created after (UTC)"/>
 
                                     <StackPanel
                                         Orientation="Horizontal"
@@ -117,8 +108,24 @@
 
                             <TextBlock
                                 Style="{DynamicResource TextBlockBody}"
-                                Text="The most conservative condition will be honored per file."
+                                Text="Actin to perform on versions not meeting the keep conditions."
                                 Margin="0,16,0,0"/>
+
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Margin="0,16,0,0">
+
+                                <RadioButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Recycle"
+                                    IsChecked="{Binding Recycle, ElementName=root}"
+                                    Margin="0,0,8,0"/>
+
+                                <RadioButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Delete"/>
+                            </StackPanel>
+                            
                             
                         </StackPanel>
                     </StackPanel>

@@ -1,22 +1,11 @@
-﻿using NovaPointLibrary.Commands.SharePoint.PreservationHoldLibrary;
-using NovaPointLibrary.Solutions.Automation;
-using PnP.Core.QueryModel;
+﻿using NovaPointLibrary.Solutions.Automation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace NovaPointWPF.UserControls
 {
@@ -55,7 +44,7 @@ namespace NovaPointWPF.UserControls
 
                     Recycle = true;
 
-                    VersionsToKeep = 500;
+                    KeepNumVersions = 500;
                     //CreatedBefore = DateTime.MinValue;
                     DateTimeSelectionChanged(null, null);
                     CreatedBeforeYear.SelectedIndex = 0;
@@ -78,26 +67,26 @@ namespace NovaPointWPF.UserControls
             }
         }
 
-        private int _versionsToKeep = 500;
-        public int VersionsToKeep
+        private int _keepNumVersions = 500;
+        public int KeepNumVersions
         {
-            get { return _versionsToKeep; }
+            get { return _keepNumVersions; }
             set
             {
-                _versionsToKeep = value;
-                Parameters.VersionsToKeep = value;
+                _keepNumVersions = value;
+                Parameters.KeepNumVersions = value;
                 OnPropertyChanged();
             }
         }
 
-        private DateTime _createdBefore;
-        public DateTime CreatedBefore
+        private DateTime _keepCreatedAfter;
+        public DateTime KeepCreatedAfter
         {
-            get { return _createdBefore; }
+            get { return _keepCreatedAfter; }
             set
             {
-                _createdBefore = value;
-                Parameters.CreatedBefore = value;
+                _keepCreatedAfter = value;
+                Parameters.KeepCreatedAfter = value;
             }
         }
 
@@ -179,7 +168,7 @@ namespace NovaPointWPF.UserControls
                     dateTime = DateTime.ParseExact(value, "yyyy MMMM d HH:mm",
                                         System.Globalization.CultureInfo.InvariantCulture);
 
-                    CreatedBefore = dateTime;
+                    KeepCreatedAfter = dateTime;
                 }
                 catch
                 {

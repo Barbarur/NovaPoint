@@ -111,8 +111,9 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 _logger.LogTxt(GetType().Name, $"Deleting all version '{resultItem.Item.File.Name}'");
 
-                if (fileVersionCollection.Count !> 0)
+                if (fileVersionCollection.Count < 1)
                 {
+                    _logger.LogTxt(GetType().Name, $"NO VERSIONS");
                     RemoveFileVersionAutoRecord record = new(resultItem, "No versions to delete");
                     record.AddFileDetails(resultItem.Item, "0", "0");
                     RecordCSV(record);
@@ -138,7 +139,9 @@ namespace NovaPointLibrary.Solutions.Automation
             }
             else
             {
-                int numberVersionsToDelete = fileVersionCollection.Count - _param.FileVersionParam.VersionsToKeep;
+                int numberVersionsToDelete = fileVersionCollection.Count - _param.FileVersionParam.KeepNumVersions;
+
+                
 
                 int errorsCount = 0;
                 string remarks = String.Empty;
@@ -151,7 +154,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
                     FileVersion fileVersionToDelete = fileVersionCollection.ElementAt(i);
                     
-                    if (_param.FileVersionParam.CreatedBefore < fileVersionToDelete.Created)
+                    if (_param.FileVersionParam.KeepCreatedAfter < fileVersionToDelete.Created)
                     {
                         break;
                     }
@@ -191,6 +194,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 versionsDeletedMB = Math.Round(versionsDeletedMB / Math.Pow(1024, 2), 2);
 
                 if (errorsCount > 0) { remarks = $"Error while deleting {errorsCount} versions"; }
+                else if ((versionsDeletedCount + errorsCount) < 1) { remarks = $"No versions to delete"; }
 
                 RemoveFileVersionAutoRecord record = new(resultItem, remarks);
                 record.AddFileDetails(resultItem.Item, versionsDeletedCount.ToString(), versionsDeletedMB.ToString());
@@ -265,13 +269,13 @@ namespace NovaPointLibrary.Solutions.Automation
     public class SPOFileVersionParameters : ISolutionParameters
     {
         public bool DeleteAll { get; set; } = false;
-        public int VersionsToKeep { get; set; } = 500;
-        public DateTime CreatedBefore { get; set; } = DateTime.MinValue;
+        public int KeepNumVersions { get; set; } = 500;
+        public DateTime KeepCreatedAfter { get; set; } = DateTime.MinValue;
         public bool Recycle { get; set; } = true;
 
         public void ParametersCheck()
         {
-            if (!DeleteAll && string.IsNullOrWhiteSpace(VersionsToKeep.ToString()))
+            if (!DeleteAll && string.IsNullOrWhiteSpace(KeepNumVersions.ToString()))
             {
                 throw new Exception($"FORM INCOMPLETED: Number of versions to keep cannot be empty when no deleting all versions");
             }
