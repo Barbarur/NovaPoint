@@ -26,6 +26,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         {
             _appInfo.IsCancelled();
 
+            _logger.LogTxt(GetType().Name, $"Processing sharing link {principal.Title} ({principal.Id})");
+
             SPOSharingLinksRecord record = new(siteUrl);
 
             try
@@ -45,6 +47,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         internal async Task<SPOSharingLinksRecord> GetFromGroupAsync(string siteUrl, Group oGroup)
         {
             _appInfo.IsCancelled();
+
+            _logger.LogTxt(GetType().Name, $"Processing sharing link {oGroup.Title} ({oGroup.Id}) - {oGroup.Description}");
 
             SPOSharingLinksRecord record = new(siteUrl);
 
@@ -74,6 +78,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 var idMatchingResult = searchByIdResults.PrimaryQueryResult.RelevantResults.Table.Rows.Find(row => row.Cells.Exists(cell => cell.Key == "UniqueId" && cell.Value.Contains(reportRecord.ItemUniqueId)));
                 if (idMatchingResult != null)
                 {
+                    string webId = string.Empty;
                     foreach (var cell in idMatchingResult.Cells)
                     {
                         if (cell.Key == "ListID")
@@ -88,7 +93,18 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                         {
                             reportRecord.ItemPath = cell.Value;
                         }
+                        if (cell.Key == "WebId")
+                        {
+                            webId = cell.Value;
+                        }
                     }
+
+                    var ctx = await _appInfo.GetContext(reportRecord.SiteUrl);
+                    Web web = ctx.Site.OpenWebById(new Guid(webId));
+                    ctx.Load(web);
+                    ctx.ExecuteQuery();
+
+                    reportRecord.SiteUrl = web.Url;
 
                     restSharingInfo = await GetItemSharingInformationAsync(reportRecord.SiteUrl, reportRecord.ListId, reportRecord.ItemID);
                 }
@@ -130,6 +146,20 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
 
         }
 
+        private async Task<RESTSearchResults> SearchItemUniqueIdAsync(string siteUrl, string itemUniqueId)
+        {
+            _appInfo.IsCancelled();
+
+            string api = siteUrl + $"/_api/search/query?querytext='UniqueId:{itemUniqueId}'&selectproperties='ListID,ListItemID,Title,Path,WebId'";
+
+            var response = await new RESTAPIHandler(_logger, _appInfo).GetAsync(api);
+
+            var searchResults = JsonConvert.DeserializeObject<RESTSearchResults>(response);
+
+            return searchResults;
+
+        }
+
         private async Task<RESTSharingInformation> GetItemSharingInformationAsync(string siteUrl, Guid listId, int listItemId)
         {
             _appInfo.IsCancelled();
@@ -141,20 +171,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             var sharingInformation = JsonConvert.DeserializeObject<RESTSharingInformation>(response);
 
             return sharingInformation;
-
-        }
-
-        private async Task<RESTSearchResults> SearchItemUniqueIdAsync(string siteUrl, string itemUniqueId)
-        {
-            _appInfo.IsCancelled();
-
-            string api = siteUrl + $"/_api/search/query?querytext='UniqueId:{itemUniqueId}'&selectproperties='ListID,ListItemID,Title,Path'";
-
-            var response = await new RESTAPIHandler(_logger, _appInfo).GetAsync(api);
-
-            var searchResults = JsonConvert.DeserializeObject<RESTSearchResults>(response);
-
-            return searchResults;
 
         }
 

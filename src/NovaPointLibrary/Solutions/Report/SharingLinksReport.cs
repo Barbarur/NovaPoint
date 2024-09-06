@@ -86,7 +86,6 @@ namespace NovaPointLibrary.Solutions.Report
             ProgressTracker groupProgress = new(siteRecord.Progress, collGroups.Count);
             foreach (Group oGroup in collGroups)
             {
-                _logger.LogTxt(GetType().Name, $"Processing sharing link {oGroup.Title} ({oGroup.Id})");
                 var record = await restSharingLinks.GetFromGroupAsync(siteRecord.SiteUrl, oGroup);
                 RecordCSV(record);
 

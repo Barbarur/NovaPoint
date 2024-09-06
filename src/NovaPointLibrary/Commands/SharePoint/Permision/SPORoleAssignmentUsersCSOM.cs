@@ -188,7 +188,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         internal async Task<SPORoleAssignmentUserRecord> ProcessSharingLinkAsync(string siteUrl, Principal spGroup, string permissionLevels)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Processing Sharing link '{spGroup.Title}' ({spGroup.Id})");
 
             SPOSharingLinksRecord recordSharingLink = await _restSharingLinks.GetFromPrincipalAsync(siteUrl, spGroup);
 
