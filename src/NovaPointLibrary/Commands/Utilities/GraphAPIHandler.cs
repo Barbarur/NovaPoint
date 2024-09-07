@@ -79,7 +79,7 @@ namespace NovaPointLibrary.Commands.Utilities
             
             HttpRequestMessage requestMessage = await GetMessage(url, HttpMethod.Get);
 
-            var sendMessage = SendMessageAsync(requestMessage);
+            var sendMessage = _appInfo.SendHttpRequestMessageAsync(requestMessage);
 
             TaskCompletionSource taskCompletionSource = new();
 
@@ -106,7 +106,7 @@ namespace NovaPointLibrary.Commands.Utilities
 
             HttpRequestMessage requestMessage = await GetMessage(url, HttpMethod.Delete);
 
-            var sendMessage = SendMessageAsync(requestMessage);
+            var sendMessage = _appInfo.SendHttpRequestMessageAsync(requestMessage);
 
             TaskCompletionSource taskCompletionSource = new();
 
@@ -156,34 +156,6 @@ namespace NovaPointLibrary.Commands.Utilities
             return message;
         }
 
-        private async Task<string> SendMessageAsync(HttpRequestMessage message)
-        {
-            _appInfo.IsCancelled();
-
-            HttpResponseMessage response = await HttpsClient.SendAsync(message);
-
-            while (response.StatusCode == (HttpStatusCode)429)
-            {
-                var retryAfter = response.Headers.RetryAfter;
-                if (retryAfter == null || retryAfter.Delta == null) { break; }
-                await Task.Delay(retryAfter.Delta.Value.Seconds * 1000);
-                response = await HttpsClient.SendAsync(message);
-            }
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                _logger.LogTxt(GetType().Name, $"Successful response {responseContent}");
-                return responseContent;
-            }
-            else
-            {
-                string responseContent = await response.Content.ReadAsStringAsync();
-                string exceptionMessage = $"Request to SharePoint REST API {message.RequestUri} failed with status code {response.StatusCode} and response content: {responseContent}";
-
-                throw new Exception(exceptionMessage);
-            }
-        }
     }
 
 }

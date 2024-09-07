@@ -7,6 +7,10 @@ using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Solutions;
 using PnP.Framework.Modernization.Functions;
 using System.Reflection;
+using System.Net.Http;
+using System.Net;
+using static Microsoft.SharePoint.Client.ClientContextExtensions;
+using AngleSharp.Io;
 
 namespace NovaPointLibrary.Commands.Authentication
 {
@@ -57,6 +61,8 @@ namespace NovaPointLibrary.Commands.Authentication
                 RootSharedUrl = "https://" + value + ".sharepoint.com";
             }
         }
+
+        private readonly HttpClient HttpsClient = new();
 
         internal AppSettings Settings { get; set; } = new();
         internal CancellationToken CancelToken { get; init; }
@@ -268,6 +274,67 @@ namespace NovaPointLibrary.Commands.Authentication
             }
 
             return result;
+        }
+
+        internal async Task<string> SendHttpRequestMessageAsync(HttpRequestMessage message)
+        {
+            IsCancelled();
+
+            int retryMax = 10;
+            int retryCount = 0;
+            int backoffInterval = 500;
+
+            while (retryCount < retryMax)
+            {
+                HttpResponseMessage response = await HttpsClient.SendAsync(message, CancelToken);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogTxt(GetType().Name, $"Successful response {responseContent}");
+                    return responseContent;
+                }
+                else if (response != null && (response.StatusCode == HttpStatusCode.TooManyRequests || response.StatusCode == HttpStatusCode.ServiceUnavailable))
+                {
+                    int waitTime;
+                    var retryAfter = response.Headers.RetryAfter;
+                    if (retryAfter == null || retryAfter.Delta == null)
+                    {
+                        waitTime = backoffInterval;
+                        backoffInterval *= 2;
+                    }
+                    else
+                    {
+                        waitTime = retryAfter.Delta.Value.Seconds * 1000;
+                    }
+                    _logger.LogUI(GetType().Name, $"API request exceeding usage limits. Retrying after {waitTime} miliseconds.");
+
+                    await Task.Delay(waitTime);
+                    retryCount++;
+
+                }
+                else if (response == null)
+                {
+                    string exceptionMessage = $"Response to API request '{message.RequestUri}' was null.";
+                    throw new Exception(exceptionMessage);
+                }
+                else
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    string exceptionMessage = $"Request to API '{message.RequestUri}' failed with status code {response.StatusCode} and response content: {responseContent}.";
+
+                    IEnumerable<string> values;
+                    if (response.Headers.TryGetValues("request-id", out values))
+                    {
+                        exceptionMessage += $" Request ID: {values.First()}";
+                    }
+
+                    throw new Exception(exceptionMessage);
+                }
+            }
+
+            throw new MaximumRetryAttemptedException($"Maximum retry attempts {retryCount}, has be attempted.");
+
         }
     }
 }

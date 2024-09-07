@@ -34,7 +34,7 @@ namespace NovaPointLibrary.Commands.Utilities
 
             HttpRequestMessage requestMessage = await GetRequestMessage(HttpMethod.Get, apiUrl);
 
-            var sendMessage = SendMessageAsync(requestMessage);
+            var sendMessage = _appInfo.SendHttpRequestMessageAsync(requestMessage);
 
             TaskCompletionSource taskCompletionSource = new();
 
@@ -60,7 +60,7 @@ namespace NovaPointLibrary.Commands.Utilities
 
             HttpRequestMessage requestMessage = await GetRequestMessage(HttpMethod.Post, apiUrl, content);
 
-            var sendMessage = SendMessageAsync(requestMessage);
+            var sendMessage = _appInfo.SendHttpRequestMessageAsync(requestMessage);
 
             TaskCompletionSource taskCompletionSource = new();
 
@@ -106,44 +106,5 @@ namespace NovaPointLibrary.Commands.Utilities
             return request;
         }
 
-        private async Task<string> SendMessageAsync(HttpRequestMessage message)
-        {
-            _appInfo.IsCancelled();
-
-            HttpResponseMessage response = await HttpsClient.SendAsync(message, _appInfo.CancelToken);
-            
-            while (response.StatusCode == (HttpStatusCode)429)
-            {
-                var retryAfter = response.Headers.RetryAfter;
-                if (retryAfter == null || retryAfter.Delta == null) { break; }
-                await Task.Delay(retryAfter.Delta.Value.Seconds * 1000);
-                response = await HttpsClient.SendAsync(message);
-            }
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                _logger.LogTxt(GetType().Name, $"Successful response {responseContent}");
-                return responseContent;
-            }
-            else
-            {
-                if (response.StatusCode == (HttpStatusCode)503)
-                {
-                    throw new Exception("Error 503. The service is unavailable.");
-                }
-                else if (response.StatusCode == (HttpStatusCode)401)
-                {
-                    throw new Exception("Error 401. Unauthorized.");
-                }
-                else
-                {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    string exceptionMessage = $"Request to SharePoint REST API {message.RequestUri} failed with status code {response.StatusCode} and response content: {responseContent}";
-
-                    throw new Exception(exceptionMessage);
-                }
-            }
-        }
     }
 }
