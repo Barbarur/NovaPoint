@@ -24,6 +24,28 @@ namespace NovaPointWPF.Pages.Solutions.Automation
     /// </summary>
     public partial class RemoveSharingLinksAutoForm : Page, ISolutionForm
     {
+        private bool _removeAll = true;
+        public bool RemoveAll
+        { 
+            get { return  _removeAll; }
+            set
+            {
+                _removeAll = value;
+                if (value)
+                {
+                    CreatedByPanel.Visibility = Visibility.Collapsed;
+                    CreatedByTextBox.Text = string.Empty;
+                    Createdby = string.Empty;
+                }
+                else
+                {
+                    CreatedByPanel.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        public string Createdby { get; set; } = string.Empty;
+
         public RemoveSharingLinksAutoForm()
         {
             InitializeComponent();
@@ -43,7 +65,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 SiteParam = SiteF.Parameters,
             };
 
-            RemoveSharingLinksAutoParameters parameters = new(ModeF.ReportMode, siteAccParam);
+            RemoveSharingLinksAutoParameters parameters = new(ModeF.ReportMode, RemoveAll, Createdby, siteAccParam);
 
             await RemoveSharingLinksAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }
