@@ -11,13 +11,13 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 {
     internal class SPOTenantListsRecord
     {
-        internal string SiteUrl { get; set; }
-        internal string SiteName { get; set; }
-        internal ProgressTracker Progress { get; set; }
-        internal Microsoft.SharePoint.Client.List? List { get; set; }
-        internal Exception? Ex { get; set; } = null;
+        internal readonly string SiteUrl;
+        internal readonly string SiteName;
+        internal readonly ProgressTracker Progress;
+        internal readonly Microsoft.SharePoint.Client.List? List;
+        internal readonly Exception? Ex = null;
 
-        internal SPOTenantListsRecord(SPOTenantSiteUrlsRecord recordSite, ProgressTracker progress, Microsoft.SharePoint.Client.List? oList)
+        internal SPOTenantListsRecord(SPOTenantSiteUrlsRecord recordSite, ProgressTracker progress, Microsoft.SharePoint.Client.List oList)
         {
             Progress = progress;
             SiteUrl = recordSite.SiteUrl;

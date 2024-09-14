@@ -38,7 +38,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
 
                 Exception? tryException = null;
-                List<Microsoft.SharePoint.Client.List>? collList = null;
+                List<Microsoft.SharePoint.Client.List> collList = new();
                 try
                 {
                     collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.ListParam);
@@ -54,7 +54,13 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
                     yield return recordList;
                 }
-                else if (collList != null)
+                else if (!collList.Any())
+                {
+                    Exception ex = new("No lists on this site.");
+                    SPOTenantListsRecord recordList = new(siteResults, siteResults.Progress, ex);
+                    yield return recordList;
+                }
+                else
                 {
                     ProgressTracker progress = new(siteResults.Progress, collList.Count);
                     foreach (var oList in collList)
@@ -67,6 +73,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                         progress.ProgressUpdateReport();
                     }
                 }
+
             }
         }
     }
