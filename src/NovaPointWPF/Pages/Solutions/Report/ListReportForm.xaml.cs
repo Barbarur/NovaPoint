@@ -28,6 +28,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
     /// </summary>
     public partial class ListReportForm : Page, ISolutionForm
     {
+        public bool IncludeStorageMetrics { get; set; } = true;
 
         public ListReportForm()
         {
@@ -48,13 +49,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 SiteParam = SiteF.Parameters,
             };
 
-            var listParameters = ListForm.Parameters;
-
-            SPOTenantListsParameters tListParam = new(siteAccParam, listParameters);
-
-            ListReportParameters parameters = new(tListParam);
-
-            //await new ListReport(parameters, uiLog, cancelTokenSource).RunAsync();
+            ListReportParameters parameters = new(IncludeStorageMetrics, siteAccParam, ListForm.Parameters);
 
             await ListReport.RunAsync(parameters, uiLog, cancelTokenSource);
         }

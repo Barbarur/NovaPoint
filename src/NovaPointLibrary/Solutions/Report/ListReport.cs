@@ -1,18 +1,14 @@
-﻿using Microsoft.Online.SharePoint.TenantAdministration;
-using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
+﻿using Microsoft.SharePoint.Client;
+using Newtonsoft.Json;
+using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Solutions.Automation;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Dynamic;
-using System.Linq;
+using NovaPointLibrary.Commands.Utilities.RESTModel;
+using NovaPointLibrary.Commands.Utilities;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using static NovaPointLibrary.Commands.SharePoint.Permision.SPOSharingLinksREST;
+using PnP.Core.Model.SharePoint;
+using NovaPointLibrary.Commands.SharePoint.Site;
+
 
 namespace NovaPointLibrary.Solutions.Report
 {
@@ -39,6 +35,13 @@ namespace NovaPointLibrary.Solutions.Report
 
             l => l.ItemCount,
 
+            l => l.RootFolder,
+            l => l.RootFolder.StorageMetrics,
+            l => l.RootFolder.StorageMetrics.LastModified,
+            l => l.RootFolder.StorageMetrics.TotalFileCount,
+            l => l.RootFolder.StorageMetrics.TotalFileStreamSize,
+            l => l.RootFolder.StorageMetrics.TotalSize,
+
             l => l.EnableVersioning,
             l => l.MajorVersionLimit,
             l => l.EnableMinorVersions,
@@ -48,7 +51,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             l => l.ForceCheckout,
 
-            l => l.EnableModeration
+            l => l.EnableModeration,
         };
 
         private ListReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, ListReportParameters parameters)
@@ -60,9 +63,10 @@ namespace NovaPointLibrary.Solutions.Report
 
         public static async Task RunAsync(ListReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            parameters.TListsParam.ListParam.ListExpresions = _listExpresions;
+            parameters.ListsParam.ListExpresions = _listExpresions;
 
             NPLogger logger = new(uiAddLog, "ListReport", parameters);
+
             try
             {
                 Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
@@ -78,90 +82,135 @@ namespace NovaPointLibrary.Solutions.Report
             }
         }
 
-        //public ListReport(ListReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        //{
-        //    Parameters = parameters;
-        //    _param.TListsParam.ListParam.ListExpresions = _listExpresions;
-        //    _logger = new(uiAddLog, this.GetType().Name, parameters);
-        //    _appInfo = new(_logger, cancelTokenSource);
-        //}
-
-        //public async Task RunAsync()
-        //{
-        //    try
-        //    {
-        //        await RunScriptAsync();
-
-        //        _logger.ScriptFinish();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.ScriptFinish(ex);
-        //    }
-        //}
-
         private async Task RunScriptAsync()
         {
             _appInfo.IsCancelled();
 
-            await foreach (var results in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
+            await foreach (var listRecord in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
             {
-                _appInfo.IsCancelled();
-
-                if (results.Ex != null)
+                if (listRecord.Ex != null)
                 {
-                    AddRecord(results.SiteUrl, results.List, remarks: results.Ex.Message);
+                    AddRecord(new(listRecord.SiteUrl, listRecord.List, listRecord.Ex.Message));
+                    continue;
                 }
-                else
+
+                try
                 {
-                    AddRecord(results.SiteUrl, results.List);
+                    await ProcessList(listRecord.SiteUrl, listRecord.List);
+                }
+                catch (Exception ex)
+                {
+                    _logger.ReportError(GetType().Name, "Site", listRecord.SiteUrl, ex);
+                    AddRecord(new(listRecord.SiteUrl, listRecord.List, ex.Message));
                 }
 
             }
         }
-
-        private void AddRecord(string siteURL, Microsoft.SharePoint.Client.List? oList = null, string remarks = "")
+        
+        private async Task ProcessList(string siteUrl, List list)
         {
-            dynamic dynamicRecord = new ExpandoObject();
-            dynamicRecord.SiteURL = siteURL;
+            _appInfo.IsCancelled();
 
-            dynamicRecord.ListTitle = oList != null ? oList.Title : String.Empty;
-            dynamicRecord.ListType = oList != null ? oList.BaseType.ToString() : string.Empty;
-            dynamicRecord.ListServerRelativeUrl = oList != null ? oList.RootFolder.ServerRelativeUrl : string.Empty;
-            dynamicRecord.ListID = oList != null ? oList.Id.ToString() : string.Empty;
+            ListReportRecord record = new(siteUrl, list);
 
-            dynamicRecord.Hidden = oList != null ? oList.Hidden.ToString() : string.Empty;
-            dynamicRecord.IsSystemList = oList != null ? oList.IsSystemList.ToString() : string.Empty;
+            if (_param.IncludeStorageMetrics)
+            {
+                var storageMetricsResponse = await new SPOFolderCSOM(_logger, _appInfo).GetFolderStorageMetricAsync(siteUrl, list.RootFolder);
+                record.AddStorageMetrics(storageMetricsResponse.StorageMetrics);
+            }
 
-            dynamicRecord.Created = oList != null ? oList.Created.ToString() : string.Empty;
-            dynamicRecord.LastModifiedDate = oList != null ? oList.LastItemUserModifiedDate.ToString() : string.Empty;
-
-            dynamicRecord.ItemCount = oList != null ? oList.ItemCount.ToString() : string.Empty;
-
-            dynamicRecord.MajorVersioning = oList != null ? oList.EnableVersioning.ToString() : string.Empty;
-            dynamicRecord.MajorVersionLimit = oList != null ? oList.MajorVersionLimit.ToString() : string.Empty;
-            dynamicRecord.MinorVersioning = oList != null ? oList.EnableMinorVersions.ToString() : string.Empty; // might be a problem for Lists
-            dynamicRecord.MinorVersionLimit = oList != null ? oList.MajorWithMinorVersionsLimit.ToString() : string.Empty;
-
-            dynamicRecord.IRM_Emabled = oList != null ? oList.IrmEnabled.ToString() : string.Empty;
-
-            dynamicRecord.RequireCheckOut = oList != null ? oList.ForceCheckout.ToString() : string.Empty;
-
-            dynamicRecord.ContentApproval = oList != null ? oList.EnableModeration.ToString() : string.Empty;
-            
-            
-            dynamicRecord.Remarks = remarks;
-
-            _logger.DynamicCSV(dynamicRecord);
+            AddRecord(record);
         }
+
+        private void AddRecord(ListReportRecord record)
+        {
+            _logger.RecordCSV(record);
+        }
+
+    }
+
+    public class ListReportRecord : ISolutionRecord
+    {
+        internal string SiteURL { get; set; }
+
+        internal string ListTitle { get; set; } = String.Empty;
+        internal string ListType { get; set; } = String.Empty;
+        internal string ListServerRelativeUrl { get; set; } = String.Empty;
+        internal string ListID { get; set; } = String.Empty;
+
+        internal string Created { get; set; } = String.Empty;
+        internal string LastModified { get; set; } = String.Empty;
+        internal string TotalFileCount { get; set; } = String.Empty;
+        internal string TotalSizeGb { get; set; } = String.Empty;
+
+        internal string ContentApproval { get; set; } = String.Empty;
+        internal string MajorVersioning { get; set; } = String.Empty;
+        internal string MajorVersionLimit { get; set; } = String.Empty;
+        internal string MinorVersioning { get; set; } = String.Empty;
+        internal string MinorVersionLimit { get; set; } = String.Empty;
+        internal string RequireCheckOut { get; set; } = String.Empty;
+
+        internal string IRM_Emabled { get; set; } = String.Empty;
+
+        internal string Hidden { get; set; } = String.Empty;
+        internal string IsSystemList { get; set; } = String.Empty;
+        
+        internal string Remarks { get; set; }
+
+        internal ListReportRecord(string siteUrl, List? list = null, string remarks = "")
+        {
+            SiteURL = siteUrl;
+            Remarks = remarks;
+
+            if (list != null)
+            {
+                ListTitle = list.Title;
+                ListType = list.BaseType.ToString();
+                ListServerRelativeUrl = list.RootFolder.ServerRelativeUrl;
+                ListID = list.Id.ToString();
+
+                Created = list.Created.ToString();
+                LastModified = list.LastItemUserModifiedDate.ToString();
+                TotalFileCount = list.ItemCount.ToString();
+
+                ContentApproval = list.EnableModeration.ToString();
+                MajorVersioning = list.EnableVersioning.ToString();
+                MajorVersionLimit = list.MajorVersionLimit.ToString();
+                MinorVersioning = list.EnableMinorVersions.ToString();
+                MinorVersionLimit = list.MajorWithMinorVersionsLimit.ToString();
+                RequireCheckOut = list.ForceCheckout.ToString();
+
+                IRM_Emabled = list.IrmEnabled.ToString();
+
+                Hidden = list.Hidden.ToString();
+                IsSystemList = list.IsSystemList.ToString();
+            }
+        }
+
+        internal void AddStorageMetrics(RESTStorageMetrics storageMetrics)
+        {
+            TotalSizeGb = Math.Round(storageMetrics.TotalSize / Math.Pow(1024, 3), 2).ToString();
+        }
+
     }
 
     public class ListReportParameters : ISolutionParameters
     {
-        public SPOTenantListsParameters TListsParam {  get; set; }
-        public ListReportParameters(SPOTenantListsParameters tenantListsParam)
+        public bool IncludeStorageMetrics { get; set; }
+        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
+        internal SPOListsParameters ListsParam { get; set; }
+        public SPOTenantListsParameters TListsParam
         {
-            TListsParam = tenantListsParam;
+            get { return new(SitesAccParam, ListsParam); }
+        }
+        public ListReportParameters(
+            bool includeStorageMetrics,
+            SPOTenantSiteUrlsWithAccessParameters sitesParam,
+            SPOListsParameters listsParam)
+        {
+            IncludeStorageMetrics = includeStorageMetrics;
+            SitesAccParam = sitesParam;
+            ListsParam = listsParam;
         }
     }
 }

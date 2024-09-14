@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report"
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="800" d:DesignWidth="600"
+      d:DesignHeight="800" d:DesignWidth="800"
       Title="ListReportForm">
 
     <Grid Background="Transparent">
@@ -16,14 +16,37 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
+            <designmaterial:ListForm
+                x:Name="ListForm"/>
+
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Additional information to include"/>
+            
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
+
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+
+                    <StackPanel
+                        HorizontalAlignment="Left">
+
+                        <ToggleButton
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
+                            Content="Include list size"
+                            IsChecked="{Binding IncludeStorageMetrics, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                            Margin="0,0,8,0"/>
+
+                    </StackPanel>
+
+                </Border>
+
+            </Grid>
+
             <designmaterial:AdminForm
                 x:Name="AdminF"/>
 
             <designmaterial:SiteTenantForm
                 x:Name="SiteF"/>
-
-            <designmaterial:ListForm
-                x:Name="ListForm"/>
 
         </StackPanel>
 

@@ -1,4 +1,7 @@
 ﻿using Microsoft.SharePoint.Client;
+using Newtonsoft.Json;
+using NovaPointLibrary.Commands.Utilities.RESTModel;
+using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Solutions;
 using System.Linq.Expressions;
 
@@ -112,6 +115,20 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
                 await new SPOFolderCSOM(_logger, _appInfo).CreateAsync(siteUrl, folderServerRelativeUrl);
             }
+        }
+
+        internal async Task<RESTStorageMetricsResponse> GetFolderStorageMetricAsync(string siteUrl, Folder folder)
+        {
+            _appInfo.IsCancelled();
+            _logger.LogTxt(GetType().Name, $"Getting storage metrics from folder '{folder.ServerRelativeUrl}' from '{siteUrl}'");
+
+            string api = siteUrl + $"/_api/Web/GetFolderByServerRelativeUrl('{folder.ServerRelativeUrl}')?&$select=StorageMetrics&$expand=StorageMetrics";
+
+            var response = await new RESTAPIHandler(_logger, _appInfo).GetAsync(api);
+
+            var storageMetricsResponse = JsonConvert.DeserializeObject<RESTStorageMetricsResponse>(response);
+
+            return storageMetricsResponse;
         }
 
     }
