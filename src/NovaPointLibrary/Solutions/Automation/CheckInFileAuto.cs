@@ -196,19 +196,38 @@ namespace NovaPointLibrary.Solutions.Automation
         public string CheckinType { get; set; } = string.Empty;
         public string Comment { get; set; } = string.Empty;
 
-        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
+        internal SPOAdminAccessParameters AdminAccess;
+        internal SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
         internal SPOListsParameters ListsParam { get; set; }
         internal SPOItemsParameters ItemsParam { get; set; }
         public SPOTenantItemsParameters TItemsParam
         {
-            get { return new(SitesAccParam, ListsParam, ItemsParam); }
+            get { return new(SiteAccParam, ListsParam, ItemsParam); }
         }
 
-        public CheckInFileAutoParameters(SPOTenantSiteUrlsWithAccessParameters sitesParam,
-                                         SPOListsParameters listsParam,
-                                         SPOItemsParameters itemsParameters)
+        public CheckInFileAutoParameters(
+            bool reportMode,
+            string checkinType,
+            string comment,
+            SPOAdminAccessParameters adminAccess,
+            SPOTenantSiteUrlsParameters siteParam,
+            SPOListsParameters listsParam,
+            SPOItemsParameters itemsParameters)
         {
-            SitesAccParam = sitesParam;
+            ReportMode = reportMode;
+            CheckinType = checkinType;
+            Comment = comment;
+
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
+
             ListsParam = listsParam;
             ItemsParam = itemsParameters;
         }

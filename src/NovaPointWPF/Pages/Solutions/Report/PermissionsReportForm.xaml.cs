@@ -72,12 +72,6 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
-            {
-                AdminAccess = AdminF.Parameters,
-                SiteParam = SiteF.Parameters,
-            };
-
             SPOSitePermissionsCSOMParameters permissionsParameters = new(ListForm.Parameters, ItemForm.Parameters)
             {
                 IncludeAdmins = this.IncludeAdmins,
@@ -85,7 +79,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
                 IncludeUniquePermissions = this.IncludeUniquePermissions,
             };
 
-            PermissionsReportParameters parameters = new(UserForm.Parameters, siteAccParam, permissionsParameters)
+            PermissionsReportParameters parameters = new(UserForm.Parameters, AdminF.Parameters, SiteF.Parameters, permissionsParameters)
             {
                 OnlyUserList = this.UserListOnly,
             };

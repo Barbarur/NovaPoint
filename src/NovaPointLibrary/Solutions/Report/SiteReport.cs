@@ -1,15 +1,11 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.SharePoint.Permision;
+using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
+using NovaPointLibrary.Commands.SharePoint.SiteGroup;
+using PnP.Core.Model.SharePoint;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace NovaPointLibrary.Solutions.Report
 {
@@ -38,6 +34,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             s => s.IsHubSite,
             s => s.HubSiteId,
+            s => s.Classification,
         };
 
         private SiteReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, SiteReportParameters parameters)
@@ -50,6 +47,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static async Task RunAsync(SiteReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
             NPLogger logger = new(uiAddLog, "SiteReport", parameters);
+
             try
             {
                 Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
@@ -69,45 +67,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
-            if (!NeedAccess() && _param.SitesAccParam.SiteParam.AllSiteCollections)
-            {
-                await SimpleReportAsync();
-            }
-            else if (NeedAccess() || !_param.SitesAccParam.SiteParam.AllSiteCollections)
-            {
-                await ComplexReportAsync();
-            }
-            else
-            {
-                throw new Exception("No matching requirements for the report.");
-            }
-        }
-
-        private async Task SimpleReportAsync()
-        {
-            _appInfo.IsCancelled();
-
-            await foreach (var recordSite in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param.SitesAccParam.SiteParam).GetAsync())
-            {
-                _appInfo.IsCancelled();
-
-                if (recordSite.SiteProperties != null)
-                {
-                    SiteReportRecord siteRecord = new(recordSite.SiteProperties);
-                    RecordCSV(siteRecord);
-                }
-                else
-                {
-                    throw new Exception("Site properties is empty");
-                }
-            }
-        }
-
-        private async Task ComplexReportAsync()
-        {
-            _appInfo.IsCancelled();
-
-            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SitesAccParam).GetAsync())
+            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
@@ -142,30 +102,33 @@ namespace NovaPointLibrary.Solutions.Report
 
             else if (siteRecord.Web != null)
             {
-                SiteReportRecord siteReportRecord = new(siteRecord.Web);
-                RecordCSV(siteReportRecord);
+                await ProcessSubsite(siteRecord.Web);
             }
 
             else
             {
-                Web? oWeb = await new SPOWebCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _webExpressions);
-
-                if (oWeb == null)
+                Web oWeb = await new SPOWebCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _webExpressions);
+                
+                if (oWeb.IsSubSite())
                 {
-                    SiteReportRecord siteReportRecord = new(siteRecord.SiteUrl, "Site wasn't found.");
-                    RecordCSV(siteReportRecord);
-                }
-                else if (oWeb.IsSubSite())
-                {
-                    SiteReportRecord siteReportRecord = new(oWeb);
-                    RecordCSV(siteReportRecord);
+                    await ProcessSubsite(oWeb);
                 }
                 else
                 {
-                    await ProcessSiteCollection(siteRecord.SiteUrl);
+                    await ProcessSiteCollection(oWeb.Url);
                 }
             }
 
+        }
+
+        private async Task ProcessSubsite(Web web)
+        {
+            var storageMetricsResponse = await new SPOFolderCSOM(_logger, _appInfo).GetFolderStorageMetricAsync(web.Url, web.RootFolder);
+
+            double storageUsedGb = Math.Round(storageMetricsResponse.StorageMetrics.TotalSize / Math.Pow(1024, 3), 2);
+
+            SiteReportRecord siteReportRecord = new(web,storageUsedGb);
+            RecordCSV(siteReportRecord);
         }
 
         private async Task ProcessSiteCollection(string siteUrl)
@@ -182,43 +145,58 @@ namespace NovaPointLibrary.Solutions.Report
             _appInfo.IsCancelled();
             SiteReportRecord siteRecord = new(oSiteCollection);
 
-            if (_param.Detailed)
+            if (_param.IncludeHubInfo || _param.IncludeClassification)
             {
-                var site = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(oSiteCollection.Url, _siteExpressions);
-                
-                string parentHubSiteId = string.Empty;
-                if (site.IsHubSite)
-                {
-                    try
-                    {
-                        Tenant tenantContext = new(await _appInfo.GetContext(_appInfo.AdminUrl));
-                        HubSiteProperties hubSiteProperties = tenantContext.GetHubSitePropertiesById(oSiteCollection.SiteId);
+                var site = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _siteExpressions);
 
-                        tenantContext.Context.Load(hubSiteProperties);
-                        tenantContext.Context.ExecuteQueryRetry();
+                if (_param.IncludeHubInfo) { await AddHubinfoAsync(siteRecord, site); }
 
-                        parentHubSiteId = hubSiteProperties.ParentHubSiteId.ToString();
-                    }
-                    catch (Exception ex) 
-                    {
-                        _logger.ReportError(GetType().Name, "Site", oSiteCollection.Url, ex);
-                        siteRecord.Remarks = ex.Message;
-                    }
-                }
-
-                siteRecord.AddHubDetails(site, parentHubSiteId);
+                if (_param.IncludeClassification) { siteRecord.AddSiteClassification(site.Classification); }
             }
+
+
+            if (_param.IncludeSharingLinks) { await  AddSharingLinksAsync(siteRecord); }
 
             RecordCSV(siteRecord);
         }
 
-        private bool NeedAccess()
+        private async Task AddHubinfoAsync(SiteReportRecord siteRecord, Site site)
         {
-            if (_param.Detailed || _param.SitesAccParam.SiteParam.IncludeSubsites)
-            {
-                return true;
+            try
+            {                
+                string parentHubSiteId = string.Empty;
+                if (site.IsHubSite)
+                {
+                    Tenant tenantContext = new(await _appInfo.GetContext(_appInfo.AdminUrl));
+                    HubSiteProperties hubSiteProperties = tenantContext.GetHubSitePropertiesById(site.Id);
+
+                    tenantContext.Context.Load(hubSiteProperties);
+                    tenantContext.Context.ExecuteQueryRetry();
+
+                    parentHubSiteId = hubSiteProperties.ParentHubSiteId.ToString();
+                }
+                siteRecord.AddHubInfo(site, parentHubSiteId);
             }
-            else { return false; }
+            catch (Exception ex)
+            {
+                _logger.ReportError(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+            }
+        }
+
+        private async Task AddSharingLinksAsync(SiteReportRecord siteRecord)
+        {
+            string countSharingLinks;
+            try
+            {
+                List<Group> collGroups = await new SPOSiteGroupCSOM(_logger, _appInfo).GetSharingLinksAsync(siteRecord.SiteUrl);
+                countSharingLinks = collGroups.Count.ToString();
+            }
+            catch (Exception ex)
+            {
+                _logger.ReportError(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                countSharingLinks = ex.Message;
+            }
+            siteRecord.AddSharingLinks(countSharingLinks);
         }
 
         private void RecordCSV(SiteReportRecord record)
@@ -231,10 +209,12 @@ namespace NovaPointLibrary.Solutions.Report
     internal class SiteReportRecord : ISolutionRecord
     {
         internal string Title { get; set; } = String.Empty;
-        internal string SiteUrl { get; set; } = String.Empty;
+        internal string SiteUrl { get; set; }
         internal string GroupId { get; set; } = String.Empty;
-        internal string Tempalte { get; set; } = String.Empty;
+        internal string Template { get; set; } = String.Empty;
         internal string IsSubSite { get; set; } = String.Empty;
+        internal string Connected_to_Teams { get; set; } = String.Empty;
+        internal string Teams_Channel { get; set; } = String.Empty;
 
         internal string StorageQuotaGB { get; set; } = String.Empty;
         internal string StorageUsedGB { get; set; } = String.Empty;
@@ -247,6 +227,10 @@ namespace NovaPointLibrary.Solutions.Report
         internal string HubSiteId { get; set; } = String.Empty;
         internal string ParentHubSiteId { get; set; } = String.Empty;
 
+        internal string Site_Classification { get; set; } = String.Empty;
+
+        internal string Sharing_Links { get; set; }  = String.Empty;
+
         internal string Remarks { get; set; } = String.Empty;
 
         internal SiteReportRecord(SiteProperties oSiteCollection)
@@ -254,8 +238,13 @@ namespace NovaPointLibrary.Solutions.Report
             Title = oSiteCollection.Title;
             SiteUrl = oSiteCollection.Url;
             GroupId = oSiteCollection.GroupId.ToString();
-            Tempalte = oSiteCollection.Template;
+            Template = GetSiteTemplateName(oSiteCollection.Template, oSiteCollection.IsTeamsConnected);
             IsSubSite = "FALSE";
+            Connected_to_Teams = oSiteCollection.IsTeamsConnected.ToString();
+            if(!oSiteCollection.TeamsChannelType.ToString().Contains("None", StringComparison.OrdinalIgnoreCase))
+            {
+                Teams_Channel = oSiteCollection.TeamsChannelType.ToString();
+            }
 
             StorageQuotaGB = Math.Round((float)oSiteCollection.StorageMaximumLevel / 1024, 2).ToString();
             StorageUsedGB = Math.Round((float)oSiteCollection.StorageUsage / 1024, 2).ToString();
@@ -265,13 +254,15 @@ namespace NovaPointLibrary.Solutions.Report
             LockState = oSiteCollection.LockState.ToString();
 
         }
-        internal SiteReportRecord(Web web)
+        internal SiteReportRecord(Web web, double storageUsedGb)
         {
             Title = web.Title;
             SiteUrl = web.Url;
             GroupId = web.Id.ToString();
-            Tempalte = web.WebTemplate;
+            Template = GetSiteTemplateName(web.WebTemplate, false);
             IsSubSite = web.IsSubSite().ToString();
+
+            StorageUsedGB = storageUsedGb.ToString();
 
             LastContentModifiedDate = web.LastItemUserModifiedDate.ToString();
         }
@@ -281,24 +272,114 @@ namespace NovaPointLibrary.Solutions.Report
             Remarks = errorMessage;
         }
 
-        internal void AddHubDetails(Site site, string parentHubSiteId)
+        internal void AddHubInfo(Site site, string parentHubSiteId)
         {
             IsHubSite = site.IsHubSite.ToString();
             if (site.HubSiteId.ToString() != "00000000-0000-0000-0000-000000000000") { HubSiteId = site.HubSiteId.ToString(); }
             if (parentHubSiteId != "00000000-0000-0000-0000-000000000000") { ParentHubSiteId = parentHubSiteId; }
         }
 
+        internal void AddSiteClassification(string classification)
+        {
+            Site_Classification = classification;
+        }
+
+        internal void AddSharingLinks(string sharingLinksCount)
+        {
+            Sharing_Links = sharingLinksCount;
+        }
+
+        private string GetSiteTemplateName(string template, bool isTeamsConnected)
+        {
+            string templateName = template;
+            if (template.Contains("SPSPERS", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "OneDrive";
+            }
+            else if (template.Contains("SITEPAGEPUBLISHING#0", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "Communication site";
+            }
+            else if (template.Contains("GROUP#0", StringComparison.OrdinalIgnoreCase))
+            {
+                if (isTeamsConnected) { templateName = "Team site connected to MS Teams"; }
+                else { templateName = "Team site"; }
+            }
+            else if (template.Contains("STS#3", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "Team site (no Microsoft 365 group)";
+            }
+            else if (template.Contains("STS#0", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "Team site (classic experience)";
+            }
+            else if (template.Contains("TEAMCHANNEL", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "Channel site";
+            }
+            else if (template.Contains("APPCATALOG", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "App Catalog Site";
+            }
+            else if (template.Contains("STS", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "Team site (Subsite)";
+            }
+            else if (template.Contains("PROJECTSITE", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "Project site (Subsite)";
+            }
+            else if (template.Contains("SRCHCENTERLITE", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "Basic Search Center (Subsite)";
+            }
+            else if (template.Contains("BDR", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "Document Center (Subsite)";
+            }
+            else if (template.Contains("SAPWORKFLOWSITE", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "SAP Workflow site (Subsite)";
+            }
+            else if (template.Contains("VISPRUS", StringComparison.OrdinalIgnoreCase))
+            {
+                templateName = "Visio Process Repository (Subsite)";
+            }
+
+            return templateName;
+        }
     }
 
     public class SiteReportParameters : ISolutionParameters
     {
-        public bool Detailed { get; set; } = false;
-        public SPOTenantSiteUrlsWithAccessParameters SitesAccParam {  get; set; }
-        public SiteReportParameters(SPOTenantSiteUrlsWithAccessParameters tenantSitesParam, 
-                                    bool detailed)
+        public bool IncludeHubInfo { get; set; }
+        public bool IncludeClassification { get; set; }
+        public bool IncludeSharingLinks { get; set; }
+
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
         {
-            Detailed = detailed;
-            SitesAccParam = tenantSitesParam;
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
         }
+
+        public SiteReportParameters(SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam, bool includeHubInfo, bool includeClassification, bool includeSharingLinks)
+        {
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
+            IncludeHubInfo = includeHubInfo;
+            IncludeClassification = includeClassification;
+            IncludeSharingLinks = includeSharingLinks;
+
+            if (!SiteParam.IncludeSubsites && string.IsNullOrWhiteSpace(SiteParam.SiteUrl) && string.IsNullOrWhiteSpace(SiteParam.ListOfSitesPath) && !IncludeSharingLinks)
+            {
+                AdminAccess.AddAdmin = false;
+                AdminAccess.RemoveAdmin = false;
+            }
+        }
+
     }
 }

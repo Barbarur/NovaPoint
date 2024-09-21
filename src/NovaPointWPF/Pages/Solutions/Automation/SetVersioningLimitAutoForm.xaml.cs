@@ -65,8 +65,6 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 ListMajorVersionLimit = this.ListMajorVersionLimit,
             };
 
-            //await new SetVersioningLimitAuto(parameters, uiLog, cancelTokenSource).RunAsync();
-
             await SetVersioningLimitAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }
     }

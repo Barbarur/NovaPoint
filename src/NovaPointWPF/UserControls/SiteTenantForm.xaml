@@ -7,6 +7,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              x:Name="root">
+    <UserControl.Resources>
+
+        <Style x:Key="ToggleButtonSites" BasedOn="{StaticResource ToggleButtonSolutionForm}" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Width" Value="175"/>
+        </Style>
+        
+    </UserControl.Resources>
     
     <Grid
         Background="Transparent">
@@ -28,14 +35,14 @@
 
                             <RadioButton
                                 Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="All Sites Collections"
-                                IsChecked="{Binding AllSiteCollections, ElementName=root}"
+                                Content="Active sites"
+                                IsChecked="{Binding ActiveSites, ElementName=root}"
                                 DockPanel.Dock="Left"
                                 Margin="0,0,8,0"/>
 
                             <RadioButton
                                 Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Single Site"
+                                Content="Single Site URL"
                                 IsChecked="{Binding SingleSite, ElementName=root}"
                                 DockPanel.Dock="Left"
                                 Margin="0,0,8,0"/>
@@ -43,7 +50,7 @@
                             <RadioButton
                                 x:Name="ListOfSitesRadioButton"
                                 Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="List of Sites"
+                                Content="List of Site URLs"
                                 IsChecked="{Binding ListOfSites, ElementName=root}"
                                 DockPanel.Dock="Left"/>
 
@@ -81,14 +88,57 @@
 
                                 <ToggleButton
                                     Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Include Sites"
-                                    IsChecked="{Binding IncludeShareSite, ElementName=root}"
+                                    Content="Include all Sites"
+                                    IsChecked="{Binding IncludeSites, ElementName=root}"
+                                    Margin="0,0,8,0"/>
+
+                            </StackPanel>
+
+                            <StackPanel
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0, 12, 0, 0">
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSites}"
+                                    Content="Team sites"
+                                    IsChecked="{Binding IncludeTeamSite, ElementName=root}"
                                     Margin="0,0,8,0"/>
 
                                 <ToggleButton
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Only Teams Sites"
-                                    IsChecked="{Binding OnlyGroupIdDefined, ElementName=root}"/>
+                                    Style="{DynamicResource ToggleButtonSites}"
+                                    Content="Team sites (with Teams)"
+                                    IsChecked="{Binding IncludeTeamSiteWithTeams, ElementName=root}"
+                                    Margin="0,0,8,0"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSites}"
+                                    Content="Team sites (no group)"
+                                    IsChecked="{Binding IncludeTeamSiteWithNoGroup, ElementName=root}"/>
+
+                            </StackPanel>
+
+                            <StackPanel
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0, 12, 0, 0">
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSites}"
+                                    Content="Communication sites"
+                                    IsChecked="{Binding IncludeCommunication, ElementName=root}"
+                                    Margin="0,0,8,0"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSites}"
+                                    Content="Channel sites"
+                                    IsChecked="{Binding IncludeChannels, ElementName=root}"
+                                    Margin="0,0,8,0"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSites}"
+                                    Content="Classic sites"
+                                    IsChecked="{Binding IncludeClassic, ElementName=root}"/>
 
                             </StackPanel>
 

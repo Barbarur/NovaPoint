@@ -103,10 +103,19 @@ namespace NovaPointLibrary.Solutions.Report
 
     public class SharingLinksReportParameters : ISolutionParameters
     {
-        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam { get; set; }
-        public SharingLinksReportParameters(SPOTenantSiteUrlsWithAccessParameters siteParam)
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
         {
-            SiteAccParam = siteParam;
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
+        public SharingLinksReportParameters(SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam)
+        {
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
         }
     }
 

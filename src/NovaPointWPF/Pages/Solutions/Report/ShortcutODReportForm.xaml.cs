@@ -32,13 +32,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
-            {
-                AdminAccess = AdminF.Parameters,
-                SiteParam = SiteF.Parameters,
-            };
-
-            ShortcutODReportParameters parameters = new(siteAccParam, new(), ItemForm.Parameters);
+            ShortcutODReportParameters parameters = new(AdminF.Parameters, SiteF.Parameters, ItemForm.Parameters);
 
             await ShortcutODReport.RunAsync(parameters, uiLog, cancelTokenSource);
         }

@@ -9,7 +9,7 @@
       d:DesignHeight="800" d:DesignWidth="600"
       Title="ItemReportForm">
 
-    <Grid Background="Transparent">
+    <Grid Margin="0,0,0,16">
                 
         <StackPanel>
 

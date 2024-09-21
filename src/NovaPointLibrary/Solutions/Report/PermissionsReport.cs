@@ -134,7 +134,15 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 AddRecord(record);
             }
-            else if (_param.UserParam.IncludeExternalUsers && (record._role.AccountType.Contains("#ext#", StringComparison.OrdinalIgnoreCase) || record._role.AccountType.Contains("urn:spo:guest", StringComparison.OrdinalIgnoreCase)))
+            else if (!string.IsNullOrWhiteSpace(_param.UserParam.IncludeUserUPN) && record._role.AccessType.Contains("organization") && record._role.AccessType.Contains("Sharing link"))
+            {
+                AddRecord(record);
+            }
+            else if (_param.UserParam.IncludeExternalUsers && (record._role.Users.Contains("#ext#", StringComparison.OrdinalIgnoreCase) || record._role.Users.Contains("urn:spo:guest", StringComparison.OrdinalIgnoreCase)))
+            {
+                AddRecord(record);
+            }
+            else if (_param.UserParam.IncludeExternalUsers && record._role.AccessType.Contains("Anyone") && record._role.AccessType.Contains("Sharing link"))
             {
                 AddRecord(record);
             }
@@ -143,6 +151,10 @@ namespace NovaPointLibrary.Solutions.Report
                 AddRecord(record);
             }
             else if (_param.UserParam.IncludeEveryoneExceptExternal && record._role.AccountType.Contains("Everyone except external users", StringComparison.OrdinalIgnoreCase))
+            {
+                AddRecord(record);
+            }
+            else
             {
                 AddRecord(record);
             }
@@ -175,12 +187,25 @@ namespace NovaPointLibrary.Solutions.Report
     {
         public bool OnlyUserList { get; set; } = false;
         public SPOSiteUserParameters UserParam {  get; set; }
-        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam {  get; set; }
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
         public SPOSitePermissionsCSOMParameters PermissionsParam {  get; set; }
-        public PermissionsReportParameters(SPOSiteUserParameters userParam, SPOTenantSiteUrlsWithAccessParameters siteParam, SPOSitePermissionsCSOMParameters permissionParam)
+        public PermissionsReportParameters(
+            SPOSiteUserParameters userParam,
+            SPOAdminAccessParameters adminAccess, 
+            SPOTenantSiteUrlsParameters siteParam, 
+            SPOSitePermissionsCSOMParameters permissionParam)
         {
             UserParam = userParam;
-            SiteAccParam = siteParam;
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
             PermissionsParam = permissionParam;
         }
     }

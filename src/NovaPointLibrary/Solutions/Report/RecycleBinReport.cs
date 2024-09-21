@@ -150,12 +150,22 @@ namespace NovaPointLibrary.Solutions.Report
     public class RecycleBinReportParameters : ISolutionParameters
     {
         public SPORecycleBinItemParameters RecycleBinParam { get; set; }
-        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam { get; set; }
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
         public RecycleBinReportParameters(SPORecycleBinItemParameters recycleBinParam,
-                                          SPOTenantSiteUrlsWithAccessParameters siteAccParam)
+                                          SPOAdminAccessParameters adminAccess,
+                                          SPOTenantSiteUrlsParameters siteParam)
         {
             RecycleBinParam = recycleBinParam;
-            SiteAccParam = siteAccParam;
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
         }
     }
 }

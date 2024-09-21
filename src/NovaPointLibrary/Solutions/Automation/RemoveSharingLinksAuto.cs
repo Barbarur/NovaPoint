@@ -126,13 +126,22 @@ namespace NovaPointLibrary.Solutions.Automation
         public bool ReportMode { get; set; }
         public bool RemoveAll { get; set; }
         public string Createdby { get; set; }
-        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam { get; set; }
-        public RemoveSharingLinksAutoParameters(bool reportMode, bool removeAll, string createdby, SPOTenantSiteUrlsWithAccessParameters siteParam)
+        internal SPOAdminAccessParameters AdminAccess;
+        internal SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
+        public RemoveSharingLinksAutoParameters(bool reportMode, bool removeAll, string createdby, SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam)
         {
             ReportMode = reportMode;
             RemoveAll = removeAll;
             Createdby = createdby;
-            SiteAccParam = siteParam;
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
         }
     }
 }

@@ -239,19 +239,29 @@ namespace NovaPointLibrary.Solutions.Report
 
     public class ItemReportParameters : ISolutionParameters
     {
-        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
         internal SPOListsParameters ListsParam { get; set; }
         internal SPOItemsParameters ItemsParam { get; set; }
         public SPOTenantItemsParameters TItemsParam
         {
-            get { return new(SitesAccParam, ListsParam, ItemsParam); }
+            get { return new(SiteAccParam, ListsParam, ItemsParam); }
         }
 
-        public ItemReportParameters(SPOTenantSiteUrlsWithAccessParameters sitesParam,
+        public ItemReportParameters(SPOAdminAccessParameters adminAccess,
+                                    SPOTenantSiteUrlsParameters siteParam,
                                     SPOListsParameters listsParam,
                                     SPOItemsParameters itemsParam)
         {
-            SitesAccParam = sitesParam;
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
             ListsParam = listsParam;
             ItemsParam = itemsParam;
         }

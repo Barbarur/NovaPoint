@@ -9,7 +9,7 @@
       d:DesignHeight="800" d:DesignWidth="800"
       Title="ListReportForm">
 
-    <Grid Background="Transparent">
+    <Grid Margin="0,0,0,16">
 
         <StackPanel>
 

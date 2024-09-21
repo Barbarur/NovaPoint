@@ -50,27 +50,6 @@ namespace NovaPointLibrary.Solutions.Automation
             }
         }
 
-        //public ClearRecycleBinAuto(ClearRecycleBinAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        //{
-        //    _param = parameters;
-        //    _logger = new(uiAddLog, this.GetType().Name, _param);
-        //    _appInfo = new(_logger, cancelTokenSource);
-        //}
-
-        //public async Task RunAsync()
-        //{
-        //    try
-        //    {
-        //        await RunScriptAsync();
-
-        //        _logger.ScriptFinish();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.ScriptFinish(ex);
-        //    }
-        //}
-
         private async Task RunScriptAsync()
         {
             _appInfo.IsCancelled();
@@ -202,12 +181,23 @@ namespace NovaPointLibrary.Solutions.Automation
     public class ClearRecycleBinAutoParameters : ISolutionParameters
     {
         public SPORecycleBinItemParameters RecycleBinParam { get; set; }
-        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam { get; set; }
-        public ClearRecycleBinAutoParameters(SPORecycleBinItemParameters recycleBinParam,
-                                             SPOTenantSiteUrlsWithAccessParameters siteAccParam)
+        internal SPOAdminAccessParameters AdminAccess;
+        internal SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
+        public ClearRecycleBinAutoParameters(
+            SPORecycleBinItemParameters recycleBinParam,
+            SPOAdminAccessParameters adminAccess,
+            SPOTenantSiteUrlsParameters siteParam)
         {
             RecycleBinParam = recycleBinParam;
-            SiteAccParam = siteAccParam;
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
         }
     }
 }

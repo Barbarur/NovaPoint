@@ -1,4 +1,5 @@
-﻿using NovaPointLibrary.Solutions;
+﻿using Microsoft.Graph;
+using NovaPointLibrary.Solutions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,16 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     public class SPOTenantSiteUrlsParameters : ISolutionParameters
     {
-        public bool AllSiteCollections { get; set; } = false;
+        public bool ActiveSites { get; set; } = false;
         public bool IncludePersonalSite { get; set; } = false;
-        public bool IncludeShareSite { get; set; } = false;
-        public bool OnlyGroupIdDefined { get; set; } = false;
+        public bool IncludeCommunication { get; set; } = false;
+        public bool IncludeTeamSite {  get; set; } = false;
+        public bool IncludeTeamSiteWithTeams { get; set; } = false;
+        public bool IncludeTeamSiteWithNoGroup { get; set; } = false;
+        public bool IncludeChannels { get; set; } = false;
+        public bool IncludeClassic { get; set; } = false;
 
+        
         private string _siteUrl = string.Empty;
         public string SiteUrl
         {
@@ -21,7 +27,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             set { _siteUrl = value.Trim(); }
         }
 
-        public bool IncludeSubsites { get; set; } = false;
 
         private string _listOfSitesPath = string.Empty;
         public string ListOfSitesPath
@@ -29,5 +34,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             get { return _listOfSitesPath; }
             set { _listOfSitesPath = value.Trim(); }
         }
+        public bool IncludeSubsites { get; set; } = false;
     }
 }

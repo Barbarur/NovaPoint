@@ -46,6 +46,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 w => w.Url,
                 w => w.WebTemplate,
                 w => w.LastItemUserModifiedDate,
+                w => w.RootFolder,
+                w => w.RootFolder.ServerRelativeUrl,
             };
 
             var expressions = retrievalExpressions.Union(defaultExpressions).ToArray();

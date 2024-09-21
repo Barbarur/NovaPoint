@@ -59,13 +59,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
-            {
-                AdminAccess = AdminF.Parameters,
-                SiteParam = SiteF.Parameters,
-            };
-
-            RemoveSharingLinksAutoParameters parameters = new(ModeF.ReportMode, RemoveAll, Createdby, siteAccParam);
+            RemoveSharingLinksAutoParameters parameters = new(ModeF.ReportMode, RemoveAll, Createdby, AdminF.Parameters, SiteF.Parameters);
 
             await RemoveSharingLinksAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }

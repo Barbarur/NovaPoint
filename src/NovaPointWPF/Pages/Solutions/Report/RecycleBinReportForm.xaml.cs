@@ -35,15 +35,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
-            {
-                AdminAccess = AdminF.Parameters,
-                SiteParam = SiteF.Parameters,
-            };
-
-            RecycleBinReportParameters parameters = new(RecycleF.Parameters, siteAccParam);
-
-            //await new RecycleBinReport(parameters, uiLog, cancelTokenSource).RunAsync();
+            RecycleBinReportParameters parameters = new(RecycleF.Parameters, AdminF.Parameters, SiteF.Parameters);
 
             await RecycleBinReport.RunAsync(parameters, uiLog, cancelTokenSource);
         }

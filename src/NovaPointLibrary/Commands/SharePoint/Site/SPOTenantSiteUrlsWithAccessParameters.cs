@@ -12,5 +12,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         public SPOAdminAccessParameters AdminAccess { get; set; } = new();
         public SPOTenantSiteUrlsParameters SiteParam { get; set; } = new();
 
+        public SPOTenantSiteUrlsWithAccessParameters(SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam)
+        {
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
+        }
+        public SPOTenantSiteUrlsWithAccessParameters()
+        {
+        }
+
     }
 }

@@ -51,18 +51,8 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
-            {
-                AdminAccess = AdminF.Parameters,
-                SiteParam = SiteF.Parameters,
-            };
-
-            CheckInFileAutoParameters parameters = new(siteAccParam, ListForm.Parameters, ItemForm.Parameters)
-            {
-                ReportMode = Mode.ReportMode,
-                CheckinType = this.CheckinType,
-                Comment = this.Comment,
-            };
+            CheckInFileAutoParameters parameters = new(Mode.ReportMode, this.CheckinType, this.Comment,
+                AdminF.Parameters, SiteF.Parameters, ListForm.Parameters, ItemForm.Parameters);
 
             await CheckInFileAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }

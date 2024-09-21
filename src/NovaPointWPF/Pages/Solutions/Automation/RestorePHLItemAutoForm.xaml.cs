@@ -56,17 +56,8 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
-            {
-                AdminAccess = AdminF.Parameters,
-                SiteParam = SiteF.Parameters,
-            };
-
-            RestorePHLItemAutoParameters parameters = new(PHLForm.Parameters, siteAccParam, new(), new())
-            {
-                RestoreOriginalLocation = RestoreOriginalLocation,
-                RestoreTargetLocation = RestoreTargetLocation,
-            };
+            RestorePHLItemAutoParameters parameters = new(RestoreOriginalLocation, RestoreTargetLocation,
+                PHLForm.Parameters, AdminF.Parameters, SiteF.Parameters);
 
             await RestorePHLItemAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }

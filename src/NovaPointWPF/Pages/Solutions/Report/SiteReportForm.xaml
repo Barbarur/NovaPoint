@@ -9,44 +9,15 @@
       d:DesignHeight="900" d:DesignWidth="800"
       Title="SiteReportForm">
 
-    <Grid>
+    <Grid Margin="0,0,0,16">
 
         <StackPanel>
 
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <TextBlock
-                Style="{DynamicResource TextBlockBodyStrong}"
-                Text="Report type"/>
-
-            <Grid Style="{DynamicResource SolutionMenuGrid}">
-
-                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
-                    
-                    <DockPanel>
-
-                        <RadioButton
-                            Style="{DynamicResource ToggleButtonSolutionForm}"
-                            Content="Standard"
-                            DockPanel.Dock="Left"
-                            Margin="0,0,8,0"/>
-
-                        <RadioButton
-                            Style="{DynamicResource ToggleButtonSolutionForm}"
-                            Content="Detailed"
-                            IsChecked="{Binding Detailed, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                            DockPanel.Dock="Left"/>
-
-                        <TextBlock
-                            DockPanel.Dock="Left"
-                            Height="Auto"/>
-
-                    </DockPanel>
-                    
-                </Border>
-
-            </Grid>
+            <designmaterial:SiteDetailsForm
+                x:Name="SiteDetails"/>
 
             <designmaterial:SiteTenantForm
                 x:Name="SiteF"/>

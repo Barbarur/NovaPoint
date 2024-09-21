@@ -195,7 +195,7 @@ namespace NovaPointLibrary.Solutions.Automation
             if (_param.RestoreOriginalLocation) { return; }
             else
             {
-                var folder = await new SPOFolderCSOM(_logger, _appInfo).GetFolderAsync(_param.SitesAccParam.SiteParam.SiteUrl, _param.RestoreTargetLocation);
+                var folder = await new SPOFolderCSOM(_logger, _appInfo).GetFolderAsync(_param.SiteParam.SiteUrl, _param.RestoreTargetLocation);
                 if (folder == null) { throw new Exception("Target location does not exist."); }
             }
         }
@@ -235,32 +235,42 @@ namespace NovaPointLibrary.Solutions.Automation
 
     public class RestorePHLItemAutoParameters : ISolutionParameters
     {
-        public bool RestoreOriginalLocation { get; set; } = true;
+        public bool RestoreOriginalLocation { get; set; }
 
         private string _restoreTargetLocation = string.Empty;
         public string RestoreTargetLocation
         {
             get { return _restoreTargetLocation; }
-            set { _restoreTargetLocation = value.Trim().TrimEnd('/'); }
+            init { _restoreTargetLocation = value.Trim().TrimEnd('/'); }
         }
         public SPOPreservationHoldLibraryParameters PHLParam { get; set; }
-        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
-        internal SPOListsParameters ListsParam { get; set; }
-        internal SPOItemsParameters ItemsParam { get; set; }
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
+        internal readonly SPOListsParameters ListsParam = new();
+        internal readonly SPOItemsParameters ItemsParam = new();
         public SPOTenantItemsParameters TItemsParam
         {
-            get { return new(SitesAccParam, ListsParam, ItemsParam); }
+            get { return new(SiteAccParam, ListsParam, ItemsParam); }
         }
 
-        public RestorePHLItemAutoParameters(SPOPreservationHoldLibraryParameters phlParam,
-                                            SPOTenantSiteUrlsWithAccessParameters sitesParam,
-                                            SPOListsParameters listsParam,
-                                            SPOItemsParameters itemsParam)
+        public RestorePHLItemAutoParameters(bool restoreOriginalLocation,
+                                            string restoreTargetLocation,
+                                            SPOPreservationHoldLibraryParameters phlParam,
+                                            SPOAdminAccessParameters adminAccess,
+                                            SPOTenantSiteUrlsParameters siteParam)
         {
+            RestoreOriginalLocation = restoreOriginalLocation;
+            RestoreTargetLocation = restoreTargetLocation;
             PHLParam = phlParam;
-            SitesAccParam = sitesParam;
-            ListsParam = listsParam;
-            ItemsParam = itemsParam;
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
         }
 
         public void ParametersCheck()
@@ -269,7 +279,7 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 throw new Exception("Target location server relative url cannot be empty");
             }
-            if (!RestoreOriginalLocation && string.IsNullOrWhiteSpace(SitesAccParam.SiteParam.SiteUrl))
+            if (!RestoreOriginalLocation && string.IsNullOrWhiteSpace(SiteParam.SiteUrl))
             {
                 throw new Exception("Restoring on a specific location is only supported when restoring a single site");
             }

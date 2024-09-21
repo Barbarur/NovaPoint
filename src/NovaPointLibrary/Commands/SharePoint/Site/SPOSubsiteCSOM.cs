@@ -35,6 +35,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 w => w.Id,
                 w => w.Title,
                 w => w.Url,
+                w => w.RootFolder,
+                w => w.RootFolder.ServerRelativeUrl,
             };
             if (retrievalExpressions != null) { defaultExpressions = retrievalExpressions.Union(defaultExpressions).ToArray(); }
 

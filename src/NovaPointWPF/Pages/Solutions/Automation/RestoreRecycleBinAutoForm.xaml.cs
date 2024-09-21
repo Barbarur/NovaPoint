@@ -42,18 +42,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
-            {
-                AdminAccess = AdminF.Parameters,
-                SiteParam = SiteF.Parameters,
-            };
-
-            RestoreRecycleBinAutoParameters parameters = new(RecycleF.Parameters, siteAccParam)
-            {
-                RenameFile = this.RenameFile
-            };
-
-            //await new RestoreRecycleBinAuto(parameters, uiLog, cancelTokenSource).RunAsync();
+            RestoreRecycleBinAutoParameters parameters = new(this.RenameFile, RecycleF.Parameters, AdminF.Parameters, SiteF.Parameters);
 
             await RestoreRecycleBinAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }

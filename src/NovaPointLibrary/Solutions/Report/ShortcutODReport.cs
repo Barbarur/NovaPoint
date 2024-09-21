@@ -17,18 +17,6 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly NPLogger _logger;
         private readonly AppInfo _appInfo;
 
-        private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
-        {
-            i => i["A2ODExtendedMetadata"],
-            i => i["Author"],
-            i => i["Created"],
-            i => i["Editor"],
-            i => i["ID"],
-            i => i.FileSystemObjectType,
-            i => i["FileLeafRef"],
-            i => i["FileRef"],
-        };
-
         private ShortcutODReport(NPLogger logger, AppInfo appInfo, ShortcutODReportParameters parameters)
         {
             _param = parameters;
@@ -38,17 +26,8 @@ namespace NovaPointLibrary.Solutions.Report
 
         public static async Task RunAsync(ShortcutODReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            parameters.SitesAccParam.SiteParam.IncludePersonalSite = true;
-            parameters.SitesAccParam.SiteParam.IncludeShareSite = false;
-            parameters.SitesAccParam.SiteParam.OnlyGroupIdDefined = false;
-            parameters.SitesAccParam.SiteParam.IncludeSubsites = false;
-            parameters.ListsParam.AllLists = false;
-            parameters.ListsParam.IncludeLists = false;
-            parameters.ListsParam.IncludeLibraries = false;
-            parameters.ListsParam.ListTitle = "Documents";
-            parameters.ItemsParam.FileExpresions = _fileExpressions;
-
             NPLogger logger = new(uiAddLog, "ShortcutODReport", parameters);
+
             try
             {
                 AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
@@ -159,21 +138,49 @@ namespace NovaPointLibrary.Solutions.Report
 
     public class ShortcutODReportParameters : ISolutionParameters
     {
-        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
-        internal SPOListsParameters ListsParam { get; set; }
+        private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
+        {
+            i => i["A2ODExtendedMetadata"],
+            i => i["Author"],
+            i => i["Created"],
+            i => i["Editor"],
+            i => i["ID"],
+            i => i.FileSystemObjectType,
+            i => i["FileLeafRef"],
+            i => i["FileRef"],
+        };
+
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
+        internal SPOListsParameters ListsParam { get; set; } = new();
         internal SPOItemsParameters ItemsParam { get; set; }
         public SPOTenantItemsParameters TItemsParam
         {
-            get { return new(SitesAccParam, ListsParam, ItemsParam); }
+            get { return new(SiteAccParam, ListsParam, ItemsParam); }
         }
 
-        public ShortcutODReportParameters(SPOTenantSiteUrlsWithAccessParameters sitesParam,
-                                          SPOListsParameters listsParam,
+        public ShortcutODReportParameters(SPOAdminAccessParameters adminAccess, 
+                                          SPOTenantSiteUrlsParameters siteParam,
                                           SPOItemsParameters itemsParameters)
         {
-            SitesAccParam = sitesParam;
-            ListsParam = listsParam;
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
             ItemsParam = itemsParameters;
+
+            SiteParam.IncludePersonalSite = true;
+            SiteParam.IncludeSubsites = false;
+            ListsParam.AllLists = false;
+            ListsParam.IncludeLists = false;
+            ListsParam.IncludeLibraries = false;
+            ListsParam.ListTitle = "Documents";
+            ItemsParam.FileExpresions = _fileExpressions;
         }
     }
 }

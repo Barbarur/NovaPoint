@@ -121,13 +121,13 @@
 
                     <Button
                             Style="{DynamicResource SolutionMenuButton}"
-                            Content="Clear recycle bin"
-                            Click="ClearRecycleBinAutoClick"/>
+                            Content="Restore recycle bin"
+                            Click="RestoreRecycleBinAutoClick"/>
 
                     <Button
                             Style="{DynamicResource SolutionMenuButton}"
-                            Content="Restore recycle bin"
-                            Click="RestoreRecycleBinAutoClick"/>
+                            Content="Clear recycle bin"
+                            Click="ClearRecycleBinAutoClick"/>
 
                 </StackPanel>
 

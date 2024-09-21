@@ -29,24 +29,25 @@ namespace NovaPointWPF.UserControls
     {
         public SPOTenantSiteUrlsParameters Parameters { get; set; } = new();
 
-        private bool _allSiteCollections;
-        public bool AllSiteCollections
+        private bool _activeSites;
+        public bool ActiveSites
         {
-            get {  return _allSiteCollections; }
+            get {  return _activeSites; }
             set
             {
-                _allSiteCollections = value;
-                Parameters.AllSiteCollections = value;
+                _activeSites = value;
+                Parameters.ActiveSites = value;
                 OnPropertyChanged();
                 if (value)
                 {
                     AllSitesFilter.Visibility = Visibility.Visible;
+                    IncludeSites = true;
                 }
                 else
                 {
                     AllSitesFilter.Visibility = Visibility.Collapsed;
                     IncludePersonalSite = false;
-                    IncludeShareSite = false;
+                    ChangeCheckedSites(false);
                 }
             }
         }
@@ -60,48 +61,118 @@ namespace NovaPointWPF.UserControls
                 _includePersonalSite = value;
                 Parameters.IncludePersonalSite = value;
                 OnPropertyChanged();
-                if (value)
-                {
-                    OnlyGroupIdDefined = false;
-                }
             }
         }
 
-
-        private bool _includeShareSite = false;
-        public bool IncludeShareSite
+        private bool _includeSites = false;
+        public bool IncludeSites
         {
-            get { return _includeShareSite; }
+            get { return _includeSites; }
             set
             {
-                _includeShareSite = value;
-                Parameters.IncludeShareSite = value;
-                OnPropertyChanged();
-                if (!value)
+                if (value && !IsAllSitesIncluded())
                 {
-                    OnlyGroupIdDefined = false;
+                    ChangeCheckedSites(true);
                 }
+                else if (!value && IsAllSitesIncluded())
+                {
+                    ChangeCheckedSites(false);
+                }
+
+                _includeSites = value;
+                OnPropertyChanged();
             }
         }
 
-        
-        private bool _onlyGroupIdDefined = false;
-        public bool OnlyGroupIdDefined
+        private bool _includeTeamSite = false;
+        public bool IncludeTeamSite
         {
-            get { return _onlyGroupIdDefined; }
+            get { return _includeTeamSite; }
             set
             {
-                _onlyGroupIdDefined = value;
-                Parameters.OnlyGroupIdDefined = value;
+                _includeTeamSite = value;
+                Parameters.IncludeTeamSite = value;
                 OnPropertyChanged();
-                if (value)
-                {
-                    IncludeShareSite = true;
-                    IncludePersonalSite = false;
-                }
+
+                if (!value) { IncludeSites = false; }
+                else { CheckControlAllSites(); }
             }
         }
 
+        private bool _includeTeamSiteWithTeams = false;
+        public bool IncludeTeamSiteWithTeams
+        {
+            get { return _includeTeamSiteWithTeams; }
+            set
+            {
+                _includeTeamSiteWithTeams = value;
+                Parameters.IncludeTeamSiteWithTeams = value;
+                OnPropertyChanged();
+
+                if (!value) { IncludeSites = false; }
+                else { CheckControlAllSites(); }
+            }
+        }
+
+        private bool _includeTeamSiteWithNoGroup = false;
+        public bool IncludeTeamSiteWithNoGroup
+        {
+            get { return _includeTeamSiteWithNoGroup; }
+            set
+            {
+                _includeTeamSiteWithNoGroup = value;
+                Parameters.IncludeTeamSiteWithNoGroup = value;
+                OnPropertyChanged();
+                
+                if (!value) { IncludeSites = false; }
+                else { CheckControlAllSites(); }
+            }
+        }
+
+        private bool _includeCommunication = false;
+        public bool IncludeCommunication
+        {
+            get { return _includeCommunication; }
+            set
+            {
+                _includeCommunication = value;
+                Parameters.IncludeCommunication = value;
+                OnPropertyChanged();
+
+                if (!value) { IncludeSites = false; }
+                else { CheckControlAllSites(); }
+            }
+        }
+
+        private bool _includeChannels = false;
+        public bool IncludeChannels
+        {
+            get { return _includeChannels; }
+            set
+            {
+                _includeChannels = value;
+                Parameters.IncludeChannels = value;
+                OnPropertyChanged();
+
+                if (!value) { IncludeSites = false; }
+                else { CheckControlAllSites(); }
+            }
+        }
+
+        private bool _includeClassic = false;
+        public bool IncludeClassic
+        {
+            get { return _includeClassic; }
+            set
+            {
+                _includeClassic = value;
+                Parameters.IncludeClassic = value;
+                OnPropertyChanged();
+                
+                if (!value) { IncludeSites = false; }
+                else { CheckControlAllSites(); }
+            }
+        }
 
         private bool _singleSite = true;
         public bool SingleSite
@@ -236,5 +307,34 @@ namespace NovaPointWPF.UserControls
             if (openFileDialog.ShowDialog() == true)
                 ListOfSitesPath = openFileDialog.FileName;
         }
+
+        private void CheckControlAllSites()
+        {
+            if (IsAllSitesIncluded())
+            {
+                IncludeSites = true;
+            }
+        }
+
+        private bool IsAllSitesIncluded()
+        {
+            if (IncludeTeamSite && IncludeTeamSiteWithTeams && IncludeTeamSiteWithNoGroup && IncludeCommunication && IncludeChannels && IncludeClassic)
+            {
+                return true;
+            }
+            else { return false; }
+        }
+
+
+        private void ChangeCheckedSites (bool IsChecked)
+        {
+            IncludeTeamSite = IsChecked;
+            IncludeTeamSiteWithTeams = IsChecked;
+            IncludeTeamSiteWithNoGroup = IsChecked;
+            IncludeCommunication = IsChecked;
+            IncludeChannels = IsChecked;
+            IncludeClassic = IsChecked;
+        }
+
     }
 }

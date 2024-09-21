@@ -365,12 +365,24 @@ namespace NovaPointLibrary.Solutions.Automation
     {
         public bool RenameFile { get; set; } = false;
         public SPORecycleBinItemParameters RecycleBinParam { get; set; }
-        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam { get; set; }
-        public RestoreRecycleBinAutoParameters(SPORecycleBinItemParameters recycleBinParam,
-                                               SPOTenantSiteUrlsWithAccessParameters siteAccParam)
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
         {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
+        public RestoreRecycleBinAutoParameters(bool renameFile,
+                                               SPORecycleBinItemParameters recycleBinParam,
+                                               SPOAdminAccessParameters adminAccess, 
+                                               SPOTenantSiteUrlsParameters siteParam)
+        {
+            RenameFile = renameFile;
             RecycleBinParam = recycleBinParam;
-            SiteAccParam = siteAccParam;
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
         }
     }
 }

@@ -284,27 +284,37 @@ namespace NovaPointLibrary.Solutions.Automation
 
     public class RemoveFileVersionAutoParameters : ISolutionParameters
     {
-        public bool ReportMode { get; set; } = true;
+        public bool ReportMode { get; set; }
 
         public SPOFileVersionParameters FileVersionParam { get; set; }
-        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
+        internal SPOAdminAccessParameters AdminAccess;
+        internal SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
         internal SPOListsParameters ListsParam { get; set; }
         internal SPOItemsParameters ItemsParam { get; set; }
         public SPOTenantItemsParameters TItemsParam
         {
-            get { return new(SitesAccParam, ListsParam, ItemsParam); }
+            get { return new(SiteAccParam, ListsParam, ItemsParam); }
         }
 
         public RemoveFileVersionAutoParameters(
                         bool reportMode,
                         SPOFileVersionParameters fileVersionParam,
-                        SPOTenantSiteUrlsWithAccessParameters sitesParam,
+                        SPOAdminAccessParameters adminAccess,
+                        SPOTenantSiteUrlsParameters siteParam,
                         SPOListsParameters listsParam,
                         SPOItemsParameters itemsParam)
         {
             ReportMode = reportMode;
             FileVersionParam = fileVersionParam;
-            SitesAccParam = sitesParam;
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
             ListsParam = listsParam;
             ItemsParam = itemsParam;
         }

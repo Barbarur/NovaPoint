@@ -1,12 +1,8 @@
 ﻿using Microsoft.SharePoint.Client;
-using Newtonsoft.Json;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
-using NovaPointLibrary.Commands.Utilities;
 using System.Linq.Expressions;
-using static NovaPointLibrary.Commands.SharePoint.Permision.SPOSharingLinksREST;
-using PnP.Core.Model.SharePoint;
 using NovaPointLibrary.Commands.SharePoint.Site;
 
 
@@ -197,19 +193,29 @@ namespace NovaPointLibrary.Solutions.Report
     public class ListReportParameters : ISolutionParameters
     {
         public bool IncludeStorageMetrics { get; set; }
-        internal SPOTenantSiteUrlsWithAccessParameters SitesAccParam { get; set; }
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
         internal SPOListsParameters ListsParam { get; set; }
         public SPOTenantListsParameters TListsParam
         {
-            get { return new(SitesAccParam, ListsParam); }
+            get { return new(SiteAccParam, ListsParam); }
         }
         public ListReportParameters(
             bool includeStorageMetrics,
-            SPOTenantSiteUrlsWithAccessParameters sitesParam,
+            SPOAdminAccessParameters adminAccess,
+            SPOTenantSiteUrlsParameters siteParam,
             SPOListsParameters listsParam)
         {
             IncludeStorageMetrics = includeStorageMetrics;
-            SitesAccParam = sitesParam;
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
             ListsParam = listsParam;
         }
     }

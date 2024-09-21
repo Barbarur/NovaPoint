@@ -80,13 +80,14 @@ namespace NovaPointWPF.Pages.Menus
 
 
         // RECYCLE BIN
-        private void ClearRecycleBinAutoClick(object sender, RoutedEventArgs e)
-        {
-            GoToSolutionForm(new ClearRecycleBinAutoForm());
-        }
         private void RestoreRecycleBinAutoClick(object sender, RoutedEventArgs e)
         {
             GoToSolutionForm(new RestoreRecycleBinAutoForm());
+        }
+
+        private void ClearRecycleBinAutoClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new ClearRecycleBinAutoForm());
         }
 
 

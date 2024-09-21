@@ -9,7 +9,7 @@
       d:DesignHeight="500" d:DesignWidth="800"
       Title="RemoveSitesAutoForm">
 
-    <Grid Background="Transparent">
+    <Grid Margin="0,0,0,16">
         
         <StackPanel>
 

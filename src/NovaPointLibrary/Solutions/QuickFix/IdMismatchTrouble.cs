@@ -172,11 +172,20 @@ namespace NovaPointLibrary.Solutions.QuickFix
             set { _userUpn = value.Trim(); }
         }
 
-        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam { get; set; }
-
-        public IdMismatchTroubleParameters(SPOTenantSiteUrlsWithAccessParameters siteParam)
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
         {
-            SiteAccParam = siteParam;
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
+
+        public IdMismatchTroubleParameters(SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam)
+        {
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
         }
     }
 }

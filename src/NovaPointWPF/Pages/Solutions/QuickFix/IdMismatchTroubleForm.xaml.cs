@@ -42,13 +42,7 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
-            {
-                AdminAccess = AdminF.Parameters,
-                SiteParam = SiteF.Parameters,
-            };
-
-            IdMismatchTroubleParameters parameters = new(siteAccParam)
+            IdMismatchTroubleParameters parameters = new(AdminF.Parameters, SiteF.Parameters)
             {
                 ReportMode = Mode.ReportMode,
                 UserUpn = this.UserUpn,

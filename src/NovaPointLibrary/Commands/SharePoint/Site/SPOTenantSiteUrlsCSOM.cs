@@ -28,9 +28,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         {
             _appInfo.IsCancelled();
 
-            if (_param.AllSiteCollections)
+            if (_param.ActiveSites)
             {
-                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAllAsync(_param.IncludeShareSite, _param.IncludePersonalSite, _param.OnlyGroupIdDefined);
+                List<SiteProperties> collSiteCollections = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAllAsync(_param);
 
                 ProgressTracker progress = new(_logger, collSiteCollections.Count);
                 foreach (var oSiteCollection in collSiteCollections)

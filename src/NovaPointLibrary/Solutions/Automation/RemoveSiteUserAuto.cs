@@ -42,9 +42,8 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public static async Task RunAsync(RemoveUserAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            parameters.SiteAccParam.SiteParam.IncludeSubsites = false;
-
             NPLogger logger = new(uiAddLog, "RemoveSiteUserAuto", parameters);
+
             try
             {
                 AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
@@ -59,29 +58,6 @@ namespace NovaPointLibrary.Solutions.Automation
                 logger.ScriptFinish(ex);
             }
         }
-
-        //public RemoveSiteUserAuto(RemoveUserAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        //{
-        //    Parameters = parameters;
-        //    _param.SiteAccParam.SiteParam.IncludeSubsites = false;
-
-        //    _logger = new(uiAddLog, this.GetType().Name, parameters);
-        //    _appInfo = new(_logger, cancelTokenSource);
-        //}
-
-        //public async Task RunAsync()
-        //{
-        //    try
-        //    {
-        //        await RunScriptAsync();
-
-        //        _logger.ScriptFinish();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.ScriptFinish(ex);
-        //    }
-        //}
 
         private async Task RunScriptAsync()
         {
@@ -152,13 +128,24 @@ namespace NovaPointLibrary.Solutions.Automation
     public class RemoveUserAutoParameters : ISolutionParameters
     {
         public SPOSiteUserParameters UserParam {  get; set; }
-        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam {  get; set; }
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
 
         public RemoveUserAutoParameters(SPOSiteUserParameters userParam,
-                                        SPOTenantSiteUrlsWithAccessParameters siteParam)
+                                        SPOAdminAccessParameters adminAccess,
+                                        SPOTenantSiteUrlsParameters siteParam)
         {
             UserParam = userParam;
-            SiteAccParam = siteParam;
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
+            SiteParam.IncludeSubsites = false;
         }
     }
 }

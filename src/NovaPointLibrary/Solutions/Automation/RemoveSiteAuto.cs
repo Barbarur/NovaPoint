@@ -24,11 +24,11 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionName = "Delete Site Collections and Subsites";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSiteAuto";
 
-        private SPOTenantSiteUrlsWithAccessParameters _param;
+        private RemoveSiteAutoParameters _param;
         private readonly NPLogger _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private RemoveSiteAuto(NPLogger logger, Commands.Authentication.AppInfo appInfo, SPOTenantSiteUrlsWithAccessParameters parameters)
+        private RemoveSiteAuto(NPLogger logger, Commands.Authentication.AppInfo appInfo, RemoveSiteAutoParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -44,19 +44,13 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public static async Task RunAsync(RemoveSiteAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOTenantSiteUrlsWithAccessParameters param = new();
-            param.SiteParam.SiteUrl = String.Empty;
-            param.SiteParam.AllSiteCollections = false;
-            param.SiteParam.ListOfSitesPath = parameters.ListOfSitesPath;
-            param.AdminAccess.AddAdmin = true;
-            param.AdminAccess.RemoveAdmin = false;
+            NPLogger logger = new(uiAddLog, "RemoveSiteAuto", parameters);
 
-            NPLogger logger = new(uiAddLog, "RemoveSiteAuto", param);
             try
             {
                 Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                await new RemoveSiteAuto(logger, appInfo, param).RunScriptAsync();
+                await new RemoveSiteAuto(logger, appInfo, parameters).RunScriptAsync();
 
                 logger.ScriptFinish();
 
@@ -72,7 +66,7 @@ namespace NovaPointLibrary.Solutions.Automation
             _appInfo.IsCancelled();
 
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param).GetAsync())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
@@ -184,11 +178,28 @@ namespace NovaPointLibrary.Solutions.Automation
 
     public class RemoveSiteAutoParameters : ISolutionParameters
     {
-        public string ListOfSitesPath { get; set; }
+        internal readonly SPOAdminAccessParameters AdminAccess;
+        internal readonly SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        {
+            get
+            {
+                return new(AdminAccess, SiteParam);
+            }
+        }
 
         public RemoveSiteAutoParameters(string listOfSitesPath)
         {
-            ListOfSitesPath = listOfSitesPath;
+            AdminAccess = new()
+            {
+                AddAdmin = true,
+                RemoveAdmin = false,
+            };
+
+            SiteParam = new()
+            {
+                ListOfSitesPath = listOfSitesPath,
+            };
         }
     }
 }
