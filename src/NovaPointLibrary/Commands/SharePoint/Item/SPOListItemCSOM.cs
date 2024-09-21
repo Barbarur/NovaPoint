@@ -172,7 +172,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             }
             else
             {
-                _logger.LogUI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' has {oList.ItemCount} items.");
+                _logger.LogTxt(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' has {oList.ItemCount} items.");
             }
         }
 

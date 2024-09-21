@@ -200,7 +200,6 @@ namespace NovaPointLibrary.Commands.Authentication
 
                 if (difference.TotalMinutes > 10)
                 {
-                    _logger.LogTxt(GetType().Name, $"Got access token from memory");
                     result = cachedResult;
                 }
             }
@@ -240,8 +239,6 @@ namespace NovaPointLibrary.Commands.Authentication
 
             if (Settings.CachingToken)
             {
-                _logger.LogTxt(GetType().Name, "Adding cached token");
-
                 var cacheHelper = await TokenCacheHelper.GetCache();
                 cacheHelper.RegisterCache(_app.UserTokenCache);
             }
@@ -252,25 +249,14 @@ namespace NovaPointLibrary.Commands.Authentication
                 var accounts = await _app.GetAccountsAsync();
                 result = await _app.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
                             .ExecuteAsync();
-
-                _logger.LogTxt(GetType().Name, $"Finish aquiring new Access Token with Refresh Token.");
             }
-            catch (MsalUiRequiredException ex)
+            catch
             {
                 this.IsCancelled();
 
                 result = await _app.AcquireTokenInteractive(scopes)
                                   .WithUseEmbeddedWebView(false)
                                   .ExecuteAsync();
-
-                _logger.LogTxt(GetType().Name, $"Finish aquiring new Access Token from AAD");
-            }
-            catch (MsalServiceException ex)
-            {
-                _logger.LogTxt(GetType().Name, $"FAILED aquiring new Access Token");
-                _logger.LogTxt(GetType().Name, ex.Message);
-                _logger.LogTxt(GetType().Name, $"{ex.StackTrace}");
-                throw;
             }
 
             return result;
@@ -323,7 +309,7 @@ namespace NovaPointLibrary.Commands.Authentication
                     string responseContent = await response.Content.ReadAsStringAsync();
                     string exceptionMessage = $"Request to API '{message.RequestUri}' failed with status code {response.StatusCode} and response content: {responseContent}.";
 
-                    IEnumerable<string> values;
+                    IEnumerable<string>? values;
                     if (response.Headers.TryGetValues("request-id", out values))
                     {
                         exceptionMessage += $" Request ID: {values.First()}";

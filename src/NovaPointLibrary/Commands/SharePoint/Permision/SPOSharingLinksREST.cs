@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Commands.Utilities;
-using NovaPointLibrary.Solutions.Report;
 using System.Text;
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
@@ -104,6 +103,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                     ctx.Load(web);
                     ctx.ExecuteQuery();
 
+                    reportRecord.SiteTitle = web.Title;
                     reportRecord.SiteUrl = web.Url;
 
                     restSharingInfo = await GetItemSharingInformationAsync(reportRecord.SiteUrl, reportRecord.ListId, reportRecord.ItemID);
@@ -176,6 +176,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
 
         public class SPOSharingLinksRecord : ISolutionRecord
         {
+            internal string SiteTitle { get; set; } = String.Empty;
             internal string SiteUrl { get; set; }
 
             internal Guid ListId = Guid.Empty;
