@@ -17,7 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Resources\NovaPoint.png" />
+    <None Remove="res\img\logoGithub.png" />
+    <None Remove="res\img\LogoLinkedIn.png" />
+    <None Remove="res\img\LogoTwitterX.png" />
+    <None Remove="res\img\LogoYoutube.png" />
+    <None Remove="res\NovaPoint.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,7 +48,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\NovaPoint.png" />
+    <Resource Include="res\img\logoGithub.png" />
+    <Resource Include="res\img\LogoLinkedIn.png" />
+    <Resource Include="res\img\LogoTwitterX.png" />
+    <Resource Include="res\img\LogoYoutube.png" />
+    <Resource Include="res\img\NovaPoint.png" />
   </ItemGroup>
 
 </Project>

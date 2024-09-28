@@ -32,31 +32,46 @@ namespace NovaPointWPF.Pages
             else { VersionNo.Content = "v " + version; }
         }
 
-        private void GoToGitHub(object sender, RoutedEventArgs e)
-        {
-            string NavigateUri = "https://github.com/Barbarur/NovaPoint";
-            var url = NavigateUri.Replace("&", "^&");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-        }
 
-        private void GoToDocumentation(object sender, RoutedEventArgs e)
+        private void GoToDocsClick(object sender, RoutedEventArgs e)
         {
             string NavigateUri = "https://github.com/Barbarur/NovaPoint/wiki";
-            var url = NavigateUri.Replace("&", "^&");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            OpenBrowser(NavigateUri);
+        }
+
+        private void GoToYoutubeClick(object sender, RoutedEventArgs e)
+        {
+            string NavigateUri = "https://www.youtube.com/@NovaPoint22";
+            OpenBrowser(NavigateUri);
+        }
+
+        private void GoToGitHubClick(object sender, RoutedEventArgs e)
+        {
+            string NavigateUri = "https://github.com/Barbarur/NovaPoint";
+            OpenBrowser(NavigateUri);
         }
         
-        private void GoToLinkedIn(object sender, RoutedEventArgs e)
+        private void GoToLinkedInClick(object sender, RoutedEventArgs e)
         {
             string NavigateUri = "https://www.linkedin.com/company/novapointopen";
-            var url = NavigateUri.Replace("&", "^&");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            OpenBrowser(NavigateUri);
         }
-        
-        private void GoToFund(object sender, RoutedEventArgs e)
+
+        private void GoToTwitterClick(object sender, RoutedEventArgs e)
+        {
+            string NavigateUri = "https://x.com/NovaPoint22";
+            OpenBrowser(NavigateUri);
+        }
+
+        private void GoToFundClick(object sender, RoutedEventArgs e)
         {
             string NavigateUri = "https://buymeacoffee.com/novapoint";
-            var url = NavigateUri.Replace("&", "^&");
+            OpenBrowser(NavigateUri);
+        }
+
+        private void OpenBrowser(string navigateUri)
+        {
+            var url = navigateUri.Replace("&", "^&");
             Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
         }
 
