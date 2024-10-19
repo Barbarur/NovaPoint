@@ -1,16 +1,11 @@
-﻿using Microsoft.Graph.ExternalConnectors;
-using Microsoft.Identity.Client;
-using Microsoft.Online.SharePoint.TenantAdministration;
+﻿using Microsoft.Identity.Client;
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Solutions;
-using PnP.Framework.Modernization.Functions;
-using System.Reflection;
-using System.Net.Http;
-using System.Net;
 using static Microsoft.SharePoint.Client.ClientContextExtensions;
-using AngleSharp.Io;
+using System.Net;
+
 
 namespace NovaPointLibrary.Commands.Authentication
 {
@@ -25,7 +20,7 @@ namespace NovaPointLibrary.Commands.Authentication
             set
             {
                 _adminUrl = value;
-                _logger.LogTxt(GetType().Name, $"SPO Admin URL '{value}'");
+                _logger.LogTxt(GetType().Name, $"SPO -admin URL '{value}'");
             }
         }
 
@@ -64,9 +59,10 @@ namespace NovaPointLibrary.Commands.Authentication
 
         private readonly HttpClient HttpsClient = new();
 
-        internal AppSettings Settings { get; set; } = new();
+        internal AppSettings Settings { get; set; }
         internal CancellationToken CancelToken { get; init; }
 
+        private static readonly SemaphoreSlim _semaphore = new(1, 1);
         private readonly IPublicClientApplication _app;
         private AuthenticationResult? _graphAuthenticationResult = null;
         private AuthenticationResult? _adminAuthenticationResult = null;
@@ -87,6 +83,8 @@ namespace NovaPointLibrary.Commands.Authentication
                                                  .WithAuthority(authority)
                                                  .WithDefaultRedirectUri()
                                                  .Build();
+
+            HttpsClient.Timeout = TimeSpan.FromMinutes(2);
         }
 
         internal static async Task<AppInfo> BuildAsync(NPLogger logger, CancellationTokenSource cancelTokenSource)
@@ -237,32 +235,44 @@ namespace NovaPointLibrary.Commands.Authentication
         {
             this.IsCancelled();
 
-            if (Settings.CachingToken)
-            {
-                var cacheHelper = await TokenCacheHelper.GetCache();
-                cacheHelper.RegisterCache(_app.UserTokenCache);
-            }
+            using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
 
             AuthenticationResult result;
+            await _semaphore.WaitAsync();
             try
             {
-                var accounts = await _app.GetAccountsAsync();
-                result = await _app.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
-                            .ExecuteAsync();
-            }
-            catch
-            {
-                this.IsCancelled();
 
-                result = await _app.AcquireTokenInteractive(scopes)
-                                  .WithUseEmbeddedWebView(false)
-                                  .ExecuteAsync();
+                if (Settings.CachingToken)
+                {
+                    var cacheHelper = await TokenCacheHelper.GetCache();
+                    cacheHelper.RegisterCache(_app.UserTokenCache);
+                }
+
+                try
+                {
+                    var accounts = await _app.GetAccountsAsync();
+                    result = await _app.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
+                                .ExecuteAsync(cts.Token);
+                }
+                catch
+                {
+                    this.IsCancelled();
+
+                    result = await _app.AcquireTokenInteractive(scopes)
+                                      .WithUseEmbeddedWebView(false)
+                                      .ExecuteAsync(cts.Token);
+                }
+
+            }
+            finally
+            {
+                _semaphore.Release();
             }
 
             return result;
         }
 
-        internal async Task<string> SendHttpRequestMessageAsync(HttpRequestMessage message)
+        internal async Task<string> SendHttpRequestMessageAsync(Func<HttpMethod, string, string, Task<HttpRequestMessage>> getMessage, HttpMethod method, string apiUrl, string content = "")
         {
             IsCancelled();
 
@@ -270,49 +280,75 @@ namespace NovaPointLibrary.Commands.Authentication
             int retryCount = 0;
             int backoffInterval = 500;
 
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             while (retryCount < retryMax)
             {
-                HttpResponseMessage response = await HttpsClient.SendAsync(message, CancelToken);
+                int waitTime = backoffInterval;
+                backoffInterval *= 2;
+                retryCount++;
+
+                HttpRequestMessage requestMessage = await getMessage(method, apiUrl, content);
+                HttpResponseMessage response;
+                try
+                {
+                    response = await HttpsClient.SendAsync(requestMessage, CancelToken);
+                }
+                catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+                {
+                    _logger.LogTxt(GetType().Name, $"The request timed out. Retrying after {waitTime} miliseconds.");
+
+                    await Task.Delay(waitTime);
+                    continue;
+                }
+                catch (HttpRequestException e) when (e.InnerException is System.Net.Sockets.SocketException)
+                {
+                    _logger.LogTxt(GetType().Name, $"Socket exception: {e.Message}. Retrying after {waitTime} miliseconds.");
+
+                    await Task.Delay(waitTime);
+                    continue;
+                }
+                catch (HttpRequestException ex)
+                {
+                    _logger.LogTxt(GetType().Name, $"An error occurred while sending the request: {ex.Message}. Retrying after {waitTime} miliseconds.");
+                    await Task.Delay(waitTime);
+                    continue;
+                }
+                catch (Exception e)
+                {
+                    _logger.Debug(GetType().Name, $"ERROR SENDING MESSAGE TO {requestMessage.RequestUri}. EXCEPTION MESSAGE: {e.Message}.");
+                    throw;
+                }
 
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogTxt(GetType().Name, $"Successful response {responseContent}");
+                    _logger.LogTxt(GetType().Name, $"Successful response {responseContent}.");
                     return responseContent;
                 }
                 else if (response != null && (response.StatusCode == HttpStatusCode.TooManyRequests || response.StatusCode == HttpStatusCode.ServiceUnavailable))
                 {
-                    int waitTime;
                     var retryAfter = response.Headers.RetryAfter;
-                    if (retryAfter == null || retryAfter.Delta == null)
-                    {
-                        waitTime = backoffInterval;
-                        backoffInterval *= 2;
-                    }
-                    else
+                    if (retryAfter != null && retryAfter.Delta != null)
                     {
                         waitTime = retryAfter.Delta.Value.Seconds * 1000;
                     }
-                    _logger.LogUI(GetType().Name, $"API request exceeding usage limits. Retrying after {waitTime} miliseconds.");
+                    _logger.LogTxt(GetType().Name, $"API request exceeding usage limits. Retrying after {waitTime} miliseconds.");
 
                     await Task.Delay(waitTime);
-                    retryCount++;
-
                 }
                 else if (response == null)
                 {
-                    string exceptionMessage = $"Response to API request '{message.RequestUri}' was null.";
+                    string exceptionMessage = $"Response to API request '{requestMessage.RequestUri}' was null.";
                     throw new Exception(exceptionMessage);
                 }
                 else
                 {
                     string responseContent = await response.Content.ReadAsStringAsync();
-                    string exceptionMessage = $"Request to API '{message.RequestUri}' failed with status code {response.StatusCode} and response content: {responseContent}.";
+                    string exceptionMessage = $"Request to API '{requestMessage.RequestUri}' failed with status code {response.StatusCode} and response content: {responseContent}.";
 
-                    IEnumerable<string>? values;
-                    if (response.Headers.TryGetValues("request-id", out values))
+                    if (response.Headers.TryGetValues("request-id", out IEnumerable<string>? values))
                     {
-                        exceptionMessage += $" Request ID: {values.First()}";
+                        exceptionMessage += $" Request ID: {values.First()}.";
                     }
 
                     throw new Exception(exceptionMessage);
