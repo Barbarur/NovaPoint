@@ -15,12 +15,12 @@ namespace NovaPointLibrary.Solutions
 
         private readonly Stopwatch SW = new();
 
-        static ReaderWriterLockSlim txtRWL = new();
-        static ReaderWriterLockSlim csvRWL = new();
-        static ReaderWriterLockSlim errorRWL = new();
+        static readonly ReaderWriterLockSlim txtRWL = new();
+        static readonly ReaderWriterLockSlim csvRWL = new();
+        static readonly ReaderWriterLockSlim errorRWL = new();
 
-        private List<string> _cachedKeyValues = new();
-        private List<string> _cachedLogTxt = new();
+        private readonly List<string> _cachedKeyValues = new();
+        private readonly List<string> _cachedLogTxt = new();
 
         public NPLogger(Action<LogInfo> uiAddLog, string solutionName, ISolutionParameters parameters)
         {
@@ -189,7 +189,7 @@ namespace NovaPointLibrary.Solutions
 
         internal static string GetLogLine(string classMethod, string log)
         {
-            return $"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} - [{classMethod}] - {log}";
+            return $"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} [{Environment.CurrentManagedThreadId}] - [{classMethod}] - {log}";
         }
 
         internal void LogTxt(string classMethod, string log)
@@ -204,6 +204,21 @@ namespace NovaPointLibrary.Solutions
             }
 
             WriteLogFile(logLine);
+        }
+
+        internal void Debug(string classMethod, string log)
+        {
+            return;
+            //string logLine = GetLogLine(classMethod, log);
+
+            //_cachedLogTxt.Add(logLine);
+
+            //while (_cachedLogTxt.Count > 20)
+            //{
+            //    _cachedLogTxt.RemoveAt(0);
+            //}
+
+            //WriteLogFile(logLine);
         }
 
         internal void LogUI(string classMethod, string log)
