@@ -2,11 +2,6 @@
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Item
 {
@@ -56,15 +51,15 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 }
             };
 
-            var content = JsonConvert.SerializeObject(x);
+            var contentCreateCopyJobs = JsonConvert.SerializeObject(x);
 
-            string response = await new RESTAPIHandler(_logger, _appInfo).PostAsync(api, content);
+            string responseCreateCopyJobs = await new RESTAPIHandler(_logger, _appInfo).PostAsync(api, contentCreateCopyJobs);
 
-            var resultCollection = JsonConvert.DeserializeObject<RESTResultCollection<RESTCreateCopyJobs>>(response);
+            var resultCollection = JsonConvert.DeserializeObject<RESTResultCollection<RESTCreateCopyJobs>>(responseCreateCopyJobs);
 
             if (resultCollection == null || !resultCollection.Items.Any())
             {
-                throw new("Copy job creation response is empty");
+                throw new($"Copy job creation response is empty");
             }
 
             var createCopyJob = resultCollection.Items.First();
@@ -74,27 +69,29 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 copyJobInfo = createCopyJob
             };
 
-            var contentcopyJobInfo = JsonConvert.SerializeObject(copyJobInfo);
+            var contentGetCopyJobProgress = JsonConvert.SerializeObject(copyJobInfo);
 
             api = siteUrl + "/_api/site/GetCopyJobProgress";
-            response = await new RESTAPIHandler(_logger, _appInfo).PostAsync(api, contentcopyJobInfo);
+            string responseGetCopyJobProgress = await new RESTAPIHandler(_logger, _appInfo).PostAsync(api, contentGetCopyJobProgress);
+            _logger.Debug(GetType().Name, $"Job progress for {contentCreateCopyJobs} is {responseGetCopyJobProgress}");
 
-            var copyJobProgress = JsonConvert.DeserializeObject<RESTCopyJobProgress>(response);
+            var copyJobProgress = JsonConvert.DeserializeObject<RESTCopyJobProgress>(responseGetCopyJobProgress);
             if (copyJobProgress == null)
             {
-                throw new("Copy job progress respose is empty.");
+                throw new($"Copy job progress respose is empty.");
             }
 
             while (copyJobProgress.JobState != 0)
             {
                 // sleep 1 second
                 await Task.Delay(1000);
-                response = await new RESTAPIHandler(_logger, _appInfo).PostAsync(api, contentcopyJobInfo);
+                responseGetCopyJobProgress = await new RESTAPIHandler(_logger, _appInfo).PostAsync(api, contentGetCopyJobProgress);
+                _logger.Debug(GetType().Name, $"Job progress for {contentCreateCopyJobs} is {responseGetCopyJobProgress}");
 
-                copyJobProgress = JsonConvert.DeserializeObject<RESTCopyJobProgress>(response);
+                copyJobProgress = JsonConvert.DeserializeObject<RESTCopyJobProgress>(responseGetCopyJobProgress);
                 if (copyJobProgress == null)
                 {
-                    throw new("Copy job progress respose is empty.");
+                    throw new($"Copy job progress respose is empty.");
                 }
             }
 
@@ -110,14 +107,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 }
             }
 
-
         }
 
         private string EncodePath(string path)
         {
             var parts = path.Split("/");
             var encodedPath = string.Join("/", parts.Select(p => Uri.EscapeDataString(p)));
-            _logger.LogTxt(GetType().Name, $"Encoded path {encodedPath}");
+            _logger.Debug(GetType().Name, $"ENCODED PATH '{encodedPath}'");
             return encodedPath;
         }
     }

@@ -208,8 +208,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 dicItemsByUrlDepth[depth].Add(oListItem);
 
-
-            _logger.LogUI(GetType().Name, $"Url: {oListItem["FileRef"]} and Depth {depth}");
+                _logger.Debug(GetType().Name, $"Url: {oListItem["FileRef"]} and Depth {depth}");
             }
 
             return dicItemsByUrlDepth.OrderBy(kvp => kvp.Key).Select(kvp => kvp.Value).ToList();
@@ -234,13 +233,18 @@ namespace NovaPointLibrary.Solutions.Automation
             await Parallel.ForEachAsync(listItemsToMove, par, async (oListItem, _) =>
             {
                 _appInfo.IsCancelled();
-                _logger.LogUI(GetType().Name, $"COPY Url: {oListItem["FileRef"]}");
 
                 var itemDestinationServerRelativeUrl = GetItemDestinationServerRelativeUrl(oListItem, destinationServerRelativeUrl);
-                _logger.LogUI(GetType().Name, $"DESTINATION IS: {itemDestinationServerRelativeUrl}");
                 try
                 {
-                    await CopyMoveListItem(sourceWeb, oListItem, itemDestinationServerRelativeUrl);
+                    string destinationFolderServerRelativeUrl = itemDestinationServerRelativeUrl.Remove(itemDestinationServerRelativeUrl.LastIndexOf("/"));
+
+                    if (!_param.ReportMode)
+                    {
+                        await new RESTCopyMoveFileFolder(_logger, _appInfo).CopyMoveAsync(sourceWeb.Url, (string)oListItem["FileRef"], destinationFolderServerRelativeUrl, _param.IsMove, _param.SameWebCopyMoveOptimization);
+                    }
+
+                    RecordCSV(new(_param, "Success", (string)oListItem["FileRef"], itemDestinationServerRelativeUrl));
                 }
                 catch (Exception ex)
                 {
@@ -255,7 +259,6 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private string GetItemDestinationServerRelativeUrl(ListItem oListItem, string destinationServerRelativeUrl)
         {
-            _logger.LogUI(GetType().Name, $"GET DESTINATION FOR: {destinationServerRelativeUrl}");
             string listItemServerRelativeUrl = (string)oListItem["FileRef"];
             string sourceFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, oListItem.ParentList.RootFolder.ServerRelativeUrl.Length);
 
@@ -264,20 +267,6 @@ namespace NovaPointLibrary.Solutions.Automation
                 sourceFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, _param.SourceItemsParam.FolderRelativeUrl.Length);
             }
             return string.Concat(destinationServerRelativeUrl, sourceFolderRelativeUrl);
-        }
-
-        private async Task CopyMoveListItem(Web sourceWeb, ListItem oListItem, string destinationFileServerRelativeUrl)
-        {
-            _appInfo.IsCancelled();
-
-            string destinationFolderServerRelativeUrl = destinationFileServerRelativeUrl.Remove(destinationFileServerRelativeUrl.LastIndexOf("/"));
-
-            if (!_param.ReportMode)
-            {
-                await new RESTCopyMoveFileFolder(_logger, _appInfo).CopyMoveAsync(sourceWeb.Url, (string)oListItem["FileRef"], destinationFolderServerRelativeUrl, _param.IsMove, _param.SameWebCopyMoveOptimization);
-            }
-
-            RecordCSV(new(_param, "Success", (string)oListItem["FileRef"], destinationFileServerRelativeUrl));
         }
 
         private void RecordCSV(CopyDuplicateFileAutoRecord record)
@@ -396,9 +385,9 @@ namespace NovaPointLibrary.Solutions.Automation
             string sourceSiteUrl,
             string sourceListTitle,
             SPOItemsParameters sourceItemsParam,
-            string targetSiteUrl,
-            string targetListTitle,
-            string targetFolderServerRelativeUrl)
+            string destinationSiteURL,
+            string destinationListTitle,
+            string destinationFolderServerRelativeUrl)
         {
             ReportMode = reportMode;
             IsMove = isMove;
@@ -409,9 +398,10 @@ namespace NovaPointLibrary.Solutions.Automation
             SourceListTitle = sourceListTitle;
             SourceItemsParam = sourceItemsParam;
             
-            DestinationSiteURL = targetSiteUrl;
-            DestinationListTitle = targetListTitle;
-            DestinationFolderServerRelativeUrl = targetFolderServerRelativeUrl;
+            DestinationSiteURL = destinationSiteURL;
+            DestinationListTitle = destinationListTitle;
+            DestinationFolderServerRelativeUrl = destinationFolderServerRelativeUrl;
+
         }
 
     }
