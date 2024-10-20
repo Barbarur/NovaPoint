@@ -100,6 +100,21 @@
 
                         </StackPanel>
 
+                        <TextBlock/>
+                        <TextBlock
+                            Style="{DynamicResource TextBlockBody}">
+                            
+                            <Run Text="If using"/>
+                            <Run FontWeight="Bold" Text="Duplicate"/>
+                            <Run Text="and"/>
+                            <Run FontStyle="Italic" TextDecorations="Underline"  Text="source site"/>
+                            <Run Text="and"/>
+                            <Run FontStyle="Italic" TextDecorations="Underline"  Text="destination site"/>
+                            <Run Text="are the same, the performed action will be"/>
+                            <Run FontWeight="Bold" Text="Move."/>
+
+                        </TextBlock>
+                        
                     </StackPanel>
                 </Border>
 
