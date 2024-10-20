@@ -1,28 +1,15 @@
-﻿using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.SharePoint.Item;
-using NovaPointLibrary.Commands.Utilities;
-using NovaPointLibrary.Solutions;
-using PnP.Framework.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Core.Logging;
 using System.Net;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using File = Microsoft.SharePoint.Client.File;
 
 namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
 {
     internal class SPORecycleBinItemCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
 
-        internal SPORecycleBinItemCSOM(NPLogger logger, Authentication.AppInfo appInfo)
+        internal SPORecycleBinItemCSOM(LoggerSolution logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -32,7 +19,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.GetBatchAsync";
-            _logger.LogTxt(methodName, $"Start getting Items from the Recycle Bin from {siteUrl}");
+            _logger.Info(methodName, $"Start getting Items from the Recycle Bin from {siteUrl}");
 
             
             string? pagingInfo = null;
@@ -58,7 +45,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
             }
             while (recycleBinItemCollection?.Count == 5000);
 
-            _logger.LogTxt(methodName, $"Finish getting Items from the Recycle Bin from {siteUrl}");
+            _logger.Info(methodName, $"Finish getting Items from the Recycle Bin from {siteUrl}");
         }
 
         internal async IAsyncEnumerable<RecycleBinItem> GetAsync(string siteUrl, SPORecycleBinItemParameters parameters)
@@ -71,7 +58,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
                 await foreach (var recycleBinItemCollection in GetBatchAsync(siteUrl, RecycleBinItemState.FirstStageRecycleBin))
                 {
                     counter += recycleBinItemCollection.Count;
-                    _logger.LogUI(GetType().Name, $"Collected {counter} items from first-stage recycle bin");
+                    _logger.UI(GetType().Name, $"Collected {counter} items from first-stage recycle bin");
                     foreach (var oRecycleBinItem in recycleBinItemCollection)
                     {
                         if (MatchParameters(oRecycleBinItem, parameters)) { yield return oRecycleBinItem; }
@@ -85,7 +72,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
                 await foreach (var recycleBinItemCollection in GetBatchAsync(siteUrl, RecycleBinItemState.SecondStageRecycleBin))
                 {
                     counter += recycleBinItemCollection.Count;
-                    _logger.LogUI(GetType().Name, $"Collected {counter} items from second-stage the recycle bin");
+                    _logger.UI(GetType().Name, $"Collected {counter} items from second-stage the recycle bin");
                     foreach (var oRecycleBinItem in recycleBinItemCollection)
                     {
                         if (MatchParameters(oRecycleBinItem, parameters)) { yield return oRecycleBinItem; }
@@ -142,7 +129,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.RemoveAsync";
-            _logger.LogTxt(methodName, $"Removing item {oRecycleBinItem.Title}");
+            _logger.Info(methodName, $"Removing item {oRecycleBinItem.Title}");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -155,7 +142,7 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
         internal async Task RestoreAsync(string siteUrl, RecycleBinItem oRecycleBinItem)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Restoring item {oRecycleBinItem.Title} with id {oRecycleBinItem.Id} using CSOM");
+            _logger.Info(GetType().Name, $"Restoring item {oRecycleBinItem.Title} with id {oRecycleBinItem.Id} using CSOM");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 

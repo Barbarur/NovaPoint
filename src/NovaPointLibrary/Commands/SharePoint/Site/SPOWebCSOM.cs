@@ -1,21 +1,16 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     internal class SPOWebCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
         
-        internal SPOWebCSOM(NPLogger logger, AppInfo appInfo)
+        internal SPOWebCSOM(LoggerSolution logger, AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -35,7 +30,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         internal async Task<Web> GetAsync(string siteUrl, Expression<Func<Web, object>>[] retrievalExpressions)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting Site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting Site '{siteUrl}'");
 
             var defaultExpressions = new Expression<Func<Web, object>>[]
             {

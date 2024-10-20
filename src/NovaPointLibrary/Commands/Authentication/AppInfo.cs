@@ -2,16 +2,16 @@
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Commands.Utilities;
-using NovaPointLibrary.Solutions;
 using static Microsoft.SharePoint.Client.ClientContextExtensions;
 using System.Net;
+using NovaPointLibrary.Core.Logging;
 
 
 namespace NovaPointLibrary.Commands.Authentication
 {
     public class AppInfo
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
 
         private string _adminUrl = string.Empty;
         internal string AdminUrl
@@ -20,7 +20,7 @@ namespace NovaPointLibrary.Commands.Authentication
             set
             {
                 _adminUrl = value;
-                _logger.LogTxt(GetType().Name, $"SPO -admin URL '{value}'");
+                _logger.Info(GetType().Name, $"SPO -admin URL '{value}'");
             }
         }
 
@@ -31,7 +31,7 @@ namespace NovaPointLibrary.Commands.Authentication
             set
             {
                 _rootPersonalUrl = value;
-                _logger.LogTxt(GetType().Name, $"SPO -my URL '{value}'");
+                _logger.Info(GetType().Name, $"SPO -my URL '{value}'");
             }
         }
         private string _rootSharedUrl = string.Empty;
@@ -41,7 +41,7 @@ namespace NovaPointLibrary.Commands.Authentication
             set
             {
                 _rootSharedUrl = value;
-                _logger.LogTxt(GetType().Name, $"SPO root URL '{value}'");
+                _logger.Info(GetType().Name, $"SPO root URL '{value}'");
             }
         }
         private string _domain = string.Empty;
@@ -69,7 +69,7 @@ namespace NovaPointLibrary.Commands.Authentication
         private AuthenticationResult? _rootPersonalAuthenticationResult = null;
         private AuthenticationResult? _rootSharedAuthenticationResult = null;
 
-        internal AppInfo(NPLogger logger, CancellationTokenSource cancelTokenSource)
+        internal AppInfo(LoggerSolution logger, CancellationTokenSource cancelTokenSource)
         {
             _logger = logger;
 
@@ -87,17 +87,17 @@ namespace NovaPointLibrary.Commands.Authentication
             HttpsClient.Timeout = TimeSpan.FromMinutes(2);
         }
 
-        internal static async Task<AppInfo> BuildAsync(NPLogger logger, CancellationTokenSource cancelTokenSource)
+        internal static async Task<AppInfo> BuildAsync(LoggerSolution logger, CancellationTokenSource cancelTokenSource)
         {
             AppInfo appInfo = new(logger, cancelTokenSource);
             appInfo.IsCancelled();
 
             string url = $"/sites/root";
             var graphUser = await new GraphAPIHandler(logger, appInfo).GetObjectAsync<GraphSitesRoot>(url);
-            logger.LogTxt("Appinfo", $"Hostname: {graphUser.SiteCollection.Hostname}");
+            logger.Info("Appinfo", $"Hostname: {graphUser.SiteCollection.Hostname}");
 
             string domain = graphUser.SiteCollection.Hostname.Remove(graphUser.SiteCollection.Hostname.IndexOf(".sharepoint.com", StringComparison.OrdinalIgnoreCase));
-            logger.LogTxt("Appinfo", $"Domain: {domain}");
+            logger.Info("Appinfo", $"Domain: {domain}");
 
             appInfo.Domain = domain;
 
@@ -121,7 +121,7 @@ namespace NovaPointLibrary.Commands.Authentication
 
             if (result != null)
             {
-                _logger.LogTxt(GetType().Name, $"Access Token expiration time: {result.ExpiresOn}");
+                _logger.Info(GetType().Name, $"Access Token expiration time: {result.ExpiresOn}");
                 return result.AccessToken;
             }
             else
@@ -151,7 +151,7 @@ namespace NovaPointLibrary.Commands.Authentication
             string defaultPermissions = rootUrl + "/.default";
             string[] scopes = new string[] { defaultPermissions };
 
-            _logger.LogTxt(GetType().Name, $"Getting Access Token for root site {rootUrl}");
+            _logger.Info(GetType().Name, $"Getting Access Token for root site {rootUrl}");
 
             AuthenticationResult? result = null;
             if (rootUrl.Equals(AdminUrl, StringComparison.OrdinalIgnoreCase))
@@ -176,7 +176,7 @@ namespace NovaPointLibrary.Commands.Authentication
 
             if (result != null)
             {
-                _logger.LogTxt(GetType().Name, $"Access Token expiration time: {result.ExpiresOn}");
+                _logger.Info(GetType().Name, $"Access Token expiration time: {result.ExpiresOn}");
                 return result.AccessToken;
             }
             else
@@ -295,21 +295,21 @@ namespace NovaPointLibrary.Commands.Authentication
                 }
                 catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
                 {
-                    _logger.LogTxt(GetType().Name, $"The request timed out. Retrying after {waitTime} miliseconds.");
+                    _logger.Info(GetType().Name, $"The request timed out. Retrying after {waitTime} miliseconds.");
 
                     await Task.Delay(waitTime);
                     continue;
                 }
                 catch (HttpRequestException e) when (e.InnerException is System.Net.Sockets.SocketException)
                 {
-                    _logger.LogTxt(GetType().Name, $"Socket exception: {e.Message}. Retrying after {waitTime} miliseconds.");
+                    _logger.Info(GetType().Name, $"Socket exception: {e.Message}. Retrying after {waitTime} miliseconds.");
 
                     await Task.Delay(waitTime);
                     continue;
                 }
                 catch (HttpRequestException ex)
                 {
-                    _logger.LogTxt(GetType().Name, $"An error occurred while sending the request: {ex.Message}. Retrying after {waitTime} miliseconds.");
+                    _logger.Info(GetType().Name, $"An error occurred while sending the request: {ex.Message}. Retrying after {waitTime} miliseconds.");
                     await Task.Delay(waitTime);
                     continue;
                 }
@@ -322,7 +322,7 @@ namespace NovaPointLibrary.Commands.Authentication
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogTxt(GetType().Name, $"Successful response {responseContent}.");
+                    _logger.Info(GetType().Name, $"Successful response {responseContent}.");
                     return responseContent;
                 }
                 else if (response != null && (response.StatusCode == HttpStatusCode.TooManyRequests || response.StatusCode == HttpStatusCode.ServiceUnavailable))
@@ -332,7 +332,7 @@ namespace NovaPointLibrary.Commands.Authentication
                     {
                         waitTime = retryAfter.Delta.Value.Seconds * 1000;
                     }
-                    _logger.LogTxt(GetType().Name, $"API request exceeding usage limits. Retrying after {waitTime} miliseconds.");
+                    _logger.Info(GetType().Name, $"API request exceeding usage limits. Retrying after {waitTime} miliseconds.");
 
                     await Task.Delay(waitTime);
                 }

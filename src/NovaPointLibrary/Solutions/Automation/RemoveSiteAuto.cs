@@ -1,21 +1,11 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.AzureAD;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Commands.SharePoint.User;
-using NovaPointLibrary.Commands.Utilities.GraphModel;
-using PnP.Core.Model.SharePoint;
+using NovaPointLibrary.Core.Logging;
 using PnP.Framework;
-using PnP.Framework.Extensions;
-using PnP.Framework.Provisioning.Model;
-using System;
-using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
@@ -25,10 +15,10 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSiteAuto";
 
         private RemoveSiteAutoParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private RemoveSiteAuto(NPLogger logger, Commands.Authentication.AppInfo appInfo, RemoveSiteAutoParameters parameters)
+        private RemoveSiteAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, RemoveSiteAutoParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -44,7 +34,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public static async Task RunAsync(RemoveSiteAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            NPLogger logger = new(uiAddLog, "RemoveSiteAuto", parameters);
+            LoggerSolution logger = new(uiAddLog, "RemoveSiteAuto", parameters);
 
             try
             {
@@ -52,12 +42,12 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 await new RemoveSiteAuto(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -82,7 +72,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                    _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
 
                     AddRecord(siteResults.SiteUrl, ex.Message);
                 }

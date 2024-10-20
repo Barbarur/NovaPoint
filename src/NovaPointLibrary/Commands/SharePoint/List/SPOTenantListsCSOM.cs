@@ -1,20 +1,16 @@
 ﻿using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.List
 {
     internal class SPOTenantListsCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly SPOTenantListsParameters _param;
 
-        internal SPOTenantListsCSOM(NPLogger logger, Authentication.AppInfo appInfo, SPOTenantListsParameters parameters)
+        internal SPOTenantListsCSOM(LoggerSolution logger, Authentication.AppInfo appInfo, SPOTenantListsParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -48,7 +44,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
                 if (tryException != null)
                 {
-                    _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, tryException);
+                    _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, tryException);
 
                     SPOTenantListsRecord recordList = new(siteResults, siteResults.Progress, tryException);
 
@@ -65,7 +61,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                     ProgressTracker progress = new(siteResults.Progress, collList.Count);
                     foreach (var oList in collList)
                     {
-                        _logger.LogTxt(GetType().Name, $"Processing '{oList.BaseType}' '{oList.Title}'");
+                        _logger.Info(GetType().Name, $"Processing '{oList.BaseType}' '{oList.Title}'");
 
                         SPOTenantListsRecord record = new(siteResults, progress, oList);
                         yield return record;

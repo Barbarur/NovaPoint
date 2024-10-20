@@ -4,6 +4,7 @@ using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Report
@@ -14,10 +15,10 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ShortcutODReport";
 
         private ShortcutODReportParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
 
-        private ShortcutODReport(NPLogger logger, AppInfo appInfo, ShortcutODReportParameters parameters)
+        private ShortcutODReport(LoggerSolution logger, AppInfo appInfo, ShortcutODReportParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -26,7 +27,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         public static async Task RunAsync(ShortcutODReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            NPLogger logger = new(uiAddLog, "ShortcutODReport", parameters);
+            LoggerSolution logger = new(uiAddLog, "ShortcutODReport", parameters);
 
             try
             {
@@ -34,12 +35,12 @@ namespace NovaPointLibrary.Solutions.Report
 
                 await new ShortcutODReport(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -82,7 +83,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     ShortcutODReportRecord record = new(tenantItemRecord, ex.Message);
                     RecordCSV(record);

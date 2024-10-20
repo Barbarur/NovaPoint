@@ -4,13 +4,9 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.PreservationHoldLibrary;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using System;
-using System.Collections.Generic;
+using NovaPointLibrary.Core.Logging;
 using System.Dynamic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions.Report
 {
@@ -20,7 +16,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PHLItemReport";
 
         private PHLItemReportParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
@@ -46,7 +42,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         };
 
-        private PHLItemReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, PHLItemReportParameters parameters)
+        private PHLItemReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, PHLItemReportParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -62,19 +58,19 @@ namespace NovaPointLibrary.Solutions.Report
             parameters.ListsParam.ListTitle = "Preservation Hold Library";
             parameters.ItemsParam.FileExpresions = _fileExpressions;
 
-            NPLogger logger = new(uiAddLog, "PHLItemReport", parameters);
+            LoggerSolution logger = new(uiAddLog, "PHLItemReport", parameters);
             try
             {
                 Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
                 await new PHLItemReport(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -107,7 +103,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     AddRecord(tenantItemRecord.ListRecord.SiteUrl, tenantItemRecord.ListRecord.List, tenantItemRecord.Item, remarks: ex.Message);
                 }

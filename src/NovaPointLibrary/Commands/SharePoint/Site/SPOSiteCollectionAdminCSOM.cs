@@ -1,22 +1,16 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     internal class SPOSiteCollectionAdminCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
 
-        internal SPOSiteCollectionAdminCSOM(NPLogger logger, Authentication.AppInfo appInfo)
+        internal SPOSiteCollectionAdminCSOM(LoggerSolution logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -25,7 +19,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         internal async Task AddPrimarySiteCollectionAdminAsync(string siteUrl, string userAdmin)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Processing '{userAdmin}' ad Primary Site Collection Admin for '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Processing '{userAdmin}' ad Primary Site Collection Admin for '{siteUrl}'");
 
             var siteContext = await _appInfo.GetContext(siteUrl);
             var user = siteContext.Web.EnsureUser(userAdmin);
@@ -62,7 +56,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         private async Task SetAsync(string siteUrl, string userAdmin, bool isSiteAdmin)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Processing '{siteUrl}' setting '{userAdmin}' IsSiteAdmin '{isSiteAdmin}'");
+            _logger.Info(GetType().Name, $"Processing '{siteUrl}' setting '{userAdmin}' IsSiteAdmin '{isSiteAdmin}'");
 
             try
             {
@@ -84,7 +78,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         internal async Task<IEnumerable<Microsoft.SharePoint.Client.User>> GetAsync(string siteUrl)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting Site Collection Administrators for '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting Site Collection Administrators for '{siteUrl}'");
 
             var retrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
             {

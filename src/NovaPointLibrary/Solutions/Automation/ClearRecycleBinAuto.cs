@@ -4,15 +4,8 @@ using Microsoft.SharePoint.News.DataModel;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.RecycleBin;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Solutions.Report;
-using PnP.Core.Model.SharePoint;
-using System;
-using System.Collections.Generic;
+using NovaPointLibrary.Core.Logging;
 using System.Dynamic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
@@ -22,10 +15,10 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-ClearRecycleBinAuto";
 
         private ClearRecycleBinAutoParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
 
-        private ClearRecycleBinAuto(NPLogger logger, AppInfo appInfo, ClearRecycleBinAutoParameters parameters)
+        private ClearRecycleBinAuto(LoggerSolution logger, AppInfo appInfo, ClearRecycleBinAutoParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -34,19 +27,19 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public static async Task RunAsync(ClearRecycleBinAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            NPLogger logger = new(uiAddLog, "ClearRecycleBinAuto", parameters);
+            LoggerSolution logger = new(uiAddLog, "ClearRecycleBinAuto", parameters);
             try
             {
                 AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
 
                 await new ClearRecycleBinAuto(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -60,7 +53,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 
                 if (siteResults.Ex != null)
                 {
-                    _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, siteResults.Ex);
+                    _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, siteResults.Ex);
                     AddRecord(siteResults.SiteUrl, remarks: siteResults.Ex.Message);
                     continue;
                 }
@@ -76,11 +69,11 @@ namespace NovaPointLibrary.Solutions.Automation
                         if (ex.Message.Contains("The attempted operation is prohibited because it exceeds the list view threshold"))
                         {
                             _param.RecycleBinParam.AllItems = false;
-                            _logger.LogUI(GetType().Name, "Recycle bin cannot be cleared in bulk due view threshold limitation. Recycle bin items will be deleted individually.");
+                            _logger.UI(GetType().Name, "Recycle bin cannot be cleared in bulk due view threshold limitation. Recycle bin items will be deleted individually.");
                         }
                         else
                         {
-                            _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                            _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
                             AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                         }
                     }
@@ -94,7 +87,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     }
                     catch (Exception ex)
                     {
-                        _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                        _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
                         AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                     }
                 }
@@ -132,7 +125,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Recycle bin item", oRecycleBinItem.Title, ex);
+                    _logger.Error(GetType().Name, "Recycle bin item", oRecycleBinItem.Title, ex);
                     remarks = ex.Message;
                 }
 
@@ -147,7 +140,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
             }
 
-            _logger.LogTxt(GetType().Name, $"Finish processing recycle bin items for '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Finish processing recycle bin items for '{siteUrl}'");
         }
 
         private void AddRecord(string siteUrl,

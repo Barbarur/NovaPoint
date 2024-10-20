@@ -1,8 +1,6 @@
 ﻿
 using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Solutions;
-using System;
-using System.Linq;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 using System.Xml.Linq;
 
@@ -11,7 +9,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 {
     internal class SPOListItemCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
 
         private readonly Expression<Func<ListItem, object>>[] _defaultExpressions = new Expression<Func<ListItem, object>>[]
@@ -28,7 +26,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             i => i.ParentList.Id,
         };
 
-        internal SPOListItemCSOM(NPLogger logger, Authentication.AppInfo appInfo)
+        internal SPOListItemCSOM(LoggerSolution logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -39,7 +37,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                                                                          SPOItemsParameters parameters)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start getting Items by batch");
+            _logger.Info(GetType().Name, $"Start getting Items by batch");
 
             CamlQuery camlQuery = CamlQuery.CreateAllItemsQuery();
 
@@ -86,7 +84,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             int counter = 0;
             ClientContext clientContext;
             Microsoft.SharePoint.Client.List oList;
-            _logger.LogTxt(GetType().Name, $"Start Loop");
+            _logger.Info(GetType().Name, $"Start Loop");
             bool shouldContinue = false;
             do
             {
@@ -110,7 +108,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 {
                     if (exception.Message.Contains("exceeds the list view threshold"))
                     {
-                        _logger.LogUI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Soution will collect all the items and then filter.");
+                        _logger.UI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Soution will collect all the items and then filter.");
                         camlQuery.FolderServerRelativeUrl = null;
                         LongListNotification(list);
                         shouldContinue = true;
@@ -123,8 +121,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 else
                 {
                     counter += subcollListItem.Count;
-                    if (counter >= 5000) { _logger.LogUI(GetType().Name, $"Collected from '{list.Title}' {counter} items..."); }
-                    else { _logger.LogTxt(GetType().Name, $"Collected from '{list.Title}' {counter} items."); }
+                    if (counter >= 5000) { _logger.UI(GetType().Name, $"Collected from '{list.Title}' {counter} items..."); }
+                    else { _logger.Info(GetType().Name, $"Collected from '{list.Title}' {counter} items."); }
 
                     yield return subcollListItem;
 
@@ -168,11 +166,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             if (oList.ItemCount > 5000)
             {
-                _logger.LogUI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' is a large list with {oList.ItemCount} items. Expect the Solution to take longer to run.");
+                _logger.UI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' is a large list with {oList.ItemCount} items. Expect the Solution to take longer to run.");
             }
             else
             {
-                _logger.LogTxt(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' has {oList.ItemCount} items.");
+                _logger.Info(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' has {oList.ItemCount} items.");
             }
         }
 
@@ -191,7 +189,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task<Microsoft.SharePoint.Client.File> GetAttachmentFileAsync(string siteUrl, string attachmentServerRelativeUrl)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting attachment file '{attachmentServerRelativeUrl}'");
+            _logger.Info(GetType().Name, $"Getting attachment file '{attachmentServerRelativeUrl}'");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
             var file = clientContext.Web.GetFileByServerRelativeUrl(attachmentServerRelativeUrl);
@@ -204,7 +202,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task RemoveAsync(string siteUrl, Microsoft.SharePoint.Client.List oList, ListItem oItem, bool recycle)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Removing ListItem '{oItem["FileLeafRef"]}'");
+            _logger.Info(GetType().Name, $"Removing ListItem '{oItem["FileLeafRef"]}'");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
             Microsoft.SharePoint.Client.List list = clientContext.Web.Lists.GetById(oList.Id);

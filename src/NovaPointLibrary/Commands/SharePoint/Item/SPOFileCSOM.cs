@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
-using NovaPointLibrary.Solutions;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 using File = Microsoft.SharePoint.Client.File;
 
@@ -10,10 +10,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 {
     internal class SPOFileCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
 
-        internal SPOFileCSOM(NPLogger logger, Authentication.AppInfo appInfo)
+        internal SPOFileCSOM(LoggerSolution logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -23,7 +23,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}";
-            _logger.LogTxt(methodName, $"Start getting Item '{fileServerRelativeUrl}' from '{siteUrl}'");
+            _logger.Info(methodName, $"Start getting Item '{fileServerRelativeUrl}' from '{siteUrl}'");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -57,7 +57,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task RenameFileAsync(string siteUrl, string fileServerRelativeUrl, string newName)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start renaming file '{fileServerRelativeUrl}' to '{newName}'");
+            _logger.Info(GetType().Name, $"Start renaming file '{fileServerRelativeUrl}' to '{newName}'");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -71,7 +71,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task CheckInAsync(string siteUrl, ListItem oFile, CheckinType checkinType, string comment)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Check-in file '{oFile["FileRef"]}' at '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Check-in file '{oFile["FileRef"]}' at '{siteUrl}'");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -82,7 +82,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task<string> FindAvailableNameAsync(string siteUrl, string fileServerRelativeUrl)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Finding available name");
+            _logger.Info(GetType().Name, $"Finding available name");
 
 
             string parentFolderPath = fileServerRelativeUrl.Remove(fileServerRelativeUrl.LastIndexOf("/") + 1);
@@ -113,14 +113,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 }
             }
 
-            _logger.LogTxt(GetType().Name, $"File name {availableName} is available.");
+            _logger.Info(GetType().Name, $"File name {availableName} is available.");
             return availableName;
         }
 
         internal string GetNewName(string itemName)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting new name for item '{itemName}'");
+            _logger.Info(GetType().Name, $"Getting new name for item '{itemName}'");
 
             string itemNameOnly = Path.GetFileNameWithoutExtension(itemName);
             var extension = Path.GetExtension(itemName);
@@ -156,7 +156,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task CopyAsync(string siteUrl, string sourceServerRelativeUrl, string destinationServerRelativeUrl, bool noWait)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Coping file '{sourceServerRelativeUrl}' from site '{siteUrl}' to '{destinationServerRelativeUrl}.");
+            _logger.Info(GetType().Name, $"Coping file '{sourceServerRelativeUrl}' from site '{siteUrl}' to '{destinationServerRelativeUrl}.");
 
             Uri sourceUri = new(new(siteUrl), EncodePath(sourceServerRelativeUrl));
             Uri targetUri = new(new(siteUrl), EncodePath(destinationServerRelativeUrl));
@@ -230,7 +230,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             var parts = path.Split("/");
             var encodedPath = string.Join("/", parts.Select(p => Uri.EscapeDataString(p)));
-            _logger.LogTxt(GetType().Name, $"Encoded path {encodedPath}");
+            _logger.Info(GetType().Name, $"Encoded path {encodedPath}");
             return encodedPath;
         }
     }

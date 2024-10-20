@@ -2,22 +2,18 @@
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.AzureAD;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
+using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     internal class SPOTenantSiteUrlsWithAccessCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly SPOTenantSiteUrlsWithAccessParameters _param;
 
-        internal SPOTenantSiteUrlsWithAccessCSOM(NPLogger logger, Authentication.AppInfo appInfo, SPOTenantSiteUrlsWithAccessParameters parameters)
+        internal SPOTenantSiteUrlsWithAccessCSOM(LoggerSolution logger, Authentication.AppInfo appInfo, SPOTenantSiteUrlsWithAccessParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -46,7 +42,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 try { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).AddAsync(record.SiteUrl, adminUPN); }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Site", record.SiteUrl, ex);
+                    _logger.Error(GetType().Name, "Site", record.SiteUrl, ex);
                     record.Ex = ex;
                 }
             }
@@ -73,7 +69,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
                 if (record.Ex != null)
                 {
-                    _logger.ReportError(GetType().Name, "Site", record.SiteUrl, record.Ex);
+                    _logger.Error(GetType().Name, "Site", record.SiteUrl, record.Ex);
                     yield return record;
                 }
             }
@@ -83,7 +79,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         private async IAsyncEnumerable<SPOTenantSiteUrlsRecord> GetSubsitesAsync(SPOTenantSiteUrlsRecord recordSite)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting Subsites from '{recordSite.SiteUrl}'");
+            _logger.Info(GetType().Name, $"Getting Subsites from '{recordSite.SiteUrl}'");
 
             List<Web>? collSubsites = null;
             try
@@ -92,7 +88,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             }
             catch (Exception ex)
             {
-                _logger.ReportError(GetType().Name, "Site", recordSite.SiteUrl, ex);
+                _logger.Error(GetType().Name, "Site", recordSite.SiteUrl, ex);
 
                 recordSite.Ex = ex;
             }
@@ -109,7 +105,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 progress.ProgressUpdateReport();
                 foreach (var oSubsite in collSubsites)
                 {
-                    _logger.LogTxt(GetType().Name, $"Processing Subsite '{oSubsite.Url}'");
+                    _logger.Info(GetType().Name, $"Processing Subsite '{oSubsite.Url}'");
 
                     SPOTenantSiteUrlsRecord resultsSubsite = new(progress, oSubsite);
                     yield return resultsSubsite;

@@ -1,18 +1,11 @@
-﻿using AngleSharp.Css.Dom;
-using Microsoft.SharePoint.Client;
+﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.SharePoint.Permision;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.User;
-using NovaPointLibrary.Solutions.Report;
-using PnP.Core.Model.SharePoint;
-using System;
-using System.Collections.Generic;
+using NovaPointLibrary.Core.Logging;
 using System.Dynamic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
@@ -22,7 +15,7 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSiteUserAuto";
 
         private RemoveUserAutoParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
 
         private Expression<Func<User, object>>[] _userRetrievalExpressions = new Expression<Func<User, object>>[]
@@ -33,7 +26,7 @@ namespace NovaPointLibrary.Solutions.Automation
             u => u.UserPrincipalName,
         };
 
-        private RemoveSiteUserAuto(NPLogger logger, AppInfo appInfo, RemoveUserAutoParameters parameters)
+        private RemoveSiteUserAuto(LoggerSolution logger, AppInfo appInfo, RemoveUserAutoParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -42,7 +35,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public static async Task RunAsync(RemoveUserAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            NPLogger logger = new(uiAddLog, "RemoveSiteUserAuto", parameters);
+            LoggerSolution logger = new(uiAddLog, "RemoveSiteUserAuto", parameters);
 
             try
             {
@@ -50,12 +43,12 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 await new RemoveSiteUserAuto(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -79,7 +72,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                    _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
                     AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                 }
             }
@@ -103,7 +96,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Site", siteUrl, ex);
+                    _logger.Error(GetType().Name, "Site", siteUrl, ex);
                     AddRecord(siteUrl, $"Error while removing user {oUser.Email}: {ex.Message}");
                 }
 

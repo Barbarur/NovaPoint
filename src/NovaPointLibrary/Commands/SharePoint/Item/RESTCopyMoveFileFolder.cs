@@ -1,16 +1,16 @@
 ﻿using Newtonsoft.Json;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Commands.Utilities;
-using NovaPointLibrary.Solutions;
+using NovaPointLibrary.Core.Logging;
 
 namespace NovaPointLibrary.Commands.SharePoint.Item
 {
     internal class RESTCopyMoveFileFolder
     {
-        private readonly NPLogger _logger;
+        private readonly ILogger _logger;
         private readonly Authentication.AppInfo _appInfo;
 
-        internal RESTCopyMoveFileFolder(NPLogger logger, Authentication.AppInfo appInfo)
+        internal RESTCopyMoveFileFolder(ILogger logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -27,7 +27,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             bool sameWebCopyMoveOptimization)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"CopyMove file '{sourceServerRelativeUrl}' from site '{siteUrl}' to '{destinationServerRelativeUrl}.");
+            _logger.Info(GetType().Name, $"CopyMove file '{sourceServerRelativeUrl}' from site '{siteUrl}' to '{destinationServerRelativeUrl}.");
 
             Uri sourceUri = new(new(siteUrl), EncodePath(sourceServerRelativeUrl));
             Uri targetUri = new(new(siteUrl), EncodePath(destinationServerRelativeUrl));
@@ -101,7 +101,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 {
                     if (log.Contains("JobError"))
                     {
-                        _logger.LogTxt(GetType().Name, $"Error log: {log}");
+                        _logger.Info(GetType().Name, $"Error log: {log}");
                         throw new($"Error while processing CopyJob. Check error logs for more details.");
                     }
                 }

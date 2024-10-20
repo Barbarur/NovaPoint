@@ -1,9 +1,7 @@
-﻿using Microsoft.SharePoint.Client;
-using Microsoft.SharePoint.Client.Sharing;
-using NovaPointLibrary.Commands.SharePoint.Item;
-using NovaPointLibrary.Commands.SharePoint.Permision;
+﻿using NovaPointLibrary.Commands.SharePoint.Permision;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
+using NovaPointLibrary.Core.Logging;
 using static NovaPointLibrary.Commands.SharePoint.Permision.SPOSharingLinksREST;
 
 
@@ -15,10 +13,10 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSharingLinksAuto";
 
         private RemoveSharingLinksAutoParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private RemoveSharingLinksAuto(NPLogger logger, Commands.Authentication.AppInfo appInfo, RemoveSharingLinksAutoParameters parameters)
+        private RemoveSharingLinksAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, RemoveSharingLinksAutoParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -27,7 +25,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public static async Task RunAsync(RemoveSharingLinksAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            NPLogger logger = new(uiAddLog, "RemoveSharingLinksAuto", parameters);
+            LoggerSolution logger = new(uiAddLog, "RemoveSharingLinksAuto", parameters);
 
             try
             {
@@ -35,12 +33,12 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 await new RemoveSharingLinksAuto(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -66,7 +64,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     SPOSharingLinksRecord record = new(siteRecord.SiteUrl);
                     record.Remarks = ex.Message;
                     RecordCSV(record);

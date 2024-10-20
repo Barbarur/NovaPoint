@@ -3,14 +3,9 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.PreservationHoldLibrary;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Solutions.Report;
-using System;
-using System.Collections.Generic;
+using NovaPointLibrary.Core.Logging;
 using System.Dynamic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
@@ -20,7 +15,7 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemovePHLItemAuto";
 
         private RemovePHLItemAutoParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
@@ -46,7 +41,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         };
 
-        private RemovePHLItemAuto(NPLogger logger, Commands.Authentication.AppInfo appInfo, RemovePHLItemAutoParameters parameters)
+        private RemovePHLItemAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, RemovePHLItemAutoParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -62,19 +57,19 @@ namespace NovaPointLibrary.Solutions.Automation
             parameters.ListsParam.ListTitle = "Preservation Hold Library";
             parameters.ItemsParam.FileExpresions = _fileExpressions;
 
-            NPLogger logger = new(uiAddLog, "RemovePHLItemAuto", parameters);
+            LoggerSolution logger = new(uiAddLog, "RemovePHLItemAuto", parameters);
             try
             {
                 Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
                 await new RemovePHLItemAuto(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -107,7 +102,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     AddRecord(tenantItemRecord.ListRecord.SiteUrl, tenantItemRecord.ListRecord.List, tenantItemRecord.Item, remarks: ex.Message);
                 }

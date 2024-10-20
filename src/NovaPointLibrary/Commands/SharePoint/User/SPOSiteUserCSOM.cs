@@ -1,19 +1,13 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.User
 {
     internal class SPOSiteUserCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
 
         private readonly Expression<Func<Microsoft.SharePoint.Client.User, object>>[] _retrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
@@ -26,7 +20,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             u => u.UserId,
         };
 
-        internal SPOSiteUserCSOM(NPLogger logger, AppInfo appInfo)
+        internal SPOSiteUserCSOM(LoggerSolution logger, AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -38,7 +32,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
 
             string userLoginName = "i:0#.f|membership|" + userUPN;
 
-            _logger.LogTxt(GetType().Name, $"Getting '{userUPN}', LoginName '{userLoginName}' from Site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting '{userUPN}', LoginName '{userLoginName}' from Site '{siteUrl}'");
 
             var clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -53,7 +47,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             }
             catch
             {
-                _logger.LogTxt(GetType().Name, $"User '{userUPN}' no found in Site '{siteUrl}'");
+                _logger.Info(GetType().Name, $"User '{userUPN}' no found in Site '{siteUrl}'");
                 return null;
             }
         }
@@ -64,7 +58,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
         {
             _appInfo.IsCancelled();
 
-            _logger.LogTxt(GetType().Name, $"Getting user with email '{userEmail}' from Site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting user with email '{userEmail}' from Site '{siteUrl}'");
 
             var expressions = _retrievalExpressions.Union(retrievalExpressions).ToArray();
 
@@ -81,7 +75,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             }
             catch
             {
-                _logger.LogTxt(GetType().Name, $"User with email '{userEmail}' no found in Site '{siteUrl}'");
+                _logger.Info(GetType().Name, $"User with email '{userEmail}' no found in Site '{siteUrl}'");
                 return null;
             }
         }
@@ -91,7 +85,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
         {
             _appInfo.IsCancelled();
 
-            _logger.LogTxt(GetType().Name, $"Getting all users from Site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting all users from Site '{siteUrl}'");
 
             var clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -108,7 +102,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             }
             catch
             {
-                _logger.LogTxt(GetType().Name, $"No users found in this Site");
+                _logger.Info(GetType().Name, $"No users found in this Site");
                 return null;
             }
         }
@@ -118,7 +112,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
         {
             _appInfo.IsCancelled();
 
-            _logger.LogTxt(GetType().Name, $"Getting all EXT users from Site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting all EXT users from Site '{siteUrl}'");
 
             var collUsers = await GetAsync(siteUrl, retrievalExpressions);
 
@@ -141,7 +135,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
                                                                                 Expression<Func<Microsoft.SharePoint.Client.User, object>>[] retrievalExpressions)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting 'Everyone' group from Site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting 'Everyone' group from Site '{siteUrl}'");
 
             var clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -158,7 +152,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             }
             catch
             {
-                _logger.LogTxt(GetType().Name, $"'Everyone' group no found in Site '{siteUrl}'");
+                _logger.Info(GetType().Name, $"'Everyone' group no found in Site '{siteUrl}'");
                 return null;
             }
         }
@@ -167,7 +161,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
                                                                                                    Expression<Func<Microsoft.SharePoint.Client.User, object>>[] retrievalExpressions)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting 'Everyone except external users' group from Site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting 'Everyone except external users' group from Site '{siteUrl}'");
 
             var clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -184,7 +178,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             }
             catch
             {
-                _logger.LogTxt(GetType().Name, $"'Everyone except external users' group no found in Site '{siteUrl}'");
+                _logger.Info(GetType().Name, $"'Everyone except external users' group no found in Site '{siteUrl}'");
                 return null;
             }
         }
@@ -249,7 +243,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
         internal async Task Register(string siteUrl, string userUPN)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start registering '{userUPN}' from Site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Start registering '{userUPN}' from Site '{siteUrl}'");
 
             var clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -263,7 +257,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
         {
             _appInfo.IsCancelled();
 
-            _logger.LogTxt(GetType().Name, $"Removing user with LoginName '{oUser.LoginName}' from Site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Removing user with LoginName '{oUser.LoginName}' from Site '{siteUrl}'");
 
             var siteContext = await _appInfo.GetContext(siteUrl);
 

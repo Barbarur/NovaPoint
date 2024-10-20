@@ -1,17 +1,10 @@
-﻿using CamlBuilder;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NovaPointLibrary.Core.Logging;
 
 namespace NovaPointLibrary.Solutions
 {
     internal class ProgressTracker
     {
-        internal readonly NPLogger _logger;
+        internal readonly LoggerSolution _logger;
 
         private int _counter;
         private int _totalUnits;
@@ -31,7 +24,7 @@ namespace NovaPointLibrary.Solutions
         private double _counterStep = 0;
         private readonly ProgressTracker? _parentProgress = null;
 
-        internal ProgressTracker(NPLogger logger, int totalCount)
+        internal ProgressTracker(LoggerSolution logger, int totalCount)
         {
             _logger = logger;
             _counter = 0;
@@ -67,7 +60,7 @@ namespace NovaPointLibrary.Solutions
             {
                 double progress = Math.Round(progressValue * 100, 2);
 
-                _logger.ProgressUI(progress);
+                _logger.Progress(progress);
             }
             else
             {

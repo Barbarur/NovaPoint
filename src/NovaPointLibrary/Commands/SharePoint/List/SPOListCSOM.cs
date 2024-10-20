@@ -1,25 +1,16 @@
-﻿using Microsoft.Graph;
-using Microsoft.Online.SharePoint.TenantAdministration;
-using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.DirectoryServices.ActiveDirectory;
-using System.Linq;
+﻿using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.List
 {
 
     internal class SPOListCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
 
-        internal SPOListCSOM(NPLogger logger, Authentication.AppInfo appInfo)
+        internal SPOListCSOM(LoggerSolution logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -30,7 +21,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.Get";
-            _logger.LogTxt(methodName, $"Start getting Lists");
+            _logger.Info(methodName, $"Start getting Lists");
 
             var defaultExpressions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
             {
@@ -56,7 +47,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 clientContext.Load(collList, l => l.Include(expressions));
                 clientContext.ExecuteQuery();
 
-                _logger.LogTxt(methodName, $"Finish getting Lists: {collList.Count}");
+                _logger.Info(methodName, $"Finish getting Lists: {collList.Count}");
 
                 List<Microsoft.SharePoint.Client.List> finalCollList = new();
                 foreach (Microsoft.SharePoint.Client.List oList in collList)
@@ -75,7 +66,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                     finalCollList.Add(oList);
                 }
 
-                _logger.LogTxt(methodName, $"Finish filtering lists: {finalCollList.Count}");
+                _logger.Info(methodName, $"Finish filtering lists: {finalCollList.Count}");
 
                 return finalCollList;
             }
@@ -90,7 +81,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
                 List<Microsoft.SharePoint.Client.List> collList = new() { list };
 
-                _logger.LogTxt(GetType().Name, $"Collected list '{list.Title}'");
+                _logger.Info(GetType().Name, $"Collected list '{list.Title}'");
                 return collList;
             }
         }

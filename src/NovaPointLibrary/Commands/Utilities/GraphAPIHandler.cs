@@ -1,18 +1,18 @@
 ﻿using Newtonsoft.Json;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
-using NovaPointLibrary.Solutions;
+using NovaPointLibrary.Core.Logging;
 
 namespace NovaPointLibrary.Commands.Utilities
 {
     internal class GraphAPIHandler
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
 
         private readonly string _graphUrl = "https://graph.microsoft.com/v1.0";
 
-        internal GraphAPIHandler(NPLogger logger, AppInfo appInfo)
+        internal GraphAPIHandler(LoggerSolution logger, AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -75,7 +75,7 @@ namespace NovaPointLibrary.Commands.Utilities
 
             string response = await _appInfo.SendHttpRequestMessageAsync(GetRequestMessage, HttpMethod.Delete, apiUrl, "");
 
-            _logger.LogTxt(GetType().Name, response);
+            _logger.Info(GetType().Name, response);
         }
 
 
@@ -88,7 +88,7 @@ namespace NovaPointLibrary.Commands.Utilities
                 apiUrl = apiUrl.Substring(1);
             }
             string uri = !apiUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? $"{_graphUrl}/{apiUrl}" : apiUrl;
-            _logger.LogTxt(GetType().Name, $"Writing message for '{method}' in '{uri}'");
+            _logger.Info(GetType().Name, $"Writing message for '{method}' in '{uri}'");
 
             HttpRequestMessage message = new();
             message.Method = method;

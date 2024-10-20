@@ -1,29 +1,26 @@
 ﻿
 using Microsoft.SharePoint.Client;
-using Microsoft.SharePoint.Client.Sharing;
 using NovaPointLibrary.Commands.AzureAD;
 using NovaPointLibrary.Commands.SharePoint.Permision.Utilities;
 using NovaPointLibrary.Commands.SharePoint.User;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
+using NovaPointLibrary.Core.Logging;
 using System.Data;
-using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using static NovaPointLibrary.Commands.SharePoint.Permision.SPOSharingLinksREST;
 
 namespace NovaPointLibrary.Commands.SharePoint.Permision
 {
     internal class SPORoleAssignmentUsersCSOM
     {
-        private readonly Solutions.NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly SPOKnownRoleAssignmentGroups _knownGroups;
         private readonly SPOSharingLinksREST _restSharingLinks;
 
 
         internal SPORoleAssignmentUsersCSOM(
-            Solutions.NPLogger logger,
+            LoggerSolution logger,
             Authentication.AppInfo appInfo,
             SPOKnownRoleAssignmentGroups knownGroups)
         {
@@ -38,12 +35,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         {
             _appInfo.IsCancelled();
 
-            _logger.LogTxt(GetType().Name, $"Iterating role assignments '{roleAssignmentCollection.Count}'");
+            _logger.Info(GetType().Name, $"Iterating role assignments '{roleAssignmentCollection.Count}'");
 
             int skippedGroupsCounter = 0;
             foreach (var role in roleAssignmentCollection)
             {
-                _logger.LogTxt(GetType().Name, $"Gettig Permissions for '{role.Member.PrincipalType}' '{role.Member.Title}'");
+                _logger.Info(GetType().Name, $"Gettig Permissions for '{role.Member.PrincipalType}' '{role.Member.Title}'");
 
                 string accessType = "Direct Permissions";
                 var permissionLevels = GetPermissionLevels(role.RoleDefinitionBindings);
@@ -51,7 +48,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 if (String.IsNullOrWhiteSpace(permissionLevels))
                 {
                     skippedGroupsCounter++;
-                    _logger.LogTxt(GetType().Name, $"No permissions found, skipping group");
+                    _logger.Info(GetType().Name, $"No permissions found, skipping group");
                     continue;
                 }
                 else if (IsSystemGroup(role.Member.Title.ToString()) )
@@ -101,7 +98,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         internal async IAsyncEnumerable<SPORoleAssignmentUserRecord> ProcessSiteGroupUsersAsync(string siteUrl, Principal spGroup, string permissionLevels)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Processing SharePoint Group '{spGroup.Title}' ({spGroup.Id})");
+            _logger.Info(GetType().Name, $"Processing SharePoint Group '{spGroup.Title}' ({spGroup.Id})");
 
             string accessType = $"SharePoint Group '{spGroup.Title}'";
 
@@ -130,7 +127,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError(GetType().Name, "SharePoint Group", spGroup.Title, ex);
+                _logger.Error(GetType().Name, "SharePoint Group", spGroup.Title, ex);
 
                 exception = ex;
             }
@@ -178,7 +175,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             else
             {
                 Exception e = new("Group is null");
-                _logger.ReportError(GetType().Name, "SharePoint Group", spGroup.Title, e);
+                _logger.Error(GetType().Name, "SharePoint Group", spGroup.Title, e);
 
                 yield return record.GetRecordWithUsers("", "", e.Message);
             }
@@ -223,7 +220,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         private SPORoleAssignmentUserRecord GetSystemGroup(SPORoleAssignmentUserRecord record, string accountType, string groupName)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting system group users");
+            _logger.Info(GetType().Name, $"Getting system group users");
 
             string thisAccountType = accountType + groupName;
 
@@ -253,7 +250,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         internal async IAsyncEnumerable<SPORoleAssignmentUserRecord> GetSecurityGroupUsersAsync(List<Microsoft.SharePoint.Client.User> listSecurityGroup, string accessType, string permissionLevels)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting users from List of Security Groups");
+            _logger.Info(GetType().Name, $"Getting users from List of Security Groups");
 
             foreach (var securityGroup in listSecurityGroup)
             {
@@ -278,7 +275,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         private async IAsyncEnumerable<SPORoleAssignmentUserRecord> GetSecurityGroupUsersAsync(string sgName, string sgID, SPORoleAssignmentUserRecord record, SPOKnownRoleAssignmentGroupHeaders groupHeaders)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting users from Security Group '{sgName}' with ID '{sgID}'");
+            _logger.Info(GetType().Name, $"Getting users from Security Group '{sgName}' with ID '{sgID}'");
 
             if (sgName.Contains("SLinkClaim")) { yield break; }
 
@@ -330,7 +327,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError(GetType().Name, "Security Group", $"{sgName}' with ID {sgID}", ex);
+                _logger.Error(GetType().Name, "Security Group", $"{sgName}' with ID {sgID}", ex);
                 groupUsers = null;
                 exceptionMessage = ex.Message;
             }
@@ -373,7 +370,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         private string GetPermissionLevels(RoleDefinitionBindingCollection roleDefinitionsCollection)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Concatenating Permission Levels");
+            _logger.Info(GetType().Name, $"Concatenating Permission Levels");
 
             StringBuilder sb = new();
             foreach (var roleDefinition in roleDefinitionsCollection)
@@ -388,7 +385,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             string permissionLevels = "";
             if (sb.Length > 0) { permissionLevels = sb.ToString().Remove(sb.Length - 3); }
 
-            _logger.LogTxt(GetType().Name, $"Permission Levels: {permissionLevels}");
+            _logger.Info(GetType().Name, $"Permission Levels: {permissionLevels}");
             return permissionLevels;
 
         }

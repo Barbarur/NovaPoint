@@ -1,5 +1,5 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Solutions;
+using NovaPointLibrary.Core.Logging;
 using System.Net.Http.Headers;
 
 
@@ -7,10 +7,10 @@ namespace NovaPointLibrary.Commands.Utilities
 {
     internal class RESTAPIHandler
     {
-        private readonly NPLogger _logger;
+        private readonly ILogger _logger;
         private AppInfo _appInfo;
 
-        internal RESTAPIHandler(NPLogger logger, AppInfo appInfo)
+        internal RESTAPIHandler(ILogger logger, AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -28,7 +28,7 @@ namespace NovaPointLibrary.Commands.Utilities
         internal async Task<string> PostAsync(string apiUrl, string content)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"HTTP Request Post API '{apiUrl}' content '{content}'.");
+            _logger.Info(GetType().Name, $"HTTP Request Post API '{apiUrl}' content '{content}'.");
 
             string response = await _appInfo.SendHttpRequestMessageAsync(GetRequestMessage, HttpMethod.Post, apiUrl, content);
 
@@ -38,7 +38,7 @@ namespace NovaPointLibrary.Commands.Utilities
         private async Task<HttpRequestMessage> GetRequestMessage(HttpMethod method, string apiUrl, string content = "")
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Writing message for '{method}' in '{apiUrl}'");
+            _logger.Info(GetType().Name, $"Writing message for '{method}' in '{apiUrl}'");
 
             HttpRequestMessage request = new()
             {

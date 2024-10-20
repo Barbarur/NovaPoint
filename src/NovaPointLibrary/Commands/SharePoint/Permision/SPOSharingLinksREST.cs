@@ -6,16 +6,17 @@ using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
 using PnP.Framework.Utilities;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
+using NovaPointLibrary.Core.Logging;
 
 namespace NovaPointLibrary.Commands.SharePoint.Permision
 {
     internal class SPOSharingLinksREST
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly Dictionary<string, KnownItemGroups> _dKnownSharingInfo = new();
 
-        internal SPOSharingLinksREST(NPLogger logger, Authentication.AppInfo appInfo)
+        internal SPOSharingLinksREST(LoggerSolution logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -25,7 +26,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         {
             _appInfo.IsCancelled();
 
-            _logger.LogTxt(GetType().Name, $"Processing sharing link {principal.Title} ({principal.Id})");
+            _logger.Info(GetType().Name, $"Processing sharing link {principal.Title} ({principal.Id})");
 
             SPOSharingLinksRecord record = new(siteUrl);
 
@@ -37,7 +38,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError(GetType().Name, "SharingLink", record.GroupTitle, ex);
+                _logger.Error(GetType().Name, "SharingLink", record.GroupTitle, ex);
                 record.Remarks = ex.Message;
             }
             return record;
@@ -47,7 +48,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         {
             _appInfo.IsCancelled();
 
-            _logger.LogTxt(GetType().Name, $"Processing sharing link {oGroup.Title} ({oGroup.Id}) - {oGroup.Description}");
+            _logger.Info(GetType().Name, $"Processing sharing link {oGroup.Title} ({oGroup.Id}) - {oGroup.Description}");
 
             SPOSharingLinksRecord record = new(siteUrl);
 
@@ -58,7 +59,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError(GetType().Name, "SharingLink", record.GroupTitle, ex);
+                _logger.Error(GetType().Name, "SharingLink", record.GroupTitle, ex);
                 record.Remarks = ex.Message;
             }
             return record;
@@ -139,7 +140,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "SharingLink", reportRecord.GroupTitle, ex);
+                    _logger.Error(GetType().Name, "SharingLink", reportRecord.GroupTitle, ex);
                     reportRecord.Remarks = ex.Message;
                 }
             }

@@ -1,25 +1,16 @@
-﻿using Microsoft.Graph;
-using Microsoft.Online.SharePoint.TenantAdministration;
-using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {
 
     internal class SPOSubsiteCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
 
-        internal SPOSubsiteCSOM(NPLogger logger, Authentication.AppInfo appInfo)
+        internal SPOSubsiteCSOM(LoggerSolution logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -28,7 +19,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         internal async Task<List<Web>> GetAsync(string siteUrl, Expression<Func<Web, object>>[]? retrievalExpressions = null)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start getting all Subsites");
+            _logger.Info(GetType().Name, $"Start getting all Subsites");
 
             var defaultExpressions = new Expression<Func<Web, object>>[]
             {
@@ -56,7 +47,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         private List<Web> GetSubWebsInternal(WebCollection subsites, Expression<Func<Web, object>>[] retrievalExpressions)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start getting Subsites internals");
+            _logger.Info(GetType().Name, $"Start getting Subsites internals");
 
             var collSubsites = new List<Web>();
 
@@ -78,7 +69,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         {
             collSubsites.RemoveAll(w => (!w.Url.Contains(_appInfo.RootPersonalUrl, StringComparison.OrdinalIgnoreCase) && !w.Url.Contains(_appInfo.RootSharedUrl, StringComparison.OrdinalIgnoreCase)));
 
-            _logger.LogTxt(GetType().Name, $"Subsites count: {collSubsites.Count}");
+            _logger.Info(GetType().Name, $"Subsites count: {collSubsites.Count}");
 
             return collSubsites;
         }

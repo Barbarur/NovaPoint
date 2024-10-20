@@ -2,18 +2,18 @@
 using Newtonsoft.Json;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Commands.Utilities;
-using NovaPointLibrary.Solutions;
 using System.Linq.Expressions;
+using NovaPointLibrary.Core.Logging;
 
 
 namespace NovaPointLibrary.Commands.SharePoint.Item
 {
     internal class SPOFolderCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
 
-        internal SPOFolderCSOM(NPLogger logger, Authentication.AppInfo appInfo)
+        internal SPOFolderCSOM(LoggerSolution logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -22,7 +22,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task<Folder?> GetFolderAsync(string siteUrl, string folderServerRelativeUrl, Expression<Func<Folder, object>>[]? retrievalExpressions = null)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start getting Folder '{folderServerRelativeUrl}' from '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Start getting Folder '{folderServerRelativeUrl}' from '{siteUrl}'");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -57,7 +57,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             }
             catch
             {
-                _logger.LogTxt(GetType().Name, $"Folder '{folderServerRelativeUrl}' doesn't exists.");
+                _logger.Info(GetType().Name, $"Folder '{folderServerRelativeUrl}' doesn't exists.");
                 return null;
             }
         }
@@ -65,7 +65,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task RenameFolderAsync(string siteUrl, string fileServerRelativeUrl, string newName)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Start renaming folder '{fileServerRelativeUrl}' to '{newName}'");
+            _logger.Info(GetType().Name, $"Start renaming folder '{fileServerRelativeUrl}' to '{newName}'");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -93,7 +93,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 folderServerRelativeUrl = folderServerRelativeUrl.Insert(0, "/");
             }
 
-            _logger.LogTxt(GetType().Name, $"Creating folder '{folderServerRelativeUrl}' on site {siteUrl}");
+            _logger.Info(GetType().Name, $"Creating folder '{folderServerRelativeUrl}' on site {siteUrl}");
 
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
             clientContext.Web.Folders.Add(folderServerRelativeUrl);
@@ -104,7 +104,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task EnsureFolderPathExistAsync(string siteUrl, string folderServerRelativeUrl)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Ensuring folder path exists '{folderServerRelativeUrl}'");
+            _logger.Info(GetType().Name, $"Ensuring folder path exists '{folderServerRelativeUrl}'");
 
             var folder = await new SPOFolderCSOM(_logger, _appInfo).GetFolderAsync(siteUrl, folderServerRelativeUrl);
 
@@ -120,7 +120,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal async Task<RESTStorageMetricsResponse> GetFolderStorageMetricAsync(string siteUrl, Folder folder)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting storage metrics from folder '{folder.ServerRelativeUrl}' from '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting storage metrics from folder '{folder.ServerRelativeUrl}' from '{siteUrl}'");
 
             string api = siteUrl + $"/_api/Web/GetFolderByServerRelativeUrl('{folder.ServerRelativeUrl}')?&$select=StorageMetrics&$expand=StorageMetrics";
 

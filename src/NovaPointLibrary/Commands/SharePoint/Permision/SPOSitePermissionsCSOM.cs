@@ -1,25 +1,19 @@
 ﻿using Microsoft.SharePoint.Client;
-using Microsoft.SharePoint.Client.Sharing;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Permision.Utilities;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
-using NovaPointLibrary.Solutions.Report;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Permision
 {
     internal class SPOSitePermissionsCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
         private readonly SPOSitePermissionsCSOMParameters _param;
 
@@ -76,7 +70,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             i => i.Versions,
         };
 
-        public SPOSitePermissionsCSOM(NPLogger logger, AppInfo appInfo, SPOSitePermissionsCSOMParameters parameters)
+        public SPOSitePermissionsCSOM(LoggerSolution logger, AppInfo appInfo, SPOSitePermissionsCSOMParameters parameters)
         {
             _param = parameters;
             _param.ListsParam.ListExpresions = _listExpresions;
@@ -130,7 +124,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         internal async IAsyncEnumerable<SPOLocationPermissionsRecord> GetSiteAdminAsync(Web oSite)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting Site collection admins for Site '{oSite.Url}'");
+            _logger.Info(GetType().Name, $"Getting Site collection admins for Site '{oSite.Url}'");
 
             string accessType = "Direct Permissions";
             string permissionLevels = "Site Collection Administrator";
@@ -148,7 +142,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError(GetType().Name, "Site", oSite.Url, ex);
+                _logger.Error(GetType().Name, "Site", oSite.Url, ex);
                 exceptionMessage = ex.Message;
             }
 
@@ -178,7 +172,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         internal async IAsyncEnumerable<SPOLocationPermissionsRecord> GetSiteAccessAsync(Web oSite)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting Site permissions for Site '{oSite.Url}'");
+            _logger.Info(GetType().Name, $"Getting Site permissions for Site '{oSite.Url}'");
 
             await foreach(var role in new SPORoleAssignmentUsersCSOM(_logger, _appInfo, _knownGroups).GetAsync(oSite.Url, oSite.RoleAssignments))
             {
@@ -190,7 +184,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         internal async IAsyncEnumerable<SPOLocationPermissionsRecord> GetUniquePermissionsAsync(Web oSite, ProgressTracker parentProgress)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting Unique permissions for Site '{oSite.Url}'");
+            _logger.Info(GetType().Name, $"Getting Unique permissions for Site '{oSite.Url}'");
 
             List<Microsoft.SharePoint.Client.List>? collLists = null;
             string exceptionMessage = string.Empty;
@@ -200,7 +194,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError(GetType().Name, "Site", oSite.Url, ex);
+                _logger.Error(GetType().Name, "Site", oSite.Url, ex);
                 exceptionMessage = ex.Message;
             }
 
@@ -225,7 +219,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             ProgressTracker progress = new(parentProgress, collLists.Count);
             foreach (var oList in collLists)
             {
-                _logger.LogTxt(GetType().Name, $"Getting permissions for List '{oList.Title}'");
+                _logger.Info(GetType().Name, $"Getting permissions for List '{oList.Title}'");
 
                 if (oList.HasUniqueRoleAssignments)
                 {
@@ -261,7 +255,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 {
                     if (oItem.HasUniqueRoleAssignments)
                     {
-                        _logger.LogTxt(GetType().Name, $"Getting permissions for {oItem.FileSystemObjectType} '{oItem["FileRef"]}'");
+                        _logger.Info(GetType().Name, $"Getting permissions for {oItem.FileSystemObjectType} '{oItem["FileRef"]}'");
 
                         await foreach (var role in new SPORoleAssignmentUsersCSOM(_logger, _appInfo, _knownGroups).GetAsync(oSite.Url, oItem.RoleAssignments))
                         {
@@ -275,7 +269,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             }
             catch (Exception ex)
             {
-                _logger.ReportError(GetType().Name, $"{oList.BaseType}", oList.Title, ex);
+                _logger.Error(GetType().Name, $"{oList.BaseType}", oList.Title, ex);
 
                 recordsList.Add(new($"{oList.BaseType}", oList.Title, $"{oList.DefaultViewUrl}", SPORoleAssignmentUserRecord.GetRecordBlankException(ex.Message)));
             }

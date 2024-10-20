@@ -3,7 +3,7 @@ using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
-using PnP.Core.Model.SharePoint;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 
 
@@ -15,7 +15,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-SiteReport";
 
         private SiteReportParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
         private readonly Expression<Func<Web, object>>[] _webExpressions = new Expression<Func<Web, object>>[]
@@ -37,7 +37,7 @@ namespace NovaPointLibrary.Solutions.Report
             s => s.Classification,
         };
 
-        private SiteReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, SiteReportParameters parameters)
+        private SiteReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, SiteReportParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -46,7 +46,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         public static async Task RunAsync(SiteReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            NPLogger logger = new(uiAddLog, "SiteReport", parameters);
+            LoggerSolution logger = new(uiAddLog, "SiteReport", parameters);
 
             try
             {
@@ -54,12 +54,12 @@ namespace NovaPointLibrary.Solutions.Report
 
                 await new SiteReport(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -84,7 +84,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     SiteReportRecord siteReportRecord = new(siteRecord.SiteUrl, ex.Message);
                     RecordCSV(siteReportRecord);
                 }
@@ -179,7 +179,7 @@ namespace NovaPointLibrary.Solutions.Report
             }
             catch (Exception ex)
             {
-                _logger.ReportError(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
             }
         }
 
@@ -193,7 +193,7 @@ namespace NovaPointLibrary.Solutions.Report
             }
             catch (Exception ex)
             {
-                _logger.ReportError(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                 countSharingLinks = ex.Message;
             }
             siteRecord.AddSharingLinks(countSharingLinks);

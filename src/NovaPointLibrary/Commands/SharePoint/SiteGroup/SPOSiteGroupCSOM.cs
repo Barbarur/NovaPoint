@@ -1,18 +1,15 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Solutions;
-using NovaPointLibrary.Solutions.Report;
-using System.Text;
-using System;
+using NovaPointLibrary.Core.Logging;
 
 namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
 {
     internal class SPOSiteGroupCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
 
-        internal SPOSiteGroupCSOM(NPLogger logger, AppInfo appInfo)
+        internal SPOSiteGroupCSOM(LoggerSolution logger, AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -21,7 +18,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
         internal async Task<IEnumerable<Group>> GetAsync(string siteUrl)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting all SharePoint Group from site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting all SharePoint Group from site '{siteUrl}'");
 
             var clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -34,7 +31,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
         internal async Task<Group> GetAsync(string siteUrl, int groupId)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting SharePoint Group with ID '{groupId}' from site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting SharePoint Group with ID '{groupId}' from site '{siteUrl}'");
 
             var clientContext = await _appInfo.GetContext(siteUrl);
 
@@ -50,7 +47,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
         internal async Task<List<Group>> GetSharingLinksAsync(string siteUrl)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting all Sharing Links from site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting all Sharing Links from site '{siteUrl}'");
 
             var collGroups = await GetAsync(siteUrl);
 
@@ -69,7 +66,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
         internal async Task RemoveAsync(string siteUrl, Group group)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Removing SharePoint Group '{group.Title}' from site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Removing SharePoint Group '{group.Title}' from site '{siteUrl}'");
 
             var clientContext = await _appInfo.GetContext(siteUrl);
 

@@ -1,20 +1,15 @@
-﻿using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NovaPointLibrary.Core.Logging;
 
 namespace NovaPointLibrary.Commands.SharePoint.Item
 {
     // ON TESTING ONLY
     internal class SPOItemEnumarableCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly SPOTenantItemsParameters _param;
 
-        internal SPOItemEnumarableCSOM(NPLogger logger, Authentication.AppInfo appInfo, SPOTenantItemsParameters parameters)
+        internal SPOItemEnumarableCSOM(LoggerSolution logger, Authentication.AppInfo appInfo, SPOTenantItemsParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;

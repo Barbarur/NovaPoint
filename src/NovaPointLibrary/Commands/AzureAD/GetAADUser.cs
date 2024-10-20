@@ -1,21 +1,15 @@
 ﻿using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
-using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using NovaPointLibrary.Core.Logging;
 
 namespace NovaPointLibrary.Commands.AzureAD
 {
     internal class GetAADUser
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
 
-        internal GetAADUser(NPLogger logger, Authentication.AppInfo appInfo)
+        internal GetAADUser(LoggerSolution logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -24,7 +18,7 @@ namespace NovaPointLibrary.Commands.AzureAD
         internal async Task<GraphUser> GetSignedInUserAsync()
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, "Getting Signed-in user");
+            _logger.Info(GetType().Name, "Getting Signed-in user");
 
             string url = "/me";
 
@@ -36,7 +30,7 @@ namespace NovaPointLibrary.Commands.AzureAD
         internal async Task<GraphUser> GetUserAsync(string userUPN)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting Azure AD user {userUPN}");
+            _logger.Info(GetType().Name, $"Getting Azure AD user {userUPN}");
 
             string url = $"/users/{userUPN}";
 

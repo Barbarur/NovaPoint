@@ -1,5 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.SharePoint.List;
+using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
 using System.Linq.Expressions;
 using System.Xml.Linq;
@@ -8,7 +9,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 {
     internal class SPOTenantItemsCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly SPOTenantItemsParameters _param;
 
@@ -23,7 +24,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             i => i.ParentList.ParentWeb.Url,
         };
 
-        internal SPOTenantItemsCSOM(NPLogger logger, Authentication.AppInfo appInfo, SPOTenantItemsParameters parameters)
+        internal SPOTenantItemsCSOM(LoggerSolution logger, Authentication.AppInfo appInfo, SPOTenantItemsParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -105,7 +106,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 int counter = 0;
                 ClientContext clientContext;
                 Microsoft.SharePoint.Client.List oList;
-                _logger.LogTxt(GetType().Name, $"Start Loop");
+                _logger.Info(GetType().Name, $"Start Loop");
                 ProgressTracker progress = new(tenantListRecord.Progress, tenantListRecord.List.ItemCount);
                 bool shouldContinue = false;
                 do
@@ -130,7 +131,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     {
                         if (exception.Message.Contains("exceeds the list view threshold"))
                         {
-                            _logger.LogUI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Soution will collect all the items and then filter.");
+                            _logger.UI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Soution will collect all the items and then filter.");
                             camlQuery.FolderServerRelativeUrl = null;
                             LongListNotification(tenantListRecord.List);
                             shouldContinue = true;
@@ -138,7 +139,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                         else
                         {
                             SPOTenantItemRecord recordItem = new(tenantListRecord, exception);
-                            _logger.ReportError(GetType().Name, $"{tenantListRecord.List.BaseType}", $"{tenantListRecord.List.Title}", exception);
+                            _logger.Error(GetType().Name, $"{tenantListRecord.List.BaseType}", $"{tenantListRecord.List.Title}", exception);
 
                             yield return recordItem;
                             break;
@@ -147,8 +148,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     else
                     {
                         counter += subcollListItem.Count;
-                        if (counter >= 5000) { _logger.LogUI(GetType().Name, $"Collected from '{tenantListRecord.List.Title}' {counter} items..."); }
-                        else { _logger.LogTxt(GetType().Name, $"Collected from '{tenantListRecord.List.Title}' {counter} items."); }
+                        if (counter >= 5000) { _logger.UI(GetType().Name, $"Collected from '{tenantListRecord.List.Title}' {counter} items..."); }
+                        else { _logger.Info(GetType().Name, $"Collected from '{tenantListRecord.List.Title}' {counter} items."); }
 
 
                         foreach (var oItem in subcollListItem)
@@ -189,7 +190,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             if (oList.ItemCount > 5000)
             {
-                _logger.LogUI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' is a large list with {oList.ItemCount} items. Expect the Solution to take longer to run.");
+                _logger.UI(GetType().Name, $"'{oList.BaseType}' '{oList.Title}' is a large list with {oList.ItemCount} items. Expect the Solution to take longer to run.");
             }
         }
 
@@ -239,7 +240,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     else
                     {
                         SPOTenantItemRecord recordItem = new(tenantListRecord, exception);
-                        _logger.ReportError(GetType().Name, $"{tenantListRecord.List.BaseType}", $"{tenantListRecord.List.RootFolder.ServerRelativeUrl}", exception);
+                        _logger.Error(GetType().Name, $"{tenantListRecord.List.BaseType}", $"{tenantListRecord.List.RootFolder.ServerRelativeUrl}", exception);
 
                         yield return recordItem;
                         break;

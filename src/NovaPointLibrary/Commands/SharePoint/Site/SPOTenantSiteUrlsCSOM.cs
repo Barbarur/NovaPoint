@@ -1,23 +1,16 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
-using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.AzureAD;
-using NovaPointLibrary.Commands.Utilities.GraphModel;
+using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     internal class SPOTenantSiteUrlsCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly SPOTenantSiteUrlsParameters _param;
 
-        internal SPOTenantSiteUrlsCSOM(NPLogger logger, Authentication.AppInfo appInfo, SPOTenantSiteUrlsParameters parameters)
+        internal SPOTenantSiteUrlsCSOM(LoggerSolution logger, Authentication.AppInfo appInfo, SPOTenantSiteUrlsParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -36,7 +29,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 foreach (var oSiteCollection in collSiteCollections)
                 {
                     _appInfo.IsCancelled();
-                    _logger.LogTxt(GetType().Name, $"Processing Site '{oSiteCollection.Url}'");
+                    _logger.Info(GetType().Name, $"Processing Site '{oSiteCollection.Url}'");
 
                     var record = new SPOTenantSiteUrlsRecord(progress, oSiteCollection);
                     yield return record;
@@ -49,7 +42,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             {
                 ProgressTracker progress = new(_logger, 1);
 
-                _logger.LogTxt(GetType().Name, $"Processing Site '{_param.SiteUrl}'");
+                _logger.Info(GetType().Name, $"Processing Site '{_param.SiteUrl}'");
 
                 SPOTenantSiteUrlsRecord record = new(progress, _param.SiteUrl);
                 yield return record;
@@ -65,13 +58,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                     lines = lines.Where(l => !string.IsNullOrWhiteSpace(l)).ToList();
 
                     int count = lines.Count();
-                    _logger.LogUI(GetType().Name, $"Collected {count} Site from file");
+                    _logger.UI(GetType().Name, $"Collected {count} Site from file");
 
                     ProgressTracker progress = new(_logger, count);
                     foreach (string line in lines)
                     {
                         _appInfo.IsCancelled();
-                        _logger.LogTxt(GetType().Name, $"Processing Site '{line}'");
+                        _logger.Info(GetType().Name, $"Processing Site '{line}'");
 
                         if (string.IsNullOrEmpty(line)) { continue; }
 

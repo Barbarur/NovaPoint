@@ -1,21 +1,16 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.User
 {
     internal class SPOSiteGroupUsersCSOM
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
 
-        internal SPOSiteGroupUsersCSOM(NPLogger logger, AppInfo appInfo)
+        internal SPOSiteGroupUsersCSOM(LoggerSolution logger, AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -24,7 +19,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
         internal async Task<UserCollection> GetAsync(string siteUrl, string groupName)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting users from SharePoint Group '{groupName}'in site '{siteUrl}'");
+            _logger.Info(GetType().Name, $"Getting users from SharePoint Group '{groupName}'in site '{siteUrl}'");
 
             var clientContext = await _appInfo.GetContext(siteUrl);
 

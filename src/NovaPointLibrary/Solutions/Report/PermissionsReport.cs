@@ -1,7 +1,7 @@
 ﻿using NovaPointLibrary.Commands.SharePoint.Permision;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.User;
-
+using NovaPointLibrary.Core.Logging;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Text;
@@ -16,7 +16,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PermissionsReport";
 
         private PermissionsReportParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
         private readonly Expression<Func<Microsoft.SharePoint.Client.User, object>>[] _userRetrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
@@ -29,7 +29,7 @@ namespace NovaPointLibrary.Solutions.Report
             u => u.UserId,
         };
 
-        private PermissionsReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, PermissionsReportParameters parameters)
+        private PermissionsReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, PermissionsReportParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -38,19 +38,19 @@ namespace NovaPointLibrary.Solutions.Report
 
         public static async Task RunAsync(PermissionsReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            NPLogger logger = new(uiAddLog, "PermissionsReport", parameters);
+            LoggerSolution logger = new(uiAddLog, "PermissionsReport", parameters);
             try
             {
                 Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
                 await new PermissionsReport(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -100,7 +100,7 @@ namespace NovaPointLibrary.Solutions.Report
                     }
                     catch (Exception ex)
                     {
-                        _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                        _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
                         AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, SPORoleAssignmentUserRecord.GetRecordBlankException(ex.Message)));
                     }
                 }

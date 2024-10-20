@@ -3,7 +3,7 @@ using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Solutions.Automation;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Report
@@ -20,7 +20,7 @@ namespace NovaPointLibrary.Solutions.Report
             set { _param = (ItemReportParameters)value; }
         }
 
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
@@ -60,7 +60,7 @@ namespace NovaPointLibrary.Solutions.Report
             i => i["_UIVersionString"],
         };
 
-        private ItemReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, ItemReportParameters parameters)
+        private ItemReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, ItemReportParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -72,19 +72,19 @@ namespace NovaPointLibrary.Solutions.Report
             parameters.ItemsParam.FileExpresions = _fileExpressions;
             parameters.ItemsParam.ItemExpresions = _itemExpressions;
 
-            NPLogger logger = new(uiAddLog, "ItemReport", parameters);
+            LoggerSolution logger = new(uiAddLog, "ItemReport", parameters);
             try
             {
                 Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
                 await new ItemReport(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -121,7 +121,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     ItemReportRecord record = new(tenantItemRecord, ex.Message);
                     RecordCSV(record);
@@ -193,7 +193,7 @@ namespace NovaPointLibrary.Solutions.Report
             }
         }
 
-        internal async Task AddDetails(NPLogger logger, AppInfo appInfo, ListItem oItem)
+        internal async Task AddDetails(LoggerSolution logger, AppInfo appInfo, ListItem oItem)
         {
             ItemCreated = (DateTime)oItem["Created"];
             FieldUserValue author = (FieldUserValue)oItem["Author"];

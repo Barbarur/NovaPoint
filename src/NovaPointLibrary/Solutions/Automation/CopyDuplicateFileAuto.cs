@@ -3,6 +3,7 @@ using NovaPointLibrary.Commands.AzureAD;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
+using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -13,7 +14,7 @@ namespace NovaPointLibrary.Solutions.Automation
         public readonly static String s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-CopyDuplicateFileAuto";
 
         private CopyDuplicateFileAutoParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpressions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
@@ -50,7 +51,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
 
 
-        private CopyDuplicateFileAuto(NPLogger logger, Commands.Authentication.AppInfo appInfo, CopyDuplicateFileAutoParameters parameters)
+        private CopyDuplicateFileAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, CopyDuplicateFileAutoParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -61,7 +62,7 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             parameters.SourceItemsParam.FileExpresions = _fileExpressions;
 
-            NPLogger logger = new(uiAddLog, "CopyDuplicateFileAuto", parameters);
+            LoggerSolution logger = new(uiAddLog, "CopyDuplicateFileAuto", parameters);
 
             try
             {
@@ -69,12 +70,12 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 await new CopyDuplicateFileAuto(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -87,15 +88,15 @@ namespace NovaPointLibrary.Solutions.Automation
 
             if (_param.AdminAccess.AddAdmin)
             {
-                _logger.LogUI(GetType().Name, "Adding Site Collection Admin to source site.");
+                _logger.UI(GetType().Name, "Adding Site Collection Admin to source site.");
                 await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).AddAsync(_param.SourceSiteURL, adminUPN);
-                _logger.LogUI(GetType().Name, "Adding Site Collection Admin to destination site.");
+                _logger.UI(GetType().Name, "Adding Site Collection Admin to destination site.");
                 await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).AddAsync(_param.DestinationSiteURL, adminUPN);
             }
 
-            _logger.LogUI(GetType().Name, "Getting source site.");
+            _logger.UI(GetType().Name, "Getting source site.");
             var oSourceWeb = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.SourceSiteURL);
-            _logger.LogUI(GetType().Name, "Getting destination site.");
+            _logger.UI(GetType().Name, "Getting destination site.");
             var oDestinationWeb = await new SPOWebCSOM(_logger, _appInfo).GetAsync(_param.DestinationSiteURL);
 
             if (oSourceWeb.Url == oDestinationWeb.Url)
@@ -103,7 +104,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 _param.SameWebCopyMoveOptimization = true;
             }
 
-            _logger.LogUI(GetType().Name, "Getting source library.");
+            _logger.UI(GetType().Name, "Getting source library.");
             var oSourceList = oSourceWeb.GetListByTitle(_param.SourceListTitle, _listExpressions);
             if (oSourceList == null)
             {
@@ -114,7 +115,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 throw new($"'{_param.SourceListTitle}' is not a library.");
             }
 
-            _logger.LogUI(GetType().Name, "Getting destination library.");
+            _logger.UI(GetType().Name, "Getting destination library.");
             var oDestinationList = oDestinationWeb.GetListByTitle(_param.DestinationListTitle, _listExpressions);
             if (oDestinationList == null)
             {
@@ -140,7 +141,7 @@ namespace NovaPointLibrary.Solutions.Automation
             }
 
 
-            _logger.LogUI(GetType().Name, "Getting Files from source locaton.");
+            _logger.UI(GetType().Name, "Getting Files from source locaton.");
             List<ListItem> listItemsToMove = new();
             await foreach (var oListItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(oSourceWeb.Url, oSourceList, _param.SourceItemsParam))
             {
@@ -155,12 +156,12 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 try
                 {
-                    _logger.LogUI(GetType().Name, "Adding Site Collection Admin from source site.");
+                    _logger.UI(GetType().Name, "Adding Site Collection Admin from source site.");
                     await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(oSourceWeb.Url, adminUPN);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Site", oSourceWeb.Url, ex);
+                    _logger.Error(GetType().Name, "Site", oSourceWeb.Url, ex);
                     string errorMessage = $"Error removing Site Collection Admin fromm site {oSourceWeb.Url}. {ex.Message}";
 
                     RecordCSV(new(_param, "Failed", remarks: errorMessage));
@@ -168,12 +169,12 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 try
                 {
-                    _logger.LogUI(GetType().Name, "Adding Site Collection Admin from destination site.");
+                    _logger.UI(GetType().Name, "Adding Site Collection Admin from destination site.");
                     await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(oDestinationWeb.Url, adminUPN);
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Site", oDestinationWeb.Url, ex);
+                    _logger.Error(GetType().Name, "Site", oDestinationWeb.Url, ex);
                     string errorMessage = $"Error removing Site Collection Admin fromm site {oDestinationWeb.Url}. {ex.Message}";
 
                     RecordCSV(new(_param, "Failed", remarks: errorMessage));
@@ -186,7 +187,7 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             var collListItemsByDepth = SegregateItemsByUrlDepth(listItemsToMove);
 
-            _logger.LogUI(GetType().Name, "Coping items...");
+            _logger.UI(GetType().Name, "Coping items...");
             ProgressTracker progress = new(_logger, listItemsToMove.Count);
             foreach (List<ListItem> batchListItemsToMove in collListItemsByDepth)
             {
@@ -235,20 +236,23 @@ namespace NovaPointLibrary.Solutions.Automation
                 _appInfo.IsCancelled();
 
                 var itemDestinationServerRelativeUrl = GetItemDestinationServerRelativeUrl(oListItem, destinationServerRelativeUrl);
+                
+                var loggerThread = await _logger.GetSubThreadLogger();
                 try
                 {
+
                     string destinationFolderServerRelativeUrl = itemDestinationServerRelativeUrl.Remove(itemDestinationServerRelativeUrl.LastIndexOf("/"));
 
                     if (!_param.ReportMode)
                     {
-                        await new RESTCopyMoveFileFolder(_logger, _appInfo).CopyMoveAsync(sourceWeb.Url, (string)oListItem["FileRef"], destinationFolderServerRelativeUrl, _param.IsMove, _param.SameWebCopyMoveOptimization);
+                        await new RESTCopyMoveFileFolder(loggerThread, _appInfo).CopyMoveAsync(sourceWeb.Url, (string)oListItem["FileRef"], destinationFolderServerRelativeUrl, _param.IsMove, _param.SameWebCopyMoveOptimization);
                     }
 
                     RecordCSV(new(_param, "Success", (string)oListItem["FileRef"], itemDestinationServerRelativeUrl));
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, oListItem.FileSystemObjectType.ToString(), (string)oListItem["FileRef"], ex);
+                    loggerThread.Error(GetType().Name, oListItem.FileSystemObjectType.ToString(), (string)oListItem["FileRef"], ex);
 
                     RecordCSV(new(_param, "Failed", (string)oListItem["FileRef"], itemDestinationServerRelativeUrl, ex.Message));
                 }

@@ -1,16 +1,9 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.SharePoint.Item;
-using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.RecycleBin;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using System;
-using System.Collections.Generic;
+using NovaPointLibrary.Core.Logging;
 using System.Dynamic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Solutions.Report
 {
@@ -20,10 +13,10 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-RecycleBinReport";
 
         private RecycleBinReportParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
 
-        private RecycleBinReport(NPLogger logger, AppInfo appInfo, RecycleBinReportParameters parameters)
+        private RecycleBinReport(LoggerSolution logger, AppInfo appInfo, RecycleBinReportParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -32,19 +25,19 @@ namespace NovaPointLibrary.Solutions.Report
 
         public static async Task RunAsync(RecycleBinReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            NPLogger logger = new(uiAddLog, "RecycleBinReport", parameters);
+            LoggerSolution logger = new(uiAddLog, "RecycleBinReport", parameters);
             try
             {
                 AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
 
                 await new RecycleBinReport(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -89,7 +82,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                    _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
                     AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                 }
             }

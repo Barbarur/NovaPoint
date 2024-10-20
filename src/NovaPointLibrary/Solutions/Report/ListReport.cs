@@ -4,6 +4,7 @@ using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using System.Linq.Expressions;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Core.Logging;
 
 
 namespace NovaPointLibrary.Solutions.Report
@@ -14,7 +15,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ListReport";
 
         private ListReportParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
@@ -50,7 +51,7 @@ namespace NovaPointLibrary.Solutions.Report
             l => l.EnableModeration,
         };
 
-        private ListReport(NPLogger logger, Commands.Authentication.AppInfo appInfo, ListReportParameters parameters)
+        private ListReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, ListReportParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -61,7 +62,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             parameters.ListsParam.ListExpresions = _listExpresions;
 
-            NPLogger logger = new(uiAddLog, "ListReport", parameters);
+            LoggerSolution logger = new(uiAddLog, "ListReport", parameters);
 
             try
             {
@@ -69,12 +70,12 @@ namespace NovaPointLibrary.Solutions.Report
 
                 await new ListReport(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -96,7 +97,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Site", listRecord.SiteUrl, ex);
+                    _logger.Error(GetType().Name, "Site", listRecord.SiteUrl, ex);
                     AddRecord(new(listRecord.SiteUrl, listRecord.List, ex.Message));
                 }
 

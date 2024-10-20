@@ -1,26 +1,18 @@
-﻿using Microsoft.Graph;
-using Microsoft.SharePoint.Client;
+﻿
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
-using NovaPointLibrary.Solutions;
-using PnP.Framework.Modernization.Transform;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using NovaPointLibrary.Core.Logging;
 
 namespace NovaPointLibrary.Commands.AzureAD
 {
     internal class AADGroup
     {
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
 
 
-        internal AADGroup(NPLogger logger, AppInfo appInfo)
+        internal AADGroup(LoggerSolution logger, AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -30,7 +22,7 @@ namespace NovaPointLibrary.Commands.AzureAD
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.GraphOwnersAndMembersAsync";
-            _logger.LogTxt(methodName, $"Getting Owners and Members of Group '{groupId}'");
+            _logger.Info(methodName, $"Getting Owners and Members of Group '{groupId}'");
 
             List<Microsoft365User> collUsers = new();
             collUsers.AddRange( await GetOwnersAsync(groupId) );
@@ -42,7 +34,7 @@ namespace NovaPointLibrary.Commands.AzureAD
         internal async Task<IEnumerable<Microsoft365User>> GetOwnersAsync(string groupId)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting Owners of Group '{groupId}'");
+            _logger.Info(GetType().Name, $"Getting Owners of Group '{groupId}'");
 
             string url = $"/groups/{groupId}/owners?$select=*";
 
@@ -54,7 +46,7 @@ namespace NovaPointLibrary.Commands.AzureAD
         internal async Task<IEnumerable<Microsoft365User>> GetMembersAsync(string groupId)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Getting Members of Group '{groupId}'");
+            _logger.Info(GetType().Name, $"Getting Members of Group '{groupId}'");
 
             string url = $"/groups/{groupId}/members?$select=*";
 
@@ -66,7 +58,7 @@ namespace NovaPointLibrary.Commands.AzureAD
         internal async Task RemoveGroupAsync(string groupId)
         {
             _appInfo.IsCancelled();
-            _logger.LogTxt(GetType().Name, $"Removing Group '{groupId}'");
+            _logger.Info(GetType().Name, $"Removing Group '{groupId}'");
 
             string url = $"/groups/{groupId}";
 

@@ -1,13 +1,25 @@
 ﻿using NovaPointLibrary.Commands.Utilities;
+using NovaPointLibrary.Solutions;
+using PnP.Framework.Diagnostics;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace NovaPointLibrary.Solutions
+namespace NovaPointLibrary.Core.Logging
 {
-    internal class NPLogger
+    internal class LoggerSolution : ILogger
     {
-        private readonly Action<LogInfo> _uiAddLog;
+        public Action<LogInfo> _uiAddLog {  get; init; }
+
+        private readonly string _threadCode = "0";
+        private int _childThreadCounter = 0;
+
+        private static readonly SemaphoreSlim _semaphoreThreadLogger = new(1, 1);
 
         private readonly string _txtPath;
         private readonly string _csvPath;
@@ -20,9 +32,9 @@ namespace NovaPointLibrary.Solutions
         static readonly ReaderWriterLockSlim errorRWL = new();
 
         private readonly List<string> _cachedKeyValues = new();
-        private readonly List<string> _cachedLogTxt = new();
+        private readonly List<string> _cachedLogs = new();
 
-        public NPLogger(Action<LogInfo> uiAddLog, string solutionName, ISolutionParameters parameters)
+        internal LoggerSolution(Action<LogInfo> uiAddLog, string solutionName, ISolutionParameters parameters)
         {
             _uiAddLog = uiAddLog;
 
@@ -35,27 +47,132 @@ namespace NovaPointLibrary.Solutions
             _csvPath = Path.Combine(folderPath, fileName + "_Report.csv");
             _errorPath = Path.Combine(folderPath, fileName + "_errors.txt");
 
-            LogTxt(GetType().Name, $"Logs: {_txtPath}");
-            LogTxt(GetType().Name, $"Report: {_csvPath}");
+            Info(GetType().Name, $"Logs: {_txtPath}");
+            Info(GetType().Name, $"Report: {_csvPath}");
             _uiAddLog(LogInfo.FolderInfo(folderPath));
 
             string v = $"Version: v{VersionControl.GetVersion()}";
-            LogTxt(GetType().Name, v);
+            Info(GetType().Name, v);
             _cachedKeyValues.Add(v);
 
             GetSolutionParameters(parameters);
 
             SW.Start();
 
-            LogUI(GetType().Name, $"Solution has started, please wait to the end");
+            UI(GetType().Name, $"Solution has started, please wait to the end");
         }
 
-        internal void WriteLogFile(string log)
+ 
+        public async Task<ILogger> GetSubThreadLogger()
         {
-            WriteLogFile(new List<string>() { log });
+            LoggerThread childThread;
+            await _semaphoreThreadLogger.WaitAsync();
+            try
+            {
+                childThread = new(this, _threadCode + "." + _childThreadCounter);
+                _childThreadCounter++;
+            }
+            finally
+            {
+                _semaphoreThreadLogger.Release();
+            }
+            return childThread;
         }
 
-        internal void WriteLogFile(List<string> logs)
+        private string FormatLogEntry(string classMethod, string log)
+        {
+            return $"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} [{_threadCode}] - [{classMethod}] - {log}";
+        }
+
+        private void CacheLog(string log)
+        {
+            _cachedLogs.Add(log);
+
+            while (_cachedLogs.Count > 20)
+            {
+                _cachedLogs.RemoveAt(0);
+            }
+        }
+
+        public void Info(string classMethod, string log)
+        {
+            string logEntry = FormatLogEntry(classMethod, log);
+
+            CacheLog(logEntry);
+
+            WriteFile(new List<string>() { logEntry });
+        }
+
+        public void Debug(string classMethod, string log)
+        {
+            return;
+            //string logEntry = FormatLogEntry(classMethod, log);
+
+            //CacheLog(logEntry);
+
+            //WriteFile(new List<string>() { logEntry });
+        }
+
+        public void UI(string classMethod, string log)
+        {
+            Info(classMethod, log);
+
+            _uiAddLog(LogInfo.TextNotification(log));
+        }
+
+        public void Progress(double progress)
+        {
+            if (progress < 0.01) { return; }
+
+            TimeSpan timeSpan = TimeSpan.FromMilliseconds((SW.Elapsed.TotalMilliseconds * 100 / progress - SW.Elapsed.TotalMilliseconds));
+
+            _uiAddLog(LogInfo.ProgressUpdate(progress, timeSpan));
+        }
+
+        public void Error(string classMethod, string type, string URL, Exception ex)
+        {
+            Guid correlationID = Guid.NewGuid();
+
+            List<string> txtLogs = new();
+            List<string> errorLogs = new()
+            {
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                FormatLogEntry(classMethod, $"========== {correlationID} ==========")
+            };
+
+            errorLogs.AddRange(_cachedLogs);
+
+            string logLine = FormatLogEntry(classMethod, $"Error processing {type} '{URL}'");
+            errorLogs.Add(logLine);
+            txtLogs.Add(logLine);
+
+            logLine = FormatLogEntry(classMethod, $"Correlation ID: {correlationID}");
+            errorLogs.Add(logLine);
+            txtLogs.Add(logLine);
+
+            logLine = FormatLogEntry(classMethod, $"Exception: {ex.Message}");
+            errorLogs.Add(logLine);
+            txtLogs.Add(logLine);
+
+
+            logLine = FormatLogEntry(classMethod, $"Trace: {ex.StackTrace}");
+            errorLogs.Add(logLine);
+            txtLogs.Add(logLine);
+
+            WriteFileError(errorLogs);
+            WriteFile(txtLogs);
+
+            _uiAddLog(LogInfo.ErrorNotification($"Error processing {type} '{URL}'."));
+        }
+
+
+        
+
+        
+
+        public void WriteFile(List<string> logs)
         {
             try
             {
@@ -74,40 +191,11 @@ namespace NovaPointLibrary.Solutions
             }
             catch (Exception ex)
             {
-                ErrorWritingFile(logs, ex);
+                ErrorWritingFile(logs , ex);
             };
         }
 
-        private void ErrorWritingFile(string log, Exception ex)
-        {
-            List<string> errorLogs = new()
-            {
-                log,
-            };
-
-            ErrorWritingFile(errorLogs, ex);
-        }
-
-        private void ErrorWritingFile(List<string> logs, Exception ex)
-        {
-            List<string> errorLogs = new();
-            {
-                GetLogLine(GetType().Name, $"========== Error writting below lines ==========");
-            };
-
-            errorLogs.AddRange(logs);
-            errorLogs.Add(GetLogLine(GetType().Name, $"Exception: {ex.Message}"));
-            errorLogs.Add(GetLogLine(GetType().Name, $"Trace: {ex.StackTrace}"));
-
-            WriteErrorLogFile(errorLogs);
-        }
-
-        private void WriteErrorLogFile(string log)
-        {
-            WriteErrorLogFile(new List<string>() { log });
-        }
-
-        private void WriteErrorLogFile(List<string> errorLogs)
+        public void WriteFileError(List<string> errorLogs)
         {
             try
             {
@@ -141,6 +229,29 @@ namespace NovaPointLibrary.Solutions
                 _uiAddLog(LogInfo.TextNotification(ex.Message));
             }
         }
+
+        private void ErrorWritingFile(List<string> logs, Exception ex)
+        {
+            List<string> errorLogs = new()
+            {
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                FormatLogEntry(GetType().Name, $"========== Error writting below lines =========="),
+            };
+
+            errorLogs.AddRange(logs);
+            errorLogs.Add(FormatLogEntry(GetType().Name, $"Exception: {ex.Message}"));
+            errorLogs.Add(FormatLogEntry(GetType().Name, $"Trace: {ex.StackTrace}"));
+
+            errorLogs.Add(string.Empty);
+            errorLogs.Add(string.Empty);
+            errorLogs.Add(string.Empty);
+
+            WriteFileError(errorLogs);
+        }
+
+
 
         private void GetSolutionParameters(ISolutionParameters parameters)
         {
@@ -179,63 +290,39 @@ namespace NovaPointLibrary.Solutions
 
         private void LogProperty(string property)
         {
-            string logLine = GetLogLine(GetType().Name, property);
-            WriteLogFile(logLine);
-            _cachedKeyValues.Add(logLine);
+            string logEntry = FormatLogEntry(GetType().Name, property);
+            _cachedKeyValues.Add(logEntry);
+
+            WriteFile(new List<string>() { logEntry });
 
             // Keep for using during testing
             //_uiAddLog(LogInfo.TextNotification(property));
         }
 
-        internal static string GetLogLine(string classMethod, string log)
+
+        internal void SolutionFinish()
         {
-            return $"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} [{Environment.CurrentManagedThreadId}] - [{classMethod}] - {log}";
+            SolutionFinishNotice();
+            UI(GetType().Name, $"COMPLETED: Solution has finished correctly!");
         }
 
-        internal void LogTxt(string classMethod, string log)
+        internal void SolutionFinish(Exception ex)
         {
-            string logLine = GetLogLine(classMethod, log);
+            SolutionFinishNotice();
+            _uiAddLog(LogInfo.ErrorNotification(ex.Message));
 
-            _cachedLogTxt.Add(logLine);
-
-            while (_cachedLogTxt.Count > 20)
-            {
-                _cachedLogTxt.RemoveAt(0);
-            }
-
-            WriteLogFile(logLine);
+            Info(GetType().Name, $"Exception: {ex.Message}");
+            Info(GetType().Name, $"Trace: {ex.StackTrace}");
         }
 
-        internal void Debug(string classMethod, string log)
+        private void SolutionFinishNotice()
         {
-            return;
-            //string logLine = GetLogLine(classMethod, log);
-
-            //_cachedLogTxt.Add(logLine);
-
-            //while (_cachedLogTxt.Count > 20)
-            //{
-            //    _cachedLogTxt.RemoveAt(0);
-            //}
-
-            //WriteLogFile(logLine);
+            SW.Stop();
+            Progress(100);
         }
 
-        internal void LogUI(string classMethod, string log)
-        {
-            LogTxt(classMethod, log);
 
-            _uiAddLog(LogInfo.TextNotification(log));
-        }
 
-        internal void ProgressUI(double progress)
-        {
-            if (progress < 0.01) { return; }
-
-            TimeSpan timeSpan = TimeSpan.FromMilliseconds( (SW.Elapsed.TotalMilliseconds * 100 / progress - SW.Elapsed.TotalMilliseconds) );
-
-            _uiAddLog(LogInfo.ProgressUpdate(progress, timeSpan));
-        }
 
         internal void DynamicCSV(dynamic o)
         {
@@ -273,7 +360,8 @@ namespace NovaPointLibrary.Solutions
             }
             catch (Exception ex)
             {
-                ErrorWritingFile(GetLogLine(GetType().Name, "Error while writting CSV file"), ex);
+                string logEntry = FormatLogEntry(GetType().Name, "Error while writting CSV file");
+                ErrorWritingFile(new List<string>() { logEntry }, ex);
             }
         }
 
@@ -316,65 +404,10 @@ namespace NovaPointLibrary.Solutions
             }
             catch (Exception ex)
             {
-                ErrorWritingFile(GetLogLine(GetType().Name, "Error while writting CSV file"), ex);
+                string logEntry = FormatLogEntry(GetType().Name, "Error while writting CSV file");
+                ErrorWritingFile(new List<string>() { logEntry }, ex);
             }
         }
 
-        internal void ScriptFinish()
-        {
-            ScriptFinishNotice();
-            LogUI(GetType().Name, $"COMPLETED: Solution has finished correctly!");
-        }
-
-        internal void ScriptFinish(Exception ex)
-        {
-            ScriptFinishNotice();
-            _uiAddLog(LogInfo.ErrorNotification(ex.Message));
-
-            LogTxt(GetType().Name, $"Exception: {ex.Message}");
-            LogTxt(GetType().Name, $"Trace: {ex.StackTrace}");
-        }
-
-        private void ScriptFinishNotice()
-        {
-            SW.Stop();
-            ProgressUI(100);
-        }
-
-        internal void ReportError(string classMethod, string type, string URL, Exception ex)
-        {
-            Guid correlationID = Guid.NewGuid();
-
-            List<string> txtLogs = new();
-            List<string> errorLogs = new()
-            {
-                GetLogLine(classMethod, $"========== {correlationID} ==========")
-            };
-
-            errorLogs.AddRange(_cachedLogTxt);
-
-            string logLine = GetLogLine(classMethod, $"Error processing {type} '{URL}'");
-            errorLogs.Add(logLine);
-            txtLogs.Add(logLine);
-
-            logLine = GetLogLine(classMethod, $"Correlation ID: {correlationID}");
-            errorLogs.Add(logLine);
-            txtLogs.Add(logLine);
-
-            logLine = GetLogLine(classMethod, $"Exception: {ex.Message}");
-            errorLogs.Add(logLine);
-            txtLogs.Add(logLine);
-
-
-            logLine = GetLogLine(classMethod, $"Trace: {ex.StackTrace}");
-            errorLogs.Add(logLine);
-            txtLogs.Add(logLine);
-
-            WriteErrorLogFile(errorLogs);
-            WriteLogFile(txtLogs);
-
-            _uiAddLog(LogInfo.ErrorNotification($"Error processing {type} '{URL}'"));
-        }
-        
     }
 }

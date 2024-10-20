@@ -1,18 +1,11 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.UserProfiles;
-using NovaPointLibrary.Commands;
-using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.User;
-using NovaPointLibrary.Solutions.Report;
-using System;
-using System.Collections.Generic;
+using NovaPointLibrary.Core.Logging;
 using System.Dynamic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using User = Microsoft.SharePoint.Client.User;
 
 namespace NovaPointLibrary.Solutions.QuickFix
@@ -23,7 +16,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
         public readonly static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-IdMismatchTrouble";
 
         private IdMismatchTroubleParameters _param;
-        private readonly NPLogger _logger;
+        private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static Expression<Func<User, object>>[] _userRetrievalExpressions = new Expression<Func<User, object>>[]
@@ -34,7 +27,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             u => u.UserPrincipalName,
         };
 
-        private IdMismatchTrouble(NPLogger logger, Commands.Authentication.AppInfo appInfo, IdMismatchTroubleParameters parameters)
+        private IdMismatchTrouble(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, IdMismatchTroubleParameters parameters)
         {
             _param = parameters;
             _logger = logger;
@@ -43,19 +36,19 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
         public static async Task RunAsync(IdMismatchTroubleParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            NPLogger logger = new(uiAddLog, "IdMismatchTrouble", parameters);
+            LoggerSolution logger = new(uiAddLog, "IdMismatchTrouble", parameters);
             try
             {
                 var appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
                 await new IdMismatchTrouble(logger, appInfo, parameters).RunScriptAsync();
 
-                logger.ScriptFinish();
+                logger.SolutionFinish();
 
             }
             catch (Exception ex)
             {
-                logger.ScriptFinish(ex);
+                logger.SolutionFinish(ex);
             }
         }
 
@@ -67,7 +60,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             var result = tenant.EncodeClaim(_param.UserUpn);
             tenant.Context.ExecuteQueryRetry();
             var accountName = result.Value;
-            _logger.LogUI(GetType().Name, $"Affected user account name: {accountName}");
+            _logger.UI(GetType().Name, $"Affected user account name: {accountName}");
 
             var peopleManager = new PeopleManager(tenant.Context);
             var personProperties = peopleManager.GetPropertiesFor(accountName);
@@ -83,10 +76,10 @@ namespace NovaPointLibrary.Solutions.QuickFix
             {
                 throw new Exception("Unable to obtain users SID");
             }
-            _logger.LogTxt(GetType().Name, $"Affected user account SID: {userSID}");
+            _logger.Info(GetType().Name, $"Affected user account SID: {userSID}");
             userSID = userSID.Substring(userSID.IndexOf("i:0h.f|membership|") + 18);
             userSID = userSID[..(userSID.IndexOf("@live.com"))];
-            _logger.LogUI(GetType().Name, $"Affected user account SID: {userSID}");
+            _logger.UI(GetType().Name, $"Affected user account SID: {userSID}");
 
 
             await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
@@ -105,7 +98,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 }
                 catch (Exception ex)
                 {
-                    _logger.ReportError(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                    _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
                     AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                 }
             }
@@ -122,7 +115,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 if (oUser == null) { return; }
 
                 string siteUserID = ((UserIdInfo)oUser.UserId).NameId;
-                _logger.LogTxt(GetType().Name, $"User found on site with ID '{siteUserID}', correct ID is {correctUserID}");
+                _logger.Info(GetType().Name, $"User found on site with ID '{siteUserID}', correct ID is {correctUserID}");
                 if (siteUserID != correctUserID)
                 {
                     if (oUser.IsSiteAdmin)
@@ -144,7 +137,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             }
             catch (Exception ex)
             {
-                _logger.ReportError(GetType().Name, "Site", siteUrl, ex);
+                _logger.Error(GetType().Name, "Site", siteUrl, ex);
                 AddRecord(siteUrl, $"Error while processing the site: {ex.Message}");
             }
         }
