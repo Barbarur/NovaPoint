@@ -63,6 +63,12 @@ namespace NovaPointWPF.Pages
             OpenBrowser(NavigateUri);
         }
 
+        private void GoToMediumClick(object sender, RoutedEventArgs e)
+        {
+            string NavigateUri = "https://novapoint.medium.com/";
+            OpenBrowser(NavigateUri);
+        }
+
         private void GoToFundClick(object sender, RoutedEventArgs e)
         {
             string NavigateUri = "https://buymeacoffee.com/novapoint";

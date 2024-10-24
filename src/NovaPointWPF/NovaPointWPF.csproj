@@ -20,6 +20,7 @@
   <ItemGroup>
     <None Remove="res\img\logoGithub.png" />
     <None Remove="res\img\LogoLinkedIn.png" />
+    <None Remove="res\img\LogoMedium.png" />
     <None Remove="res\img\LogoTwitterX.png" />
     <None Remove="res\img\LogoYoutube.png" />
     <None Remove="res\NovaPoint.png" />
@@ -49,8 +50,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="res\img\logoGithub.png" />
+    <Resource Include="res\img\LogoGithub.png" />
     <Resource Include="res\img\LogoLinkedIn.png" />
+    <Resource Include="res\img\LogoMedium.png" />
     <Resource Include="res\img\LogoTwitterX.png" />
     <Resource Include="res\img\LogoYoutube.png" />
     <Resource Include="res\img\NovaPoint.png" />

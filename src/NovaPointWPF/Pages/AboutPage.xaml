@@ -76,15 +76,19 @@
                 <NPCustomControls:ButtonSocialMedia
                     ImagePath="pack://application:,,,/res/img/LogoYoutube.png"
                     Click="GoToYoutubeClick"/>
+
+                <NPCustomControls:ButtonSocialMedia
+                    ImagePath="pack://application:,,,/res/img/LogoMedium.png"
+                    Click="GoToMediumClick"/>
                 
                 <NPCustomControls:ButtonSocialMedia
-                    ImagePath="pack://application:,,,/res/img/logoGithub.png"
+                    ImagePath="pack://application:,,,/res/img/LogoGithub.png"
                      Click="GoToGitHubClick"/>
                 
                 <NPCustomControls:ButtonSocialMedia
                     ImagePath="pack://application:,,,/res/img/LogoLinkedIn.png"
                     Click="GoToLinkedInClick"/>
-                
+
                 <NPCustomControls:ButtonSocialMedia
                     ImagePath="pack://application:,,,/res/img/LogoTwitterX.png"
                     Click="GoToTwitterClick"/>
