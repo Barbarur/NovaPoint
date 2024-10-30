@@ -3,8 +3,19 @@
 **NovaPoint** is a collection of ready and easy to use *Solutions* aiming to help SharePoint Admins and Site Collections Admins to manage the SharePoint Online Sites in their Tenants. These *solutions* help with different activities on Admins scope that are not available from the user interface.
 
 Regular users can also find some benefits using **NovaPoint** specially the reports you can generate for better understanding of the overall structure and usage of their site. The final goal of this project is to streamline and improve the user experience when interacting with you data on SharePoint.
+<div align="center">
+
+Follow **NovaPoint** on
+
+[Youtube](https://www.youtube.com/@NovaPoint22)
+[Medium](https://novapoint.medium.com/)
+[LinkedIn](https://www.linkedin.com/company/novapointopen)
+[Twitter](https://x.com/NovaPoint22)
+
 
 [![NovaPoint 0.7.0](https://img.youtube.com/vi/-0__y4mBYto/hqdefault.jpg)](https://youtu.be/-0__y4mBYto)
+
+</div>
 
 <br>
 
