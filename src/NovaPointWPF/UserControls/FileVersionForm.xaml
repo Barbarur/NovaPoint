@@ -62,7 +62,7 @@
 
                                     <TextBox
                                         Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                                        Text="{Binding VersionsToKeep, ElementName=root}"/>
+                                        Text="{Binding KeepNumVersions, ElementName=root}"/>
 
                                 </StackPanel>
 
@@ -108,7 +108,7 @@
 
                             <TextBlock
                                 Style="{DynamicResource TextBlockBody}"
-                                Text="Actin to perform on versions not meeting the keep conditions."
+                                Text="Action to perform on versions not meeting the keep conditions."
                                 Margin="0,16,0,0"/>
 
                             <StackPanel
