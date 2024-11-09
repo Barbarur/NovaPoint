@@ -1,10 +1,4 @@
 ﻿using NovaPointLibrary.Commands.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace NovaPointLibrary.Commands.Authentication
@@ -93,7 +87,7 @@ namespace NovaPointLibrary.Commands.Authentication
                 ContinueWith(t => Console.WriteLine(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        private static async Task CheckForUpdatesAsync()
+        public static async Task CheckForUpdatesAsync()
         {
             await Task.Run(async () =>
             {

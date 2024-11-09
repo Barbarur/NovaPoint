@@ -6,9 +6,10 @@
       xmlns:local="clr-namespace:NovaPointWPF.Pages"
       mc:Ignorable="d" 
       d:DesignHeight="800" d:DesignWidth="800"
-      Title="MainPage">
-    
-    <Grid Background="Transparent">
+      Title="MainPage"
+      Loaded="CheckUpdateAsync">
+
+    <Grid Style="{DynamicResource WindowGrid}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="20"/>

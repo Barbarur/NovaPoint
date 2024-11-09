@@ -30,9 +30,11 @@ namespace NovaPointWPF.Pages.Menus
 
         private void GoToSolutionForm(ISolutionForm solutionForm)
         {
-            Frame? mainFrame = Application.Current.MainWindow.FindName("MainWindowMainFrame") as Frame;
+            //Frame? mainFrame = Application.Current.MainWindow.FindName("MainWindowMainFrame") as Frame;
 
-            if (mainFrame is not null) { mainFrame.Content = new SolutionBasePage(solutionForm); }
+            //if (mainFrame is not null) { mainFrame.Content = new SolutionBasePage(solutionForm); }
+
+            Application.Current.MainWindow.Content = new SolutionBasePage(solutionForm);
         }
 
 

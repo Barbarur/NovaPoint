@@ -30,9 +30,11 @@ namespace NovaPointWPF
         {
             InitializeComponent();
 
-            MainWindowMainFrame.Content = MainPage;
+            //MainWindowMainFrame.Content = MainPage;
 
             AppSettings.CheckForUpdates();
+
+            this.Content = new MainPage();
         }
 
 

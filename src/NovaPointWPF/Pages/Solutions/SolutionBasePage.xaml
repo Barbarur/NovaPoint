@@ -7,8 +7,8 @@
       mc:Ignorable="d" 
       d:DesignHeight="900" d:DesignWidth="1600"
       Title="SolutionBasePage">
-    
-    <Grid Background="Transparent">
+
+    <Grid Style="{DynamicResource WindowGrid}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="800"/>
             <ColumnDefinition Width="16"/>

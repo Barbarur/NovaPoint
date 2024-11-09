@@ -97,11 +97,13 @@ namespace NovaPointWPF.Pages.Solutions
 
         private void Back_Click(object sender, RoutedEventArgs e)
         {
-            Frame? mainFrame = Application.Current.MainWindow.FindName("MainWindowMainFrame") as Frame;
+            //Frame? mainFrame = Application.Current.MainWindow.FindName("MainWindowMainFrame") as Frame;
 
             MainWindow? mainWindow = Application.Current.MainWindow as MainWindow;
 
-            if (mainFrame is not null && mainWindow is not null) { mainFrame.Content = mainWindow.MainPage; }
+            //if (mainFrame is not null && mainWindow is not null) { mainFrame.Content = mainWindow.MainPage; }
+
+            if (mainWindow is not null) { Application.Current.MainWindow.Content = mainWindow.MainPage; }
 
         }
 
