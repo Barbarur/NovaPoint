@@ -7,7 +7,7 @@
       mc:Ignorable="d" 
       d:DesignHeight="800" d:DesignWidth="800"
       Title="MainPage"
-      Loaded="CheckUpdateAsync">
+      Loaded="CheckForUpdatesAsync">
 
     <Grid Style="{DynamicResource WindowGrid}">
         <Grid.ColumnDefinitions>

@@ -26,13 +26,6 @@ namespace NovaPointLibrary.Commands.Authentication
             set { _cachingToken = value; }
         }
 
-        private bool _isUpdated { get; set; } = true;
-        public bool IsUpdated
-        {
-            get { return _isUpdated; }
-            set { _isUpdated = value; }
-        }
-
         private static readonly string _npLocalAppFolder = Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "NovaPoint");
 
         internal static string GetLocalAppPath()
@@ -79,23 +72,6 @@ namespace NovaPointLibrary.Commands.Authentication
             }
 
             return appSettings;
-        }
-
-        public static void CheckForUpdates()
-        {
-            CheckForUpdatesAsync().
-                ContinueWith(t => Console.WriteLine(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
-        }
-
-        public static async Task CheckForUpdatesAsync()
-        {
-            await Task.Run(async () =>
-            {
-
-                var appSettings = AppSettings.GetSettings();
-                appSettings.IsUpdated = await VersionControl.IsUpdated();
-                appSettings.SaveSettings();
-            });
         }
 
         public void SaveSettings()

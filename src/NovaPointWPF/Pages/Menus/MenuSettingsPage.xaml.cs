@@ -1,5 +1,6 @@
 ﻿using Microsoft.Graph;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.Utilities;
 using NovaPointWPF.Properties;
 using System;
 using System.Collections.Generic;
@@ -42,8 +43,20 @@ namespace NovaPointWPF.Pages.Menus
             ClientId = AppSettings.ClientId;
             CachingToken = AppSettings.CachingToken;
 
-            if (AppSettings.IsUpdated) { UpdateButton.Visibility = Visibility.Collapsed; }
-            else { UpdateButton.Visibility = Visibility.Visible; }
+        }
+
+        private async void CheckForUpdatesAsync(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                bool isUpdated = await VersionControl.IsUpdatedAsync();
+                if (isUpdated) { UpdateButton.Visibility = Visibility.Collapsed; }
+                else { UpdateButton.Visibility = Visibility.Visible; }
+            }
+            catch
+            {
+                UpdateErrorNotification.Visibility = Visibility.Visible;
+            }
         }
 
         private void SaveClick(object sender, RoutedEventArgs e)
@@ -52,11 +65,18 @@ namespace NovaPointWPF.Pages.Menus
             AppSettings.ClientId = ClientId;
             AppSettings.CachingToken = CachingToken;
 
-            AppSettings.SaveSettings();
+            try
+            {
+                AppSettings.SaveSettings();
 
-            if (!CachingToken) { AppSettings.RemoveTokenCache(); }
+                if (!CachingToken) { AppSettings.RemoveTokenCache(); }
 
-            TriggerNotification("Settings saved");
+                TriggerNotification("Settings saved");
+            }
+            catch
+            {
+                TriggerNotification("Error while saving setting, please try again.");
+            }
         }
 
         private void DeleteClick(object sender, RoutedEventArgs e)

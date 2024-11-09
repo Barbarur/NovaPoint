@@ -7,7 +7,8 @@
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="800"
-      Title="MenuSettingsPage">
+      Title="MenuSettingsPage"
+      Loaded="CheckForUpdatesAsync">
    
 
     <Grid>
@@ -93,15 +94,24 @@
             <Button
                 Style="{DynamicResource ButtonSolutionMainAction}"
                 x:Name="UpdateButton"
-                Content="Update"
+                Content="New Update Available"
                 Click="UpdateClick"
                 Background="DarkRed"
                 BorderThickness="0"
                 Height="60"
-                Width="120"
+                Width="180"
                 Margin="0, 42, 0, 0"
                 Visibility="Collapsed"/>
 
+            <TextBlock
+                x:Name="UpdateErrorNotification"
+                Style="{DynamicResource TextBlockBody}"
+                HorizontalAlignment="Center"
+                Margin="0, 42, 0, 0"
+                Text="Unable to check for updates. Please check your internet connection."
+                FontWeight="Bold"
+                Foreground="OrangeRed"
+                Visibility="Collapsed"/>
 
         </StackPanel>
 

@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.Utilities;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -13,19 +14,21 @@ namespace NovaPointWPF.Pages
         public MainPage()
         {
             InitializeComponent();
-            CheckUpdate();
+
         }
 
-        private void CheckUpdate()
+        private async void CheckForUpdatesAsync(object sender, RoutedEventArgs e)
         {
-            var appSettings = AppSettings.GetSettings();
-            if (!appSettings.IsUpdated) { SettingsButton.Background = Brushes.DarkRed; }
-        }
-
-        private async void CheckUpdateAsync(object sender, RoutedEventArgs e)
-        {
-            await AppSettings.CheckForUpdatesAsync();
-            CheckUpdate();
+            try
+            {
+                bool isUpdated = await VersionControl.IsUpdatedAsync();
+                if (!isUpdated) { SettingsButton.Background = Brushes.DarkRed; }
+                else { SettingsButton.ClearValue(Button.BackgroundProperty) ; }
+            }
+            catch
+            {
+                SettingsButton.Background = Brushes.DarkRed;
+            }
         }
 
         private void Reports_Click(object sender, RoutedEventArgs e)
@@ -45,7 +48,6 @@ namespace NovaPointWPF.Pages
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
-            CheckUpdate();
             SolutionListFrame.Content = new Pages.Menus.MenuSettingsPage();
         }
 

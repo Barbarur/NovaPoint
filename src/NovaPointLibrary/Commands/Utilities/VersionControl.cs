@@ -1,5 +1,7 @@
-﻿using Microsoft.SharePoint.Client;
+﻿using Microsoft.Graph;
+using Microsoft.SharePoint.Client;
 using Newtonsoft.Json;
+using NovaPointLibrary.Commands.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,19 +30,23 @@ namespace NovaPointLibrary.Commands.Utilities
             return version;
         }
 
-        public static async Task<bool> IsUpdated()
+        public static async Task<bool> IsUpdatedAsync()
+        {
+            bool isUpdated = false;
+
+            await Task.Run(async () =>
+            {
+                isUpdated = await VersionControl.GetForUpdatesAsync();
+            });
+
+            return isUpdated;
+        }
+
+        private static async Task<bool> GetForUpdatesAsync()
         {
             string versionAssembly = GetVersion();
-            string? versionGitHub;
-            try
-            {
-                versionGitHub = await GetGithubLatestRelease();
-            }
-            catch
-            {
-                return true;
-            }
-
+            string? versionGitHub = await GetGithubLatestRelease();
+            
             if (versionGitHub != null)
             {
                 if (String.Equals(versionAssembly, versionGitHub)) { return true; }
@@ -48,7 +54,7 @@ namespace NovaPointLibrary.Commands.Utilities
             }
             else
             {
-                return true;
+                throw new Exception("Unable to connect to GitHub.");
             }
         }
 
