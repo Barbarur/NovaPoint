@@ -11,9 +11,16 @@ namespace NovaPointConsoleTester
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            Console.WriteLine("Hello, World!\n");
 
-            await new SolutionsTester().TestSolution();
+            try
+            {
+                //await new SolutionsTester().TestSolution();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex.Message}\n");
+            }
 
             Console.WriteLine("Byebye, World!");
 
