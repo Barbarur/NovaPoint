@@ -1,8 +1,6 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Core.Logging;
-using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Commands.SharePoint.Admin
 {
