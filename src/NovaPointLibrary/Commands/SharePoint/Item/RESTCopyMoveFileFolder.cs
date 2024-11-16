@@ -7,32 +7,60 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 {
     internal class RESTCopyMoveFileFolder
     {
-        private readonly ILogger _logger;
-        private readonly Authentication.AppInfo _appInfo;
 
-        internal RESTCopyMoveFileFolder(ILogger logger, Authentication.AppInfo appInfo)
+        public int Depth { get; set; }
+        public string SiteUrl { get; set; } =string.Empty;
+        internal string _sourceServerRelativeUrl = string.Empty;
+        public string SourceServerRelativeUrl
         {
-            _logger = logger;
-            _appInfo = appInfo;
+            get { return _sourceServerRelativeUrl; }
+            set
+            {
+                _sourceServerRelativeUrl = value;
+                Depth = value.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Length;
+            }
+        }
+
+        internal string _destinationServerRelativeUrl = string.Empty;
+        public string DestinationServerRelativeUrl
+        {
+            get { return _destinationServerRelativeUrl; }
+            set
+            {
+                _destinationServerRelativeUrl = value;
+                _folderDestinationServerRelativeUrl = value.Remove(value.LastIndexOf("/"));
+            }
+        }
+        private string _folderDestinationServerRelativeUrl = string.Empty;
+
+        internal RESTCopyMoveFileFolder() { }
+
+        internal RESTCopyMoveFileFolder(
+            string siteUrl,
+            string sourceServerRelativeUrl,
+            string destinationServerRelativeUrl)
+        {
+            SiteUrl = siteUrl;
+            SourceServerRelativeUrl = sourceServerRelativeUrl;
+            DestinationServerRelativeUrl = destinationServerRelativeUrl;
         }
 
         // Reference:
         // https://gist.github.com/zplume/21248c3a8a5f840a366722442cf9ee97
         // https://learn.microsoft.com/en-us/sharepoint/dev/apis/spod-copy-move-api
         internal async Task CopyMoveAsync(
-            string siteUrl, 
-            string sourceServerRelativeUrl, 
-            string destinationServerRelativeUrl, 
+            ILogger logger,
+            Authentication.AppInfo appInfo,
             bool isMove,
             bool sameWebCopyMoveOptimization)
         {
-            _appInfo.IsCancelled();
-            _logger.Info(GetType().Name, $"CopyMove file '{sourceServerRelativeUrl}' from site '{siteUrl}' to '{destinationServerRelativeUrl}.");
+            appInfo.IsCancelled();
+            logger.Info(GetType().Name, $"CopyMove file '{SourceServerRelativeUrl}' from site '{SiteUrl}' to '{DestinationServerRelativeUrl}.");
 
-            Uri sourceUri = new(new(siteUrl), EncodePath(sourceServerRelativeUrl));
-            Uri targetUri = new(new(siteUrl), EncodePath(destinationServerRelativeUrl));
+            Uri sourceUri = new(new(SiteUrl), EncodePath(SourceServerRelativeUrl));
+            Uri targetUri = new(new(SiteUrl), EncodePath(_folderDestinationServerRelativeUrl));
 
-            string api = siteUrl + "/_api/site/CreateCopyJobs";
+            string api = SiteUrl + "/_api/site/CreateCopyJobs";
 
             var x = new
             {
@@ -53,7 +81,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
             var contentCreateCopyJobs = JsonConvert.SerializeObject(x);
 
-            string responseCreateCopyJobs = await new RESTAPIHandler(_logger, _appInfo).PostAsync(api, contentCreateCopyJobs);
+            string responseCreateCopyJobs = await new RESTAPIHandler(logger, appInfo).PostAsync(api, contentCreateCopyJobs);
 
             var resultCollection = JsonConvert.DeserializeObject<RESTResultCollection<RESTCreateCopyJobs>>(responseCreateCopyJobs);
 
@@ -71,9 +99,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
             var contentGetCopyJobProgress = JsonConvert.SerializeObject(copyJobInfo);
 
-            api = siteUrl + "/_api/site/GetCopyJobProgress";
-            string responseGetCopyJobProgress = await new RESTAPIHandler(_logger, _appInfo).PostAsync(api, contentGetCopyJobProgress);
-            _logger.Debug(GetType().Name, $"Job progress for {contentCreateCopyJobs} is {responseGetCopyJobProgress}");
+            api = SiteUrl + "/_api/site/GetCopyJobProgress";
+            string responseGetCopyJobProgress = await new RESTAPIHandler(logger, appInfo).PostAsync(api, contentGetCopyJobProgress);
+            logger.Debug(GetType().Name, $"Job progress for {contentCreateCopyJobs} is {responseGetCopyJobProgress}");
 
             var copyJobProgress = JsonConvert.DeserializeObject<RESTCopyJobProgress>(responseGetCopyJobProgress);
             if (copyJobProgress == null)
@@ -85,8 +113,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             {
                 // sleep 1 second
                 await Task.Delay(1000);
-                responseGetCopyJobProgress = await new RESTAPIHandler(_logger, _appInfo).PostAsync(api, contentGetCopyJobProgress);
-                _logger.Debug(GetType().Name, $"Job progress for {contentCreateCopyJobs} is {responseGetCopyJobProgress}");
+                responseGetCopyJobProgress = await new RESTAPIHandler(logger, appInfo).PostAsync(api, contentGetCopyJobProgress);
+                logger.Debug(GetType().Name, $"Job progress for {contentCreateCopyJobs} is {responseGetCopyJobProgress}");
 
                 copyJobProgress = JsonConvert.DeserializeObject<RESTCopyJobProgress>(responseGetCopyJobProgress);
                 if (copyJobProgress == null)
@@ -101,7 +129,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 {
                     if (log.Contains("JobError"))
                     {
-                        _logger.Info(GetType().Name, $"Error log: {log}");
+                        logger.Info(GetType().Name, $"Error log: {log}");
                         throw new($"Error while processing CopyJob. Check error logs for more details.");
                     }
                 }
@@ -113,8 +141,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             var parts = path.Split("/");
             var encodedPath = string.Join("/", parts.Select(p => Uri.EscapeDataString(p)));
-            _logger.Debug(GetType().Name, $"ENCODED PATH '{encodedPath}'");
+
             return encodedPath;
         }
     }
+
 }

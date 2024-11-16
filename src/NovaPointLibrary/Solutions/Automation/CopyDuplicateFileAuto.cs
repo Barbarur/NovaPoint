@@ -4,6 +4,7 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.SQLite;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -48,8 +49,6 @@ namespace NovaPointLibrary.Solutions.Automation
 
             i => i.ParentList.RootFolder.ServerRelativeUrl,
         };
-
-
 
         private CopyDuplicateFileAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, CopyDuplicateFileAutoParameters parameters)
         {
@@ -140,17 +139,17 @@ namespace NovaPointLibrary.Solutions.Automation
                 destinationServerRelativeUrl = oDestinationFolder.ServerRelativeUrl;
             }
 
-
             _logger.UI(GetType().Name, "Getting Files from source locaton.");
-            List<ListItem> listItemsToMove = new();
-            await foreach (var oListItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(oSourceWeb.Url, oSourceList, _param.SourceItemsParam))
+            var sql = new SqliteHandler(_logger);
+            try
             {
-                listItemsToMove.Add(oListItem);
+                await CopyMoveAsync(sql, oSourceWeb, oSourceList, destinationServerRelativeUrl);
             }
+            finally
+            {
+                sql.DropTable(typeof(RESTCopyMoveFileFolder));
 
-
-            await CopyMoveListItemsAsync(oSourceWeb, listItemsToMove, destinationServerRelativeUrl);
-
+            }
 
             if (_param.AdminAccess.RemoveAdmin)
             {
@@ -180,81 +179,77 @@ namespace NovaPointLibrary.Solutions.Automation
                     RecordCSV(new(_param, "Failed", remarks: errorMessage));
                 }
             }
-
+            
         }
 
-        private async Task CopyMoveListItemsAsync(Web sourceWeb, List<ListItem> listItemsToMove, string destinationServerRelativeUrl)
+        private async Task CopyMoveAsync(SqliteHandler sql, Web oSourceWeb, List oSourceList, string destinationServerRelativeUrl)
         {
-            var collListItemsByDepth = SegregateItemsByUrlDepth(listItemsToMove);
+            sql.ResetTableQuery(typeof(RESTCopyMoveFileFolder));
+            await foreach (var oListItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(oSourceWeb.Url, oSourceList, _param.SourceItemsParam))
+            {
+                var itemServerRelativeUrlAtDestination = GetItemDestinationServerRelativeUrl(oListItem, destinationServerRelativeUrl);
+
+                RESTCopyMoveFileFolder obj = new(oSourceWeb.Url, (string)oListItem["FileRef"], itemServerRelativeUrlAtDestination);
+                sql.InsertValue(obj);
+            }
+
+            await CopyMoveListItemsAsync(sql);
+        }
+
+        private async Task CopyMoveListItemsAsync(SqliteHandler sql)
+        {
+            int deepest = sql.GetMaxValue(typeof(RESTCopyMoveFileFolder), "Depth");
+            int tableFloor = sql.GetMinValue(typeof(RESTCopyMoveFileFolder), "Depth");
+
+            int totalCount = sql.GetCountTotalRecord(typeof(RESTCopyMoveFileFolder));
+            ProgressTracker progress = new(_logger, totalCount);
 
             _logger.UI(GetType().Name, "Coping items...");
-            ProgressTracker progress = new(_logger, listItemsToMove.Count);
-            foreach (List<ListItem> batchListItemsToMove in collListItemsByDepth)
+            for (int depth = tableFloor; depth <= deepest; depth++)
             {
-                await CopyMoveDepthBatchListItems(sourceWeb, batchListItemsToMove, destinationServerRelativeUrl, progress);
-            }
-        }
+                int batchCount = 0;
+                var batch = GetBatch(sql, depth, batchCount);
 
-        private List<List<ListItem>> SegregateItemsByUrlDepth(List<ListItem> listItemsToMove)
-        {
-            var dicItemsByUrlDepth = new Dictionary<int, List<ListItem>>();
-
-            foreach (var oListItem in listItemsToMove)
-            {
-                int depth = GetUrlDepth((string)oListItem["FileRef"]);
-
-                if (!dicItemsByUrlDepth.ContainsKey(depth))
+                while (batch.Any())
                 {
-                    dicItemsByUrlDepth[depth] = new List<ListItem>();
+                    _logger.Info(GetType().Name, $"Processing depth {depth}");
+                    await CopyMoveDepthBatchListItemAsync(batch, progress);
+                    batchCount++;
+                    batch = GetBatch(sql, depth, batchCount);
                 }
-                dicItemsByUrlDepth[depth].Add(oListItem);
-
-                _logger.Debug(GetType().Name, $"Url: {oListItem["FileRef"]} and Depth {depth}");
             }
-
-            return dicItemsByUrlDepth.OrderBy(kvp => kvp.Key).Select(kvp => kvp.Value).ToList();
         }
 
-        static int GetUrlDepth(string url)
-        {
-            return url.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Length;
-        }
-
-        private async Task CopyMoveDepthBatchListItems(Web sourceWeb, List<ListItem> listItemsToMove, string destinationServerRelativeUrl, ProgressTracker progress)
+        private async Task CopyMoveDepthBatchListItemAsync(IEnumerable<RESTCopyMoveFileFolder> batch, ProgressTracker progress)
         {
             _appInfo.IsCancelled();
 
-            listItemsToMove = listItemsToMove.OrderBy(i => (string)i["FileRef"]).ToList();
+            batch = batch.OrderBy(i => i.SourceServerRelativeUrl).ToList();
 
             ParallelOptions par = new()
             {
                 MaxDegreeOfParallelism = 9,
                 CancellationToken = _appInfo.CancelToken,
             };
-            await Parallel.ForEachAsync(listItemsToMove, par, async (oListItem, _) =>
+            await Parallel.ForEachAsync(batch, par, async (oListItem, _) =>
             {
                 _appInfo.IsCancelled();
 
-                var itemDestinationServerRelativeUrl = GetItemDestinationServerRelativeUrl(oListItem, destinationServerRelativeUrl);
-                
                 var loggerThread = await _logger.GetSubThreadLogger();
                 try
                 {
-
-                    string destinationFolderServerRelativeUrl = itemDestinationServerRelativeUrl.Remove(itemDestinationServerRelativeUrl.LastIndexOf("/"));
-
                     if (!_param.ReportMode)
                     {
-                        await new RESTCopyMoveFileFolder(loggerThread, _appInfo).CopyMoveAsync(sourceWeb.Url, (string)oListItem["FileRef"], destinationFolderServerRelativeUrl, _param.IsMove, _param.SameWebCopyMoveOptimization);
+                        await oListItem.CopyMoveAsync(loggerThread, _appInfo, _param.IsMove, _param.SameWebCopyMoveOptimization);
                     }
 
-                    RecordCSV(new(_param, "Success", (string)oListItem["FileRef"], itemDestinationServerRelativeUrl));
+                    RecordCSV(new(_param, "Success", oListItem.SourceServerRelativeUrl, oListItem.DestinationServerRelativeUrl));
                 }
                 catch (Exception ex)
                 {
-                    loggerThread.Error(GetType().Name, oListItem.FileSystemObjectType.ToString(), (string)oListItem["FileRef"], ex);
+                    loggerThread.Error(GetType().Name, "Item", oListItem.SourceServerRelativeUrl, ex);
 
-                    RecordCSV(new(_param, "Failed", (string)oListItem["FileRef"], itemDestinationServerRelativeUrl, ex.Message));
+                    RecordCSV(new(_param, "Failed", oListItem.SourceServerRelativeUrl, oListItem.DestinationServerRelativeUrl, ex.Message));
                 }
                 progress.ProgressUpdateReport();
             });
@@ -273,6 +268,19 @@ namespace NovaPointLibrary.Solutions.Automation
             return string.Concat(destinationServerRelativeUrl, sourceFolderRelativeUrl);
         }
 
+        private IEnumerable<RESTCopyMoveFileFolder> GetBatch(SqliteHandler sql, int depth, int batchCount)
+        {
+            int batchSize = 5;
+            int offset = batchSize * batchCount;
+            string query = @$"
+                    SELECT * 
+                    FROM {typeof(RESTCopyMoveFileFolder).Name} 
+                    WHERE Depth = {depth} 
+                    LIMIT {batchSize} OFFSET {offset};";
+
+            return sql.GetRecords<RESTCopyMoveFileFolder>(query);
+        }
+
         private void RecordCSV(CopyDuplicateFileAutoRecord record)
         {
             _logger.RecordCSV(record);
@@ -280,24 +288,28 @@ namespace NovaPointLibrary.Solutions.Automation
 
     }
 
-    public class CopyDuplicateFileAutoRecord : ISolutionRecord
+    internal class CopyDuplicateFileAutoRecord : ISolutionRecord
     {
-        internal string SourceSiteURL { get; set; } = String.Empty;
-        internal string SourceListTitle { get; set; } = String.Empty;
-        internal string SourceItemsServerRelativeUrl { get; set; } = String.Empty;
+        internal int _depth;
+        internal string SourceSiteURL { get; set; }
+        internal string SourceListTitle { get; set; }
+        internal string SourceItemsServerRelativeUrl { get; set; }
 
-        internal string DestinationSiteURL { get; set; } = String.Empty;
-        internal string DestinationListTitle { get; set; } = String.Empty;
-        internal string DestinationItemsServerRelativeUrl { get; set; } = String.Empty;
+        internal string DestinationSiteURL { get; set; }
+        internal string DestinationListTitle { get; set; }
+        internal string DestinationItemsServerRelativeUrl { get; set; }
 
-        internal string Status { get; set; } = String.Empty;
-        internal string Remarks { get; set; } = String.Empty;
+        internal string Status { get; set; }
+        internal string Remarks { get; set; }
 
-        internal CopyDuplicateFileAutoRecord(CopyDuplicateFileAutoParameters param,
-                                        string status,
-                                        string sourceItemsServerRelativeUrl = "",
-                                        string destinationItemsServerRelativeUrl = "",
-                                        string remarks = "")
+        internal CopyDuplicateFileAutoRecord(
+            CopyDuplicateFileAutoParameters param,
+            string status,
+            string sourceItemsServerRelativeUrl = "",
+            string destinationItemsServerRelativeUrl = "",
+            string remarks = "",
+            int depth = 0
+            )
         {
             SourceSiteURL = param.SourceSiteURL;
             SourceListTitle = param.SourceListTitle;
@@ -312,7 +324,6 @@ namespace NovaPointLibrary.Solutions.Automation
         }
 
     }
-
 
     public class CopyDuplicateFileAutoParameters : ISolutionParameters
     {
