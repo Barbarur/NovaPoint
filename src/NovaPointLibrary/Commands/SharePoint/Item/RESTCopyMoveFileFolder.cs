@@ -2,6 +2,7 @@
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Core.Logging;
+using Microsoft.SharePoint.Client;
 
 namespace NovaPointLibrary.Commands.SharePoint.Item
 {
@@ -10,6 +11,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
         public int Depth { get; set; }
         public string SiteUrl { get; set; } =string.Empty;
+
         internal string _sourceServerRelativeUrl = string.Empty;
         public string SourceServerRelativeUrl
         {
@@ -33,16 +35,29 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         }
         private string _folderDestinationServerRelativeUrl = string.Empty;
 
+        public int FileSizeBytes { get; set; } = -1;
+        public int FileTotalSizeBytes { get; set; } = -1;
+
+        internal double _waitingTime = 1000;
+
         internal RESTCopyMoveFileFolder() { }
 
         internal RESTCopyMoveFileFolder(
             string siteUrl,
-            string sourceServerRelativeUrl,
+            ListItem listItem,
             string destinationServerRelativeUrl)
         {
             SiteUrl = siteUrl;
-            SourceServerRelativeUrl = sourceServerRelativeUrl;
+            SourceServerRelativeUrl = (string)listItem["FileRef"];
             DestinationServerRelativeUrl = destinationServerRelativeUrl;
+
+            if (listItem.FileSystemObjectType.ToString() != "Folder")
+            {
+                FileSizeBytes = Convert.ToInt32(listItem["File_x0020_Size"]);
+                FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)listItem["SMTotalSize"];
+                FileTotalSizeBytes = FileSizeTotalBytes.LookupId;
+            }
+
         }
 
         // Reference:
@@ -100,6 +115,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             var contentGetCopyJobProgress = JsonConvert.SerializeObject(copyJobInfo);
 
             api = SiteUrl + "/_api/site/GetCopyJobProgress";
+            logger.Info(GetType().Name, $"Waiting for job to complete {_waitingTime} milliseconds to process {FileSizeBytes} bytes and total {FileTotalSizeBytes} bytes.");
+            await Task.Delay((int)_waitingTime);
             string responseGetCopyJobProgress = await new RESTAPIHandler(logger, appInfo).PostAsync(api, contentGetCopyJobProgress);
             logger.Debug(GetType().Name, $"Job progress for {contentCreateCopyJobs} is {responseGetCopyJobProgress}");
 

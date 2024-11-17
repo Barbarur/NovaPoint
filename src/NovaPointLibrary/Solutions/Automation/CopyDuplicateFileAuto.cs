@@ -5,6 +5,7 @@ using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Core.SQLite;
+using System.Diagnostics;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -38,6 +39,7 @@ namespace NovaPointLibrary.Solutions.Automation
         private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
         {
             i => i.FileSystemObjectType,
+            f => f["File_x0020_Size"],
             i => i["SMTotalSize"],
 
             i => i.Id,
@@ -49,6 +51,10 @@ namespace NovaPointLibrary.Solutions.Automation
 
             i => i.ParentList.RootFolder.ServerRelativeUrl,
         };
+
+        private double _averageWaitingTimeMillisecondsPerByte = 0.000001;
+
+        private int _count = 0;
 
         private CopyDuplicateFileAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, CopyDuplicateFileAutoParameters parameters)
         {
@@ -189,7 +195,7 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 var itemServerRelativeUrlAtDestination = GetItemDestinationServerRelativeUrl(oListItem, destinationServerRelativeUrl);
 
-                RESTCopyMoveFileFolder obj = new(oSourceWeb.Url, (string)oListItem["FileRef"], itemServerRelativeUrlAtDestination);
+                RESTCopyMoveFileFolder obj = new(oSourceWeb.Url, oListItem, itemServerRelativeUrlAtDestination);
                 sql.InsertValue(obj);
             }
 
@@ -231,27 +237,34 @@ namespace NovaPointLibrary.Solutions.Automation
                 MaxDegreeOfParallelism = 9,
                 CancellationToken = _appInfo.CancelToken,
             };
-            await Parallel.ForEachAsync(batch, par, async (oListItem, _) =>
+            await Parallel.ForEachAsync(batch, par, async (copyMoveItem, _) =>
             {
                 _appInfo.IsCancelled();
+                //Stopwatch sw = new();
+                //sw.Start();
+
+                //copyMoveItem._waitingTime = GetWaitingTimeInMilliseconds(copyMoveItem);
 
                 var loggerThread = await _logger.GetSubThreadLogger();
                 try
                 {
                     if (!_param.ReportMode)
                     {
-                        await oListItem.CopyMoveAsync(loggerThread, _appInfo, _param.IsMove, _param.SameWebCopyMoveOptimization);
+                        await copyMoveItem.CopyMoveAsync(loggerThread, _appInfo, _param.IsMove, _param.SameWebCopyMoveOptimization);
                     }
 
-                    RecordCSV(new(_param, "Success", oListItem.SourceServerRelativeUrl, oListItem.DestinationServerRelativeUrl));
+                    RecordCSV(new(_param, copyMoveItem, "Success"));
                 }
                 catch (Exception ex)
                 {
-                    loggerThread.Error(GetType().Name, "Item", oListItem.SourceServerRelativeUrl, ex);
+                    loggerThread.Error(GetType().Name, "Item", copyMoveItem.SourceServerRelativeUrl, ex);
 
-                    RecordCSV(new(_param, "Failed", oListItem.SourceServerRelativeUrl, oListItem.DestinationServerRelativeUrl, ex.Message));
+                    RecordCSV(new(_param, copyMoveItem, "Failed", ex.Message));
                 }
                 progress.ProgressUpdateReport();
+
+                //CalculateAverageWaitingTime(sw.Elapsed.TotalMilliseconds, copyMoveItem);
+                //sw.Stop();
             });
 
         }
@@ -270,7 +283,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private IEnumerable<RESTCopyMoveFileFolder> GetBatch(SqliteHandler sql, int depth, int batchCount)
         {
-            int batchSize = 5;
+            int batchSize = 5000;
             int offset = batchSize * batchCount;
             string query = @$"
                     SELECT * 
@@ -280,6 +293,52 @@ namespace NovaPointLibrary.Solutions.Automation
 
             return sql.GetRecords<RESTCopyMoveFileFolder>(query);
         }
+
+        //private void CalculateAverageWaitingTime(double timeElapsedMilliseconds, RESTCopyMoveFileFolder itemCopied)
+        //{
+        //    if (itemCopied.FileSizeBytes < 0) { return; }
+
+        //    double waitingTimeMillisecondsPerByte;
+        //    timeElapsedMilliseconds -= 1000;
+        //    if (_param.IsMove)
+        //    {
+        //        _logger.Debug(GetType().Name, $"Calculating average waiting time after process {itemCopied.FileTotalSizeBytes} bytes in {timeElapsedMilliseconds} milliseconds");
+        //        waitingTimeMillisecondsPerByte = timeElapsedMilliseconds / itemCopied.FileTotalSizeBytes;
+        //    }
+        //    else
+        //    {
+        //        _logger.Debug(GetType().Name, $"Calculating average waiting time after process {itemCopied.FileSizeBytes} bytes in {timeElapsedMilliseconds} milliseconds");
+        //        waitingTimeMillisecondsPerByte = timeElapsedMilliseconds / itemCopied.FileSizeBytes;
+        //    }
+
+
+        //    double newAverage = (_averageWaitingTimeMillisecondsPerByte * _count + waitingTimeMillisecondsPerByte) / (_count + 1);
+        //    if (newAverage < 0)
+        //    {
+        //        newAverage = 0.000001;
+        //    }
+        //    _averageWaitingTimeMillisecondsPerByte = newAverage;
+        //    _logger.Debug(GetType().Name, $"Average waiting time {_averageWaitingTimeMillisecondsPerByte} milliseconds per byte");
+        //    _count++;
+        //}
+
+        //private double GetWaitingTimeInMilliseconds(RESTCopyMoveFileFolder itemCopied)
+        //{
+        //    double waitingTime;
+        //    if (_param.IsMove)
+        //    {
+        //        waitingTime =  _averageWaitingTimeMillisecondsPerByte * itemCopied.FileTotalSizeBytes;
+        //    }
+        //    else
+        //    {
+        //        waitingTime =  _averageWaitingTimeMillisecondsPerByte * itemCopied.FileSizeBytes;
+        //    }
+        //    if (waitingTime < 1000)
+        //    {
+        //        waitingTime = 1000;
+        //    }
+        //    return waitingTime;
+        //}
 
         private void RecordCSV(CopyDuplicateFileAutoRecord record)
         {
@@ -305,19 +364,35 @@ namespace NovaPointLibrary.Solutions.Automation
         internal CopyDuplicateFileAutoRecord(
             CopyDuplicateFileAutoParameters param,
             string status,
-            string sourceItemsServerRelativeUrl = "",
-            string destinationItemsServerRelativeUrl = "",
-            string remarks = "",
-            int depth = 0
+            string remarks
             )
         {
             SourceSiteURL = param.SourceSiteURL;
             SourceListTitle = param.SourceListTitle;
-            SourceItemsServerRelativeUrl = sourceItemsServerRelativeUrl;
+            SourceItemsServerRelativeUrl = string.Empty;
 
             DestinationSiteURL = param.DestinationSiteURL;
             DestinationListTitle = param.DestinationListTitle;
-            DestinationItemsServerRelativeUrl = destinationItemsServerRelativeUrl;
+            DestinationItemsServerRelativeUrl = string.Empty;
+
+            Status = status;
+            Remarks = remarks;
+        }
+
+        internal CopyDuplicateFileAutoRecord(
+            CopyDuplicateFileAutoParameters param,
+            RESTCopyMoveFileFolder restObject,
+            string status,
+            string remarks = ""
+            )
+        {
+            SourceSiteURL = param.SourceSiteURL;
+            SourceListTitle = param.SourceListTitle;
+            SourceItemsServerRelativeUrl = restObject.SourceServerRelativeUrl;
+
+            DestinationSiteURL = param.DestinationSiteURL;
+            DestinationListTitle = param.DestinationListTitle;
+            DestinationItemsServerRelativeUrl = restObject.DestinationServerRelativeUrl;
 
             Status = status;
             Remarks = remarks;
