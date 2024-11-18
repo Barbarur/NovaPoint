@@ -154,9 +154,13 @@
 
                             <TextBlock
                                 Style="{DynamicResource TextBlockBody}"
-                                Text="Folder server relative path (Optional)"
-                                Margin="0,16,0,0"/>
-
+                                Margin="0,16,0,0">
+                                <TextBlock.Inlines>
+                                    <Run Text="Folder path as Library relative path (Optional)"/>
+                                    <Run FontStyle="Italic" Text="'/Folder/SubfolderOne/SubfolderTwo'"/>
+                                </TextBlock.Inlines>
+                            </TextBlock>
+                            
                             <TextBox
                                 Style="{DynamicResource TextBoxSolutionFormTextInput}"
                                 Text="{Binding DestinationFolderServerRelativeUrl, Mode=TwoWay}"

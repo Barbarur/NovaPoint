@@ -134,12 +134,13 @@ namespace NovaPointLibrary.Solutions.Automation
 
             string destinationServerRelativeUrl = oDestinationList.RootFolder.ServerRelativeUrl;
 
-            if (!String.IsNullOrWhiteSpace(_param.DestinationFolderServerRelativeUrl))
+            if (!String.IsNullOrWhiteSpace(_param.DestinationLibraryRelativeUrl))
             {
-                var oDestinationFolder = await new SPOFolderCSOM(_logger, _appInfo).GetFolderAsync(oDestinationWeb.Url, _param.DestinationFolderServerRelativeUrl);
+                string folderServerRelativeUrl = oDestinationList.RootFolder.ServerRelativeUrl + _param.DestinationLibraryRelativeUrl;
+                var oDestinationFolder = await new SPOFolderCSOM(_logger, _appInfo).GetFolderAsync(oDestinationWeb.Url, folderServerRelativeUrl);
                 if (oDestinationFolder == null)
                 {
-                    throw new($"Destination folder '{_param.DestinationFolderServerRelativeUrl}' does not exists.");
+                    throw new($"Destination folder '{folderServerRelativeUrl}' does not exists.");
                 }
 
                 destinationServerRelativeUrl = oDestinationFolder.ServerRelativeUrl;
@@ -416,9 +417,9 @@ namespace NovaPointLibrary.Solutions.Automation
             set
             {
                 _sourceSiteURL = value.Trim();
-                if (_destinationFolderServerRelativeUrl.EndsWith("/"))
+                if (_destinationLibraryRelativeUrl.EndsWith("/"))
                 {
-                    _destinationFolderServerRelativeUrl = _destinationFolderServerRelativeUrl.Remove(_destinationFolderServerRelativeUrl.LastIndexOf("/"));
+                    _destinationLibraryRelativeUrl = _destinationLibraryRelativeUrl.Remove(_destinationLibraryRelativeUrl.LastIndexOf("/"));
                 }
             }
         }
@@ -437,9 +438,9 @@ namespace NovaPointLibrary.Solutions.Automation
             set
             {
                 _destinationSiteURL = value.Trim();
-                if (_destinationFolderServerRelativeUrl.EndsWith("/"))
+                if (_destinationLibraryRelativeUrl.EndsWith("/"))
                 {
-                    _destinationFolderServerRelativeUrl = _destinationFolderServerRelativeUrl.Remove(_destinationFolderServerRelativeUrl.LastIndexOf("/"));
+                    _destinationLibraryRelativeUrl = _destinationLibraryRelativeUrl.Remove(_destinationLibraryRelativeUrl.LastIndexOf("/"));
                 }
             }
         }
@@ -449,20 +450,20 @@ namespace NovaPointLibrary.Solutions.Automation
             get { return _destinationListTitle; }
             set { _destinationListTitle = value.Trim(); }
         }
-        private string _destinationFolderServerRelativeUrl = String.Empty;
-        public string DestinationFolderServerRelativeUrl
+        private string _destinationLibraryRelativeUrl = String.Empty;
+        public string DestinationLibraryRelativeUrl
         {
-            get { return _destinationFolderServerRelativeUrl; }
+            get { return _destinationLibraryRelativeUrl; }
             set
             {
-                _destinationFolderServerRelativeUrl = value.Trim();
-                if (!_destinationFolderServerRelativeUrl.StartsWith("/"))
+                _destinationLibraryRelativeUrl = value.Trim();
+                if (!_destinationLibraryRelativeUrl.StartsWith("/"))
                 {
-                    _destinationFolderServerRelativeUrl = "/" + _destinationFolderServerRelativeUrl;
+                    _destinationLibraryRelativeUrl = "/" + _destinationLibraryRelativeUrl;
                 }
-                if (_destinationFolderServerRelativeUrl.EndsWith("/"))
+                if (_destinationLibraryRelativeUrl.EndsWith("/"))
                 {
-                    _destinationFolderServerRelativeUrl = _destinationFolderServerRelativeUrl.Remove(_destinationFolderServerRelativeUrl.LastIndexOf("/"));
+                    _destinationLibraryRelativeUrl = _destinationLibraryRelativeUrl.Remove(_destinationLibraryRelativeUrl.LastIndexOf("/"));
                 }
             }
         }
@@ -477,7 +478,7 @@ namespace NovaPointLibrary.Solutions.Automation
             SPOItemsParameters sourceItemsParam,
             string destinationSiteURL,
             string destinationListTitle,
-            string destinationFolderServerRelativeUrl)
+            string destinationLibraryRelativeUrl)
         {
             ReportMode = reportMode;
             IsMove = isMove;
@@ -490,8 +491,7 @@ namespace NovaPointLibrary.Solutions.Automation
             
             DestinationSiteURL = destinationSiteURL;
             DestinationListTitle = destinationListTitle;
-            DestinationFolderServerRelativeUrl = destinationFolderServerRelativeUrl;
-
+            DestinationLibraryRelativeUrl = destinationLibraryRelativeUrl;
         }
 
     }
