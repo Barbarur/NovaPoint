@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Automation"
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="900" d:DesignWidth="800"
+      d:DesignHeight="1400" d:DesignWidth="800"
       Title="SetVersioningLimitAutoForm">
 
     <Grid Margin="0,0,0,16">
@@ -16,58 +16,14 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <TextBlock
-                Style="{DynamicResource TextBlockBodyStrong}"
-                Text="Versioning limits"/>
-
-            <Grid Style="{DynamicResource SolutionMenuGrid}">
-
-                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
-
-                    <StackPanel>
-
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}"
-                            Text="Document Library major versioning limit"
-                            Margin="0,0,0,8"/>
-
-                        <TextBox
-                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                            Text="{Binding LibraryMajorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}"
-                            Text="Document Library minor versioning limit"
-                            Margin="0,16,0,8"/>
-
-                        <TextBox
-                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                            Text="{Binding LibraryMinorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}"
-                            Text="Item List major versioning limit"
-                            Margin="0,16,0,8"/>
-
-                        <TextBox
-                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                            Text="{Binding ListMajorVersionLimit, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-
-                    </StackPanel>
-                </Border>
-
-            </Grid>
+            <designmaterial:VersioningLimitParametersForm
+                x:Name="VersioningF"/>
 
             <designmaterial:AdminForm
                 x:Name="AdminF"/>
 
             <designmaterial:SiteTenantForm
                 x:Name="SiteF"/>
-
-            <designmaterial:ListForm
-                x:Name="ListForm"
-                FilterTarget="Library"/>
 
         </StackPanel>
 

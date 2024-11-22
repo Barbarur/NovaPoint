@@ -50,20 +50,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SPOTenantSiteUrlsWithAccessParameters siteAccParam = new()
-            {
-                AdminAccess = AdminF.Parameters,
-                SiteParam = SiteF.Parameters,
-            };
-
-            SPOTenantListsParameters tListParam = new(siteAccParam, ListForm.Parameters);
-
-            SetVersioningLimitAutoParameters parameters = new(tListParam)
-            {
-                LibraryMajorVersionLimit = this.LibraryMajorVersionLimit,
-                LibraryMinorVersionLimit = this.LibraryMinorVersionLimit,
-                ListMajorVersionLimit = this.ListMajorVersionLimit,
-            };
+            SetVersioningLimitAutoParameters parameters = new(AdminF.Parameters, SiteF.Parameters, VersioningF.Parameters);
 
             await SetVersioningLimitAuto.RunAsync(parameters, uiLog, cancelTokenSource);
         }

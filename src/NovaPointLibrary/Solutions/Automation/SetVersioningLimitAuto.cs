@@ -1,7 +1,8 @@
 ﻿using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Commands.SharePoint.Admin;
 using NovaPointLibrary.Commands.SharePoint.List;
+using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Core.Logging;
-using System.Dynamic;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -17,9 +18,6 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
         {
-
-            l => l.Hidden,
-
             l => l.BaseType,
             l => l.Title,
             l => l.DefaultViewUrl,
@@ -29,22 +27,40 @@ namespace NovaPointLibrary.Solutions.Automation
             l => l.MajorVersionLimit,
             l => l.EnableMinorVersions,
             l => l.MajorWithMinorVersionsLimit,
+            l => l.VersionPolicies.DefaultTrimMode,
+            l => l.VersionPolicies.DefaultExpireAfterDays,
         };
+        private static readonly SPOListsParameters _allLibraries = new()
+        {
+            AllLists = true,
+            IncludeLists = false,
+            IncludeLibraries = true,
+        };
+
+        private readonly SPOListsParameters _listParameters;
 
         private SetVersioningLimitAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, SetVersioningLimitAutoParameters parameters)
         {
             _param = parameters;
             _logger = logger;
             _appInfo = appInfo;
+
+            _listParameters = new()
+            {
+                AllLists = parameters.VersionParam.ListApplyToAllExistingLists,
+                IncludeLists = true,
+                IncludeLibraries = false,
+                ListTitle = parameters.VersionParam.ListApplySingleListTitle,
+            };
         }
 
         public static async Task RunAsync(SetVersioningLimitAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            parameters.TListsParam.ListParam.ListExpresions = _listExpresions;
-
             LoggerSolution logger = new(uiAddLog, "SetVersioningLimitAuto", parameters);
+
             try
             {
+
                 Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
                 await new SetVersioningLimitAuto(logger, appInfo, parameters).RunScriptAsync();
@@ -58,166 +74,344 @@ namespace NovaPointLibrary.Solutions.Automation
             }
         }
 
-        //public SetVersioningLimitAuto(SetVersioningLimitAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        //{
-        //    _param = parameters;
-        //    _param.TListsParam.ListParam.ListExpresions = _listExpresions;
-        //    _logger = new(uiAddLog, this.GetType().Name, _param);
-        //    _appInfo = new(_logger, cancelTokenSource);
-        //}
-
-        //public async Task RunAsync()
-        //{
-        //    try
-        //    {
-        //        await RunScriptAsync();
-
-        //        _logger.ScriptFinish();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.ScriptFinish(ex);
-        //    }
-        //}
-
         private async Task RunScriptAsync()
         {
             _appInfo.IsCancelled();
 
-            await foreach (var tenantListRecord in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
+            if (_param.VersionParam.LibraryInheritTenantVersionSettings && _param.VersionParam.LibraryExistingLibraries)
+            {
+                await GetTenantVersionLimitsAsync();
+            }
+
+            await foreach (var tenantSiteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
-                if ( tenantListRecord.Ex != null || tenantListRecord.List == null)
+                if (tenantSiteRecord.Ex != null)
                 {
-                    AddRecord(tenantListRecord.SiteUrl, tenantListRecord.List, remarks: tenantListRecord.Ex.Message);
+                    SetVersioningLimitAutoRecord record = new(tenantSiteRecord.SiteUrl, remarks: tenantSiteRecord.Ex.Message);
+                    RecordCSV(record);
                     continue;
                 }
 
                 try
                 {
-                    await SetVersioning(tenantListRecord.SiteUrl, tenantListRecord.List);
+                    var site = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(tenantSiteRecord.SiteUrl);
+
+                    if (_param.VersionParam.LibrarySetVersioningSettings)
+                    {
+                        if (_param.VersionParam.LibraryNewLibraries) { SetLibraryVersioningLimitsNew(site); }
+                        if (_param.VersionParam.LibraryExistingLibraries) { await SetLibraryVersioningLimitsExistingAsync(site); }
+                    }
+
+                    if (_param.VersionParam.ListSetVersioningSettings)
+                    {
+                        await SetListVersioningLimitsAsync(site);
+                    }
+
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, tenantListRecord.List.BaseType.ToString(), tenantListRecord.List.DefaultViewUrl, ex);
-                    AddRecord(tenantListRecord.SiteUrl, tenantListRecord.List, remarks: ex.Message);
+                    _logger.Error(GetType().Name, "Site", tenantSiteRecord.SiteUrl, ex);
+
+                    RecordCSV(new(tenantSiteRecord.SiteUrl, remarks: ex.Message));
                 }
             }
 
         }
 
-        private async Task SetVersioning(string siteUrl, Microsoft.SharePoint.Client.List olist)
+        private async Task GetTenantVersionLimitsAsync()
         {
             _appInfo.IsCancelled();
 
-            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
+            _logger.Info(GetType().Name, $"Getting Tenant version history limits");
 
-            Microsoft.SharePoint.Client.List oList = clientContext.Web.GetListByTitle(olist.Title, _listExpresions);
+            _param.VersionParam.LibraryEnableVersioning = true;
+            _param.VersionParam.LibraryMinorVersionLimit = 0;
 
-            int majorVersions = 0;
-            int minorVersions = 0;
+            var tenant = await new SPOTenant(_logger, _appInfo).GetAsync();
+            _param.VersionParam.LibraryAutomaticVersionLimit = tenant.EnableAutoExpirationVersionTrim;
+            _param.VersionParam.LibraryMajorVersionLimit = tenant.MajorVersionLimit;
+            _param.VersionParam.LibraryExpirationDays = tenant.ExpireVersionsAfterDays;
 
-            if (oList.BaseType == BaseType.DocumentLibrary)
-            {
-                majorVersions = _param.LibraryMajorVersionLimit;
-                minorVersions = _param.LibraryMinorVersionLimit;
-
-            }
-            else if (oList.BaseType == BaseType.GenericList)
-            {
-                majorVersions = _param.ListMajorVersionLimit;
-                minorVersions = 0;
-            }
-
-            bool enableVersioning = majorVersions > 0;
-            bool enableMinorVersions = minorVersions > 0;
-            bool updateRequired = false;
-
-            if (enableVersioning != oList.EnableVersioning)
-            {
-                oList.EnableVersioning = enableVersioning;
-                updateRequired = true;
-            }
-
-            if (enableVersioning)
-            {
-                oList.MajorVersionLimit = majorVersions;
-                updateRequired = true;
-            }
-
-            if (oList.BaseType == BaseType.DocumentLibrary)
-            {
-                //if (enableVersioning && enableMinorVersions)
-                //{
-                //    oList.EnableMinorVersions = enableMinorVersions;
-                //    oList.MajorWithMinorVersionsLimit = (int)minorVersions;
-                //    updateRequired = true;
-                //}
-                //else
-                //{
-                //    oList.EnableMinorVersions = false;
-                //    oList.MajorWithMinorVersionsLimit = 0;
-                //    updateRequired = true;
-                //}
-
-
-                if (enableVersioning && enableMinorVersions != oList.EnableMinorVersions)
-                {
-                    oList.EnableMinorVersions = enableMinorVersions;
-                    updateRequired = true;
-                }
-
-                if (enableVersioning && enableMinorVersions)
-                {
-                    oList.MajorWithMinorVersionsLimit = (int)minorVersions;
-                    updateRequired = true;
-                }
-            }
-
-            if (updateRequired)
-            {
-                _logger.Info(GetType().Name, $"Updating '{oList.BaseType}' - '{oList.Title}', Major versions {enableVersioning}, Major versions limit {majorVersions}, Minor versions {enableMinorVersions}, Minor versions limit {minorVersions}");
-                oList.Update();
-                clientContext.ExecuteQuery();
-            }
+            _logger.Info(GetType().Name, $"EnableAutoExpirationVersionTrim: {tenant.EnableAutoExpirationVersionTrim}");
+            _logger.Info(GetType().Name, $"MajorVersionLimit: {tenant.MajorVersionLimit}");
+            _logger.Info(GetType().Name, $"ExpireVersionsAfterDays: {tenant.ExpireVersionsAfterDays}");
 
         }
 
-        private void AddRecord(string siteUrl,
-                               Microsoft.SharePoint.Client.List? oList = null,
-                               string remarks = "")
+        private void SetLibraryVersioningLimitsNew(Site site)
         {
-            dynamic dynamicRecord = new ExpandoObject();
-            dynamicRecord.SiteUrl = siteUrl;
-            dynamicRecord.ListTitle = oList != null ? oList.Title : String.Empty;
-            dynamicRecord.ListType = oList != null ? oList.BaseType.ToString() : String.Empty;
+            _logger.UI(GetType().Name, $"Setting versioning limit on new libraries for site {site.Url}.");
 
-            dynamicRecord.Remarks = remarks;
+            try
+            {
+                if (_param.VersionParam.LibraryInheritTenantVersionSettings)
+                {
+                    site.EnsureProperty(s => s.VersionPolicyForNewLibrariesTemplate);
+                    site.VersionPolicyForNewLibrariesTemplate.InheritTenantSettings();
+                    site.Context.ExecuteQueryRetry();
+                }
+                else if (_param.VersionParam.LibraryAutomaticVersionLimit)
+                {
+                    site.EnsureProperty(s => s.VersionPolicyForNewLibrariesTemplate);
+                    site.VersionPolicyForNewLibrariesTemplate.SetAutoExpiration();
+                    site.Context.ExecuteQueryRetry();
+                }
+                else
+                {
+                    site.EnsureProperty(s => s.VersionPolicyForNewLibrariesTemplate);
+                    if (_param.VersionParam.LibraryExpirationDays == 0)
+                    {
+                        site.VersionPolicyForNewLibrariesTemplate.SetNoExpiration(_param.VersionParam.LibraryMajorVersionLimit);
+                        site.Context.ExecuteQueryRetry();
+                    }
+                    else
+                    {
+                        site.VersionPolicyForNewLibrariesTemplate.SetExpireAfter(_param.VersionParam.LibraryMajorVersionLimit, _param.VersionParam.LibraryExpirationDays);
+                        site.Context.ExecuteQueryRetry();
+                    }
+                }
+                RecordCSV(new(site.Url, "New Libraries", "Successful"));
+            }
+            catch (Exception ex)
+            {
+                RecordCSV(new(site.Url, "New Libraries", "Failed", ex.Message));
+            }
+        }
 
-            _logger.DynamicCSV(dynamicRecord);
+        private async Task SetLibraryVersioningLimitsExistingAsync(Site site)
+        {
+            _logger.UI(GetType().Name, $"Setting versioning limit on existing libraries for site {site.Url}.");
+
+            List<Microsoft.SharePoint.Client.List> collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(site.Url, _param.LibraryParameters);
+            foreach (var oList in collList)
+            {
+                try
+                {
+                    SetLibraryVersioningLimitsAsync(oList);
+                    RecordCSV(new(site.Url, $"Document Library '{oList.Title}", "Successful"));
+                }
+                catch (Exception ex)
+                {
+                    RecordCSV(new(site.Url, $"Document Library '{oList.Title}", "Failed", ex.Message));
+                }
+            }
+        }
+
+        private void SetLibraryVersioningLimitsAsync(List oList)
+        {
+            _logger.UI(GetType().Name, $"Processing Library {oList.RootFolder.ServerRelativeUrl}.");
+
+            oList.EnableVersioning = _param.VersionParam.LibraryEnableVersioning;
+
+            if (_param.VersionParam.LibraryEnableVersioning)
+            {
+                if (_param.VersionParam.LibraryAutomaticVersionLimit)
+                {
+                    oList.VersionPolicies.DefaultTrimMode = VersionPolicyTrimMode.AutoExpiration;
+                    oList.EnableMinorVersions = false;
+                }
+                else
+                {
+                    oList.MajorVersionLimit = _param.VersionParam.LibraryMajorVersionLimit;
+
+                    if (_param.VersionParam.LibraryMinorVersionLimit > 0)
+                    {
+                        oList.EnableMinorVersions = true;
+                        oList.MajorWithMinorVersionsLimit = _param.VersionParam.LibraryMinorVersionLimit;
+                    }
+                    else
+                    {
+                        oList.EnableMinorVersions = false;
+                    }
+
+                    if (_param.VersionParam.LibraryExpirationDays < 1)
+                    {
+                        oList.VersionPolicies.DefaultTrimMode = VersionPolicyTrimMode.NoExpiration;
+                    }
+                    else
+                    {
+                        oList.VersionPolicies.DefaultTrimMode = VersionPolicyTrimMode.ExpireAfter;
+                        oList.VersionPolicies.DefaultExpireAfterDays = _param.VersionParam.LibraryExpirationDays;
+                    }
+                }
+            }
+
+            oList.Update();
+            oList.Context.ExecuteQuery();
+        }
+
+        private async Task SetListVersioningLimitsAsync(Site site)
+        {
+            _logger.UI(GetType().Name, $"Setting versioning limit on existing lists for site {site.Url}.");
+
+            List<Microsoft.SharePoint.Client.List> collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(site.Url, _param.ListParameters);
+            foreach (var oList in collList)
+            {
+                try
+                {
+                    SetListVersioningLimits(oList);
+                    RecordCSV(new(site.Url, $"List '{oList.Title}", "Successful"));
+                }
+                catch (Exception ex)
+                {
+                    RecordCSV(new(site.Url, $"List '{oList.Title}", "Failed", ex.Message));
+                }
+            }
+        }
+
+        private void SetListVersioningLimits(List oList)
+        {
+            _logger.UI(GetType().Name, $"Processing list {oList.RootFolder.ServerRelativeUrl}.");
+
+            oList.EnableVersioning = _param.VersionParam.ListEnableVersioning;
+            if (_param.VersionParam.ListEnableVersioning)
+            {
+                oList.MajorVersionLimit = _param.VersionParam.LibraryMajorVersionLimit;
+                // Review how to apply minor versions only when approval is enabled.
+            }
+
+            oList.Update();
+            oList.Context.ExecuteQuery();
+        }
+
+        private void RecordCSV(SetVersioningLimitAutoRecord record)
+        {
+            _logger.RecordCSV(record);
+        }
+
+    }
+
+    public class SetVersioningLimitAutoRecord : ISolutionRecord
+    {
+        internal string SiteUrl { get; set; } = String.Empty;
+        internal string TargetList { get; set; } = String.Empty;
+        internal string Status { get; set; } = String.Empty;
+        internal string Remarks { get; set; } = String.Empty;
+
+        internal SetVersioningLimitAutoRecord(string siteUrl, string target = "", string status = "", string remarks = "")
+        {
+            SiteUrl = siteUrl;
+            TargetList = target;
+            Status = status;
+            Remarks = remarks;
+        }
+
+    }
+
+    public class VersioningLimitParameters : ISolutionParameters
+    {
+        public bool LibrarySetVersioningSettings { get; set; } = false;
+        public bool LibraryNewLibraries { get; set; } = false;
+        public bool LibraryExistingLibraries { get; set; } = false;
+        public bool LibraryApplyToAllExistingLibraries { get; set; } = false;
+        public string LibraryApplyToSingleLibraryTitle { get; set; } = String.Empty;
+        public bool LibraryInheritTenantVersionSettings { get; set; } = false;
+        public bool LibraryEnableVersioning { get; set; } = true;
+
+        public bool LibraryAutomaticVersionLimit { get; set; } = false;
+        public int LibraryMajorVersionLimit { get; set; } = 500;
+        public int LibraryExpirationDays { get; set; } = 0;
+        public int LibraryMinorVersionLimit { get; set; } = 0;
+
+        public bool ListSetVersioningSettings {  get; set; } = false;
+        public bool ListApplyToAllExistingLists { get; set; } = false;
+        public string ListApplySingleListTitle { get; set; } = String.Empty;
+        public bool ListEnableVersioning { get; set; } = false;
+        public int ListMajorVersionLimit { get; set; } = 500;
+
+
+        public void ParametersCheck()
+        {
+
+            if (LibraryNewLibraries && !LibraryEnableVersioning && !LibraryInheritTenantVersionSettings)
+            {
+                throw new Exception($"You cannot disable versioning for new libraries. This is only available for existing ones.");
+            }
+            if (LibraryNewLibraries && LibraryMajorVersionLimit < 100)
+            {
+                throw new Exception($"Major version for bew libraries has to be 100 or above.");
+            }
+            if (LibraryExistingLibraries && !LibraryApplyToAllExistingLibraries && String.IsNullOrWhiteSpace(LibraryApplyToSingleLibraryTitle))
+            {
+                throw new Exception($"If selected Existing libraries, you need to apply either to all libraries or provide the title of a single library.");
+            }
+            if (LibraryInheritTenantVersionSettings && (LibraryAutomaticVersionLimit || LibraryMajorVersionLimit != 500 || LibraryExpirationDays != 0 || LibraryMinorVersionLimit != 0))
+            {
+                throw new Exception($"If selected to inherit limits from Tenant, you cannot set Automatic, Major, Minor or Expiration days version limit for Libraries.");
+            }
+            if (LibraryAutomaticVersionLimit && (LibraryMajorVersionLimit != 500 || LibraryExpirationDays != 0 || LibraryMinorVersionLimit != 0))
+            {
+                throw new Exception($"If selected Automatic limits, you cannot set Major, Minor or Expiration days version limit for Libraries .");
+            }
+            if (LibraryExpirationDays > 0)
+            {
+                if (LibraryExpirationDays < 30 || 36500 < LibraryExpirationDays )
+                {
+                    throw new Exception($"Expiration days needs to be between 30 and 36500.");
+                }
+                if (!LibraryEnableVersioning || LibraryMajorVersionLimit < 1)
+                {
+                    throw new Exception($"If selected Expiration days, you need to enable Versioning and Major version limit above 1 for libraries.");
+                }
+            }
+            if (LibraryMinorVersionLimit > 0 && (!LibraryEnableVersioning || LibraryMajorVersionLimit < 1))
+            {
+                throw new Exception($"If selected Minor versions, you need to enable Versioning and Major version limit above 1 for libraries.");
+            }
+            if (LibraryEnableVersioning && !LibraryAutomaticVersionLimit && LibraryMajorVersionLimit < 1)
+            {
+                throw new Exception($"If enable versioning, you need to enable set automatic limit of set Majot version limits.");
+            }
+
+            if (ListSetVersioningSettings && !ListApplyToAllExistingLists && string.IsNullOrEmpty(ListApplySingleListTitle))
+            {
+                throw new Exception($"You need to apply either to all list or provide the title of a single list.");
+            }
         }
     }
 
     public class SetVersioningLimitAutoParameters : ISolutionParameters
     {
-        public int LibraryMajorVersionLimit { get; set; } = 500;
-        public int LibraryMinorVersionLimit { get; set; } = 0;
-        public int ListMajorVersionLimit { get; set; } = 500;
 
-        public SPOTenantListsParameters TListsParam {  get; set; }
-
-        public SetVersioningLimitAutoParameters(SPOTenantListsParameters listsParameters)
+        internal SPOAdminAccessParameters AdminAccess;
+        internal SPOTenantSiteUrlsParameters SiteParam;
+        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
         {
-            TListsParam = listsParameters;
-        }
-
-        internal void ParametersCheck()
-        {
-            if (LibraryMajorVersionLimit < 1 && LibraryMinorVersionLimit > 0)
+            get
             {
-                throw new Exception($"FORM INCOMPLETED: You cannot set Minor verion limit for a library without setting Major version limit.");
+                return new(AdminAccess, SiteParam);
             }
         }
+        public VersioningLimitParameters VersionParam { get; set; }
+
+        internal SPOListsParameters LibraryParameters;
+        internal SPOListsParameters ListParameters;
+
+        public SetVersioningLimitAutoParameters(SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam, VersioningLimitParameters versionParam)
+        {
+            AdminAccess = adminAccess;
+            SiteParam = siteParam;
+            VersionParam = versionParam;
+
+            LibraryParameters = new()
+            {
+                AllLists = versionParam.LibraryApplyToAllExistingLibraries,
+                IncludeLibraries = versionParam.LibraryApplyToAllExistingLibraries,
+                IncludeLists = false,
+                ListTitle = versionParam.LibraryApplyToSingleLibraryTitle,
+            };
+
+            ListParameters = new()
+            {
+                AllLists = versionParam.ListApplyToAllExistingLists,
+                IncludeLibraries = false,
+                IncludeLists = versionParam.ListApplyToAllExistingLists,
+                ListTitle = versionParam.ListApplySingleListTitle,
+            };
+
+        }
+
     }
 }
