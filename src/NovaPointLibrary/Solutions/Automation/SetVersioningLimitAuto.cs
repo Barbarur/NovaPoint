@@ -3,7 +3,6 @@ using NovaPointLibrary.Commands.SharePoint.Admin;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Core.Logging;
-using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
@@ -16,20 +15,6 @@ namespace NovaPointLibrary.Solutions.Automation
         private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
-        {
-            l => l.BaseType,
-            l => l.Title,
-            l => l.DefaultViewUrl,
-            l => l.Id,
-
-            l => l.EnableVersioning,
-            l => l.MajorVersionLimit,
-            l => l.EnableMinorVersions,
-            l => l.MajorWithMinorVersionsLimit,
-            l => l.VersionPolicies.DefaultTrimMode,
-            l => l.VersionPolicies.DefaultExpireAfterDays,
-        };
         private static readonly SPOListsParameters _allLibraries = new()
         {
             AllLists = true,
@@ -182,7 +167,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task SetLibraryVersioningLimitsExistingAsync(Site site)
         {
-            _logger.UI(GetType().Name, $"Setting versioning limit on existing libraries for site {site.Url}.");
+            _logger.Info(GetType().Name, $"Setting versioning limit on existing libraries for site {site.Url}.");
 
             List<Microsoft.SharePoint.Client.List> collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(site.Url, _param.LibraryParameters);
             foreach (var oList in collList)
@@ -201,7 +186,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void SetLibraryVersioningLimitsAsync(List oList)
         {
-            _logger.UI(GetType().Name, $"Processing Library {oList.RootFolder.ServerRelativeUrl}.");
+            _logger.Info(GetType().Name, $"Processing Library {oList.RootFolder.ServerRelativeUrl}.");
 
             oList.EnableVersioning = _param.VersionParam.LibraryEnableVersioning;
 
@@ -244,7 +229,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task SetListVersioningLimitsAsync(Site site)
         {
-            _logger.UI(GetType().Name, $"Setting versioning limit on existing lists for site {site.Url}.");
+            _logger.Info(GetType().Name, $"Setting versioning limit on existing lists for site {site.Url}.");
 
             List<Microsoft.SharePoint.Client.List> collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(site.Url, _param.ListParameters);
             foreach (var oList in collList)
@@ -263,12 +248,12 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void SetListVersioningLimits(List oList)
         {
-            _logger.UI(GetType().Name, $"Processing list {oList.RootFolder.ServerRelativeUrl}.");
+            _logger.Info(GetType().Name, $"Processing list {oList.RootFolder.ServerRelativeUrl}.");
 
             oList.EnableVersioning = _param.VersionParam.ListEnableVersioning;
             if (_param.VersionParam.ListEnableVersioning)
             {
-                oList.MajorVersionLimit = _param.VersionParam.LibraryMajorVersionLimit;
+                oList.MajorVersionLimit = _param.VersionParam.ListMajorVersionLimit;
                 // Review how to apply minor versions only when approval is enabled.
             }
 
