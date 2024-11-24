@@ -51,6 +51,11 @@ namespace NovaPointLibrary.Solutions.Report
             l => l.EnableModeration,
         };
 
+        private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _libraryExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
+        {
+            l => l.VersionPolicies.DefaultTrimMode,
+        };
+
         private ListReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, ListReportParameters parameters)
         {
             _param = parameters;
@@ -108,6 +113,12 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
+            if (list.BaseType == BaseType.DocumentLibrary)
+            {
+                list.Context.Load(list, _libraryExpresions);
+                list.Context.ExecuteQuery();
+            }
+
             ListReportRecord record = new(siteUrl, list);
 
             if (_param.IncludeStorageMetrics)
@@ -141,8 +152,10 @@ namespace NovaPointLibrary.Solutions.Report
         internal string TotalSizeGb { get; set; } = String.Empty;
 
         internal string ContentApproval { get; set; } = String.Empty;
-        internal string MajorVersioning { get; set; } = String.Empty;
+        internal string EnableVersioning {  get; set; } = String.Empty;
+        internal string AutomaticExpiration {  get; set; } = "NA";
         internal string MajorVersionLimit { get; set; } = String.Empty;
+        internal string ExpireAfter { get; set; } = "NA";
         internal string MinorVersioning { get; set; } = String.Empty;
         internal string MinorVersionLimit { get; set; } = String.Empty;
         internal string RequireCheckOut { get; set; } = String.Empty;
@@ -171,7 +184,7 @@ namespace NovaPointLibrary.Solutions.Report
                 TotalFileCount = list.ItemCount.ToString();
 
                 ContentApproval = list.EnableModeration.ToString();
-                MajorVersioning = list.EnableVersioning.ToString();
+                EnableVersioning = list.EnableVersioning.ToString();
                 MajorVersionLimit = list.MajorVersionLimit.ToString();
                 MinorVersioning = list.EnableMinorVersions.ToString();
                 MinorVersionLimit = list.MajorWithMinorVersionsLimit.ToString();
@@ -181,6 +194,23 @@ namespace NovaPointLibrary.Solutions.Report
 
                 Hidden = list.Hidden.ToString();
                 IsSystemList = list.IsSystemList.ToString();
+
+                if (list.BaseType == BaseType.DocumentLibrary)
+                {
+                    if (list.VersionPolicies.DefaultTrimMode == VersionPolicyTrimMode.AutoExpiration)
+                    {
+                        AutomaticExpiration = "True";
+                    }
+                    else if (list.VersionPolicies.DefaultTrimMode == VersionPolicyTrimMode.ExpireAfter)
+                    {
+                        ExpireAfter = list.VersionPolicies.DefaultExpireAfterDays.ToString();
+                        AutomaticExpiration = "False";
+                    }
+                    else
+                    {
+                        AutomaticExpiration = "False";
+                    }
+                }
             }
         }
 
