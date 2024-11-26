@@ -63,6 +63,12 @@ namespace NovaPointWPF.Pages
             OpenBrowser(NavigateUri);
         }
 
+        private void GoToBlueskyClick(object sender, RoutedEventArgs e)
+        {
+            string NavigateUri = "https://bsky.app/profile/novapoint.bsky.social";
+            OpenBrowser(NavigateUri);
+        }
+
         private void GoToMediumClick(object sender, RoutedEventArgs e)
         {
             string NavigateUri = "https://novapoint.medium.com/";
