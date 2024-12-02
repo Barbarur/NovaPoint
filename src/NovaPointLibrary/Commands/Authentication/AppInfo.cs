@@ -235,8 +235,6 @@ namespace NovaPointLibrary.Commands.Authentication
         {
             this.IsCancelled();
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
-
             AuthenticationResult result;
             await _semaphore.WaitAsync();
             try
@@ -252,7 +250,7 @@ namespace NovaPointLibrary.Commands.Authentication
                 {
                     var accounts = await _app.GetAccountsAsync();
                     result = await _app.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
-                                .ExecuteAsync(cts.Token);
+                                .ExecuteAsync(CancelToken);
                 }
                 catch
                 {
@@ -260,7 +258,7 @@ namespace NovaPointLibrary.Commands.Authentication
 
                     result = await _app.AcquireTokenInteractive(scopes)
                                       .WithUseEmbeddedWebView(false)
-                                      .ExecuteAsync(cts.Token);
+                                      .ExecuteAsync(CancelToken);
                 }
 
             }
