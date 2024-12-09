@@ -1,14 +1,10 @@
 ﻿using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Solutions;
-using PnP.Framework.Diagnostics;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+
 
 namespace NovaPointLibrary.Core.Logging
 {
@@ -105,12 +101,11 @@ namespace NovaPointLibrary.Core.Logging
 
         public void Debug(string classMethod, string log)
         {
-            return;
-            //string logEntry = FormatLogEntry(classMethod, log);
+            string logEntry = FormatLogEntry(classMethod, log);
 
-            //CacheLog(logEntry);
+            CacheLog(logEntry);
 
-            //WriteFile(new List<string>() { logEntry });
+            WriteFile(new List<string>() { logEntry });
         }
 
         public void UI(string classMethod, string log)
@@ -393,9 +388,11 @@ namespace NovaPointLibrary.Core.Logging
 
                         foreach (var propertyInfo in properties)
                         {
-                            sb.Append($"\"{propertyInfo.GetValue(record)}\",");
+                            string s = $"{propertyInfo.GetValue(record)}";
+                            sb.Append($"\"{s.Replace("\"", "'")}\",");
                         }
                         if (sb.Length > 0) { sb.Length--; }
+                        string output = Regex.Replace(sb.ToString(), @"\r\n?|\n", "");
 
                         csv.WriteLine(sb.ToString());
                     }
