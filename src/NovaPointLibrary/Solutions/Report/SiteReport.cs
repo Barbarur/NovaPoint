@@ -212,7 +212,7 @@ namespace NovaPointLibrary.Solutions.Report
         internal string SiteUrl { get; set; }
         internal string GroupId { get; set; } = String.Empty;
         internal string Template { get; set; } = String.Empty;
-        internal string IsSubSite { get; set; } = String.Empty;
+        internal string IsSubsite { get; set; } = String.Empty;
         internal string Connected_to_Teams { get; set; } = String.Empty;
         internal string Teams_Channel { get; set; } = String.Empty;
 
@@ -238,8 +238,8 @@ namespace NovaPointLibrary.Solutions.Report
             Title = oSiteCollection.Title;
             SiteUrl = oSiteCollection.Url;
             GroupId = oSiteCollection.GroupId.ToString();
-            Template = GetSiteTemplateName(oSiteCollection.Template, oSiteCollection.IsTeamsConnected);
-            IsSubSite = "FALSE";
+            Template = SPOWeb.GetSiteTemplateName(oSiteCollection.Template, oSiteCollection.IsTeamsConnected);
+            IsSubsite = "FALSE";
             Connected_to_Teams = oSiteCollection.IsTeamsConnected.ToString();
             if(!oSiteCollection.TeamsChannelType.ToString().Contains("None", StringComparison.OrdinalIgnoreCase))
             {
@@ -259,8 +259,8 @@ namespace NovaPointLibrary.Solutions.Report
             Title = web.Title;
             SiteUrl = web.Url;
             GroupId = web.Id.ToString();
-            Template = GetSiteTemplateName(web.WebTemplate, false);
-            IsSubSite = web.IsSubSite().ToString();
+            Template = SPOWeb.GetSiteTemplateName(web.WebTemplate, false);
+            IsSubsite = web.IsSubSite().ToString();
 
             StorageUsedGB = storageUsedGb.ToString();
 
@@ -289,65 +289,6 @@ namespace NovaPointLibrary.Solutions.Report
             Sharing_Links = sharingLinksCount;
         }
 
-        private string GetSiteTemplateName(string template, bool isTeamsConnected)
-        {
-            string templateName = template;
-            if (template.Contains("SPSPERS", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "OneDrive";
-            }
-            else if (template.Contains("SITEPAGEPUBLISHING#0", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "Communication site";
-            }
-            else if (template.Contains("GROUP#0", StringComparison.OrdinalIgnoreCase))
-            {
-                if (isTeamsConnected) { templateName = "Team site connected to MS Teams"; }
-                else { templateName = "Team site"; }
-            }
-            else if (template.Contains("STS#3", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "Team site (no Microsoft 365 group)";
-            }
-            else if (template.Contains("STS#0", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "Team site (classic experience)";
-            }
-            else if (template.Contains("TEAMCHANNEL", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "Channel site";
-            }
-            else if (template.Contains("APPCATALOG", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "App Catalog Site";
-            }
-            else if (template.Contains("STS", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "Team site (Subsite)";
-            }
-            else if (template.Contains("PROJECTSITE", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "Project site (Subsite)";
-            }
-            else if (template.Contains("SRCHCENTERLITE", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "Basic Search Center (Subsite)";
-            }
-            else if (template.Contains("BDR", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "Document Center (Subsite)";
-            }
-            else if (template.Contains("SAPWORKFLOWSITE", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "SAP Workflow site (Subsite)";
-            }
-            else if (template.Contains("VISPRUS", StringComparison.OrdinalIgnoreCase))
-            {
-                templateName = "Visio Process Repository (Subsite)";
-            }
-
-            return templateName;
-        }
     }
 
     public class SiteReportParameters : ISolutionParameters

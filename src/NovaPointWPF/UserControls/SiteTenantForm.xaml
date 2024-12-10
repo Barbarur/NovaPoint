@@ -15,8 +15,7 @@
         
     </UserControl.Resources>
     
-    <Grid
-        Background="Transparent">
+    <Grid>
 
         <StackPanel>
 
