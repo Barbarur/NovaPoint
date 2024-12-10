@@ -1,0 +1,75 @@
+﻿<UserControl x:Class="NovaPointWPF.UserControls.MembershipForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NovaPointWPF.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="800"
+             x:Name="root">
+    
+    <Grid>
+
+        <StackPanel>
+
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Membership filter"/>
+
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
+
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+
+                    <StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+
+                            <ToggleButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Owners"
+                                IsChecked="{Binding Owners, ElementName=root}"
+                                Margin="0,0,8,0"/>
+
+                            <ToggleButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Members"
+                                IsChecked="{Binding Members, ElementName=root}"/>
+
+                        </StackPanel>
+
+                        <ToggleButton
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
+                            Content="Site Admins"
+                            IsChecked="{Binding SiteAdmins, ElementName=root}"
+                            HorizontalAlignment="Left"
+                            Margin="0,16,0,16"/>
+                    
+                        <StackPanel Orientation="Horizontal">
+
+                            <ToggleButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Site Owners"
+                                IsChecked="{Binding SiteOwners, ElementName=root}"/>
+
+                            <ToggleButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Site Members"
+                                IsChecked="{Binding SiteMembers, ElementName=root}"
+                                Margin="8,0,8,0"/>
+
+                            <ToggleButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Site Visitors"
+                                IsChecked="{Binding SiteVisitors, ElementName=root}"/>
+
+                        </StackPanel>
+
+                    </StackPanel>
+                </Border>
+
+            </Grid>
+
+        </StackPanel>
+
+    </Grid>
+</UserControl>

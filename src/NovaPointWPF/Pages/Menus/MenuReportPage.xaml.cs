@@ -75,6 +75,10 @@ namespace NovaPointWPF.Pages.Menus
         }
 
 
+        private void MembershipReportFormClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new MembershipReportForm());
+        }
 
         private void PermissionsReportFormClick(object sender, RoutedEventArgs e)
         {

@@ -120,6 +120,11 @@
 
                     <Button
                         Style="{DynamicResource SolutionMenuButton}"
+                        Content="Site memberships"
+                        Click="MembershipReportFormClick"/>
+                    
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
                         Content="User permissions"
                         Click="PermissionsReportFormClick"/>
 
