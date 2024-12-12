@@ -101,15 +101,60 @@ namespace NovaPointWPF.Pages.Menus
         {
             NotificationMessage.Text = notification;
 
-            DoubleAnimation doubleAnimation = new()
+            //DoubleAnimation doubleAnimation = new()
+            //{
+            //    From = 0,
+            //    To = 1,
+            //    Duration = TimeSpan.FromSeconds(1),
+            //    AutoReverse = true,
+            //};
+
+            //NotificationMessage.BeginAnimation(TextBlock.OpacityProperty, doubleAnimation);
+
+
+            var storyboard = new Storyboard();
+
+            // Create the fade-in animation
+            var fadeInAnimation = new DoubleAnimation
             {
                 From = 0,
                 To = 1,
-                Duration = TimeSpan.FromSeconds(1),
-                AutoReverse = true,
+                Duration = TimeSpan.FromSeconds(0.1),
+                FillBehavior = FillBehavior.HoldEnd
             };
 
-            NotificationMessage.BeginAnimation(TextBlock.OpacityProperty, doubleAnimation);
+            // Create the hold animation
+            var holdAnimation = new DoubleAnimation
+            {
+                From = 1,
+                To = 1,
+                BeginTime = TimeSpan.FromSeconds(0.1),
+                Duration = TimeSpan.FromSeconds(1),
+                FillBehavior = FillBehavior.HoldEnd
+            };
+            var fadeOutAnimation = new DoubleAnimation
+            {
+                From = 1,
+                To = 0,
+                BeginTime = TimeSpan.FromSeconds(1.1),
+                Duration = TimeSpan.FromSeconds(1),
+                FillBehavior = FillBehavior.HoldEnd
+            };
+
+            Storyboard.SetTarget(fadeInAnimation, NotificationMessage);
+            Storyboard.SetTargetProperty(fadeInAnimation, new PropertyPath("Opacity"));
+
+            Storyboard.SetTarget(holdAnimation, NotificationMessage);
+            Storyboard.SetTargetProperty(holdAnimation, new PropertyPath("Opacity"));
+
+            Storyboard.SetTarget(fadeOutAnimation, NotificationMessage);
+            Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath("Opacity"));
+
+            storyboard.Children.Add(fadeInAnimation);
+            storyboard.Children.Add(holdAnimation);
+            storyboard.Children.Add(fadeOutAnimation);
+
+            storyboard.Begin();
         }
 
     }

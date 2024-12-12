@@ -18,8 +18,10 @@
         <SolidColorBrush x:Key="CheckedButtonColor" Color="#484D65"/>
         <SolidColorBrush x:Key="PrimaryBorderColor" Color="#3E4852"/>
 
-        
-        
+        <FontFamily x:Key="NPRegularFont">
+            pack://application:,,,/res/font/#Soft Elegance
+        </FontFamily>
+
         <!--BACKGROUND-->
 
         <Style x:Key="BorderPrimaryBackgroud" TargetType="{x:Type Border}">
@@ -53,6 +55,7 @@
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontFamily" Value="Segoe UI Variable Text"/>
         </Style>
 
         <Style x:Key="SolutionFormLabel" TargetType="{x:Type Label}">
@@ -83,8 +86,8 @@
         <Style x:Key="TextBlockBase" TargetType="{x:Type TextBlock}">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
-            <Setter Property="FontFamily" Value="Segoe UI Variable Text"/>
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource NPRegularFont}"/>
         </Style>
 
         <Style x:Key="TextBlockBody" BasedOn="{StaticResource TextBlockBase}" TargetType="{x:Type TextBlock}">
@@ -117,7 +120,6 @@
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
             <Setter Property="BorderThickness" Value="4"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="15"/>
             <Setter Property="Width" Value="140"/>
             <Setter Property="Height" Value="50"/>
             <Setter Property="BorderThickness" Value="2"/>
@@ -138,14 +140,13 @@
                                 Height="{TemplateBinding Height}">
 
                                 <TextBlock
+                                    
                                     x:Name="ButtonTitle"
+                                    Style="{DynamicResource TextBlockBodyStrong}"
                                     Margin="10, 0, 10, 0"
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Center"
-                                    FontFamily="Segoe UI Variable Text"
-                                    FontSize="{TemplateBinding FontSize}"
                                     FontWeight="{TemplateBinding FontWeight}"
-                                    Foreground="{TemplateBinding Foreground}"
                                     Text="{TemplateBinding Content}"/>
 
                             </Border>
