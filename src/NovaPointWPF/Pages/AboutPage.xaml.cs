@@ -28,8 +28,8 @@ namespace NovaPointWPF.Pages
             InitializeComponent();
 
             string version = VersionControl.GetVersion();
-            if (String.IsNullOrWhiteSpace(version)) { VersionNo.Content = String.Empty; }
-            else { VersionNo.Content = "v " + version; }
+            if (String.IsNullOrWhiteSpace(version)) { VersionNo.Text = String.Empty; }
+            else { VersionNo.Text = "v " + version; }
         }
 
 

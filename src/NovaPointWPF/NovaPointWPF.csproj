@@ -18,10 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="res\font\Soft Elegance.ttf" />
     <None Remove="res\img\LogoBluesky.png" />
     <None Remove="res\img\logoGithub.png" />
     <None Remove="res\img\LogoLinkedIn.png" />
     <None Remove="res\img\LogoMedium.png" />
+    <None Remove="res\img\LogoNovaPoint150x150.png" />
     <None Remove="res\img\LogoTwitterX.png" />
     <None Remove="res\img\LogoYoutube.png" />
     <None Remove="res\NovaPoint.png" />
@@ -51,13 +53,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="res\font\Soft Elegance.ttf" />
     <Resource Include="res\img\LogoBluesky.png" />
     <Resource Include="res\img\LogoGithub.png" />
     <Resource Include="res\img\LogoLinkedIn.png" />
     <Resource Include="res\img\LogoMedium.png" />
+    <Resource Include="res\img\LogoNovaPoint150x150.png" />
     <Resource Include="res\img\LogoTwitterX.png" />
     <Resource Include="res\img\LogoYoutube.png" />
-    <Resource Include="res\img\NovaPoint.png" />
   </ItemGroup>
 
 </Project>

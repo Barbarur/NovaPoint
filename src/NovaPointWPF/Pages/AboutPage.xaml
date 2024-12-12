@@ -26,7 +26,7 @@
             VerticalAlignment="Center"
             Margin="0,0,0,30">
 
-            <Image Source="pack://application:,,,/res/img/NovaPoint.png"
+            <Image Source="pack://application:,,,/res/img/LogoNovaPoint150x150.png"
                    Width="150"
                    Height="150"/>
 
@@ -38,19 +38,15 @@
                 FontSize="40"
                 Margin="0,0,0,9"/>
 
-            <Label
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                Content="Open source app for SharePoint Admins"
-                HorizontalAlignment="Center"
-                FontWeight="Light"
-                FontSize="18"/>
+            <TextBlock
+                Style="{DynamicResource TextBlockSubtitle}"
+                Text="Open source app for SharePoint Admins"
+                HorizontalAlignment="Center"/>
 
-            <Label
+            <TextBlock
                 x:Name="VersionNo"
-                Style="{DynamicResource MenuSectionTitleLabel}"
-                HorizontalAlignment="Center"
-                FontWeight="Light"
-                FontSize="12"/>
+                Style="{DynamicResource TextBlockBody}"
+                HorizontalAlignment="Center"/>
 
             <StackPanel
                 Orientation="Horizontal"
