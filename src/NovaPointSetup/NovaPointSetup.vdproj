@@ -15,13 +15,13 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_1AFB1E1E55694F3F8DABDE7CA23AA1E7"
+        "MsmKey" = "8:_AB684BA8FD6948D69C63B49CCF5785B2"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_AB684BA8FD6948D69C63B49CCF5785B2"
+        "MsmKey" = "8:_DF24AF50C6E449718830E9389FD7D42F"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -122,10 +122,10 @@
         }
         "File"
         {
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1AFB1E1E55694F3F8DABDE7CA23AA1E7"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DF24AF50C6E449718830E9389FD7D42F"
             {
-            "SourcePath" = "8:..\\..\\res\\images\\NovaPoint.ico"
-            "TargetName" = "8:NovaPoint.ico"
+            "SourcePath" = "8:..\\NovaPointWPF\\NovaPointIcon.ico"
+            "TargetName" = "8:NovaPointIcon.ico"
             "Tag" = "8:"
             "Folder" = "8:_D59EA6F12D844DF18DFB825D31680F27"
             "Condition" = "8:"
@@ -198,15 +198,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:NovaPoint"
-        "ProductCode" = "8:{ACD9EFC6-137C-4C05-8D11-78CC70F61E47}"
-        "PackageCode" = "8:{E0EF4B55-AD5F-4F97-BB39-C412528713DD}"
+        "ProductCode" = "8:{0633BE5A-242A-4B06-8B1F-7699BD8B9995}"
+        "PackageCode" = "8:{2F3E17C3-81DF-40B3-B2CD-0E7DD9C6CBC8}"
         "UpgradeCode" = "8:{F3F15478-AFE6-43E3-9D82-D5914B1FF2DE}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:0.12.0"
+        "ProductVersion" = "8:0.13.0"
         "Manufacturer" = "8:Novacato"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -330,7 +330,7 @@
             "Target" = "8:_AB684BA8FD6948D69C63B49CCF5785B2"
             "Folder" = "8:_9494A405F3A24EB48457FFEFC4BDF2E8"
             "WorkingFolder" = "8:_D59EA6F12D844DF18DFB825D31680F27"
-            "Icon" = "8:_1AFB1E1E55694F3F8DABDE7CA23AA1E7"
+            "Icon" = "8:_DF24AF50C6E449718830E9389FD7D42F"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_8BF1466F795242F79B09099DB7EFCF90"
@@ -344,7 +344,7 @@
             "Target" = "8:_AB684BA8FD6948D69C63B49CCF5785B2"
             "Folder" = "8:_05E623684DE140B5A905016BE499DCA1"
             "WorkingFolder" = "8:_D59EA6F12D844DF18DFB825D31680F27"
-            "Icon" = "8:_1AFB1E1E55694F3F8DABDE7CA23AA1E7"
+            "Icon" = "8:_DF24AF50C6E449718830E9389FD7D42F"
             "Feature" = "8:"
             }
         }
