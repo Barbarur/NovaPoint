@@ -44,6 +44,9 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
 
         [JsonProperty("officeLocation")]
         public object OfficeLocation { get; set; }
-        
+
+        [JsonProperty("accountEnabled")]
+        public bool AccountEnabled { get; set; }
+
     }
 }
