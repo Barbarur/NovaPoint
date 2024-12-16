@@ -1,6 +1,7 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Core.Logging;
+using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {
@@ -15,7 +16,15 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _appInfo = appInfo;
         }
 
-        internal async Task<SiteProperties> GetAsync(string siteUrl)
+        private readonly Expression<Func<SiteProperties, object>>[] _defaultExpressions = new Expression<Func<SiteProperties, object>>[]
+        {
+            p => p.Url,
+            p => p.Title,
+            p => p.Template,
+        };
+
+
+        internal async Task<SiteProperties> GetAsync(string siteUrl, Expression<Func<SiteProperties, object>>[]? siteExpressions = null)
         {
             _appInfo.IsCancelled();
             _logger.Info(GetType().Name, $"Getting single site {siteUrl}");
@@ -23,8 +32,15 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             ClientContext clientContext = await _appInfo.GetContext(_appInfo.AdminUrl);
             var tenant = new Tenant(clientContext);
 
+            Expression<Func<SiteProperties, object>>[] expressions = _defaultExpressions;
+            if(siteExpressions != null)
+            {
+                expressions = _defaultExpressions.Union(siteExpressions).ToArray();
+            }
+
             SiteProperties oSiteCollection = tenant.GetSitePropertiesByUrl(siteUrl, true);
-            clientContext.Load(oSiteCollection);
+
+            clientContext.Load(oSiteCollection, expressions);
             clientContext.ExecuteQuery();
 
             return oSiteCollection;
