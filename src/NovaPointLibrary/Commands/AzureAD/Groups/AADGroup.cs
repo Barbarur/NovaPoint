@@ -1,10 +1,8 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.SharePoint.Permision;
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Logging;
-using System.Xml.Linq;
 
 
 namespace NovaPointLibrary.Commands.AzureAD.Groups
@@ -21,35 +19,14 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
             _appInfo = appInfo;
         }
 
-        internal async Task<List<AADGroupUserEmails>> GetUsersAsync(User secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
+        internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft.SharePoint.Client.User secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
         {
-
-            List<AADGroupUserEmails> listOfUsers = new();
-            if (IsSystemGroup(secGroup.Title))
-            {
-                listOfUsers.Add(new("", secGroup.Title, secGroup.Title));
-            }
-            else
-            {
-                listOfUsers = await GetUsersAsync(secGroup.Title, secGroup.AadObjectId.NameId, listKnownGroups);
-            }
-
-            return listOfUsers;
+            return await GetUsersAsync(secGroup.Title, secGroup.AadObjectId.NameId, listKnownGroups);
         }
 
         internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft365User secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
         {
-            List<AADGroupUserEmails> listOfUsers = new();
-            if (IsSystemGroup(secGroup.DisplayName))
-            {
-                listOfUsers.Add(new("", secGroup.DisplayName, secGroup.DisplayName));
-            }
-            else
-            {
-                listOfUsers = await GetUsersAsync(secGroup.DisplayName, secGroup.Id, listKnownGroups);
-            }
-
-            return listOfUsers;
+            return await GetUsersAsync(secGroup.DisplayName, secGroup.Id, listKnownGroups);
         }
 
         internal async Task<List<AADGroupUserEmails>> GetUsersAsync(string secGroupTitle, string secGroupId, List<AADGroupUserEmails>? listKnownGroups = null)
@@ -57,14 +34,20 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
             _appInfo.IsCancelled();
             _logger.Info(GetType().Name, $"Getting users from Security Group '{secGroupTitle}'");
 
+            List<AADGroupUserEmails> listOfUsers = new();
+
+            if (IsSystemGroup(secGroupTitle))
+            {
+                listOfUsers.Add(new("", secGroupTitle, secGroupTitle));
+                return listOfUsers;
+            }
+
             if (listKnownGroups != null)
             {
                 List<AADGroupUserEmails> knownGroups = listKnownGroups.Where(sg => sg.GroupID == secGroupId).ToList();
 
                 if (knownGroups.Any()) { return knownGroups; }
             }
-
-            List<AADGroupUserEmails> listOfUsers = new();
 
             try
             {
@@ -86,7 +69,7 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
 
                 if (!groupUsers.Any())
                 {
-                    listOfUsers.Add(new(secGroupId, secGroupTitle, "Group Empty"));
+                    listOfUsers.Add(new(secGroupId, secGroupTitle, "Empty Group"));
                 }
                 else
                 {
