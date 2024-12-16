@@ -52,6 +52,25 @@ namespace NovaPointWPF.UserControls
             }
         }
 
+        public bool _oneDriveVisibilityVisibility = true;
+        public bool OneDriveVisibility
+        {
+            get { return _oneDriveVisibilityVisibility; }
+            set
+            {
+                _oneDriveVisibilityVisibility = value;
+                if (value)
+                {
+                    OneDriveButton.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    OneDriveButton.Visibility = Visibility.Collapsed;
+                    IncludePersonalSite = false;
+                }
+            }
+        }
+
         private bool _includePersonalSite = false;
         public bool IncludePersonalSite
         {

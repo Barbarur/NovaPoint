@@ -80,6 +80,7 @@
                                 Orientation="Horizontal">
 
                                 <ToggleButton
+                                    x:Name="OneDriveButton"
                                     Style="{DynamicResource ToggleButtonSolutionForm}"
                                     Content="Include OneDrive"
                                     IsChecked="{Binding IncludePersonalSite, ElementName=root}"

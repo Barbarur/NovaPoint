@@ -33,6 +33,11 @@
                         Content="All Site Collections and Subsites"
                         Click="SiteReportFormClick"/>
 
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Orphan sites"
+                        Click="OrphanSiteReportFormClick"/>
+
                 </StackPanel>
 
             </Grid>
