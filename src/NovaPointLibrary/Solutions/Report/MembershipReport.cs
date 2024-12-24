@@ -1,8 +1,10 @@
-﻿using Microsoft.SharePoint.Client;
+﻿using Microsoft.Online.SharePoint.TenantAdministration;
+using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Core.Logging;
+using PnP.Core.Model.SharePoint;
 using System.Linq.Expressions;
 
 
@@ -17,14 +19,7 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private readonly Expression<Func<Site, object>>[] _siteRetrievalExpressions = new Expression<Func<Site, object>>[]
-        {
-            s => s.Id,
-            s => s.GroupId,
-            s => s.Url,
-        };
-
-        private readonly Expression<Func<Web, object>>[] _webRetrievalExpressions = new Expression<Func<Web, object>>[]
+        private readonly Expression<Func<Web, object>>[] _webExpressions = new Expression<Func<Web, object>>[]
         {
             w => w.HasUniqueRoleAssignments,
             w => w.Id,
@@ -33,14 +28,14 @@ namespace NovaPointLibrary.Solutions.Report
             w => w.WebTemplate,
         };
 
+        private readonly List<AADGroupUserEmails>? _listKnownGroups = new();
+
         private MembershipReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, MembershipReportParameters parameters)
         {
             _param = parameters;
             _logger = logger;
             _appInfo = appInfo;
         }
-
-        private List<AADGroupUserEmails>? _listKnownGroups = new();
 
         public static async Task RunAsync(MembershipReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
@@ -64,6 +59,9 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
+            var emptyGuid = Guid.Empty;
+            _logger.Debug(GetType().Name, $"Blank Guid: {emptyGuid}");
+
             await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
             {
                 _appInfo.IsCancelled();
@@ -76,52 +74,79 @@ namespace NovaPointLibrary.Solutions.Report
 
                 try
                 {
-                    Web web = await new SPOWebCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _webRetrievalExpressions);
-
-                    MembershipReportRecord record;
-
-                    string template = web.WebTemplate.ToString();
-                    _logger.Debug(GetType().Name, $"Web Template: {web.WebTemplate}");
-                    if (web.IsSubSite())
-                    {
-                        record = new(web.Title, web.Url, SPOWeb.GetSiteTemplateName(web.WebTemplate, false), "True");
-
-                        if (!web.HasUniqueRoleAssignments)
-                        {
-                            string m = "Inherits Site Membership";
-                            AddRecord(record.ReportUsers(m, m, m));
-                        }
-                        else
-                        {
-                            await GetSiteMembershipUsersAsync(record);
-                        }
-                    }
-                    else
-                    {
-                        var siteProperties = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(web.Url);
-                        template = siteProperties.Template;
-                        _logger.Debug(GetType().Name, $"Site Template: {siteProperties.Template}");
-
-                        record = new(siteProperties.Title, siteProperties.Url, SPOWeb.GetSiteTemplateName(siteProperties.Template, siteProperties.IsTeamsConnected), "False");
-
-                        await GetMembershipUsersAsync(GetSiteCollectionAdminsAsync, record, "Site Admins");
-
-                        if (siteProperties.Template.Contains("SPSPERS", StringComparison.OrdinalIgnoreCase)) { continue; }
-
-                        if (siteProperties.Template.Contains("GROUP#0", StringComparison.OrdinalIgnoreCase))
-                        {
-                            await GetMembershipUsersAsync(GetMS365GroupAsync, record, "MS365 Group");
-                        }
-
-                        await GetSiteMembershipUsersAsync(record);
-                    }
-
+                    await ProcessSite(siteRecord);
                 }
                 catch (Exception ex)
                 {
                     _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     AddRecord(new(siteRecord.SiteUrl, ex.Message));
                 }
+            }
+        }
+        private async Task ProcessSite(SPOTenantSiteUrlsRecord siteRecord)
+        {
+            _appInfo.IsCancelled();
+
+            if (siteRecord.SiteProperties != null)
+            {
+                await ProcessSiteCollection(siteRecord.SiteProperties);
+            }
+
+            else if (siteRecord.Web != null)
+            {
+                await ProcessSubsite(siteRecord.Web);
+            }
+
+            else
+            {
+                Web web = await new SPOWebCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _webExpressions);
+
+                if (web.IsSubSite())
+                {
+                    await ProcessSubsite(web);
+                }
+                else
+                {
+                    var oSiteProperties = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(web.Url);
+                    await ProcessSiteCollection(oSiteProperties);
+                }
+            }
+
+        }
+
+        private async Task ProcessSiteCollection(SiteProperties siteProperties)
+        {
+            string template = siteProperties.Template;
+            _logger.Debug(GetType().Name, $"Site Template: {siteProperties.Template}");
+
+            MembershipReportRecord record = new(siteProperties.Title, siteProperties.Url, SPOWeb.GetSiteTemplateName(siteProperties.Template, siteProperties.IsTeamsConnected), "False");
+
+            await GetMembershipUsersAsync(GetSiteCollectionAdminsAsync, record, "Site Admins");
+
+            if (siteProperties.Template.Contains("SPSPERS", StringComparison.OrdinalIgnoreCase)) { return; }
+
+            if (siteProperties.GroupId != Guid.Empty)
+            {
+                await GetMS365GroupOwnersAdminsAsync(record, siteProperties.GroupId.ToString(), "Owners");
+
+                await GetMS365GroupMembersAdminsAsync(record, siteProperties.GroupId.ToString(), "Members");
+            }
+
+            await GetSiteMembershipUsersAsync(record);
+        }
+
+        private async Task ProcessSubsite(Web web)
+        {
+            MembershipReportRecord record = new(web.Title, web.Url, SPOWeb.GetSiteTemplateName(web.WebTemplate, false), "True");
+
+            if (!web.HasUniqueRoleAssignments)
+            {
+                string m = "Inherits Site Membership";
+                AddRecord(record.ReportUsers(m, m, m));
+            }
+            else
+            {
+                await GetSiteMembershipUsersAsync(record);
             }
         }
 
@@ -160,46 +185,49 @@ namespace NovaPointLibrary.Solutions.Report
             await ProcessUsersAsync(record, membership, collUsers);
         }
 
-        private async Task GetMS365GroupAsync(MembershipReportRecord record, string membership)
+        private async Task GetMS365GroupOwnersAdminsAsync(MembershipReportRecord record, string groupId, string membership)
         {
             _appInfo.IsCancelled();
 
-            if (!_param.MembershipParam.Owners && !_param.MembershipParam.Members) { return; }
-
-            _logger.Info(GetType().Name, $"Getting MS365 Group for '{record.SiteUrl}'");
-
-            Site site = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(record.SiteUrl, _siteRetrievalExpressions);
-
-            string groupId = site.GroupId.ToString();
-
-            await GetMS365GroupOwnersAdminsAsync(record, groupId, "Owners");
-
-            await GetMS365GroupMembersAdminsAsync(record, groupId, "Members");
-        }
-
-        private async Task GetMS365GroupOwnersAdminsAsync(MembershipReportRecord record, string groupId, string membership)
-        {
             if (!_param.MembershipParam.Owners) { return; }
 
-            string ownersGroupId = groupId + "_o";
-
-            var listSecGroupUsers = await new AADGroup(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Owners", ownersGroupId, _listKnownGroups);
-
-            foreach (var secGRoupUsers in listSecGroupUsers)
+            try
             {
-                AddRecord(record.ReportAadGroupUsers(membership, secGRoupUsers));
+                string ownersGroupId = groupId + "_o";
+
+                var listSecGroupUsers = await new AADGroup(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Owners", ownersGroupId, _listKnownGroups);
+
+                foreach (var secGRoupUsers in listSecGroupUsers)
+                {
+                    AddRecord(record.ReportAadGroupUsers(membership, secGRoupUsers));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(GetType().Name, "Site", record.SiteUrl, ex);
+                AddRecord(record.ReportError(membership, ex));
             }
         }
 
         private async Task GetMS365GroupMembersAdminsAsync(MembershipReportRecord record, string groupId, string membership)
         {
+            _appInfo.IsCancelled();
+            
             if (!_param.MembershipParam.Members) { return; }
 
-            var listSecGroupUsers = await new AADGroup(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Members", groupId, _listKnownGroups);
-
-            foreach (var secGRoupUsers in listSecGroupUsers)
+            try
             {
-                AddRecord(record.ReportAadGroupUsers(membership, secGRoupUsers));
+                var listSecGroupUsers = await new AADGroup(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Members", groupId, _listKnownGroups);
+
+                foreach (var secGRoupUsers in listSecGroupUsers)
+                {
+                    AddRecord(record.ReportAadGroupUsers(membership, secGRoupUsers));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(GetType().Name, "Site", record.SiteUrl, ex);
+                AddRecord(record.ReportError(membership, ex));
             }
         }
 
