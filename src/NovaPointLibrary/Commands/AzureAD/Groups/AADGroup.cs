@@ -21,12 +21,34 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
 
         internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft.SharePoint.Client.User secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
         {
-            return await GetUsersAsync(secGroup.Title, secGroup.AadObjectId.NameId, listKnownGroups);
+            if (IsSystemGroup(secGroup.Title))
+            {
+                List<AADGroupUserEmails> listOfUsers = new()
+                {
+                    new("", secGroup.Title, secGroup.Title)
+                };
+                return listOfUsers;
+            }
+            else
+            {
+                return await GetUsersAsync(secGroup.Title, secGroup.AadObjectId.NameId, listKnownGroups);
+            }
         }
 
         internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft365User secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
         {
-            return await GetUsersAsync(secGroup.DisplayName, secGroup.Id, listKnownGroups);
+            if (IsSystemGroup(secGroup.DisplayName))
+            {
+                List<AADGroupUserEmails> listOfUsers = new()
+                {
+                    new("", secGroup.DisplayName, secGroup.DisplayName)
+                };
+                return listOfUsers;
+            }
+            else
+            {
+                return await GetUsersAsync(secGroup.DisplayName, secGroup.Id, listKnownGroups);
+            }
         }
 
         internal async Task<List<AADGroupUserEmails>> GetUsersAsync(string secGroupTitle, string secGroupId, List<AADGroupUserEmails>? listKnownGroups = null)
@@ -35,12 +57,6 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
             _logger.Info(GetType().Name, $"Getting users from Security Group '{secGroupTitle}'");
 
             List<AADGroupUserEmails> listOfUsers = new();
-
-            if (IsSystemGroup(secGroupTitle))
-            {
-                listOfUsers.Add(new("", secGroupTitle, secGroupTitle));
-                return listOfUsers;
-            }
 
             if (listKnownGroups != null)
             {
@@ -109,7 +125,8 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
             if (secGroupTitle == "Everyone"
                 || secGroupTitle == "Everyone except external users"
                 || secGroupTitle == "Global Administrator"
-                || secGroupTitle == "SharePoint Administrator")
+                || secGroupTitle == "SharePoint Administrator"
+                || secGroupTitle == "All Company Members")
             {
                 return true;
             }
