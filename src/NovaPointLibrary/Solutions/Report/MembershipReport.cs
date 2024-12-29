@@ -19,6 +19,22 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
+        private readonly Expression<Func<SiteProperties, object>>[] _sitePropertiesExpressions = new Expression<Func<SiteProperties, object>>[]
+        {
+            p => p.Title,
+            p => p.Url,
+            p => p.GroupId,
+            p => p.Template,
+            p => p.IsTeamsConnected,
+            p => p.TeamsChannelType,
+            p => p.Owner,
+            p => p.OwnerEmail,
+            p => p.OwnerLoginName,
+            p => p.OwnerName,
+
+            p => p.IsGroupOwnerSiteAdmin,
+        };
+
         private readonly Expression<Func<Web, object>>[] _webExpressions = new Expression<Func<Web, object>>[]
         {
             w => w.HasUniqueRoleAssignments,
@@ -107,7 +123,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 else
                 {
-                    var oSiteProperties = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(web.Url);
+                    var oSiteProperties = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(web.Url, _sitePropertiesExpressions);
                     await ProcessSiteCollection(oSiteProperties);
                 }
             }

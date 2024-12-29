@@ -16,15 +16,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _appInfo = appInfo;
         }
 
-        private readonly Expression<Func<SiteProperties, object>>[] _defaultExpressions = new Expression<Func<SiteProperties, object>>[]
-        {
-            p => p.Url,
-            p => p.Title,
-            p => p.Template,
-        };
-
-
-        internal async Task<SiteProperties> GetAsync(string siteUrl, Expression<Func<SiteProperties, object>>[]? siteExpressions = null)
+        internal async Task<SiteProperties> GetAsync(string siteUrl, Expression<Func<SiteProperties, object>>[] siteExpressions)
         {
             _appInfo.IsCancelled();
             _logger.Info(GetType().Name, $"Getting single site {siteUrl}");
@@ -32,18 +24,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             ClientContext clientContext = await _appInfo.GetContext(_appInfo.AdminUrl);
             var tenant = new Tenant(clientContext);
 
-            Expression<Func<SiteProperties, object>>[] expressions = _defaultExpressions;
-            if(siteExpressions != null)
-            {
-                expressions = _defaultExpressions.Union(siteExpressions).ToArray();
-            }
+            SiteProperties siteProperties = tenant.GetSitePropertiesByUrl(siteUrl, true);
 
-            SiteProperties oSiteCollection = tenant.GetSitePropertiesByUrl(siteUrl, true);
-
-            clientContext.Load(oSiteCollection, expressions);
+            clientContext.Load(siteProperties, siteExpressions);
             clientContext.ExecuteQuery();
 
-            return oSiteCollection;
+            return siteProperties;
         }
 
         internal async Task<List<SiteProperties>> GetAllAsync(bool includeShareSite, bool includePersonalSite, bool onlyGroupIdDefined)
