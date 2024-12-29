@@ -1,5 +1,4 @@
-﻿using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
+﻿using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Logging;
@@ -19,6 +18,17 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
             _appInfo = appInfo;
         }
 
+        internal async Task<GraphGroup> GetInfoAsync(string groupId, string optionalQuery = "")
+        {
+            _appInfo.IsCancelled();
+            _logger.Info(GetType().Name, $"Getting information from Group '{groupId}'");
+
+            string api = $"/groups/{groupId}" + optionalQuery;
+
+            var group = await new GraphAPIHandler(_logger, _appInfo).GetObjectAsync<GraphGroup>(api);
+
+            return group;
+        }
         internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft.SharePoint.Client.User secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
         {
             if (IsSystemGroup(secGroup.Title))
