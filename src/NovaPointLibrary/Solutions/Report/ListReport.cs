@@ -1,10 +1,10 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.Utilities.RESTModel;
-using System.Linq.Expressions;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Core.Logging;
+using System.Linq.Expressions;
 
 
 namespace NovaPointLibrary.Solutions.Report
@@ -20,40 +20,37 @@ namespace NovaPointLibrary.Solutions.Report
 
         private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
         {
-            l => l.Hidden,
-
-            l => l.BaseType,
             l => l.Title,
-            l => l.DefaultViewUrl,
+            l => l.BaseType,
             l => l.Id,
 
             l => l.Created,
             l => l.LastItemUserModifiedDate,
-
             l => l.ItemCount,
 
             l => l.RootFolder,
+            l => l.RootFolder.ServerRelativeUrl,
             l => l.RootFolder.StorageMetrics,
             l => l.RootFolder.StorageMetrics.LastModified,
             l => l.RootFolder.StorageMetrics.TotalFileCount,
             l => l.RootFolder.StorageMetrics.TotalFileStreamSize,
             l => l.RootFolder.StorageMetrics.TotalSize,
 
+            l => l.EnableModeration,
             l => l.EnableVersioning,
             l => l.MajorVersionLimit,
             l => l.EnableMinorVersions,
             l => l.MajorWithMinorVersionsLimit,
+            l => l.ForceCheckout,
 
             l => l.IrmEnabled,
 
-            l => l.ForceCheckout,
-
-            l => l.EnableModeration,
+            l => l.Hidden,
         };
 
         private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _libraryExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
         {
-            l => l.VersionPolicies.DefaultTrimMode,
+            l => l.VersionPolicies,
         };
 
         private ListReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, ListReportParameters parameters)
@@ -96,6 +93,12 @@ namespace NovaPointLibrary.Solutions.Report
                     continue;
                 }
 
+                if (listRecord.List == null)
+                {
+                    AddRecord(new(listRecord.SiteUrl, listRecord.List, "List is null"));
+                    continue;
+                }
+
                 try
                 {
                     await ProcessList(listRecord.SiteUrl, listRecord.List);
@@ -113,13 +116,15 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled();
 
+            ListReportRecord record = new(siteUrl, list);
+
             if (list.BaseType == BaseType.DocumentLibrary)
             {
                 list.Context.Load(list, _libraryExpresions);
                 list.Context.ExecuteQuery();
-            }
 
-            ListReportRecord record = new(siteUrl, list);
+                record.AddVersionPolicies(list);
+            }
 
             if (_param.IncludeStorageMetrics)
             {
@@ -194,22 +199,25 @@ namespace NovaPointLibrary.Solutions.Report
 
                 Hidden = list.Hidden.ToString();
                 IsSystemList = list.IsSystemList.ToString();
+            }
+        }
 
-                if (list.BaseType == BaseType.DocumentLibrary)
+        internal void AddVersionPolicies(List list)
+        {
+            if (list.BaseType == BaseType.DocumentLibrary)
+            {
+                if (list.VersionPolicies.DefaultTrimMode == VersionPolicyTrimMode.AutoExpiration)
                 {
-                    if (list.VersionPolicies.DefaultTrimMode == VersionPolicyTrimMode.AutoExpiration)
-                    {
-                        AutomaticExpiration = "True";
-                    }
-                    else if (list.VersionPolicies.DefaultTrimMode == VersionPolicyTrimMode.ExpireAfter)
-                    {
-                        ExpireAfter = list.VersionPolicies.DefaultExpireAfterDays.ToString();
-                        AutomaticExpiration = "False";
-                    }
-                    else
-                    {
-                        AutomaticExpiration = "False";
-                    }
+                    AutomaticExpiration = "True";
+                }
+                else if (list.VersionPolicies.DefaultTrimMode == VersionPolicyTrimMode.ExpireAfter)
+                {
+                    ExpireAfter = list.VersionPolicies.DefaultExpireAfterDays.ToString();
+                    AutomaticExpiration = "False";
+                }
+                else
+                {
+                    AutomaticExpiration = "False";
                 }
             }
         }
