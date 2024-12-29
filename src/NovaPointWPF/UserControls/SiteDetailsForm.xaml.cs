@@ -1,4 +1,6 @@
-﻿using System;
+﻿using NovaPointLibrary.Commands.SharePoint.List;
+using NovaPointLibrary.Solutions.Report;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -22,6 +24,7 @@ namespace NovaPointWPF.UserControls
     /// </summary>
     public partial class SiteDetailsForm : UserControl, INotifyPropertyChanged
     {
+        public SiteInformationParameters Parameters { get; set; } = new();
 
         private bool _basicReport = true;
         public bool BasicReport
@@ -37,6 +40,7 @@ namespace NovaPointWPF.UserControls
                     IncludeHubInfo = false;
                     IncludeClassification = false;
                     IncludeSharingLinks = false;
+                    IncludePrivacy = false;
                 }
             }
         }
@@ -48,6 +52,7 @@ namespace NovaPointWPF.UserControls
             set
             {
                 _includeHubInfo = value;
+                Parameters.IncludeHubInfo = value;
                 OnPropertyChanged();
 
                 if (value) { BasicReport = false; }
@@ -61,6 +66,7 @@ namespace NovaPointWPF.UserControls
             set
             {
                 _includeClassification = value;
+                Parameters.IncludeClassification = value;
                 OnPropertyChanged();
                 
                 if (value) { BasicReport = false; }
@@ -74,13 +80,28 @@ namespace NovaPointWPF.UserControls
             set
             {
                 _includeSharingLinks = value;
+                Parameters.IncludeSharingLinks = value;
                 OnPropertyChanged();
 
                 if (value) { BasicReport = false; }
             }
         }
 
-        
+        private bool _includePrivacy = false;
+        public bool IncludePrivacy
+        {
+            get { return _includePrivacy; }
+            set
+            {
+                _includePrivacy = value;
+                Parameters.IncludePrivacy = value;
+                OnPropertyChanged();
+
+                if (value) { BasicReport = false; }
+            }
+        }
+
+
         public SiteDetailsForm()
         {
             InitializeComponent();

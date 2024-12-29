@@ -1,5 +1,6 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
@@ -18,6 +19,28 @@ namespace NovaPointLibrary.Solutions.Report
         private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
+        private readonly Expression<Func<SiteProperties, object>>[] _sitePropertiesExpressions = new Expression<Func<SiteProperties, object>>[]
+        {
+            p => p.Title,
+            p => p.Url,
+            p => p.GroupId,
+            p => p.Template,
+            p => p.IsTeamsConnected,
+            p => p.TeamsChannelType,
+            p => p.StorageMaximumLevel,
+            p => p.StorageUsage,
+            p => p.StorageWarningLevel,
+            p => p.LastContentModifiedDate,
+            p => p.LockState,
+        };
+
+        private readonly Expression<Func<Site, object>>[] _siteExpressions = new Expression<Func<Site, object>>[]
+        {
+            s => s.IsHubSite,
+            s => s.HubSiteId,
+            s => s.Classification,
+        };
+
         private readonly Expression<Func<Web, object>>[] _webExpressions = new Expression<Func<Web, object>>[]
         {
             w => w.Id,
@@ -28,13 +51,6 @@ namespace NovaPointLibrary.Solutions.Report
             w => w.WebTemplate,
             w => w.LastItemUserModifiedDate,
 
-        };
-
-        private readonly Expression<Func<Microsoft.SharePoint.Client.Site, object>>[] _siteExpressions = new Expression<Func<Microsoft.SharePoint.Client.Site, object>>[]
-        {
-            s => s.IsHubSite,
-            s => s.HubSiteId,
-            s => s.Classification,
         };
 
         private SiteReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, SiteReportParameters parameters)
@@ -135,36 +151,36 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _appInfo.IsCancelled(); 
             
-            var oSiteProperties = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(siteUrl);
+            var oSiteProperties = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(siteUrl, _sitePropertiesExpressions);
 
             await ProcessSiteCollection(oSiteProperties);
         }
 
-        private async Task ProcessSiteCollection(SiteProperties oSiteCollection)
+        private async Task ProcessSiteCollection(SiteProperties siteProperties)
         {
             _appInfo.IsCancelled();
-            SiteReportRecord siteRecord = new(oSiteCollection);
+            SiteReportRecord siteRecord = new(siteProperties);
 
-            if (_param.IncludeHubInfo || _param.IncludeClassification)
+            if (_param.SiteInfo.IncludeHubInfo || _param.SiteInfo.IncludeClassification)
             {
                 var site = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _siteExpressions);
 
-                if (_param.IncludeHubInfo) { await AddHubinfoAsync(siteRecord, site); }
+                if (_param.SiteInfo.IncludeHubInfo) { await AddHubInfoAsync(siteRecord, site); }
 
-                if (_param.IncludeClassification) { siteRecord.AddSiteClassification(site.Classification); }
+                if (_param.SiteInfo.IncludeClassification) { siteRecord.AddSiteClassification(site.Classification); }
             }
 
+            if (_param.SiteInfo.IncludeSharingLinks) { await AddSharingLinksAsync(siteRecord); }
 
-            if (_param.IncludeSharingLinks) { await  AddSharingLinksAsync(siteRecord); }
+            if (_param.SiteInfo.IncludePrivacy) { await AddPrivacyInfoAsync(siteRecord, siteProperties.GroupId); }
 
             RecordCSV(siteRecord);
         }
 
-        private async Task AddHubinfoAsync(SiteReportRecord siteRecord, Site site)
+        private async Task AddHubInfoAsync(SiteReportRecord siteRecord, Site site)
         {
             try
-            {                
-                string parentHubSiteId = string.Empty;
+            {
                 if (site.IsHubSite)
                 {
                     Tenant tenantContext = new(await _appInfo.GetContext(_appInfo.AdminUrl));
@@ -173,9 +189,14 @@ namespace NovaPointLibrary.Solutions.Report
                     tenantContext.Context.Load(hubSiteProperties);
                     tenantContext.Context.ExecuteQueryRetry();
 
-                    parentHubSiteId = hubSiteProperties.ParentHubSiteId.ToString();
+                    string parentHubSiteId = hubSiteProperties.ParentHubSiteId.ToString();
+                    
+                    siteRecord.AddHubInfo(site, parentHubSiteId);
                 }
-                siteRecord.AddHubInfo(site, parentHubSiteId);
+                else
+                {
+                    siteRecord.AddNoHub();
+                }
             }
             catch (Exception ex)
             {
@@ -199,6 +220,30 @@ namespace NovaPointLibrary.Solutions.Report
             siteRecord.AddSharingLinks(countSharingLinks);
         }
 
+        private async Task AddPrivacyInfoAsync(SiteReportRecord siteRecord, Guid groupId)
+        {
+            string privacy;
+            if (groupId != Guid.Empty)
+            {
+                try
+                {
+                    var group = await new AADGroup(_logger, _appInfo).GetInfoAsync(groupId.ToString(), "?$select=visibility");
+                    privacy = group.Visibility;
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    privacy = ex.Message;
+                }
+            }
+            else
+            {
+                privacy = "NA";
+            }
+
+            siteRecord.AddPrivacy(privacy);
+        }
+
         private void RecordCSV(SiteReportRecord record)
         {
             _logger.RecordCSV(record);
@@ -213,8 +258,8 @@ namespace NovaPointLibrary.Solutions.Report
         internal string GroupId { get; set; } = String.Empty;
         internal string Template { get; set; } = String.Empty;
         internal string IsSubsite { get; set; } = String.Empty;
-        internal string Connected_to_Teams { get; set; } = String.Empty;
-        internal string Teams_Channel { get; set; } = String.Empty;
+        internal string ConnectedtoTeams { get; set; } = String.Empty;
+        internal string TeamsChannel { get; set; } = String.Empty;
 
         internal string StorageQuotaGB { get; set; } = String.Empty;
         internal string StorageUsedGB { get; set; } = String.Empty;
@@ -227,9 +272,11 @@ namespace NovaPointLibrary.Solutions.Report
         internal string HubSiteId { get; set; } = String.Empty;
         internal string ParentHubSiteId { get; set; } = String.Empty;
 
-        internal string Site_Classification { get; set; } = String.Empty;
+        internal string Classification { get; set; } = String.Empty;
 
-        internal string Sharing_Links { get; set; }  = String.Empty;
+        internal string SharingLinks { get; set; }  = String.Empty;
+
+        internal string Privacy { get; set; } = String.Empty;
 
         internal string Remarks { get; set; } = String.Empty;
 
@@ -239,12 +286,13 @@ namespace NovaPointLibrary.Solutions.Report
             SiteUrl = oSiteCollection.Url;
             GroupId = oSiteCollection.GroupId.ToString();
             Template = SPOWeb.GetSiteTemplateName(oSiteCollection.Template, oSiteCollection.IsTeamsConnected);
-            IsSubsite = "FALSE";
-            Connected_to_Teams = oSiteCollection.IsTeamsConnected.ToString();
+            IsSubsite = "False";
+            ConnectedtoTeams = oSiteCollection.IsTeamsConnected.ToString();
             if(!oSiteCollection.TeamsChannelType.ToString().Contains("None", StringComparison.OrdinalIgnoreCase))
             {
-                Teams_Channel = oSiteCollection.TeamsChannelType.ToString();
+                TeamsChannel = oSiteCollection.TeamsChannelType.ToString();
             }
+            else { TeamsChannel = "NA"; }
 
             StorageQuotaGB = Math.Round((float)oSiteCollection.StorageMaximumLevel / 1024, 2).ToString();
             StorageUsedGB = Math.Round((float)oSiteCollection.StorageUsage / 1024, 2).ToString();
@@ -254,6 +302,7 @@ namespace NovaPointLibrary.Solutions.Report
             LockState = oSiteCollection.LockState.ToString();
 
         }
+
         internal SiteReportRecord(Web web, double storageUsedGb)
         {
             Title = web.Title;
@@ -266,6 +315,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             LastContentModifiedDate = web.LastItemUserModifiedDate.ToString();
         }
+        
         internal SiteReportRecord(string siteUrl, string errorMessage)
         {
             SiteUrl = siteUrl;
@@ -276,26 +326,44 @@ namespace NovaPointLibrary.Solutions.Report
         {
             IsHubSite = site.IsHubSite.ToString();
             if (site.HubSiteId.ToString() != "00000000-0000-0000-0000-000000000000") { HubSiteId = site.HubSiteId.ToString(); }
+            else { HubSiteId = "NA"; }
             if (parentHubSiteId != "00000000-0000-0000-0000-000000000000") { ParentHubSiteId = parentHubSiteId; }
+            else { ParentHubSiteId = "NA"; }
+        }
+        internal void AddNoHub()
+        {
+            IsHubSite = "NA";
+            HubSiteId = "NA";
+            ParentHubSiteId = "NA";
         }
 
         internal void AddSiteClassification(string classification)
         {
-            Site_Classification = classification;
+            Classification = classification;
         }
 
         internal void AddSharingLinks(string sharingLinksCount)
         {
-            Sharing_Links = sharingLinksCount;
+            SharingLinks = sharingLinksCount;
         }
 
+        internal void AddPrivacy(string privacy)
+        {
+            Privacy = privacy;
+        }
+    }
+
+    public class SiteInformationParameters : ISolutionParameters
+    {
+        public bool IncludeHubInfo { get; set; } = false;
+        public bool IncludeClassification { get; set; } = false;
+        public bool IncludeSharingLinks { get; set; } = false;
+        public bool IncludePrivacy {  get; set; } = false;
     }
 
     public class SiteReportParameters : ISolutionParameters
     {
-        public bool IncludeHubInfo { get; set; }
-        public bool IncludeClassification { get; set; }
-        public bool IncludeSharingLinks { get; set; }
+        public SiteInformationParameters SiteInfo { get; set; }
 
         internal readonly SPOAdminAccessParameters AdminAccess;
         internal readonly SPOTenantSiteUrlsParameters SiteParam;
@@ -307,15 +375,13 @@ namespace NovaPointLibrary.Solutions.Report
             }
         }
 
-        public SiteReportParameters(SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam, bool includeHubInfo, bool includeClassification, bool includeSharingLinks)
+        public SiteReportParameters(SiteInformationParameters siteInfo, SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam)
         {
+            SiteInfo = siteInfo;
             AdminAccess = adminAccess;
             SiteParam = siteParam;
-            IncludeHubInfo = includeHubInfo;
-            IncludeClassification = includeClassification;
-            IncludeSharingLinks = includeSharingLinks;
 
-            if (!SiteParam.IncludeSubsites && string.IsNullOrWhiteSpace(SiteParam.SiteUrl) && string.IsNullOrWhiteSpace(SiteParam.ListOfSitesPath) && !IncludeSharingLinks)
+            if (!SiteParam.IncludeSubsites && string.IsNullOrWhiteSpace(SiteParam.SiteUrl) && string.IsNullOrWhiteSpace(SiteParam.ListOfSitesPath) && !SiteInfo.IncludeSharingLinks)
             {
                 AdminAccess.AddAdmin = false;
                 AdminAccess.RemoveAdmin = false;

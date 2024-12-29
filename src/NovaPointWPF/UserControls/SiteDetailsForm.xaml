@@ -23,41 +23,37 @@
 
                     <StackPanel>
 
-                        <DockPanel>
-
-                            <ToggleButton
+                        <ToggleButton
                             Style="{DynamicResource ToggleButtonSolutionForm}"
                             Content="Basic report"
                             IsChecked="{Binding BasicReport, ElementName=root}"
-                            DockPanel.Dock="Left"
-                            Margin="0,0,8,0"/>
+                            HorizontalAlignment="Left"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0, 16, 0, 0">
+                            <ToggleButton
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Include Hub details"
+                                IsChecked="{Binding IncludeHubInfo, ElementName=root}"/>
 
                             <ToggleButton
-                            Style="{DynamicResource ToggleButtonSolutionForm}"
-                            Content="Include Hub details"
-                            IsChecked="{Binding IncludeHubInfo, ElementName=root}"
-                            DockPanel.Dock="Right"/>
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Include Classification"
+                                IsChecked="{Binding IncludeClassification, ElementName=root}"
+                                Margin="8, 0, 8, 0"/>
 
                             <ToggleButton
-                            Style="{DynamicResource ToggleButtonSolutionForm}"
-                            Content="Include Classification"
-                            IsChecked="{Binding IncludeClassification, ElementName=root}"
-                            DockPanel.Dock="Right"
-                            Margin="8,0,8,0"/>
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Include Sharing links"
+                                IsChecked="{Binding IncludeSharingLinks, ElementName=root}"
+                                Margin="0,0,8,0"/>
 
                             <ToggleButton
-                            Style="{DynamicResource ToggleButtonSolutionForm}"
-                            Content="Include Sharing links"
-                            IsChecked="{Binding IncludeSharingLinks, ElementName=root}"
-                            DockPanel.Dock="Right"/>
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Content="Include Privacy"
+                                IsChecked="{Binding IncludePrivacy, ElementName=root}"/>
 
-                            <TextBlock
-                            DockPanel.Dock="Left"
-                            Height="Auto"/>
 
-                        </DockPanel>
-
-                     
+                        </StackPanel>
 
                     </StackPanel>
 
