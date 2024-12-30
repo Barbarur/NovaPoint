@@ -87,6 +87,8 @@ namespace NovaPointLibrary.Solutions.Report
 
             await foreach (var listRecord in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
             {
+                _appInfo.IsCancelled();
+
                 if (listRecord.Ex != null)
                 {
                     AddRecord(new(listRecord.SiteUrl, listRecord.List, listRecord.Ex.Message));
