@@ -24,7 +24,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         public string SiteUrl
         {
             get { return _siteUrl; }
-            set { _siteUrl = value.Trim(); }
+            set
+            { 
+                _siteUrl = value.Trim();
+                if (_siteUrl.EndsWith("/"))
+                {
+                    _siteUrl = _siteUrl.Remove(_siteUrl.LastIndexOf("/"));
+                }
+            }
         }
 
 

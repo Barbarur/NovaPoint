@@ -64,11 +64,18 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                     foreach (string line in lines)
                     {
                         _appInfo.IsCancelled();
-                        _logger.Info(GetType().Name, $"Processing Site '{line}'");
 
                         if (string.IsNullOrEmpty(line)) { continue; }
 
-                        SPOTenantSiteUrlsRecord record = new(progress, line.Trim());
+                        string siteUrl = line.Trim();
+                        if (siteUrl.EndsWith("/"))
+                        {
+                            siteUrl = siteUrl.Remove(siteUrl.LastIndexOf("/"));
+                        }
+
+                        _logger.Info(GetType().Name, $"Processing Site '{siteUrl}'");
+
+                        SPOTenantSiteUrlsRecord record = new(progress, siteUrl);
                         yield return record;
 
                         progress.ProgressUpdateReport();
