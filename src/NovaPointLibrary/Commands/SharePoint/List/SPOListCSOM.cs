@@ -16,8 +16,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             _appInfo = appInfo;
         }
 
-        internal async Task<List<Microsoft.SharePoint.Client.List>> GetAsync(string siteUrl,
-                                                                             SPOListsParameters parameters)
+        internal async Task<List<Microsoft.SharePoint.Client.List>> GetAsync(string siteUrl, SPOListsParameters parameters)
         {
             _appInfo.IsCancelled();
             string methodName = $"{GetType().Name}.Get";
@@ -39,10 +38,11 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
             var expressions = defaultExpressions.Union(parameters.ListExpresions).ToArray();
 
-            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
 
             if (parameters.AllLists)
             {
+                ClientContext clientContext = await _appInfo.GetContext(siteUrl);
+
                 ListCollection collList = clientContext.Web.Lists;
                 clientContext.Load(collList, l => l.Include(expressions));
                 clientContext.ExecuteQuery();
@@ -73,17 +73,21 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
             else
             {
-                Microsoft.SharePoint.Client.List list = clientContext.Web.GetListByTitle(parameters.ListTitle, expressions);
-                if (list == null)
-                {
-                    throw new Exception($"List '{parameters.ListTitle}' not found");
-                }
+                var list = await GetList(siteUrl, parameters.ListTitle, expressions);
 
                 List<Microsoft.SharePoint.Client.List> collList = new() { list };
 
-                _logger.Info(GetType().Name, $"Collected list '{list.Title}'");
                 return collList;
             }
+        }
+
+        internal async Task<Microsoft.SharePoint.Client.List> GetList(string siteUrl, string listTitle, Expression<Func<Microsoft.SharePoint.Client.List, object>>[] expressions)
+        {
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
+
+            Microsoft.SharePoint.Client.List list = clientContext.Web.GetListByTitle(listTitle, expressions) ?? throw new Exception($"List '{listTitle}' not found");
+
+            return list;
         }
     }
 }
