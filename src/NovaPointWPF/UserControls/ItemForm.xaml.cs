@@ -67,19 +67,19 @@ namespace NovaPointWPF.UserControls
                 else
                 {
                     SpecificRelativeUrl.Visibility = Visibility.Collapsed;
-                    FolderRelativeUrl = string.Empty;
+                    FolderSiteRelativeUrl = string.Empty;
                 }
             }
         }
 
-        private string _folderRelativeUrl = string.Empty;
-        public string FolderRelativeUrl
+        private string _folderSiteRelativeUrl = string.Empty;
+        public string FolderSiteRelativeUrl
         {
-            get { return _folderRelativeUrl; }
+            get { return _folderSiteRelativeUrl; }
             set
             {
-                _folderRelativeUrl = value;
-                Parameters.FolderRelativeUrl = value;
+                _folderSiteRelativeUrl = value;
+                Parameters.FolderSiteRelativeUrl = value;
                 OnPropertyChanged();
             }
         }

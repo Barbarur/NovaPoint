@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NovaPointWPF.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="600"
+             d:DesignHeight="600" d:DesignWidth="800"
              x:Name="root">
 
     <Grid
@@ -48,13 +48,33 @@
 
                             <TextBlock
                                 Style="{DynamicResource TextBlockBody}"
-                                Text="Server relative path"
-                                Margin="0,0,0,12"/>
+                                Text="Site relative path of the folder"
+                                Margin="0,0,0,2"/>
+                            
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Margin="16,0,0,2">
+                                <TextBlock.Inlines>
+                                    <Run Text="If the folder path is"/>
+                                    <Run FontStyle="Italic" Text="https://domain.sharepoint.com/sites/SiteName"/><Run FontWeight="Bold" FontStyle="Italic" Text="/Library Name/FolderName/Subfolder"/>
+                                </TextBlock.Inlines>
+
+                            </TextBlock>
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Margin="16,0,0,8">
+                                <TextBlock.Inlines>
+                                    <Run Text="You should write"/>
+                                    <Run FontWeight="Bold" FontStyle="Italic" Text="/Library Name/Folder/Subfolder"/>
+                                </TextBlock.Inlines>
+
+                            </TextBlock>
 
                             <TextBox
                                 x:Name="SiteUrlTextBox"
                                 Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                                Text="{Binding FolderRelativeUrl, ElementName=root}"/>
+                                Text="{Binding FolderSiteRelativeUrl, ElementName=root}"/>
 
                         </StackPanel>
                     </StackPanel>

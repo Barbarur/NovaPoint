@@ -1,11 +1,7 @@
-﻿using Microsoft.SharePoint.Client;
+﻿using CamlBuilder;
+using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.SharePoint.Item
 {
@@ -15,23 +11,37 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         internal Expression<Func<ListItem, object>>[] FileExpresions = new Expression<Func<ListItem, object>>[] { };
 
         public bool AllItems { get; set; } = true;
-        private string _folderRelativeUrl = String.Empty;
 
-        public string FolderRelativeUrl
+        private string _folderSiteRelativeUrl = String.Empty;
+        public string FolderSiteRelativeUrl
         {
-            get { return _folderRelativeUrl; }
+            get { return _folderSiteRelativeUrl; }
             set
             {
-                _folderRelativeUrl = value.Trim();
-                if (!_folderRelativeUrl.StartsWith("/"))
+                _folderSiteRelativeUrl = value.Trim();
+                if (!_folderSiteRelativeUrl.StartsWith("/"))
                 {
-                    _folderRelativeUrl = "/" + _folderRelativeUrl;
+                    _folderSiteRelativeUrl = "/" + _folderSiteRelativeUrl;
                 }
-                if (_folderRelativeUrl.EndsWith("/"))
+                if (_folderSiteRelativeUrl.EndsWith("/"))
                 {
-                    _folderRelativeUrl = _folderRelativeUrl.Remove(_folderRelativeUrl.LastIndexOf("/"));
+                    _folderSiteRelativeUrl = _folderSiteRelativeUrl.Remove(_folderSiteRelativeUrl.LastIndexOf("/"));
                 }
             }
+        }
+
+        internal string GetFolderServerRelativeURL(string siteUrl)
+        {
+            string siteUrlClean = siteUrl.Trim();
+            if (siteUrlClean.EndsWith("/"))
+            {
+                siteUrlClean = siteUrlClean.Remove(siteUrlClean.LastIndexOf("/"));
+            }
+
+            string folderUrl = siteUrlClean + FolderSiteRelativeUrl;
+            string folderServerRelativeUrl = folderUrl[(folderUrl.IndexOf(".com") + 4)..];
+
+            return folderServerRelativeUrl;
         }
     }
 }

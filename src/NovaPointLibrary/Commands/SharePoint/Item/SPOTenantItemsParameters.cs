@@ -30,7 +30,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
         public void ParametersCheck()
         {
-            if (!String.IsNullOrWhiteSpace(ItemsParam.FolderRelativeUrl) && (String.IsNullOrWhiteSpace(ListsParam.ListTitle) || String.IsNullOrWhiteSpace(SitesAccParam.SiteParam.SiteUrl)))
+            if (!String.IsNullOrWhiteSpace(ItemsParam.FolderSiteRelativeUrl) && (String.IsNullOrWhiteSpace(ListsParam.ListTitle) || String.IsNullOrWhiteSpace(SitesAccParam.SiteParam.SiteUrl)))
             {
                 throw new Exception($"When using Server relative path for filtering the items, you need to add the List name and URL of a single site");
             }

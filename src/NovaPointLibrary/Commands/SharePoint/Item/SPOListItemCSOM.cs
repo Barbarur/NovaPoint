@@ -47,7 +47,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             }
             else
             {
-                camlQuery.FolderServerRelativeUrl = parameters.FolderRelativeUrl;
+                string folderServerRelativeUrl = parameters.GetFolderServerRelativeURL(siteUrl);
+                camlQuery.FolderServerRelativeUrl = folderServerRelativeUrl;
+                _logger.Debug(GetType().Name, $"Folder ServerRelativeUrl {folderServerRelativeUrl}");
             }
 
             var queryElement = XElement.Parse(camlQuery.ViewXml);
@@ -146,6 +148,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                                                            Microsoft.SharePoint.Client.List oList,
                                                            SPOItemsParameters parameters)
         {
+            _logger.Info(GetType().Name, $"Getting items from site '{siteUrl}' list '{oList.Title}'");
+
+            string folderServerRelativeUrl = parameters.GetFolderServerRelativeURL(siteUrl);
+
             await foreach (var listItemCollection in GetBatchAsync(siteUrl, oList, parameters))
             {
                 foreach (var oItem in listItemCollection)
@@ -154,9 +160,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     {
                         yield return oItem;
                     }
-                    else if (!String.IsNullOrWhiteSpace(parameters.FolderRelativeUrl) && oItem["FileRef"].ToString() != null && oItem["FileRef"].ToString().Contains(parameters.FolderRelativeUrl))
+                    else if (!String.IsNullOrWhiteSpace(parameters.FolderSiteRelativeUrl))
                     {
-                        yield return oItem;
+                        if (oItem["FileRef"].ToString() != null && oItem["FileRef"].ToString().Contains(folderServerRelativeUrl))
+                        {
+                            yield return oItem;
+                        }
                     }
                 }
             }

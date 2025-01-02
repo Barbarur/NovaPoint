@@ -34,6 +34,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             l => l.RootFolder,
             l => l.RootFolder.ServerRelativeUrl,
+
         };
 
         private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
@@ -194,7 +195,17 @@ namespace NovaPointLibrary.Solutions.Automation
             sql.ResetTableQuery(typeof(RESTCopyMoveFileFolder));
             await foreach (var oListItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(oSourceWeb.Url, oSourceList, _param.SourceItemsParam))
             {
-                var itemServerRelativeUrlAtDestination = GetItemDestinationServerRelativeUrl(oListItem, destinationServerRelativeUrl);
+                string listItemServerRelativeUrl = (string)oListItem["FileRef"];
+                string listItemFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, oListItem.ParentList.RootFolder.ServerRelativeUrl.Length);
+
+                if (!String.IsNullOrWhiteSpace(_param.SourceItemsParam.FolderSiteRelativeUrl))
+                {
+                    string folderServerRelativeUrl = _param.SourceItemsParam.GetFolderServerRelativeURL(oSourceWeb.Url);
+
+                    listItemFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, folderServerRelativeUrl.Length);
+                }
+
+                var itemServerRelativeUrlAtDestination = string.Concat(destinationServerRelativeUrl, listItemFolderRelativeUrl);
 
                 RESTCopyMoveFileFolder obj = new(oSourceWeb.Url, oListItem, itemServerRelativeUrlAtDestination);
                 sql.InsertValue(obj);
@@ -270,17 +281,17 @@ namespace NovaPointLibrary.Solutions.Automation
 
         }
 
-        private string GetItemDestinationServerRelativeUrl(ListItem oListItem, string destinationServerRelativeUrl)
-        {
-            string listItemServerRelativeUrl = (string)oListItem["FileRef"];
-            string sourceFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, oListItem.ParentList.RootFolder.ServerRelativeUrl.Length);
+        //private string GetItemDestinationServerRelativeUrl(ListItem oListItem, string destinationServerRelativeUrl)
+        //{
+        //    string listItemServerRelativeUrl = (string)oListItem["FileRef"];
+        //    string sourceFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, oListItem.ParentList.RootFolder.ServerRelativeUrl.Length);
 
-            if (!String.IsNullOrWhiteSpace(_param.SourceItemsParam.FolderRelativeUrl))
-            {
-                sourceFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, _param.SourceItemsParam.FolderRelativeUrl.Length);
-            }
-            return string.Concat(destinationServerRelativeUrl, sourceFolderRelativeUrl);
-        }
+        //    if (!String.IsNullOrWhiteSpace(_param.SourceItemsParam.FolderSiteRelativeUrl))
+        //    {
+        //        sourceFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, _param.SourceItemsParam.FolderSiteRelativeUrl.Length);
+        //    }
+        //    return string.Concat(destinationServerRelativeUrl, sourceFolderRelativeUrl);
+        //}
 
         private IEnumerable<RESTCopyMoveFileFolder> GetBatch(SqliteHandler sql, int depth, int batchCount)
         {
