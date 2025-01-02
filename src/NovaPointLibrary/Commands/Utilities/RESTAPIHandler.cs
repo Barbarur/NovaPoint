@@ -1,6 +1,6 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Core.HttpService;
 using NovaPointLibrary.Core.Logging;
-using System.Net.Http.Headers;
 
 
 namespace NovaPointLibrary.Commands.Utilities
@@ -16,51 +16,29 @@ namespace NovaPointLibrary.Commands.Utilities
             _appInfo = appInfo;
         }
 
-        internal async Task<string> GetAsync(string apiUrl)
+        internal async Task<string> GetAsync(string uriString)
         {
             _appInfo.IsCancelled();
 
-            string response = await _appInfo.SendHttpRequestMessageAsync(GetRequestMessage, HttpMethod.Get, apiUrl, "");
+            _logger.Info(GetType().Name, $"GET '{uriString}'");
+
+            HttpMessageWriter messageWriter = new(_appInfo, HttpMethod.Get, uriString);
+            string response = await HttpClientService.SendHttpRequestMessageAsync(_logger, messageWriter, _appInfo.CancelToken);
 
             return response;
         }
 
-        internal async Task<string> PostAsync(string apiUrl, string content)
+        internal async Task<string> PostAsync(string uriString, string content)
         {
             _appInfo.IsCancelled();
-            _logger.Info(GetType().Name, $"HTTP Request Post API '{apiUrl}' content '{content}'.");
+            _logger.Info(GetType().Name, $"POST '{uriString}' with content '{content}'");
 
-            string response = await _appInfo.SendHttpRequestMessageAsync(GetRequestMessage, HttpMethod.Post, apiUrl, content);
+            HttpMessageWriter messageWriter = new(_appInfo, HttpMethod.Post, uriString, content);
+            string response = await HttpClientService.SendHttpRequestMessageAsync(_logger, messageWriter, _appInfo.CancelToken);
+
 
             return response;
         }
 
-        private async Task<HttpRequestMessage> GetRequestMessage(HttpMethod method, string apiUrl, string content = "")
-        {
-            _appInfo.IsCancelled();
-            _logger.Info(GetType().Name, $"Writing message for '{method}' in '{apiUrl}'");
-
-            HttpRequestMessage request = new()
-            {
-                Method = method
-            };
-
-            string accessToken = await _appInfo.GetSPOAccessToken(apiUrl);
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-            
-            request.RequestUri = new Uri(apiUrl);
-                        
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
-
-
-            if (method == HttpMethod.Post || method == HttpMethod.Put || method.Method == "PATCH")
-            {
-                request.Content = new StringContent(content, System.Text.Encoding.UTF8);
-                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-            }
-
-            return request;
-        }
-        
     }
 }

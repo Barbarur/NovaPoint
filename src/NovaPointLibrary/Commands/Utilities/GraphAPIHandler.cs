@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
+using NovaPointLibrary.Core.HttpService;
 using NovaPointLibrary.Core.Logging;
 
 namespace NovaPointLibrary.Commands.Utilities
@@ -60,52 +61,37 @@ namespace NovaPointLibrary.Commands.Utilities
             }
         }
 
-        internal async Task<string> GetResponseJSONAsync(string apiUrl)
+        internal async Task<string> GetResponseJSONAsync(string apiEndpoint)
         {
             _appInfo.IsCancelled();
 
-            string response = await _appInfo.SendHttpRequestMessageAsync(GetRequestMessage, HttpMethod.Get, apiUrl, "");
+            HttpMessageWriter messageWriter = new(_appInfo, HttpMethod.Get, GetUriString(apiEndpoint), "");
+            string response = await HttpClientService.SendHttpRequestMessageAsync(_logger, messageWriter, _appInfo.CancelToken);
 
             return response;
         }
 
-        internal async Task DeleteAsync(string apiUrl)
+        internal async Task DeleteAsync(string apiEndpoint)
         {
             _appInfo.IsCancelled();
 
-            string response = await _appInfo.SendHttpRequestMessageAsync(GetRequestMessage, HttpMethod.Delete, apiUrl, "");
+            HttpMessageWriter messageWriter = new(_appInfo, HttpMethod.Delete, GetUriString(apiEndpoint));
+            string response = await HttpClientService.SendHttpRequestMessageAsync(_logger, messageWriter, _appInfo.CancelToken);
 
             _logger.Info(GetType().Name, response);
         }
 
-
-        private async Task<HttpRequestMessage> GetRequestMessage(HttpMethod method, string apiUrl, string content = "")
+        private string GetUriString(string apiEndpoint)
         {
-            _appInfo.IsCancelled();
-
-            if (apiUrl.StartsWith("/"))
+            if (apiEndpoint.StartsWith("/"))
             {
-                apiUrl = apiUrl.Substring(1);
+                apiEndpoint = apiEndpoint.Substring(1);
             }
-            string uri = !apiUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? $"{_graphUrl}/{apiUrl}" : apiUrl;
-            _logger.Info(GetType().Name, $"Writing message for '{method}' in '{uri}'");
+            string uri = !apiEndpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? $"{_graphUrl}/{apiEndpoint}" : apiEndpoint;
 
-            HttpRequestMessage message = new();
-            message.Method = method;
+            _logger.Info(GetType().Name, $"URI: {uri}");
 
-            string accessToken = await _appInfo.GetGraphAccessToken();
-            message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-
-            message.RequestUri = new Uri(uri);
-
-            // MISSING:
-            // Header.Accept
-            // Content
-            // Additional Headers
-            // Content header content type
-
-
-            return message;
+            return uri;
         }
 
     }

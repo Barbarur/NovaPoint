@@ -2,8 +2,6 @@
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Commands.Utilities;
-using static Microsoft.SharePoint.Client.ClientContextExtensions;
-using System.Net;
 using NovaPointLibrary.Core.Logging;
 
 
@@ -57,8 +55,6 @@ namespace NovaPointLibrary.Commands.Authentication
             }
         }
 
-        private readonly HttpClient HttpsClient = new();
-
         internal AppSettings Settings { get; set; }
         internal CancellationToken CancelToken { get; init; }
 
@@ -83,8 +79,6 @@ namespace NovaPointLibrary.Commands.Authentication
                                                  .WithAuthority(authority)
                                                  .WithDefaultRedirectUri()
                                                  .Build();
-
-            HttpsClient.Timeout = TimeSpan.FromMinutes(2);
         }
 
         internal static async Task<AppInfo> BuildAsync(LoggerSolution logger, CancellationTokenSource cancelTokenSource)
@@ -93,10 +87,10 @@ namespace NovaPointLibrary.Commands.Authentication
             appInfo.IsCancelled();
 
             string url = $"/sites/root";
-            var graphUser = await new GraphAPIHandler(logger, appInfo).GetObjectAsync<GraphSitesRoot>(url);
-            logger.Info("Appinfo", $"Hostname: {graphUser.SiteCollection.Hostname}");
+            var graphSiteRoot = await new GraphAPIHandler(logger, appInfo).GetObjectAsync<GraphSitesRoot>(url);
+            logger.Info("Appinfo", $"Hostname: {graphSiteRoot.SiteCollection.Hostname}");
 
-            string domain = graphUser.SiteCollection.Hostname.Remove(graphUser.SiteCollection.Hostname.IndexOf(".sharepoint.com", StringComparison.OrdinalIgnoreCase));
+            string domain = graphSiteRoot.SiteCollection.Hostname.Remove(graphSiteRoot.SiteCollection.Hostname.IndexOf(".sharepoint.com", StringComparison.OrdinalIgnoreCase));
             logger.Info("Appinfo", $"Domain: {domain}");
 
             appInfo.Domain = domain;
@@ -270,91 +264,5 @@ namespace NovaPointLibrary.Commands.Authentication
             return result;
         }
 
-        internal async Task<string> SendHttpRequestMessageAsync(Func<HttpMethod, string, string, Task<HttpRequestMessage>> getMessage, HttpMethod method, string apiUrl, string content = "")
-        {
-            IsCancelled();
-
-            int retryMax = 10;
-            int retryCount = 0;
-            int backoffInterval = 500;
-
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            while (retryCount < retryMax)
-            {
-                int waitTime = backoffInterval;
-                backoffInterval *= 2;
-                retryCount++;
-
-                HttpRequestMessage requestMessage = await getMessage(method, apiUrl, content);
-                HttpResponseMessage response;
-                try
-                {
-                    response = await HttpsClient.SendAsync(requestMessage, CancelToken);
-                }
-                catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
-                {
-                    _logger.Info(GetType().Name, $"The request timed out. Retrying after {waitTime} miliseconds.");
-
-                    await Task.Delay(waitTime);
-                    continue;
-                }
-                catch (HttpRequestException e) when (e.InnerException is System.Net.Sockets.SocketException)
-                {
-                    _logger.Info(GetType().Name, $"Socket exception: {e.Message}. Retrying after {waitTime} miliseconds.");
-
-                    await Task.Delay(waitTime);
-                    continue;
-                }
-                catch (HttpRequestException ex)
-                {
-                    _logger.Info(GetType().Name, $"An error occurred while sending the request: {ex.Message}. Retrying after {waitTime} miliseconds.");
-                    await Task.Delay(waitTime);
-                    continue;
-                }
-                catch (Exception e)
-                {
-                    _logger.Debug(GetType().Name, $"ERROR SENDING MESSAGE TO {requestMessage.RequestUri}. EXCEPTION MESSAGE: {e.Message}.");
-                    throw;
-                }
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    _logger.Info(GetType().Name, $"Successful response {responseContent}.");
-                    return responseContent;
-                }
-                else if (response != null && (response.StatusCode == HttpStatusCode.TooManyRequests || response.StatusCode == HttpStatusCode.ServiceUnavailable))
-                {
-                    var retryAfter = response.Headers.RetryAfter;
-                    if (retryAfter != null && retryAfter.Delta != null)
-                    {
-                        waitTime = retryAfter.Delta.Value.Seconds * 1000;
-                    }
-                    _logger.Info(GetType().Name, $"API request exceeding usage limits. Retrying after {waitTime} miliseconds.");
-
-                    await Task.Delay(waitTime);
-                }
-                else if (response == null)
-                {
-                    string exceptionMessage = $"Response to API request '{requestMessage.RequestUri}' was null.";
-                    throw new Exception(exceptionMessage);
-                }
-                else
-                {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    string exceptionMessage = $"Request to API '{requestMessage.RequestUri}' failed with status code {response.StatusCode} and response content: {responseContent}.";
-
-                    if (response.Headers.TryGetValues("request-id", out IEnumerable<string>? values))
-                    {
-                        exceptionMessage += $" Request ID: {values.First()}.";
-                    }
-
-                    throw new Exception(exceptionMessage);
-                }
-            }
-
-            throw new MaximumRetryAttemptedException($"Maximum retry attempts {retryCount}, has be attempted.");
-
-        }
     }
 }
