@@ -148,14 +148,14 @@ namespace NovaPointLibrary.Solutions.Automation
             }
 
             _logger.UI(GetType().Name, "Getting Files from source locaton.");
-            var sql = new SqliteHandler(_logger);
+            var sql = SqliteHandler.GetCacheHandler();
             try
             {
                 await CopyMoveAsync(sql, oSourceWeb, oSourceList, destinationServerRelativeUrl);
             }
             finally
             {
-                sql.DropTable(typeof(RESTCopyMoveFileFolder));
+                sql.DropTable(_logger, typeof(RESTCopyMoveFileFolder));
 
             }
 
@@ -192,7 +192,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task CopyMoveAsync(SqliteHandler sql, Web oSourceWeb, List oSourceList, string destinationServerRelativeUrl)
         {
-            sql.ResetTableQuery(typeof(RESTCopyMoveFileFolder));
+            sql.ResetTableQuery(_logger, typeof(RESTCopyMoveFileFolder));
             await foreach (var oListItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(oSourceWeb.Url, oSourceList, _param.SourceItemsParam))
             {
                 string listItemServerRelativeUrl = (string)oListItem["FileRef"];
@@ -208,7 +208,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 var itemServerRelativeUrlAtDestination = string.Concat(destinationServerRelativeUrl, listItemFolderRelativeUrl);
 
                 RESTCopyMoveFileFolder obj = new(oSourceWeb.Url, oListItem, itemServerRelativeUrlAtDestination);
-                sql.InsertValue(obj);
+                sql.InsertValue(_logger, obj);
             }
 
             await CopyMoveListItemsAsync(sql);
@@ -216,10 +216,10 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task CopyMoveListItemsAsync(SqliteHandler sql)
         {
-            int deepest = sql.GetMaxValue(typeof(RESTCopyMoveFileFolder), "Depth");
-            int tableFloor = sql.GetMinValue(typeof(RESTCopyMoveFileFolder), "Depth");
+            int deepest = sql.GetMaxValue(_logger, typeof(RESTCopyMoveFileFolder), "Depth");
+            int tableFloor = sql.GetMinValue(_logger, typeof(RESTCopyMoveFileFolder), "Depth");
 
-            int totalCount = sql.GetCountTotalRecord(typeof(RESTCopyMoveFileFolder));
+            int totalCount = sql.GetCountTotalRecord(_logger, typeof(RESTCopyMoveFileFolder));
             ProgressTracker progress = new(_logger, totalCount);
 
             _logger.UI(GetType().Name, "Coping items...");
@@ -303,7 +303,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     WHERE Depth = {depth} 
                     LIMIT {batchSize} OFFSET {offset};";
 
-            return sql.GetRecords<RESTCopyMoveFileFolder>(query);
+            return sql.GetRecords<RESTCopyMoveFileFolder>(_logger, query);
         }
 
         //private void CalculateAverageWaitingTime(double timeElapsedMilliseconds, RESTCopyMoveFileFolder itemCopied)

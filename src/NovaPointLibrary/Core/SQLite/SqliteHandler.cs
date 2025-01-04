@@ -1,14 +1,17 @@
 ﻿using Dapper;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Core.Logging;
+using System.IO;
 
 
 namespace NovaPointLibrary.Core.SQLite
 {
     internal class SqliteHandler
     {
-        private readonly ILogger _logger;
-        internal static string ConnectionString
+
+        private static readonly SqliteHandler _cacheHandler = new(CacheConnectionString);
+
+        internal static string CacheConnectionString
         {
             get
             {
@@ -16,114 +19,159 @@ namespace NovaPointLibrary.Core.SQLite
                 return $"Data Source={bdPath};";
             }
         }
-        internal SqliteHandler(ILogger logger)
+
+        private readonly string _connectionString;
+        private readonly ReaderWriterLockSlim _rwl = new();
+        private readonly int rwlMillisecondsTimeout = 3000;
+
+        private SqliteHandler(string connectionString)
         {
-            _logger = logger;
+            _connectionString = connectionString;
         }
 
-        internal void CreateTable(string createTableQuery)
+        internal static SqliteHandler GetCacheHandler()
         {
-            _logger.Debug(GetType().Name, createTableQuery);
-
-            using Microsoft.Data.Sqlite.SqliteConnection connection = new(ConnectionString);
-
-            connection.Open();
-
-            connection.Execute(createTableQuery);
+            return _cacheHandler;
         }
 
-        internal void CreateTable(Type type)
+        internal void CreateTable(ILogger logger, string createTableQuery)
+        {
+            _rwl.TryEnterWriteLock(rwlMillisecondsTimeout);
+            try
+            {
+                logger.Debug(GetType().Name, createTableQuery);
+
+                using Microsoft.Data.Sqlite.SqliteConnection connection = new(_connectionString);
+
+                connection.Open();
+
+                connection.Execute(createTableQuery);
+            }
+            finally { _rwl.ExitWriteLock(); }
+        }
+
+        internal void CreateTable(ILogger logger, Type type)
         {
             string createTableQuery = SqliteQueryHelper.GetCreateTableQuery(type);
 
-            CreateTable(createTableQuery);
+            CreateTable(logger, createTableQuery);
         }
 
-        internal void DropTable(Type type)
+        internal void DropTable(ILogger logger, Type type)
         {
             string dropTableQuery = $"DROP TABLE IF EXISTS {type.Name};";
-            _logger.Info(GetType().Name, dropTableQuery);
+            logger.Info(GetType().Name, dropTableQuery);
 
-            using Microsoft.Data.Sqlite.SqliteConnection connection = new(ConnectionString);
+            _rwl.TryEnterWriteLock(rwlMillisecondsTimeout);
+            try
+            {
+                using Microsoft.Data.Sqlite.SqliteConnection connection = new(_connectionString);
 
-            connection.Open();
+                connection.Open();
 
-            connection.Execute(dropTableQuery);
+                connection.Execute(dropTableQuery);
+            }
+            finally { _rwl.ExitWriteLock(); }
         }
 
-        internal void ResetTableQuery(Type type)
+        internal void ResetTableQuery(ILogger logger, Type type)
         {
-            DropTable(type);
+            DropTable(logger, type);
 
-            CreateTable(type);
+            CreateTable(logger, type);
         }
 
-        internal void InsertValue<T>(T obj)
+        internal void InsertValue<T>(ILogger logger, T obj)
         {
             string insertValueQuery = SqliteQueryHelper.GetInsertQuery(obj);
-            _logger.Debug(GetType().Name, insertValueQuery);
+            logger.Debug(GetType().Name, insertValueQuery);
 
-            using Microsoft.Data.Sqlite.SqliteConnection connection = new(ConnectionString);
+            _rwl.TryEnterWriteLock(rwlMillisecondsTimeout);
+            try
+            {
+                using Microsoft.Data.Sqlite.SqliteConnection connection = new(_connectionString);
 
-            connection.Open();
+                connection.Open();
 
-            connection.Execute(insertValueQuery);
+                connection.Execute(insertValueQuery);
+            }
+            finally { _rwl.ExitWriteLock(); }
         }
 
-        internal int GetCountTotalRecord(Type type)
+        internal int GetCountTotalRecord(ILogger logger, Type type)
         {
             string countRecordsQuery = $"SELECT COUNT(*) FROM {type.Name};";
-            _logger.Info(GetType().Name, countRecordsQuery);
+            logger.Info(GetType().Name, countRecordsQuery);
 
-            using Microsoft.Data.Sqlite.SqliteConnection connection = new(ConnectionString);
+            _rwl.TryEnterReadLock(rwlMillisecondsTimeout);
+            try
+            {
+                using Microsoft.Data.Sqlite.SqliteConnection connection = new(_connectionString);
 
-            connection.Open();
+                connection.Open();
 
-            int recordCount = connection.ExecuteScalar<int>(countRecordsQuery);
+                int recordCount = connection.ExecuteScalar<int>(countRecordsQuery);
 
-            _logger.Info(GetType().Name, $"Total count {recordCount}");
-            return recordCount;
+                logger.Info(GetType().Name, $"Total count {recordCount}");
+                return recordCount;
+            }
+            finally { _rwl.ExitWriteLock(); }
         }
 
-        internal int GetMaxValue(Type type, string columnName)
+        internal int GetMaxValue(ILogger logger, Type type, string columnName)
         {
             string countRecordsQuery = $"SELECT MAX({columnName}) FROM {type.Name};";
-            _logger.Info(GetType().Name, countRecordsQuery);
+            logger.Info(GetType().Name, countRecordsQuery);
 
-            using Microsoft.Data.Sqlite.SqliteConnection connection = new(ConnectionString);
+            _rwl.TryEnterReadLock(rwlMillisecondsTimeout);
+            try
+            {
+                using Microsoft.Data.Sqlite.SqliteConnection connection = new(_connectionString);
 
-            connection.Open();
+                connection.Open();
 
-            int maxValue = connection.ExecuteScalar<int>(countRecordsQuery);
+                int maxValue = connection.ExecuteScalar<int>(countRecordsQuery);
 
-            _logger.Info(GetType().Name, $"Max Value {maxValue}");
-            return maxValue;
+                logger.Info(GetType().Name, $"Max Value {maxValue}");
+                return maxValue;
+            }
+            finally { _rwl.ExitWriteLock(); }
         }
 
-        internal int GetMinValue(Type type, string columnName)
+        internal int GetMinValue(ILogger logger, Type type, string columnName)
         {
             string countRecordsQuery = $"SELECT MIN({columnName}) FROM {type.Name};";
-            _logger.Info(GetType().Name, countRecordsQuery);
+            logger.Info(GetType().Name, countRecordsQuery);
 
-            using Microsoft.Data.Sqlite.SqliteConnection connection = new(ConnectionString);
+            _rwl.TryEnterReadLock(rwlMillisecondsTimeout);
+            try
+            {
+                using Microsoft.Data.Sqlite.SqliteConnection connection = new(_connectionString);
 
-            connection.Open();
+                connection.Open();
 
-            int minValue = connection.ExecuteScalar<int>(countRecordsQuery);
+                int minValue = connection.ExecuteScalar<int>(countRecordsQuery);
 
-            _logger.Info(GetType().Name, $"Min Value {minValue}");
-            return minValue;
+                logger.Info(GetType().Name, $"Min Value {minValue}");
+                return minValue;
+            }
+            finally { _rwl.ExitWriteLock(); }
         }
 
-        internal IEnumerable<T> GetRecords<T>(string query)
+        internal IEnumerable<T> GetRecords<T>(ILogger logger, string query)
         {
-            _logger.Info(GetType().Name, query);
+            logger.Info(GetType().Name, query);
 
-            using Microsoft.Data.Sqlite.SqliteConnection connection = new(ConnectionString);
+            _rwl.TryEnterReadLock(rwlMillisecondsTimeout);
+            try
+            {
+                using Microsoft.Data.Sqlite.SqliteConnection connection = new(_connectionString);
 
-            connection.Open();
+                connection.Open();
 
-            return connection.Query<T>(query);
+                return connection.Query<T>(query);
+            }
+            finally { _rwl.ExitWriteLock(); }
         }
 
     }
