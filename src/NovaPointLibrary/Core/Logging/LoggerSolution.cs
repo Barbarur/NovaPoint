@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Commands.Utilities;
+using NovaPointLibrary.Core.SQLite;
 using NovaPointLibrary.Solutions;
 using System.Diagnostics;
 using System.Reflection;
@@ -30,28 +31,35 @@ namespace NovaPointLibrary.Core.Logging
         private readonly List<string> _cachedKeyValues = new();
         private readonly List<string> _cachedLogs = new();
 
+        private readonly string _solutionFolderPath;
+        private readonly string _solutionFileName;
+
+        private readonly SqliteHandler _sql;
+
         internal LoggerSolution(Action<LogInfo> uiAddLog, string solutionName, ISolutionParameters parameters)
         {
             _uiAddLog = uiAddLog;
 
             string userDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string folderPath = Path.Combine(userDocumentsFolder, "NovaPoint", solutionName, DateTime.UtcNow.ToString("yyMMddHHmmss"));
-            Directory.CreateDirectory(folderPath);
+            _solutionFolderPath = Path.Combine(userDocumentsFolder, "NovaPoint", solutionName, DateTime.UtcNow.ToString("yyMMddHHmmss"));
+            Directory.CreateDirectory(_solutionFolderPath);
 
-            string fileName = solutionName + "_" + DateTime.UtcNow.ToString("yyMMddHHmmss");
-            _txtPath = Path.Combine(folderPath, fileName + "_Logs.txt");
-            _csvPath = Path.Combine(folderPath, fileName + "_Report.csv");
-            _errorPath = Path.Combine(folderPath, fileName + "_errors.txt");
+            _solutionFileName = solutionName + "_" + DateTime.UtcNow.ToString("yyMMddHHmmss");
+            _txtPath = Path.Combine(_solutionFolderPath, _solutionFileName + "_Logs.txt");
+            _csvPath = Path.Combine(_solutionFolderPath, _solutionFileName + "_Report.csv");
+            _errorPath = Path.Combine(_solutionFolderPath, _solutionFileName + "_errors.txt");
 
             Info(GetType().Name, $"Logs: {_txtPath}");
             Info(GetType().Name, $"Report: {_csvPath}");
-            _uiAddLog(LogInfo.FolderInfo(folderPath));
+            _uiAddLog(LogInfo.FolderInfo(_solutionFolderPath));
 
             string v = $"Version: v{VersionControl.GetVersion()}";
             Info(GetType().Name, v);
             _cachedKeyValues.Add(v);
 
             GetSolutionParameters(parameters);
+
+            _sql = SqliteHandler.GetCacheHandler();
 
             SW.Start();
 
@@ -406,5 +414,92 @@ namespace NovaPointLibrary.Core.Logging
             }
         }
 
+        internal void ResetCache(Type type)
+        {
+            _sql.ResetTableQuery(this, type);
+        }
+
+        internal void RecordSql(ISolutionRecord record)
+        {
+            _sql.InsertValue(this, record);
+        }
+
+        internal void ExportCacheToCsv<T>(Type type, string reportName)
+        {
+            string reportPath = Path.Combine(_solutionFolderPath, _solutionFileName + $"_{reportName}.csv");
+
+            foreach (var record in GetCachedRecords<T>())
+            {
+                try
+                {
+                    Type solutiontype = type;
+                    PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+                    StringBuilder sb = new();
+                    using StreamWriter csv = new(new FileStream(reportPath, FileMode.Append, FileAccess.Write));
+                    {
+                        var csvFileLenth = new System.IO.FileInfo(reportPath).Length;
+                        if (csvFileLenth == 0)
+                        {
+                            foreach (var propertyInfo in properties)
+                            {
+                                sb.Append($"\"{propertyInfo.Name}\",");
+                            }
+                            if (sb.Length > 0) { sb.Length--; }
+
+                            csv.WriteLine(sb.ToString());
+                            sb.Clear();
+                        }
+
+                        foreach (var propertyInfo in properties)
+                        {
+                            string s = $"{propertyInfo.GetValue(record)}";
+                            sb.Append($"\"{s.Replace("\"", "'")}\",");
+                        }
+                        if (sb.Length > 0) { sb.Length--; }
+                        string output = Regex.Replace(sb.ToString(), @"\r\n?|\n", "");
+
+                        csv.WriteLine(sb.ToString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    string logEntry = FormatLogEntry(GetType().Name, "Error while writting CSV file");
+                    ErrorWritingFile(new List<string>() { logEntry }, ex);
+                }
+            }
+        }
+
+        private IEnumerable<T> GetCachedRecords<T>()
+        {
+            int batchCount = 0;
+            int batchSize = 5000;
+
+            IEnumerable<T> collRecords;
+            do
+            {
+                int offset = batchSize * batchCount;
+                string query = @$"
+                    SELECT * 
+                    FROM {typeof(T).Name} 
+                    LIMIT {batchSize} OFFSET {offset};";
+
+                collRecords = _sql.GetRecords<T>(this, query);
+
+                foreach (var record in collRecords)
+                {
+                    yield return record;
+                }
+
+                batchCount++;
+
+            } while (collRecords.Any());
+
+        }
+
+        internal void ClearCache(Type type)
+        {
+            _sql.DropTable(this, type);
+        }
     }
 }
