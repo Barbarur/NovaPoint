@@ -115,7 +115,7 @@ namespace NovaPointLibrary.Core.SQLite
                 logger.Info(GetType().Name, $"Total count {recordCount}");
                 return recordCount;
             }
-            finally { _rwl.ExitWriteLock(); }
+            finally { _rwl.ExitReadLock(); }
         }
 
         internal int GetMaxValue(ILogger logger, Type type, string columnName)
@@ -135,7 +135,7 @@ namespace NovaPointLibrary.Core.SQLite
                 logger.Info(GetType().Name, $"Max Value {maxValue}");
                 return maxValue;
             }
-            finally { _rwl.ExitWriteLock(); }
+            finally { _rwl.ExitReadLock(); }
         }
 
         internal int GetMinValue(ILogger logger, Type type, string columnName)
@@ -155,7 +155,7 @@ namespace NovaPointLibrary.Core.SQLite
                 logger.Info(GetType().Name, $"Min Value {minValue}");
                 return minValue;
             }
-            finally { _rwl.ExitWriteLock(); }
+            finally { _rwl.ExitReadLock(); }
         }
 
         internal IEnumerable<T> GetRecords<T>(ILogger logger, string query)
@@ -171,7 +171,7 @@ namespace NovaPointLibrary.Core.SQLite
 
                 return connection.Query<T>(query);
             }
-            finally { _rwl.ExitWriteLock(); }
+            finally { _rwl.ExitReadLock(); }
         }
 
     }
