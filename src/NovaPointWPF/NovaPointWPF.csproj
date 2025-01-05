@@ -7,7 +7,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>NovaPointIcon.ico</ApplicationIcon>
     <AssemblyName>NovaPoint</AssemblyName>
-    <AssemblyVersion>0.13.1</AssemblyVersion>
+    <AssemblyVersion>0.14.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
