@@ -34,6 +34,7 @@ namespace NovaPointLibrary.Core.Logging
         private readonly string _solutionFolderPath;
         private readonly string _solutionFileName;
 
+        private  Dictionary<Type, string>? _solutionReports = null;
         private readonly SqliteHandler _sql;
 
         internal LoggerSolution(Action<LogInfo> uiAddLog, string solutionName, ISolutionParameters parameters)
@@ -81,6 +82,13 @@ namespace NovaPointLibrary.Core.Logging
                 _semaphoreThreadLogger.Release();
             }
             return childThread;
+        }
+
+        internal void AddSolutionReports(Dictionary<Type, string> dicSolutions)
+        {
+            _solutionReports = dicSolutions;
+
+            ResetCache();
         }
 
         private string FormatLogEntry(string classMethod, string log)
@@ -320,11 +328,15 @@ namespace NovaPointLibrary.Core.Logging
 
         private void SolutionFinishNotice()
         {
+            ExportAllReports();
+
+            ClearCache();
+
             SW.Stop();
             Progress(100);
         }
 
-
+        
 
 
         internal void DynamicCSV(dynamic o)
@@ -414,9 +426,14 @@ namespace NovaPointLibrary.Core.Logging
             }
         }
 
-        internal void ResetCache(Type type)
+        private void ResetCache()
         {
-            _sql.ResetTableQuery(this, type);
+            if (_solutionReports == null) { return; }
+
+            foreach (var key in _solutionReports.Keys)
+            {
+                _sql.ResetTable(this, key);
+            }
         }
 
         internal void RecordSql(ISolutionRecord record)
@@ -424,15 +441,29 @@ namespace NovaPointLibrary.Core.Logging
             _sql.InsertValue(this, record);
         }
 
-        internal void ExportCacheToCsv<T>(Type type, string reportName)
+        private void ExportAllReports()
+        {
+            if (_solutionReports == null) { return; }
+            foreach (var entry in _solutionReports)
+            {
+                var type = entry.Key;
+                var reportName = entry.Value;
+
+                var method = typeof(LoggerSolution).GetMethod(nameof(ExportReportToCsv), BindingFlags.NonPublic | BindingFlags.Instance);
+                var genericMethod = method.MakeGenericMethod(type);
+                genericMethod.Invoke(this, new object[] { reportName });
+            }
+        }
+
+        private void ExportReportToCsv<ISolutionRecord>(string reportName)
         {
             string reportPath = Path.Combine(_solutionFolderPath, _solutionFileName + $"_{reportName}.csv");
 
-            foreach (var record in GetCachedRecords<T>())
+            foreach (var record in _sql.GetAllRecords<ISolutionRecord>(this))
             {
                 try
                 {
-                    Type solutiontype = type;
+                    Type solutiontype = typeof(ISolutionRecord);
                     PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
                     StringBuilder sb = new();
@@ -470,36 +501,14 @@ namespace NovaPointLibrary.Core.Logging
             }
         }
 
-        private IEnumerable<T> GetCachedRecords<T>()
+        private void ClearCache()
         {
-            int batchCount = 0;
-            int batchSize = 5000;
+            if (_solutionReports == null) { return; }
 
-            IEnumerable<T> collRecords;
-            do
+            foreach (var key in _solutionReports.Keys)
             {
-                int offset = batchSize * batchCount;
-                string query = @$"
-                    SELECT * 
-                    FROM {typeof(T).Name} 
-                    LIMIT {batchSize} OFFSET {offset};";
-
-                collRecords = _sql.GetRecords<T>(this, query);
-
-                foreach (var record in collRecords)
-                {
-                    yield return record;
-                }
-
-                batchCount++;
-
-            } while (collRecords.Any());
-
-        }
-
-        internal void ClearCache(Type type)
-        {
-            _sql.DropTable(this, type);
+                _sql.DropTable(this, key.GetType());
+            }
         }
     }
 }
