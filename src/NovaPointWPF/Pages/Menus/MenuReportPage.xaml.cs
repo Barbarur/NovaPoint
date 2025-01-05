@@ -37,6 +37,12 @@ namespace NovaPointWPF.Pages.Menus
             GoToSolutionForm(new OrphanSiteReportForm());
         }
 
+        private void PrivacySiteReportFormClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new PrivacySiteReportForm());
+        }
+
+
 
         private void ListReportClick(object sender, RoutedEventArgs e)
         {

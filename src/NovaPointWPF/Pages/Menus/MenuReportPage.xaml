@@ -38,6 +38,11 @@
                         Content="Orphan sites"
                         Click="OrphanSiteReportFormClick"/>
 
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Public and Private sites"
+                        Click="PrivacySiteReportFormClick"/>
+
                 </StackPanel>
 
             </Grid>
