@@ -192,7 +192,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task CopyMoveAsync(SqliteHandler sql, Web oSourceWeb, List oSourceList, string destinationServerRelativeUrl)
         {
-            sql.ResetTableQuery(_logger, typeof(RESTCopyMoveFileFolder));
+            sql.ResetTable(_logger, typeof(RESTCopyMoveFileFolder));
             await foreach (var oListItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(oSourceWeb.Url, oSourceList, _param.SourceItemsParam))
             {
                 string listItemServerRelativeUrl = (string)oListItem["FileRef"];

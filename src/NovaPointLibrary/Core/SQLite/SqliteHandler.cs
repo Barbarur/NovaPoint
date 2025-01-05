@@ -1,7 +1,6 @@
 ﻿using Dapper;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Core.Logging;
-using System.IO;
 
 
 namespace NovaPointLibrary.Core.SQLite
@@ -74,7 +73,7 @@ namespace NovaPointLibrary.Core.SQLite
             finally { _rwl.ExitWriteLock(); }
         }
 
-        internal void ResetTableQuery(ILogger logger, Type type)
+        internal void ResetTable(ILogger logger, Type type)
         {
             DropTable(logger, type);
 
@@ -172,6 +171,32 @@ namespace NovaPointLibrary.Core.SQLite
                 return connection.Query<T>(query);
             }
             finally { _rwl.ExitReadLock(); }
+        }
+
+        internal IEnumerable<T> GetAllRecords<T>(ILogger logger)
+        {
+            int batchCount = 0;
+            int batchSize = 5000;
+
+            IEnumerable<T> collRecords;
+            do
+            {
+                int offset = batchSize * batchCount;
+                string query = @$"
+                    SELECT * 
+                    FROM {typeof(T).Name} 
+                    LIMIT {batchSize} OFFSET {offset};";
+
+                collRecords = GetRecords<T>(logger, query);
+
+                foreach (var record in collRecords)
+                {
+                    yield return record;
+                }
+
+                batchCount++;
+
+            } while (collRecords.Any());
         }
 
     }
