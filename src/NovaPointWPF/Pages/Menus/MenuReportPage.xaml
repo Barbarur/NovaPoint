@@ -92,7 +92,25 @@
 
             </Grid>
 
-            
+            <TextBlock
+                    Style="{DynamicResource TextBlockBodyStrong}"
+                    Text="Site Pages"/>
+
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
+
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}"/>
+
+                <StackPanel>
+
+                    <Button
+                        Style="{DynamicResource SolutionMenuButton}"
+                        Content="Site assets used in Site Pages"
+                        Click="PageAssetsReportClick"/>
+
+                </StackPanel>
+
+            </Grid>
+
             <TextBlock
                 Style="{DynamicResource TextBlockBodyStrong}"
                 Text="Recycle bin"/>

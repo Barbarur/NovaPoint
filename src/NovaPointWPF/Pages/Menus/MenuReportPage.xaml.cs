@@ -60,6 +60,10 @@ namespace NovaPointWPF.Pages.Menus
             GoToSolutionForm(new PHLItemReportForm());
         }
 
+        private void PageAssetsReportClick(object sender, RoutedEventArgs e)
+        {
+            GoToSolutionForm(new PageAssetsReportForm());
+        }
 
         private void RecycleBinReportClick(object sender, RoutedEventArgs e)
         {
