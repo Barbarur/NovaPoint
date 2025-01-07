@@ -31,6 +31,13 @@ namespace NovaPointLibrary.Core.SQLite
         {
             Type type = obj.GetType();
 
+            return GetInsertQuery(obj, type.Name);
+        }
+
+        internal static string GetInsertQuery<T>(T obj, string tableName)
+        {
+            Type type = obj.GetType();
+
             StringBuilder sbColumns = new StringBuilder();
             sbColumns.Append("(");
             StringBuilder sbValues = new StringBuilder();
@@ -46,7 +53,7 @@ namespace NovaPointLibrary.Core.SQLite
             sbValues.Length--;
             sbValues.Append(")");
 
-            string insertQuery = $"INSERT INTO {type.Name} {sbColumns} VALUES {sbValues}";
+            string insertQuery = $"INSERT INTO {tableName} {sbColumns} VALUES {sbValues}";
 
             return insertQuery;
         }

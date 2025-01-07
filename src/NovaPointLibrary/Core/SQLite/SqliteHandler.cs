@@ -59,7 +59,7 @@ namespace NovaPointLibrary.Core.SQLite
         internal void DropTable(ILogger logger, Type type)
         {
             string dropTableQuery = $"DROP TABLE IF EXISTS {type.Name};";
-            logger.Info(GetType().Name, dropTableQuery);
+            logger.Debug(GetType().Name, dropTableQuery);
 
             _rwl.TryEnterWriteLock(rwlMillisecondsTimeout);
             try
@@ -83,6 +83,12 @@ namespace NovaPointLibrary.Core.SQLite
         internal void InsertValue<T>(ILogger logger, T obj)
         {
             string insertValueQuery = SqliteQueryHelper.GetInsertQuery(obj);
+
+            InsertValue(logger, insertValueQuery);
+        }
+
+        internal void InsertValue(ILogger logger, string insertValueQuery)
+        {
             logger.Debug(GetType().Name, insertValueQuery);
 
             _rwl.TryEnterWriteLock(rwlMillisecondsTimeout);
@@ -100,7 +106,7 @@ namespace NovaPointLibrary.Core.SQLite
         internal int GetCountTotalRecord(ILogger logger, Type type)
         {
             string countRecordsQuery = $"SELECT COUNT(*) FROM {type.Name};";
-            logger.Info(GetType().Name, countRecordsQuery);
+            logger.Debug(GetType().Name, countRecordsQuery);
 
             _rwl.TryEnterReadLock(rwlMillisecondsTimeout);
             try
@@ -111,7 +117,7 @@ namespace NovaPointLibrary.Core.SQLite
 
                 int recordCount = connection.ExecuteScalar<int>(countRecordsQuery);
 
-                logger.Info(GetType().Name, $"Total count {recordCount}");
+                logger.Debug(GetType().Name, $"Total count {recordCount}");
                 return recordCount;
             }
             finally { _rwl.ExitReadLock(); }
@@ -120,7 +126,7 @@ namespace NovaPointLibrary.Core.SQLite
         internal int GetMaxValue(ILogger logger, Type type, string columnName)
         {
             string countRecordsQuery = $"SELECT MAX({columnName}) FROM {type.Name};";
-            logger.Info(GetType().Name, countRecordsQuery);
+            logger.Debug(GetType().Name, countRecordsQuery);
 
             _rwl.TryEnterReadLock(rwlMillisecondsTimeout);
             try
@@ -131,7 +137,7 @@ namespace NovaPointLibrary.Core.SQLite
 
                 int maxValue = connection.ExecuteScalar<int>(countRecordsQuery);
 
-                logger.Info(GetType().Name, $"Max Value {maxValue}");
+                logger.Debug(GetType().Name, $"Max Value {maxValue}");
                 return maxValue;
             }
             finally { _rwl.ExitReadLock(); }
@@ -140,7 +146,7 @@ namespace NovaPointLibrary.Core.SQLite
         internal int GetMinValue(ILogger logger, Type type, string columnName)
         {
             string countRecordsQuery = $"SELECT MIN({columnName}) FROM {type.Name};";
-            logger.Info(GetType().Name, countRecordsQuery);
+            logger.Debug(GetType().Name, countRecordsQuery);
 
             _rwl.TryEnterReadLock(rwlMillisecondsTimeout);
             try
@@ -151,7 +157,7 @@ namespace NovaPointLibrary.Core.SQLite
 
                 int minValue = connection.ExecuteScalar<int>(countRecordsQuery);
 
-                logger.Info(GetType().Name, $"Min Value {minValue}");
+                logger.Debug(GetType().Name, $"Min Value {minValue}");
                 return minValue;
             }
             finally { _rwl.ExitReadLock(); }
@@ -159,7 +165,7 @@ namespace NovaPointLibrary.Core.SQLite
 
         internal IEnumerable<T> GetRecords<T>(ILogger logger, string query)
         {
-            logger.Info(GetType().Name, query);
+            logger.Debug(GetType().Name, query);
 
             _rwl.TryEnterReadLock(rwlMillisecondsTimeout);
             try
