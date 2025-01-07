@@ -5,7 +5,6 @@ using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Core.SQLite;
-using System.Diagnostics;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -226,15 +225,16 @@ namespace NovaPointLibrary.Solutions.Automation
             for (int depth = tableFloor; depth <= deepest; depth++)
             {
                 int batchCount = 0;
-                var batch = GetBatch(sql, depth, batchCount);
+                _logger.Info(GetType().Name, $"Processing depth {depth}");
 
-                while (batch.Any())
+                IEnumerable<RESTCopyMoveFileFolder> batch;
+                do
                 {
-                    _logger.Info(GetType().Name, $"Processing depth {depth}");
+                    batch = GetBatch(sql, depth, batchCount);
                     await CopyMoveDepthBatchListItemAsync(batch, progress);
                     batchCount++;
-                    batch = GetBatch(sql, depth, batchCount);
-                }
+
+                } while (batch.Any());
             }
         }
 
