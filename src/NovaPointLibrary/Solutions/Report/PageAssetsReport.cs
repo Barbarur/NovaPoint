@@ -181,7 +181,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(ISolutionRecord record)
         {
-            _logger.RecordSql(record);
+            _logger.WriteRecord(record);
         }
 
     }

@@ -1,6 +1,7 @@
 ﻿using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Core.SQLite;
 using NovaPointLibrary.Solutions;
+using PnP.Framework.Diagnostics;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
@@ -11,77 +12,59 @@ namespace NovaPointLibrary.Core.Logging
 {
     internal class LoggerSolution : ILogger
     {
-        public Action<LogInfo> _uiAddLog {  get; init; }
+        public Action<LogInfo> UiAddLog {  get; init; }
 
         private readonly string _threadCode = "0";
         private int _childThreadCounter = 0;
 
         private static readonly SemaphoreSlim _semaphoreThreadLogger = new(1, 1);
 
-        private readonly string _txtPath;
-        private readonly string _csvPath;
-        private readonly string _errorPath;
+        private readonly List<SolutionLog> _cachedKeyValues = new();
+        private readonly List<SolutionLog> _cachedLogs = new();
 
-        private readonly Stopwatch SW = new();
-
-        static readonly ReaderWriterLockSlim txtRWL = new();
-        static readonly ReaderWriterLockSlim csvRWL = new();
-        static readonly ReaderWriterLockSlim errorRWL = new();
-
-        private readonly List<string> _cachedKeyValues = new();
-        private readonly List<string> _cachedLogs = new();
-
+        private readonly string _solutionName;
         private readonly string _solutionFolderPath;
         private readonly string _solutionFileName;
 
         private  Dictionary<Type, string>? _solutionReports = null;
-        private readonly SqliteHandler _sql;
+        private readonly SqliteHandler _sql = SqliteHandler.GetCacheHandler();
+
+        private readonly Stopwatch SW = new();
+
+        private readonly string _txtPath;
+        static readonly ReaderWriterLockSlim txtRWL = new();
+
+
+        // TO RETIRE
+        private readonly string _csvPath;
+        static readonly ReaderWriterLockSlim csvRWL = new();
 
         internal LoggerSolution(Action<LogInfo> uiAddLog, string solutionName, ISolutionParameters parameters)
         {
-            _uiAddLog = uiAddLog;
+            UiAddLog = uiAddLog;
+            _solutionName = solutionName;
 
             string userDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            _solutionFolderPath = Path.Combine(userDocumentsFolder, "NovaPoint", solutionName, DateTime.UtcNow.ToString("yyMMddHHmmss"));
+            _solutionFolderPath = Path.Combine(userDocumentsFolder, "NovaPoint", _solutionName, DateTime.UtcNow.ToString("yyMMddHHmmss"));
             Directory.CreateDirectory(_solutionFolderPath);
 
-            _solutionFileName = solutionName + "_" + DateTime.UtcNow.ToString("yyMMddHHmmss");
+            _solutionFileName = _solutionName + "_" + DateTime.UtcNow.ToString("yyMMddHHmmss");
+
             _txtPath = Path.Combine(_solutionFolderPath, _solutionFileName + "_Logs.txt");
             _csvPath = Path.Combine(_solutionFolderPath, _solutionFileName + "_Report.csv");
-            _errorPath = Path.Combine(_solutionFolderPath, _solutionFileName + "_errors.txt");
 
-            Info(GetType().Name, $"Logs: {_txtPath}");
-            Info(GetType().Name, $"Report: {_csvPath}");
-            _uiAddLog(LogInfo.FolderInfo(_solutionFolderPath));
+            Info(GetType().Name, $"Solution folder: {_solutionFolderPath}");
+            UiAddLog(LogInfo.FolderInfo(_solutionFolderPath));
 
-            string v = $"Version: v{VersionControl.GetVersion()}";
-            Info(GetType().Name, v);
-            _cachedKeyValues.Add(v);
+            SolutionLog logEntry = new("Info", _threadCode, GetType().Name, $"Version: v{VersionControl.GetVersion()}");
+            WriteLog(logEntry);
+            _cachedKeyValues.Add(logEntry);
 
             GetSolutionParameters(parameters);
-
-            _sql = SqliteHandler.GetCacheHandler();
 
             SW.Start();
 
             UI(GetType().Name, $"Solution has started, please wait to the end");
-        }
-
- 
-        public async Task<ILogger> GetSubThreadLogger()
-        {
-            LoggerThread childThread;
-            await _semaphoreThreadLogger.WaitAsync();
-            try
-            {
-                childThread = new(this, _threadCode + "." + _childThreadCounter);
-                _childThreadCounter++;
-            }
-            finally
-            {
-                _semaphoreThreadLogger.Release();
-            }
-            return childThread;
         }
 
         internal void AddSolutionReports(Dictionary<Type, string> dicSolutions)
@@ -91,12 +74,22 @@ namespace NovaPointLibrary.Core.Logging
             ResetCache();
         }
 
-        private string FormatLogEntry(string classMethod, string log)
+        public async Task<ILogger> GetSubThreadLogger()
         {
-            return $"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss} [{_threadCode}] - [{classMethod}] - {log}";
+            await _semaphoreThreadLogger.WaitAsync();
+            try
+            {
+                LoggerThread childThread = new(this, _threadCode + "." + _childThreadCounter);
+                _childThreadCounter++;
+                return childThread;
+            }
+            finally
+            {
+                _semaphoreThreadLogger.Release();
+            }
         }
 
-        private void CacheLog(string log)
+        private void HistoryLog(SolutionLog log)
         {
             _cachedLogs.Add(log);
 
@@ -108,27 +101,25 @@ namespace NovaPointLibrary.Core.Logging
 
         public void Info(string classMethod, string log)
         {
-            string logEntry = FormatLogEntry(classMethod, log);
+            SolutionLog logEntry = new("Info", _threadCode, classMethod, log);
+            HistoryLog(logEntry);
 
-            CacheLog(logEntry);
-
-            WriteFile(new List<string>() { logEntry });
+            WriteLog(logEntry);
         }
 
         public void Debug(string classMethod, string log)
         {
-            string logEntry = FormatLogEntry(classMethod, log);
+            SolutionLog logEntry = new("Debug", _threadCode, classMethod, log);
+            HistoryLog(logEntry);
 
-            CacheLog(logEntry);
-
-            WriteFile(new List<string>() { logEntry });
+            WriteLog(logEntry);
         }
 
         public void UI(string classMethod, string log)
         {
             Info(classMethod, log);
 
-            _uiAddLog(LogInfo.TextNotification(log));
+            UiAddLog(LogInfo.TextNotification(log));
         }
 
         public void Progress(double progress)
@@ -137,133 +128,47 @@ namespace NovaPointLibrary.Core.Logging
 
             TimeSpan timeSpan = TimeSpan.FromMilliseconds((SW.Elapsed.TotalMilliseconds * 100 / progress - SW.Elapsed.TotalMilliseconds));
 
-            _uiAddLog(LogInfo.ProgressUpdate(progress, timeSpan));
+            UiAddLog(LogInfo.ProgressUpdate(progress, timeSpan));
         }
 
         public void Error(string classMethod, string type, string URL, Exception ex)
         {
-            Guid correlationID = Guid.NewGuid();
 
-            List<string> txtLogs = new();
-            List<string> errorLogs = new()
+            List<SolutionLog> infoLogs = new()
             {
-                string.Empty,
-                string.Empty,
-                string.Empty,
-                FormatLogEntry(classMethod, $"========== {correlationID} ==========")
+                new("Error", _threadCode, classMethod, $"Error processing {type} '{URL}'"),
+                new("Error", _threadCode, classMethod, $"Exception: {ex.Message}"),
+                new("Error", _threadCode, classMethod, $"Trace: {ex.StackTrace}"),
             };
 
-            errorLogs.AddRange(_cachedLogs);
+            WriteLog(infoLogs);
 
-            string logLine = FormatLogEntry(classMethod, $"Error processing {type} '{URL}'");
-            errorLogs.Add(logLine);
-            txtLogs.Add(logLine);
-
-            logLine = FormatLogEntry(classMethod, $"Correlation ID: {correlationID}");
-            errorLogs.Add(logLine);
-            txtLogs.Add(logLine);
-
-            logLine = FormatLogEntry(classMethod, $"Exception: {ex.Message}");
-            errorLogs.Add(logLine);
-            txtLogs.Add(logLine);
-
-
-            logLine = FormatLogEntry(classMethod, $"Trace: {ex.StackTrace}");
-            errorLogs.Add(logLine);
-            txtLogs.Add(logLine);
-
-            WriteFileError(errorLogs);
-            WriteFile(txtLogs);
-
-            _uiAddLog(LogInfo.ErrorNotification($"Error processing {type} '{URL}'."));
+            UiAddLog(LogInfo.ErrorNotification($"Error processing {type} '{URL}'."));
         }
 
-
-        
-
-        
-
-        public void WriteFile(List<string> logs)
+        private void WriteLog(List<SolutionLog> collRecord)
         {
+            foreach (var record in collRecord)
+            {
+                WriteLog(record);
+            }
+        }
+
+        public void WriteLog(SolutionLog log)
+        {
+            txtRWL.TryEnterWriteLock(3000);
             try
             {
-                txtRWL.TryEnterWriteLock(3000);
-                try
-                {
-                    var filestreamer = new FileStream(_txtPath, FileMode.Append, FileAccess.Write);
-                    using StreamWriter streamWriter = new(filestreamer);
+                var fileStreamer = new FileStream(_txtPath, FileMode.Append, FileAccess.Write);
+                using StreamWriter streamWriter = new(fileStreamer);
 
-                    foreach (var log in logs)
-                    {
-                        streamWriter.WriteLine(log);
-                    }
-                }
-                finally { txtRWL.ExitWriteLock(); }
+                streamWriter.WriteLine(log.GetLogEntry());
             }
-            catch (Exception ex)
-            {
-                ErrorWritingFile(logs , ex);
-            };
-        }
-
-        public void WriteFileError(List<string> errorLogs)
-        {
-            try
-            {
-                errorRWL.TryEnterWriteLock(3000);
-                try
-                {
-                    var fileStream = new FileStream(_errorPath, FileMode.Append, FileAccess.Write);
-                    using StreamWriter streamWriter = new(fileStream);
-
-                    var csvFileLenth = new System.IO.FileInfo(_errorPath).Length;
-                    if (csvFileLenth == 0)
-                    {
-                        foreach (var keyValue in _cachedKeyValues)
-                        {
-                            streamWriter.WriteLine(keyValue);
-                        }
-                    }
-
-                    foreach (var log in errorLogs)
-                    {
-                        streamWriter.WriteLine(log);
-                    }
-                }
-                finally
-                {
-                    errorRWL.ExitWriteLock();
-                }
-            }
-            catch (Exception ex)
-            {
-                _uiAddLog(LogInfo.TextNotification(ex.Message));
-            }
-        }
-
-        private void ErrorWritingFile(List<string> logs, Exception ex)
-        {
-            List<string> errorLogs = new()
-            {
-                string.Empty,
-                string.Empty,
-                string.Empty,
-                FormatLogEntry(GetType().Name, $"========== Error writting below lines =========="),
-            };
-
-            errorLogs.AddRange(logs);
-            errorLogs.Add(FormatLogEntry(GetType().Name, $"Exception: {ex.Message}"));
-            errorLogs.Add(FormatLogEntry(GetType().Name, $"Trace: {ex.StackTrace}"));
-
-            errorLogs.Add(string.Empty);
-            errorLogs.Add(string.Empty);
-            errorLogs.Add(string.Empty);
-
-            WriteFileError(errorLogs);
+            finally { txtRWL.ExitWriteLock(); }
         }
 
 
-
+        // RECORD PROPERTIES
         private void GetSolutionParameters(ISolutionParameters parameters)
         {
             LogProperty($"Solution parameters");
@@ -276,8 +181,8 @@ namespace NovaPointLibrary.Core.Logging
 
         private void GetProperties(ISolutionParameters parameters)
         {
-            Type solutiontype = parameters.GetType();
-            PropertyInfo[] collPropertyInfo = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            Type type = parameters.GetType();
+            PropertyInfo[] collPropertyInfo = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             foreach (var propertyInfo in collPropertyInfo)
             {
@@ -301,16 +206,18 @@ namespace NovaPointLibrary.Core.Logging
 
         private void LogProperty(string property)
         {
-            string logEntry = FormatLogEntry(GetType().Name, property);
+            SolutionLog logEntry = new("Info", _threadCode, GetType().Name, property);
             _cachedKeyValues.Add(logEntry);
 
-            WriteFile(new List<string>() { logEntry });
+
+            WriteLog(logEntry);
 
             // Keep for using during testing
             //_uiAddLog(LogInfo.TextNotification(property));
         }
 
 
+        // SOLUTION FINISH
         internal void SolutionFinish()
         {
             SolutionFinishNotice();
@@ -319,15 +226,18 @@ namespace NovaPointLibrary.Core.Logging
 
         internal void SolutionFinish(Exception ex)
         {
-            SolutionFinishNotice();
-            _uiAddLog(LogInfo.ErrorNotification(ex.Message));
+            Error(_solutionName, "Solution", _solutionName, ex);
+            UiAddLog(LogInfo.ErrorNotification($"Exception: {ex.Message}"));
+            UiAddLog(LogInfo.ErrorNotification($"StackTrace: {ex.StackTrace}"));
 
-            Info(GetType().Name, $"Exception: {ex.Message}");
-            Info(GetType().Name, $"Trace: {ex.StackTrace}");
+            SolutionFinishNotice();
+            UiAddLog(LogInfo.ErrorNotification($"COMPLETED: Solution has finished with errors!"));
         }
 
         private void SolutionFinishNotice()
         {
+            Info(GetType().Name, "Finishing solution");
+
             ExportAllReports();
 
             ClearCache();
@@ -336,9 +246,93 @@ namespace NovaPointLibrary.Core.Logging
             Progress(100);
         }
 
-        
 
 
+        // SQL MANAGEMENT
+        private void ResetCache()
+        {
+            if (_solutionReports == null) { return; }
+
+            foreach (var key in _solutionReports.Keys)
+            {
+                _sql.ResetTable(this, key);
+            }
+        }
+
+        internal void WriteRecord<T>(T record)
+        {
+            _sql.InsertValue(this, record);
+        }
+
+        private void ClearCache()
+        {
+            if (_solutionReports == null) { return; }
+
+            foreach (var key in _solutionReports.Keys)
+            {
+                _sql.DropTable(this, key.GetType());
+            }
+        }
+
+        private void ExportAllReports()
+        {
+            if (_solutionReports == null) { return; }
+
+            Info(GetType().Name, "Exporting all reports");
+
+            foreach (var entry in _solutionReports)
+            {
+                var type = entry.Key;
+                var reportName = entry.Value;
+
+                var method = typeof(LoggerSolution).GetMethod(nameof(ExportReportToCsv), BindingFlags.NonPublic | BindingFlags.Instance);
+                var genericMethod = method.MakeGenericMethod(type);
+                genericMethod.Invoke(this, new object[] { reportName });
+            }
+        }
+
+        private void ExportReportToCsv<ISolutionRecord>(string reportName)
+        {
+            Info(GetType().Name, $"Exporting report {reportName}");
+
+            string reportPath = Path.Combine(_solutionFolderPath, _solutionFileName + $"_{reportName}.csv");
+
+            foreach (var record in _sql.GetAllRecords<ISolutionRecord>(this))
+            {
+                Type solutionType = typeof(ISolutionRecord);
+                PropertyInfo[] properties = solutionType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+                StringBuilder sb = new();
+                using StreamWriter csv = new(new FileStream(reportPath, FileMode.Append, FileAccess.Write));
+                {
+                    var csvFileLenth = new System.IO.FileInfo(reportPath).Length;
+                    if (csvFileLenth == 0)
+                    {
+                        foreach (var propertyInfo in properties)
+                        {
+                            sb.Append($"\"{propertyInfo.Name}\",");
+                        }
+                        if (sb.Length > 0) { sb.Length--; }
+
+                        csv.WriteLine(sb.ToString());
+                        sb.Clear();
+                    }
+
+                    foreach (var propertyInfo in properties)
+                    {
+                        string s = $"{propertyInfo.GetValue(record)}";
+                        sb.Append($"\"{s.Replace("\"", "'")}\",");
+                    }
+                    if (sb.Length > 0) { sb.Length--; }
+                    string output = Regex.Replace(sb.ToString(), @"\r\n?|\n", "");
+
+                    csv.WriteLine(sb.ToString());
+                }
+            }
+        }
+
+
+        // TO RETIRE
         internal void DynamicCSV(dynamic o)
         {
             try
@@ -375,8 +369,7 @@ namespace NovaPointLibrary.Core.Logging
             }
             catch (Exception ex)
             {
-                string logEntry = FormatLogEntry(GetType().Name, "Error while writting CSV file");
-                ErrorWritingFile(new List<string>() { logEntry }, ex);
+                Error(GetType().Name, "Solution", _solutionName, ex);
             }
         }
 
@@ -421,94 +414,10 @@ namespace NovaPointLibrary.Core.Logging
             }
             catch (Exception ex)
             {
-                string logEntry = FormatLogEntry(GetType().Name, "Error while writting CSV file");
-                ErrorWritingFile(new List<string>() { logEntry }, ex);
+                Error(GetType().Name, "Solution", _solutionName, ex);
             }
         }
 
-        private void ResetCache()
-        {
-            if (_solutionReports == null) { return; }
-
-            foreach (var key in _solutionReports.Keys)
-            {
-                _sql.ResetTable(this, key);
-            }
-        }
-
-        internal void RecordSql(ISolutionRecord record)
-        {
-            _sql.InsertValue(this, record);
-        }
-
-        private void ExportAllReports()
-        {
-            if (_solutionReports == null) { return; }
-            foreach (var entry in _solutionReports)
-            {
-                var type = entry.Key;
-                var reportName = entry.Value;
-
-                var method = typeof(LoggerSolution).GetMethod(nameof(ExportReportToCsv), BindingFlags.NonPublic | BindingFlags.Instance);
-                var genericMethod = method.MakeGenericMethod(type);
-                genericMethod.Invoke(this, new object[] { reportName });
-            }
-        }
-
-        private void ExportReportToCsv<ISolutionRecord>(string reportName)
-        {
-            string reportPath = Path.Combine(_solutionFolderPath, _solutionFileName + $"_{reportName}.csv");
-
-            foreach (var record in _sql.GetAllRecords<ISolutionRecord>(this))
-            {
-                try
-                {
-                    Type solutiontype = typeof(ISolutionRecord);
-                    PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-                    StringBuilder sb = new();
-                    using StreamWriter csv = new(new FileStream(reportPath, FileMode.Append, FileAccess.Write));
-                    {
-                        var csvFileLenth = new System.IO.FileInfo(reportPath).Length;
-                        if (csvFileLenth == 0)
-                        {
-                            foreach (var propertyInfo in properties)
-                            {
-                                sb.Append($"\"{propertyInfo.Name}\",");
-                            }
-                            if (sb.Length > 0) { sb.Length--; }
-
-                            csv.WriteLine(sb.ToString());
-                            sb.Clear();
-                        }
-
-                        foreach (var propertyInfo in properties)
-                        {
-                            string s = $"{propertyInfo.GetValue(record)}";
-                            sb.Append($"\"{s.Replace("\"", "'")}\",");
-                        }
-                        if (sb.Length > 0) { sb.Length--; }
-                        string output = Regex.Replace(sb.ToString(), @"\r\n?|\n", "");
-
-                        csv.WriteLine(sb.ToString());
-                    }
-                }
-                catch (Exception ex)
-                {
-                    string logEntry = FormatLogEntry(GetType().Name, "Error while writting CSV file");
-                    ErrorWritingFile(new List<string>() { logEntry }, ex);
-                }
-            }
-        }
-
-        private void ClearCache()
-        {
-            if (_solutionReports == null) { return; }
-
-            foreach (var key in _solutionReports.Keys)
-            {
-                _sql.DropTable(this, key.GetType());
-            }
-        }
     }
+
 }
