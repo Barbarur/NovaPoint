@@ -32,7 +32,6 @@ namespace NovaPointWPF.Pages.Solutions
             {
                 if (Directory.Exists(value))
                 {
-                    FilesButton.IsEnabled = true;
                     _solutionFolder = value;
                 };
             }
@@ -112,6 +111,7 @@ namespace NovaPointWPF.Pages.Solutions
             BackButton.IsEnabled = false;
             RunButton.IsEnabled = false;
             CancelButton.IsEnabled = true;
+            FilesButton.IsEnabled = false;
 
 
             Timer timer = new(CountDown, null, 0, 1000);
@@ -128,7 +128,8 @@ namespace NovaPointWPF.Pages.Solutions
             }
             catch (Exception ex)
             {
-                UILog(LogInfo.ErrorNotification(ex.Message));
+                UILog(LogInfo.ErrorNotification($"Exception: {ex.Message}"));
+                UILog(LogInfo.ErrorNotification($"StackTrace: {ex.StackTrace}"));
             }
 
             timer.Dispose();
@@ -136,6 +137,7 @@ namespace NovaPointWPF.Pages.Solutions
             BackButton.IsEnabled = true;
             RunButton.IsEnabled = true;
             CancelButton.IsEnabled = false;
+            FilesButton.IsEnabled = true;
         }
 
         // Reference: https://learn.microsoft.com/en-us/answers/questions/1045656/wpf-usercontrol-run-button-click-async
