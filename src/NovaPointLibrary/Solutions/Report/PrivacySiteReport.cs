@@ -176,26 +176,19 @@ namespace NovaPointLibrary.Solutions.Report
 
     public class PrivacySiteReportRecord : ISolutionRecord
     {
-        internal string Title { get; set; } = String.Empty;
+        internal string SiteTitle { get; set; } = String.Empty;
         internal string SiteUrl { get; set; }
         internal string GroupId { get; set; } = String.Empty;
-        internal string Template { get; set; } = String.Empty;
-        internal string IsSubsite { get; set; } = String.Empty;
-        internal string ConnectedToTeams { get; set; } = String.Empty;
-        internal string TeamsChannel { get; set; } = String.Empty;
-
         internal string Privacy { get; set; } = String.Empty;
 
         internal string Remarks { get; set; } = String.Empty;
 
         internal PrivacySiteReportRecord(SiteProperties oSiteCollection)
         {
-            Title = oSiteCollection.Title;
+            SiteTitle = oSiteCollection.Title;
             SiteUrl = oSiteCollection.Url;
             GroupId = oSiteCollection.GroupId.ToString();
-            Template = SPOWeb.GetSiteTemplateName(oSiteCollection.Template, oSiteCollection.IsTeamsConnected);
-            IsSubsite = "False";
-            ConnectedToTeams = oSiteCollection.IsTeamsConnected.ToString();
+
             if (oSiteCollection.IsTeamsChannelConnected)
             {
                 Remarks = "This is a Teams Channel. Privacy setting is a property of the MS365 group linked to a Site Collection, not applicable to Teams Channels.";
@@ -204,11 +197,9 @@ namespace NovaPointLibrary.Solutions.Report
 
         internal PrivacySiteReportRecord(Web web)
         {
-            Title = web.Title;
+            SiteTitle = web.Title;
             SiteUrl = web.Url;
             GroupId = "NA";
-            Template = SPOWeb.GetSiteTemplateName(web.WebTemplate, false);
-            IsSubsite = web.IsSubSite().ToString();
 
             Remarks = "This is a subsite. Privacy setting is a property of the MS365 group linked to a Site Collection, not applicable to subsites.";
         }

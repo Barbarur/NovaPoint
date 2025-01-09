@@ -253,12 +253,12 @@ namespace NovaPointLibrary.Solutions.Report
 
     internal class SiteReportRecord : ISolutionRecord
     {
-        internal string Title { get; set; } = String.Empty;
+        internal string SiteTitle { get; set; } = String.Empty;
         internal string SiteUrl { get; set; }
         internal string GroupId { get; set; } = String.Empty;
-        internal string Template { get; set; } = String.Empty;
+        internal string SiteTemplate { get; set; } = String.Empty;
         internal string IsSubsite { get; set; } = String.Empty;
-        internal string ConnectedtoTeams { get; set; } = String.Empty;
+        internal string ConnectedToTeams { get; set; } = String.Empty;
         internal string TeamsChannel { get; set; } = String.Empty;
 
         internal string StorageQuotaGB { get; set; } = String.Empty;
@@ -282,12 +282,12 @@ namespace NovaPointLibrary.Solutions.Report
 
         internal SiteReportRecord(SiteProperties oSiteCollection)
         {
-            Title = oSiteCollection.Title;
+            SiteTitle = oSiteCollection.Title;
             SiteUrl = oSiteCollection.Url;
             GroupId = oSiteCollection.GroupId.ToString();
-            Template = SPOWeb.GetSiteTemplateName(oSiteCollection.Template, oSiteCollection.IsTeamsConnected);
+            SiteTemplate = SPOWeb.GetSiteTemplateName(oSiteCollection.Template, oSiteCollection.IsTeamsConnected);
             IsSubsite = "False";
-            ConnectedtoTeams = oSiteCollection.IsTeamsConnected.ToString();
+            ConnectedToTeams = oSiteCollection.IsTeamsConnected.ToString();
             if(!oSiteCollection.TeamsChannelType.ToString().Contains("None", StringComparison.OrdinalIgnoreCase))
             {
                 TeamsChannel = oSiteCollection.TeamsChannelType.ToString();
@@ -305,10 +305,10 @@ namespace NovaPointLibrary.Solutions.Report
 
         internal SiteReportRecord(Web web, double storageUsedGb)
         {
-            Title = web.Title;
+            SiteTitle = web.Title;
             SiteUrl = web.Url;
             GroupId = web.Id.ToString();
-            Template = SPOWeb.GetSiteTemplateName(web.WebTemplate, false);
+            SiteTemplate = SPOWeb.GetSiteTemplateName(web.WebTemplate, false);
             IsSubsite = web.IsSubSite().ToString();
 
             StorageUsedGB = storageUsedGb.ToString();
