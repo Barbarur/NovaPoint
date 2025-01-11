@@ -1,73 +1,62 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.SharePoint.Client;
+using Newtonsoft.Json;
+using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Commands.Utilities;
-using System.Text;
-using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Solutions;
-using PnP.Framework.Utilities;
-using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Core.Logging;
 
-namespace NovaPointLibrary.Commands.SharePoint.Permision
+
+namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
 {
-    internal class SPOSharingLinksREST
+    internal class SpoSharingLinksRest
     {
         private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly Dictionary<string, KnownItemGroups> _dKnownSharingInfo = new();
 
-        internal SPOSharingLinksREST(LoggerSolution logger, Authentication.AppInfo appInfo)
+        internal SpoSharingLinksRest(LoggerSolution logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
         }
 
-        internal async Task<SPOSharingLinksRecord> GetFromPrincipalAsync(string siteUrl, Microsoft.SharePoint.Client.Principal principal)
+        internal async Task<SpoSharingLinksRecord> GetFromPrincipalAsync(string siteUrl, Microsoft.SharePoint.Client.Principal principal)
         {
-            _appInfo.IsCancelled();
-
-            _logger.Info(GetType().Name, $"Processing sharing link {principal.Title} ({principal.Id})");
-
-            SPOSharingLinksRecord record = new(siteUrl);
-
+            SpoSharingLinksRecord record;
             try
             {
                 Group oGroup = await new SPOSiteGroupCSOM(_logger, _appInfo).GetAsync(siteUrl, principal.Id);
-                record.AddGroup(oGroup);
-                await GetSharingLinkInfoAsync(record);
+                record = await GetFromGroupAsync(siteUrl, oGroup);
             }
             catch (Exception ex)
             {
-                _logger.Error(GetType().Name, "SharingLink", record.GroupTitle, ex);
-                record.Remarks = ex.Message;
+                _logger.Error(GetType().Name, "SharingLink", principal.Title, ex);
+                record = new(siteUrl, ex);
             }
             return record;
         }
 
-        internal async Task<SPOSharingLinksRecord> GetFromGroupAsync(string siteUrl, Group oGroup)
+        internal async Task<SpoSharingLinksRecord> GetFromGroupAsync(string siteUrl, Group oGroup)
         {
-            _appInfo.IsCancelled();
-
-            _logger.Info(GetType().Name, $"Processing sharing link {oGroup.Title} ({oGroup.Id}) - {oGroup.Description}");
-
-            SPOSharingLinksRecord record = new(siteUrl);
-
+            SpoSharingLinksRecord record;
             try
             {
-                record.AddGroup(oGroup);
+                record = new(siteUrl, oGroup);
                 await GetSharingLinkInfoAsync(record);
             }
             catch (Exception ex)
             {
-                _logger.Error(GetType().Name, "SharingLink", record.GroupTitle, ex);
-                record.Remarks = ex.Message;
+                _logger.Error(GetType().Name, "SharingLink", oGroup.Title, ex);
+                record = new(siteUrl, ex);
             }
             return record;
         }
 
-        private async Task GetSharingLinkInfoAsync(SPOSharingLinksRecord reportRecord)
+        private async Task GetSharingLinkInfoAsync(SpoSharingLinksRecord reportRecord)
         {
             _appInfo.IsCancelled();
+
+            _logger.Info(GetType().Name, $"Processing sharing link {reportRecord.GroupTitle} '{reportRecord.GroupId}' - {reportRecord.GroupDescription}");
 
             _dKnownSharingInfo.TryGetValue(reportRecord.ItemUniqueId, out KnownItemGroups? knownGroups);
 
@@ -75,11 +64,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             if (knownGroups == null)
             {
                 var searchByIdResults = await SearchItemUniqueIdAsync(reportRecord.SiteUrl, reportRecord.ItemUniqueId);
-                var idMatchingResult = searchByIdResults.PrimaryQueryResult.RelevantResults.Table.Rows.Find(row => row.Cells.Exists(cell => cell.Key == "UniqueId" && cell.Value.Contains(reportRecord.ItemUniqueId)));
-                if (idMatchingResult != null)
+                var itemMatchingIdResult = searchByIdResults.PrimaryQueryResult.RelevantResults.Table.Rows.Find(row => row.Cells.Exists(cell => cell.Key == "UniqueId" && cell.Value.Contains(reportRecord.ItemUniqueId)));
+                if (itemMatchingIdResult != null)
                 {
                     string webId = string.Empty;
-                    foreach (var cell in idMatchingResult.Cells)
+                    foreach (var cell in itemMatchingIdResult.Cells)
                     {
                         if (cell.Key == "ListID")
                         {
@@ -114,10 +103,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                     throw new($"Item with ItemUniqueId '{reportRecord.ItemUniqueId}' not found.");
                 }
 
-                _dKnownSharingInfo.Add(reportRecord.ItemUniqueId, new(reportRecord.ItemUniqueId, reportRecord.ItemID, reportRecord.ListId, reportRecord.ItemPath, restSharingInfo));
+                _dKnownSharingInfo.Add(reportRecord.ItemUniqueId, new(reportRecord, restSharingInfo));
             }
             else
             {
+                reportRecord.SiteTitle = knownGroups.SiteTitle;
                 reportRecord.ListId = knownGroups.ListId;
                 reportRecord.ItemID = knownGroups.ItemID;
                 reportRecord.ItemPath = knownGroups.ItemPath;
@@ -132,6 +122,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 throw new("Sharing link Id not found on the Item sharing information.");
             }
 
+            // Change to get only the first one, as it is expected to get only one result
             foreach (var oLink in collLinks)
             {
                 try
@@ -175,125 +166,22 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
 
         }
 
-        public class SPOSharingLinksRecord : ISolutionRecord
-        {
-            internal string SiteTitle { get; set; } = String.Empty;
-            internal string SiteUrl { get; set; }
 
-            internal Guid ListId = Guid.Empty;
-            internal int ItemID { get; set; } = -1;
-            internal string ItemPath { get; set; } = String.Empty;
-
-
-            internal string SharingLink { get; set; } = String.Empty;
-            internal string SharingLinkRequiresPassword { get; set; } = String.Empty;
-            internal string SharingLinkExpiration { get; set; } = String.Empty;
-
-
-            internal string SharingLinkIsActive { get; set; } = String.Empty;
-            internal string SharingLinkCreated { get; set; } = String.Empty;
-            internal string SharingLinkCreatedBy { get; set; } = String.Empty;
-            internal string SharingLinkModified { get; set; } = String.Empty;
-            internal string SharingLinkModifiedBy { get; set; } = String.Empty;
-            internal string SharingLinkUrl { get; set; } = String.Empty;
-
-
-            internal string GroupId { get; set; } = String.Empty;
-            internal string GroupTitle { get; set; } = String.Empty;
-            internal string ItemUniqueId = String.Empty;
-            internal string ShareId = String.Empty;
-            internal string Users { get; set; } = String.Empty;
-
-            internal string Remarks { get; set; } = String.Empty;
-
-            internal SPOSharingLinksRecord(string siteUrl)
-            {
-                SiteUrl = siteUrl;
-            }
-
-            internal void AddGroup(Group oGroup)
-            {
-                GroupId = oGroup.Id.ToString();
-                GroupTitle = oGroup.Title;
-
-                var titleComponents = oGroup.Title.Split(".");
-                ItemUniqueId = titleComponents[1];
-                ShareId = titleComponents[3];
-
-                StringBuilder sbUsers = new();
-                foreach (var user in oGroup.Users)
-                {
-                    sbUsers.Append($"{user.Email} ");
-                }
-                Users = sbUsers.ToString();
-
-                int i = oGroup.Description.IndexOf("'") + 1;
-                int l = oGroup.Description.Length - i - 1;
-                ItemPath = UrlUtility.Combine(SiteUrl, oGroup.Description.Substring(i, l));
-            }
-
-            internal void AddLink(Link oLink)
-            {
-                if (oLink.linkDetails.AllowsAnonymousAccess)
-                {
-                    SharingLink = "Anyone with the link";
-                    Users = "Anyone with the link";
-                }
-                else if (!oLink.linkDetails.RestrictedShareMembership)
-                {
-                    SharingLink = "People in your organization with the link";
-                    Users = "People in your organization with the link";
-                }
-                else
-                {
-                    SharingLink = "Specific People with the link";
-                }
-
-                if (oLink.linkDetails.IsEditLink)
-                {
-                    SharingLink += " can edit";
-                }
-                else if (oLink.linkDetails.IsReviewLink)
-                {
-                    SharingLink += " can review";
-                }
-                else if (oLink.linkDetails.BlocksDownload)
-                {
-                    SharingLink += " can view but can't download";
-                }
-                else
-                {
-                    SharingLink += " can view";
-                }
-
-                SharingLinkRequiresPassword = oLink.linkDetails.RequiresPassword.ToString();
-                SharingLinkExpiration = oLink.linkDetails.Expiration.ToString();
-
-                SharingLinkIsActive = oLink.linkDetails.IsActive.ToString();
-
-                SharingLinkCreated = oLink.linkDetails.Created;
-                SharingLinkCreatedBy = oLink.linkDetails.CreatedBy.email;
-                SharingLinkModified = oLink.linkDetails.LastModified;
-                SharingLinkModifiedBy = oLink.linkDetails.LastModifiedBy.email;
-                SharingLinkUrl = oLink.linkDetails.Url;
-            }
-
-        }
 
         internal class KnownItemGroups
         {
-            internal string ItemUniqueId;
+            internal string SiteTitle;
             internal Guid ListId;
             internal int ItemID;
             internal string ItemPath;
             internal RESTSharingInformation SharingInformation;
 
-            internal KnownItemGroups(string itemUniqueId, int itemID, Guid listId, string itemPath, RESTSharingInformation rest)
+            internal KnownItemGroups(SpoSharingLinksRecord reportRecord, RESTSharingInformation rest)
             {
-                ItemUniqueId = itemUniqueId;
-                ItemID = itemID;
-                ListId = listId;
-                ItemPath = itemPath;
+                SiteTitle = reportRecord.SiteTitle;
+                ListId = reportRecord.ListId;
+                ItemID = reportRecord.ItemID;
+                ItemPath = reportRecord.ItemPath;
                 SharingInformation = rest;
             }
 

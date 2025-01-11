@@ -1,8 +1,7 @@
-﻿using NovaPointLibrary.Commands.SharePoint.Permision;
+﻿using NovaPointLibrary.Commands.SharePoint.SharingLinks;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Core.Logging;
-using static NovaPointLibrary.Commands.SharePoint.Permision.SPOSharingLinksREST;
 
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -52,8 +51,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 
                 if (siteRecord.Ex != null)
                 {
-                    SPOSharingLinksRecord record = new(siteRecord.SiteUrl);
-                    record.Remarks = siteRecord.Ex.Message;
+                    SpoSharingLinksRecord record = new(siteRecord.SiteUrl, siteRecord.Ex);
                     RecordCSV(record);
                     continue;
                 }
@@ -65,8 +63,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 catch (Exception ex)
                 {
                     _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
-                    SPOSharingLinksRecord record = new(siteRecord.SiteUrl);
-                    record.Remarks = ex.Message;
+                    SpoSharingLinksRecord record = new(siteRecord.SiteUrl, ex);
                     RecordCSV(record);
                 }
 
@@ -79,33 +76,27 @@ namespace NovaPointLibrary.Solutions.Automation
 
             var collGroups = await new SPOSiteGroupCSOM(_logger, _appInfo).GetSharingLinksAsync(siteRecord.SiteUrl);
 
-            SPOSharingLinksREST restSharingLinks = new(_logger, _appInfo);
-            ProgressTracker progress = new(siteRecord.Progress, collGroups.Count());
+            SpoSharingLinksRest restSharingLinks = new(_logger, _appInfo);
+            ProgressTracker progress = new(siteRecord.Progress, collGroups.Count);
             foreach (var oGroup in collGroups)
             {
                 var record = await restSharingLinks.GetFromGroupAsync(siteRecord.SiteUrl, oGroup);
 
-                try
+                if (_param.SharingLinks.MatchFilters(record))
                 {
-                    if (_param.RemoveAll || record.SharingLinkCreatedBy.Equals(_param.Createdby, StringComparison.OrdinalIgnoreCase))
+                    try
                     {
-                        if (!_param.ReportMode)
-                        {
-                            await new SPOSiteGroupCSOM(_logger, _appInfo).RemoveAsync(siteRecord.SiteUrl, oGroup);
-                        }
+                        await new SPOSiteGroupCSOM(_logger, _appInfo).RemoveAsync(siteRecord.SiteUrl, oGroup);
+                        record.Remarks = "Sharing Link deleted";
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        continue;
+                        record.Remarks = ex.Message;
                     }
-
-                    record.Remarks = "Sharing Link deleted";
-                    RecordCSV(record);
-                }
-                catch (Exception ex)
-                {
-                    record.Remarks = ex.Message;
-                    RecordCSV(record);
+                    finally
+                    {
+                        RecordCSV(record);
+                    }
                 }
 
                 progress.ProgressUpdateReport();
@@ -113,17 +104,17 @@ namespace NovaPointLibrary.Solutions.Automation
 
         }
 
-        private void RecordCSV(SPOSharingLinksRecord record)
+        private void RecordCSV(SpoSharingLinksRecord record)
         {
             _logger.RecordCSV(record);
         }
     }
 
+
     public class RemoveSharingLinksAutoParameters : ISolutionParameters
     {
-        public bool ReportMode { get; set; }
-        public bool RemoveAll { get; set; }
-        public string Createdby { get; set; }
+        public SpoSharingLinksFilter SharingLinks { get; init; }
+
         internal SPOAdminAccessParameters AdminAccess;
         internal SPOTenantSiteUrlsParameters SiteParam;
         public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
@@ -133,11 +124,9 @@ namespace NovaPointLibrary.Solutions.Automation
                 return new(AdminAccess, SiteParam);
             }
         }
-        public RemoveSharingLinksAutoParameters(bool reportMode, bool removeAll, string createdby, SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam)
+        public RemoveSharingLinksAutoParameters(SpoSharingLinksFilter sharingLinks, SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam)
         {
-            ReportMode = reportMode;
-            RemoveAll = removeAll;
-            Createdby = createdby;
+            SharingLinks = sharingLinks;
             AdminAccess = adminAccess;
             SiteParam = siteParam;
         }

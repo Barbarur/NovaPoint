@@ -1,13 +1,12 @@
-﻿
-using Microsoft.SharePoint.Client;
+﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.AzureAD;
 using NovaPointLibrary.Commands.SharePoint.Permision.Utilities;
+using NovaPointLibrary.Commands.SharePoint.SharingLinks;
 using NovaPointLibrary.Commands.SharePoint.User;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Logging;
 using System.Data;
 using System.Text;
-using static NovaPointLibrary.Commands.SharePoint.Permision.SPOSharingLinksREST;
 
 namespace NovaPointLibrary.Commands.SharePoint.Permision
 {
@@ -16,7 +15,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly SPOKnownRoleAssignmentGroups _knownGroups;
-        private readonly SPOSharingLinksREST _restSharingLinks;
+        private readonly SpoSharingLinksRest _restSharingLinks;
 
 
         internal SPORoleAssignmentUsersCSOM(
@@ -27,7 +26,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             _logger = logger;
             _appInfo = appInfo;
             _knownGroups = knownGroups;
-            _restSharingLinks = new SPOSharingLinksREST(_logger, _appInfo);
+            _restSharingLinks = new SpoSharingLinksRest(_logger, _appInfo);
         }
 
 
@@ -186,7 +185,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         {
             _appInfo.IsCancelled();
 
-            SPOSharingLinksRecord recordSharingLink = await _restSharingLinks.GetFromPrincipalAsync(siteUrl, spGroup);
+            SpoSharingLinksRecord recordSharingLink = await _restSharingLinks.GetFromPrincipalAsync(siteUrl, spGroup);
 
             SPORoleAssignmentUserRecord record;
             if (string.IsNullOrWhiteSpace(recordSharingLink.Remarks))

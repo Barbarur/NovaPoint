@@ -1,21 +1,8 @@
-﻿using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Solutions.Automation;
-using NovaPointLibrary.Solutions;
+﻿using NovaPointLibrary.Solutions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using NovaPointLibrary.Solutions.Report;
 
 namespace NovaPointWPF.Pages.Solutions.Report
@@ -38,7 +25,7 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SharingLinksReportParameters parameters = new(AdminF.Parameters, SiteF.Parameters);
+            SharingLinksReportParameters parameters = new(LinkF.Parameters, AdminF.Parameters, SiteF.Parameters);
 
             await SharingLinksReport.RunAsync(parameters, uiLog, cancelTokenSource);
         }

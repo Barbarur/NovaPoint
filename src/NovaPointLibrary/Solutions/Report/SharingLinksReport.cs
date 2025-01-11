@@ -1,16 +1,15 @@
 ﻿using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.SharePoint.Permision;
+using NovaPointLibrary.Commands.SharePoint.SharingLinks;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Core.Logging;
-using static NovaPointLibrary.Commands.SharePoint.Permision.SPOSharingLinksREST;
 
 
 namespace NovaPointLibrary.Solutions.Report
 {
     public class SharingLinksReport
     {
-        public static readonly string s_SolutionName = "Report Sharing Links";
+        public static readonly string s_SolutionName = "Sharing Links report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-SharingLinksReport";
 
         private SharingLinksReportParameters _param;
@@ -27,6 +26,7 @@ namespace NovaPointLibrary.Solutions.Report
         public static async Task RunAsync(SharingLinksReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
             LoggerSolution logger = new(uiAddLog, "SharingLinksReport", parameters);
+
             try
             {
                 Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
@@ -52,8 +52,7 @@ namespace NovaPointLibrary.Solutions.Report
 
                 if (siteRecord.Ex != null)
                 {
-                    SPOSharingLinksRecord record = new(siteRecord.SiteUrl);
-                    record.Remarks = siteRecord.Ex.Message;
+                    SpoSharingLinksRecord record = new(siteRecord.SiteUrl, siteRecord.Ex);
                     RecordCSV(record);
                     continue;
                 }
@@ -65,8 +64,7 @@ namespace NovaPointLibrary.Solutions.Report
                 catch (Exception ex)
                 {
                     _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
-                    SPOSharingLinksRecord record = new(siteRecord.SiteUrl);
-                    record.Remarks = ex.Message;
+                    SpoSharingLinksRecord record = new(siteRecord.SiteUrl, ex);
                     RecordCSV(record);
                 }
             }
@@ -78,19 +76,22 @@ namespace NovaPointLibrary.Solutions.Report
 
             var collGroups = await new SPOSiteGroupCSOM(_logger, _appInfo).GetSharingLinksAsync(siteRecord.SiteUrl);
 
-            SPOSharingLinksREST restSharingLinks = new(_logger, _appInfo);
+            SpoSharingLinksRest restSharingLinks = new(_logger, _appInfo);
             ProgressTracker groupProgress = new(siteRecord.Progress, collGroups.Count);
             foreach (Group oGroup in collGroups)
             {
                 var record = await restSharingLinks.GetFromGroupAsync(siteRecord.SiteUrl, oGroup);
-                RecordCSV(record);
+                if (_param.SharingLinks.MatchFilters(record))
+                {
+                    RecordCSV(record);
+                }
 
                 groupProgress.ProgressUpdateReport();
             }
 
         }
 
-        private void RecordCSV(SPOSharingLinksRecord record)
+        private void RecordCSV(SpoSharingLinksRecord record)
         {
             _logger.RecordCSV(record);
         }
@@ -99,6 +100,8 @@ namespace NovaPointLibrary.Solutions.Report
 
     public class SharingLinksReportParameters : ISolutionParameters
     {
+        public SpoSharingLinksFilter SharingLinks { get; init; }
+
         internal readonly SPOAdminAccessParameters AdminAccess;
         internal readonly SPOTenantSiteUrlsParameters SiteParam;
         public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
@@ -108,8 +111,9 @@ namespace NovaPointLibrary.Solutions.Report
                 return new(AdminAccess, SiteParam);
             }
         }
-        public SharingLinksReportParameters(SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam)
+        public SharingLinksReportParameters(SpoSharingLinksFilter sharingLinks, SPOAdminAccessParameters adminAccess, SPOTenantSiteUrlsParameters siteParam)
         {
+            SharingLinks = sharingLinks;
             AdminAccess = adminAccess;
             SiteParam = siteParam;
         }

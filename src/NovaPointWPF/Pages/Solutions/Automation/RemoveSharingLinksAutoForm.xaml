@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
-      d:DesignHeight="900" d:DesignWidth="800"
+      d:DesignHeight="1200" d:DesignWidth="800"
       Title="RemoveSharingLinksAutoForm">
 
     <Grid Margin="0,0,0,16">
@@ -15,57 +15,8 @@
             <designmaterial:FormHeader
                 x:Name="SolutionHeader"/>
 
-            <designmaterial:ReportModeForm
-                x:Name="ModeF"/>
-            
-            <TextBlock
-                Style="{DynamicResource TextBlockBodyStrong}"
-                Text="Sharing links to delete"/>
-
-            <Grid Style="{DynamicResource SolutionMenuGrid}">
-
-                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
-
-                    <StackPanel>
-
-                        <StackPanel
-                            Orientation="Horizontal">
-
-                            <RadioButton
-                                Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Remove all"
-                                IsChecked="{Binding RemoveAll, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                                Margin="0,0,8,0"/>
-
-                            <RadioButton
-                                Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Remove created by"
-                                IsChecked="False"/>
-
-                        </StackPanel>
-
-                        <StackPanel
-                            x:Name="CreatedByPanel"
-                            Visibility="Collapsed"
-                            Margin="0,16,0,0">
-
-                            <TextBlock
-                                Style="{DynamicResource TextBlockBody}"
-                                Text="User email who created the Sharing links"/>
-
-                            <TextBox
-                                x:Name="CreatedByTextBox"
-                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                                Text="{Binding Createdby, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                                Margin="0,8,0,0"/>
-
-                        </StackPanel>
-
-                    </StackPanel>
-
-                </Border>
-
-            </Grid>
+            <designmaterial:SharingLinksFilterForm
+                x:Name="LinkF"/>
 
             <designmaterial:AdminForm
                 x:Name="AdminF"/>
