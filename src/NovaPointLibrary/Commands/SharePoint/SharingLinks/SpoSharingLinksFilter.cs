@@ -1,4 +1,5 @@
-﻿using NovaPointLibrary.Solutions;
+﻿using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Solutions;
 
 
 namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
@@ -14,7 +15,12 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
         public bool IncludeCanNotDownload { get; set; } = false;
         public bool IncludeCanView { get; set; } = false;
 
-        public string FilterCreatedBy { get; set; } = string.Empty;
+        public string _filterCreatedBy = string.Empty;
+        public string FilterCreatedBy
+        {
+            get { return _filterCreatedBy; }
+            set { _filterCreatedBy = value.Trim(); }
+        }
 
         internal bool MatchFilters(SpoSharingLinksRecord link)
         {
