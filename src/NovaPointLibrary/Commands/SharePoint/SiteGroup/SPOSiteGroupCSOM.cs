@@ -25,6 +25,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
             var groups = clientContext.LoadQuery(clientContext.Web.SiteGroups.IncludeWithDefaultProperties(g => g.Users, g => g.Title, g => g.OwnerTitle, g => g.Owner.LoginName, g => g.LoginName));
             clientContext.ExecuteQueryRetry();
 
+            _logger.Info(GetType().Name, $"Got {groups.Count()} groups");
             return groups;
         }
 
@@ -41,7 +42,6 @@ namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
             clientContext.ExecuteQueryRetry();
 
             return group;
-
         }
 
         internal async Task<List<Group>> GetSharingLinksAsync(string siteUrl)
@@ -60,6 +60,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
                 }
             }
 
+            _logger.Info(GetType().Name, $"Got {collSharingLinks.Count} sharing links");
             return collSharingLinks;
         }
 
