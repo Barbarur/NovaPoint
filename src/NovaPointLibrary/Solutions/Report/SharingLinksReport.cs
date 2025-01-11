@@ -80,6 +80,8 @@ namespace NovaPointLibrary.Solutions.Report
             ProgressTracker groupProgress = new(siteRecord.Progress, collGroups.Count);
             foreach (Group oGroup in collGroups)
             {
+                _appInfo.IsCancelled();
+
                 var record = await restSharingLinks.GetFromGroupAsync(siteRecord.SiteUrl, oGroup);
                 if (_param.SharingLinks.MatchFilters(record))
                 {
