@@ -15,11 +15,21 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
         public bool IncludeCanNotDownload { get; set; } = false;
         public bool IncludeCanView { get; set; } = false;
 
-        public string _filterCreatedBy = string.Empty;
+        private string _filterCreatedBy = string.Empty;
         public string FilterCreatedBy
         {
             get { return _filterCreatedBy; }
             set { _filterCreatedBy = value.Trim(); }
+        }
+
+        public int DaysOld { get; set; } = 0;
+
+        public void ParametersCheck()
+        {
+            if (DaysOld < 0)
+            {
+                throw new("Parameter 'Older than' should be 0 or above");
+            }
         }
 
         internal bool MatchFilters(SpoSharingLinksRecord link)
@@ -27,6 +37,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
             bool typeMatch = false;
             bool permissionMatch = false;
             bool authorMatch = false;
+            bool age = false;
 
             if (link.LinkDetailsAnonymous)
             {
@@ -67,7 +78,14 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
                 authorMatch = true;
             }
 
-            if (typeMatch && permissionMatch && authorMatch)
+            DateTime createdBeforeThan = DateTime.Today.AddDays(DaysOld * -1);
+            if (link.SharingLinkCreated <= createdBeforeThan)
+            {
+                age = true;
+            }
+
+
+            if (typeMatch && permissionMatch && authorMatch && age)
             {
                 return true;
             }

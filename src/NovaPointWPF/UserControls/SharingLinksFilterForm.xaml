@@ -87,24 +87,47 @@
                                 Margin=" 8, 0, 0, 0"/>
                         </StackPanel>
 
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}"
-                            Text="Additional filters"
-                            Margin="0,16,0,0"/>
-                        
-                        <ToggleButton
-                            Style="{DynamicResource ToggleButtonSolutionForm}"
-                            Content="Created By"
-                            IsChecked="{Binding EnableFilterCreatedBy, ElementName=root}"
-                            Margin="0,8,0,0"
-                            HorizontalAlignment="Left"/>
+                        <Grid HorizontalAlignment="Stretch" Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-                        <TextBox
-                            x:Name="CreayedByTextBox"
-                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                            Text="{Binding FilterCreatedBy, ElementName=root}"
-                            Margin="0,8,0,0"
-                            Visibility="Collapsed"/>
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Stretch">
+                                <TextBlock
+                                    Style="{DynamicResource TextBlockBody}">
+
+                                    <TextBlock.Inlines>
+                                        <Run Text="Created by (Optional)"/>
+                                        <Run FontStyle="Italic" Text="Leave it blank if no needed"/>
+                                    </TextBlock.Inlines>
+                                </TextBlock>
+
+                                <TextBox
+                                    x:Name="CreayedByTextBox"
+                                    Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                    Text="{Binding FilterCreatedBy, ElementName=root}"
+                                    Margin="0,8,0,0"/>
+
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="16,0,0,0">
+                                <TextBlock Style="{DynamicResource TextBlockBody}">
+
+                                    <TextBlock.Inlines>
+                                        <Run Text="Number of days old (Optional)"/>
+                                        <Run FontStyle="Italic" Text="Leave 0 if no needed"/>
+                                    </TextBlock.Inlines>
+                                </TextBlock>
+
+                                <TextBox
+                                    Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                    Text="{Binding DaysOld, ElementName=root}"
+                                    Margin="0,8,0,0"/>
+
+                            </StackPanel>
+
+                        </Grid>
 
                     </StackPanel>
 

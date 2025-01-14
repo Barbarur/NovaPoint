@@ -26,9 +26,9 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
 
 
         internal string SharingLinkIsActive { get; set; } = String.Empty;
-        internal string SharingLinkCreated { get; set; } = String.Empty;
+        internal DateTime SharingLinkCreated { get; set; } = DateTime.MinValue;
         internal string SharingLinkCreatedBy { get; set; } = String.Empty;
-        internal string SharingLinkModified { get; set; } = String.Empty;
+        internal DateTime SharingLinkModified { get; set; } = DateTime.MinValue;
         internal string SharingLinkModifiedBy { get; set; } = String.Empty;
         internal string SharingLinkUrl { get; set; } = String.Empty;
 
@@ -123,9 +123,9 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
 
             SharingLinkIsActive = oLink.linkDetails.IsActive.ToString();
 
-            SharingLinkCreated = oLink.linkDetails.Created;
+            SharingLinkCreated = DateTime.Parse(oLink.linkDetails.Created);
             SharingLinkCreatedBy = oLink.linkDetails.CreatedBy.email;
-            SharingLinkModified = oLink.linkDetails.LastModified;
+            SharingLinkModified = DateTime.Parse(oLink.linkDetails.LastModified);
             SharingLinkModifiedBy = oLink.linkDetails.LastModifiedBy.email;
             SharingLinkUrl = oLink.linkDetails.Url;
         }

@@ -147,26 +147,6 @@ namespace NovaPointWPF.UserControls
             }
         }
 
-        private bool _enableFilterCreatedBy = false;
-        public bool EnableFilterCreatedBy
-        {
-            get { return _enableFilterCreatedBy; }
-            set
-            {
-                _enableFilterCreatedBy = value;
-                OnPropertyChanged();
-                if (value)
-                {
-                    CreayedByTextBox.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    CreayedByTextBox.Visibility = Visibility.Collapsed;
-                    FilterCreatedBy = string.Empty;
-                }
-            }
-        }
-
         public string FilterCreatedBy
         {
             get { return Parameters.FilterCreatedBy; }
@@ -177,9 +157,21 @@ namespace NovaPointWPF.UserControls
             }
         }
 
+        public int DaysOld
+        {
+            get { return Parameters.DaysOld; }
+            set
+            {
+                Parameters.DaysOld = value;
+                OnPropertyChanged();
+            }
+        }
+
         public SharingLinksFilterForm()
         {
             InitializeComponent();
+
+            DataContext = this;
         }
         
         public event PropertyChangedEventHandler? PropertyChanged;
