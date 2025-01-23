@@ -17,7 +17,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             i => i.Id,
             i => i["FileRef"],
             i => i["FileLeafRef"],
-            i => i["Title"],
             i => i.FileSystemObjectType,
             i => i.ParentList.Title,
             i => i.ParentList.BaseType,
