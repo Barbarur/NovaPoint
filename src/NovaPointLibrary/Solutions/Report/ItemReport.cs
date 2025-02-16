@@ -35,6 +35,7 @@ namespace NovaPointLibrary.Solutions.Report
             f => f["FileLeafRef"],
             f => f["FileRef"],
             f => f["File_x0020_Size"],
+            f => f["UniqueId"],
             f => f["Modified"],
             f => f["SMTotalSize"],
             f => f.Versions,
@@ -53,6 +54,7 @@ namespace NovaPointLibrary.Solutions.Report
             i => i.FileSystemObjectType,
             i => i["FileLeafRef"],
             i => i["FileRef"],
+            f => f["UniqueId"],
             i => i["Modified"],
             i => i["SMTotalSize"],
             i => i["Title"],
@@ -144,6 +146,7 @@ namespace NovaPointLibrary.Solutions.Report
         internal string ListServerRelativeUrl { get; set; } = String.Empty;
 
         internal string ItemID { get; set; } = String.Empty;
+        internal Guid ItemUniqueID { get; set; } = Guid.Empty;
         internal string ItemTitle { get; set; } = String.Empty;
         internal string ItemPath { get; set; } = String.Empty;
         internal string ItemType { get; set; } = String.Empty;
@@ -179,6 +182,7 @@ namespace NovaPointLibrary.Solutions.Report
             if (tenantItemRecord.Item != null)
             {
                 ItemID = tenantItemRecord.Item.Id.ToString();
+                ItemUniqueID = (Guid)tenantItemRecord.Item["UniqueId"];
                 ItemPath = (string)tenantItemRecord.Item["FileRef"];
                 ItemType = tenantItemRecord.Item.FileSystemObjectType.ToString();
 
