@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Graph;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -338,7 +339,7 @@ namespace NovaPointLibrary.Commands.Utilities.RESTModel
         public bool Embeddable { get; set; }
         public string Expiration { get; set; }
         public bool HasExternalGuestInvitees { get; set; }
-        public List<object> Invitations { get; set; }
+        public List<Invitation> Invitations { get; set; }
         public bool IsActive { get; set; }
         public bool IsAddressBarLink { get; set; }
         public bool IsCreateOnlyLink { get; set; }
@@ -596,4 +597,44 @@ namespace NovaPointLibrary.Commands.Utilities.RESTModel
         public int disabledReason { get; set; }
         public bool enabled { get; set; }
     }
+
+    public class Invitation
+    {
+        public InvitedBy invitedBy { get; set; }
+        public DateTime invitedOn { get; set; }
+        public Invitee invitee { get; set; }
+    }
+
+    public class InvitedBy
+    {
+        public object directoryObjectId { get; set; }
+        public string email { get; set; }
+        public string expiration { get; set; }
+        public int id { get; set; }
+        public bool isActive { get; set; }
+        public bool isExternal { get; set; }
+        public object jobTitle { get; set; }
+        public string loginName { get; set; }
+        public string name { get; set; }
+        public int principalType { get; set; }
+        public object userId { get; set; }
+        public string userPrincipalName { get; set; }
+    }
+
+    public class Invitee
+    {
+        public object directoryObjectId { get; set; }
+        public string email { get; set; }
+        public object expiration { get; set; }
+        public int id { get; set; }
+        public bool isActive { get; set; }
+        public bool isExternal { get; set; }
+        public object jobTitle { get; set; }
+        public object loginName { get; set; }
+        public string name { get; set; }
+        public int principalType { get; set; }
+        public object userId { get; set; }
+        public object userPrincipalName { get; set; }
+    }
+
 }

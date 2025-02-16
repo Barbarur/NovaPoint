@@ -1,22 +1,21 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Solutions;
-using PnP.Framework.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+
 
 namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
 {
     internal class SpoSharingLinksRecord : ISolutionRecord
     {
         internal string SiteTitle { get; set; } = String.Empty;
-        internal string SiteUrl { get; set; }
+        internal string SiteUrl { get; set; } = String.Empty;
 
-        internal Guid ListId = Guid.Empty;
-        internal int ItemID { get; set; } = -1;
+        internal string ListTitle { get; set; } = String.Empty;
+        internal Guid ListId { get; set; } = Guid.Empty;
+
+        internal int ItemId { get; set; } = -1;
+        internal Guid ItemUniqueId { get; set; } = Guid.Empty;
         internal string ItemPath { get; set; } = String.Empty;
 
 
@@ -35,7 +34,6 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
 
         internal string GroupId { get; set; } = String.Empty;
         internal string GroupTitle { get; set; } = String.Empty;
-        internal string ItemUniqueId = String.Empty;
         internal string ShareId = String.Empty;
         internal string Users { get; set; } = String.Empty;
 
@@ -47,6 +45,8 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
         public bool LinkDetailsCanEdit { get; set; } = false;
         public bool LinkDetailsCaReview { get; set; } = false;
         public bool LinkDetailsCanNotDownload { get; set; } = false;
+
+        public Link? Link { get; set; } = null;
 
 
         internal SpoSharingLinksRecord(string siteUrl, Exception ex)
@@ -63,7 +63,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
             GroupTitle = oGroup.Title;
 
             var titleComponents = oGroup.Title.Split(".");
-            ItemUniqueId = titleComponents[1];
+            ItemUniqueId = Guid.Parse(titleComponents[1]);
             ShareId = titleComponents[3];
 
             StringBuilder sbUsers = new();
@@ -74,13 +74,24 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
             Users = sbUsers.ToString();
 
             GroupDescription = oGroup.Description;
-            int i = oGroup.Description.IndexOf("'") + 1;
-            int l = oGroup.Description.Length - i - 1;
-            ItemPath = UrlUtility.Combine(SiteUrl, oGroup.Description.Substring(i, l));
+            //int i = oGroup.Description.IndexOf("'") + 1;
+            //int l = oGroup.Description.Length - i - 1;
+            //ItemPath = UrlUtility.Combine(SiteUrl, oGroup.Description.Substring(i, l));
+        }
+
+        internal void AddListAndItem(Microsoft.SharePoint.Client.List oList, ListItem oItem)
+        {
+            ListTitle = oList.Title;
+            ListId = oList.Id;
+
+            ItemId = oItem.Id;
+            ItemPath = (string)oItem["FileRef"];
         }
 
         internal void AddLink(Link oLink)
         {
+            Link = oLink;
+
             if (oLink.linkDetails.AllowsAnonymousAccess)
             {
                 LinkDetailsAnonymous = true;
@@ -96,6 +107,13 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
             else
             {
                 SharingLink = "Specific People with the link";
+
+                StringBuilder sbUsers = new();
+                foreach (var invitation in oLink.linkDetails.Invitations)
+                {
+                    sbUsers.Append($"{invitation.invitee.email} ");
+                }
+                Users = sbUsers.ToString();
             }
 
             if (oLink.linkDetails.IsEditLink)
