@@ -19,6 +19,27 @@
             <designmaterial:SharingLinksFilterForm
                 x:Name="LinkF"/>
 
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Sharing links details"/>
+
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
+
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+
+                    <StackPanel HorizontalAlignment="Left">
+
+                        <ToggleButton
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
+                            Content="Breakdown Invitations"
+                            IsChecked="{Binding BreakdownInvitations, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                            Margin="0,0,8,0"/>
+
+                    </StackPanel>
+
+                </Border>
+
+            </Grid>
             <designmaterial:AdminForm
                 x:Name="AdminF"/>
 

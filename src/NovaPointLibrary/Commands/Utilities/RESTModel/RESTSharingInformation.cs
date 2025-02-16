@@ -600,15 +600,15 @@ namespace NovaPointLibrary.Commands.Utilities.RESTModel
 
     public class Invitation
     {
-        public InvitedBy invitedBy { get; set; }
-        public DateTime invitedOn { get; set; }
-        public Invitee invitee { get; set; }
+        public InvitedBy InvitedBy { get; set; }
+        public DateTime InvitedOn { get; set; }
+        public Invitee Invitee { get; set; }
     }
 
     public class InvitedBy
     {
         public object directoryObjectId { get; set; }
-        public string email { get; set; }
+        public string Email { get; set; }
         public string expiration { get; set; }
         public int id { get; set; }
         public bool isActive { get; set; }
@@ -624,7 +624,7 @@ namespace NovaPointLibrary.Commands.Utilities.RESTModel
     public class Invitee
     {
         public object directoryObjectId { get; set; }
-        public string email { get; set; }
+        public string Email { get; set; }
         public object expiration { get; set; }
         public int id { get; set; }
         public bool isActive { get; set; }

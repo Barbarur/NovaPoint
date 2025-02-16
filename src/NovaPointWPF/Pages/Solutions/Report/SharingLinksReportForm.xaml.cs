@@ -12,6 +12,8 @@ namespace NovaPointWPF.Pages.Solutions.Report
     /// </summary>
     public partial class SharingLinksReportForm : Page, ISolutionForm
     {
+        public bool BreakdownInvitations { get; set; } = true;
+
         public SharingLinksReportForm()
         {
             InitializeComponent();
@@ -21,11 +23,12 @@ namespace NovaPointWPF.Pages.Solutions.Report
             SolutionHeader.SolutionTitle = SharingLinksReport.s_SolutionName;
             SolutionHeader.SolutionCode = nameof(SharingLinksReport);
             SolutionHeader.SolutionDocs = SharingLinksReport.s_SolutionDocs;
+
         }
 
         public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
         {
-            SharingLinksReportParameters parameters = new(LinkF.Parameters, AdminF.Parameters, SiteF.Parameters);
+            SharingLinksReportParameters parameters = new(BreakdownInvitations, LinkF.Parameters, SiteF.Parameters, AdminF.Parameters);
 
             await SharingLinksReport.RunAsync(parameters, uiLog, cancelTokenSource);
         }

@@ -111,7 +111,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
                 StringBuilder sbUsers = new();
                 foreach (var invitation in oLink.linkDetails.Invitations)
                 {
-                    sbUsers.Append($"{invitation.invitee.email} ");
+                    sbUsers.Append($"{invitation.Invitee.Email} ");
                 }
                 Users = sbUsers.ToString();
             }
