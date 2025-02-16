@@ -73,7 +73,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
         public SPOSitePermissionsCSOM(LoggerSolution logger, AppInfo appInfo, SPOSitePermissionsCSOMParameters parameters)
         {
             _param = parameters;
-            _param.ListsParam.ListExpresions = _listExpresions;
+            _param.ListsParam.ListExpressions = _listExpresions;
             _param.ItemsParam.FileExpresions = _fileExpressions;
             _param.ItemsParam.ItemExpresions = _itemExpressions;
             _logger = logger;

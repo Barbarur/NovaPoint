@@ -62,7 +62,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         public static async Task RunAsync(ListReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            parameters.ListsParam.ListExpresions = _listExpresions;
+            parameters.ListsParam.ListExpressions = _listExpresions;
 
             LoggerSolution logger = new(uiAddLog, "ListReport", parameters);
 

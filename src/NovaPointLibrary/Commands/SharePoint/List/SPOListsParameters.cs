@@ -10,7 +10,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 {
     public class SPOListsParameters : ISolutionParameters
     {
-        internal Expression<Func<Microsoft.SharePoint.Client.List, object>>[] ListExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[] { };
+        internal Expression<Func<Microsoft.SharePoint.Client.List, object>>[] ListExpressions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[] { };
 
         public bool AllLists { get; set; } = true;
         public bool IncludeLists { get; set; } = true;

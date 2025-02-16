@@ -16,6 +16,20 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             _appInfo = appInfo;
         }
 
+        internal async Task<List<Microsoft.SharePoint.Client.List>> GetAsyncAll(string siteUrl)
+        {
+            SPOListsParameters parameters = new()
+            {
+                AllLists = true,
+                IncludeLibraries = true,
+                IncludeLists = true,
+                IncludeHiddenLists = true,
+                IncludeSystemLists = true,
+            };
+
+            return await GetAsync(siteUrl, parameters);
+        }
+
         internal async Task<List<Microsoft.SharePoint.Client.List>> GetAsync(string siteUrl, SPOListsParameters parameters)
         {
             _appInfo.IsCancelled();
@@ -36,7 +50,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 l => l.RootFolder.ServerRelativeUrl,
             };
 
-            var expressions = defaultExpressions.Union(parameters.ListExpresions).ToArray();
+            var expressions = defaultExpressions.Union(parameters.ListExpressions).ToArray();
 
 
             if (parameters.AllLists)
