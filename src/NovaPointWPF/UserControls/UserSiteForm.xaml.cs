@@ -1,20 +1,9 @@
 ﻿using NovaPointLibrary.Commands.SharePoint.User;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace NovaPointWPF.UserControls
 {
@@ -22,23 +11,19 @@ namespace NovaPointWPF.UserControls
     {
         public SPOSiteUserParameters Parameters { get; set; } = new();
         
-        
-        private bool _allUsers = false;
         public bool AllUsers
         {
-            get { return _allUsers; }
+            get { return Parameters.AllUsers; }
             set
             {
-                _allUsers = value;
                 Parameters.AllUsers = value;
                 OnPropertyChanged();
-                if (value)
+                if (value && IsAnyUserSelected())
                 {
                     SingleUser = false;
                     IncludeExternalUsers = false;
                     IncludeSystemGroups = false;
                 }
-                SwapButtons();
             }
         }
 
@@ -50,34 +35,48 @@ namespace NovaPointWPF.UserControls
             {
                 _singleUser = value;
                 OnPropertyChanged();
-                if (value) { AllUsers = false; }
-                SwapButtons();
+
+                if (value)
+                { 
+                    AllUsers = false;
+                    SingleUserPanel.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    CheckUsers();
+                    IncludeUserUPN = string.Empty;
+                    SingleUserPanel.Visibility = Visibility.Collapsed;
+                }
             }
         }
 
-        private string _includeUserUPN = string.Empty;
         public string IncludeUserUPN
         {
-            get { return _includeUserUPN; }
+            get { return Parameters.IncludeUserUPN; }
             set
             { 
-                _includeUserUPN = value;
                 Parameters.IncludeUserUPN = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool _includeExternalUsers = false;
         public bool IncludeExternalUsers
         {
-            get { return _includeExternalUsers; }
+            get { return Parameters.IncludeExternalUsers; }
             set
             { 
-                _includeExternalUsers = value;
                 Parameters.IncludeExternalUsers = value;
                 OnPropertyChanged();
-                if (value) { AllUsers = false; }
-                SwapButtons();
+                if (value)
+                {
+                    AllUsers = false;
+                    ExternalLabel.Visibility = Visibility.Visible; 
+                }
+                else
+                {
+                    CheckUsers(); 
+                    ExternalLabel.Visibility = Visibility.Collapsed; 
+                }
             }
         }
 
@@ -89,30 +88,37 @@ namespace NovaPointWPF.UserControls
             {
                 _includeSystemGroups = value;
                 OnPropertyChanged();
-                if (value) { AllUsers = false; }
-                SwapButtons();
+                if (value)
+                {
+                    AllUsers = false;
+                    SystemGroupPanel.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    CheckUsers();
+                    IncludeEveryone = false;
+                    IncludeEveryoneExceptExternal = false;
+                    SystemGroupPanel.Visibility = Visibility.Collapsed;
+                }
+
             }
         }
 
-        private bool _includeEveryone = false;
         public bool IncludeEveryone
         {
-            get { return _includeEveryone; }
+            get { return Parameters.IncludeEveryone; }
             set
             {
-                _includeEveryone = value;
                 Parameters.IncludeEveryone = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool _includeEveryoneExceptExternal = false;
         public bool IncludeEveryoneExceptExternal
         {
-            get { return _includeEveryoneExceptExternal; }
+            get { return Parameters.IncludeEveryoneExceptExternal; }
             set
             {
-                _includeEveryoneExceptExternal = value;
                 Parameters.IncludeEveryoneExceptExternal = value;
                 OnPropertyChanged();
             }
@@ -131,29 +137,21 @@ namespace NovaPointWPF.UserControls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void SwapButtons()
+        private void CheckUsers()
         {
-            if (AllUsers) { AllUsersLabel.Visibility = Visibility.Visible; }
-            else { AllUsersLabel.Visibility = Visibility.Collapsed; }
-
-            if (SingleUser) { SingleUserPanel.Visibility = Visibility.Visible; }
-            else
+            if (!IsAnyUserSelected())
             {
-                IncludeUserUPN = string.Empty;
-                SingleUserPanel.Visibility = Visibility.Collapsed;
-            }
-
-            if (IncludeExternalUsers) { ExternalLabel.Visibility = Visibility.Visible; }
-            else { ExternalLabel.Visibility = Visibility.Collapsed; }
-
-            if (IncludeSystemGroups) { SystemGroupPanel.Visibility = Visibility.Visible; }
-            else
-            {
-                IncludeEveryone = false;
-                IncludeEveryoneExceptExternal = false;
-                SystemGroupPanel.Visibility = Visibility.Collapsed;
+                AllUsers = true;
             }
         }
 
+        private bool IsAnyUserSelected()
+        {
+            if (SingleUser || IncludeExternalUsers || IncludeSystemGroups)
+            {
+                return true;
+            }
+            else { return false; }
+        }
     }
 }
