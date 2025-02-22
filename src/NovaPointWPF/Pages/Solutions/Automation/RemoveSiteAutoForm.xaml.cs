@@ -1,7 +1,7 @@
 ﻿using Microsoft.Win32;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Permision;
+using NovaPointLibrary.Commands.SharePoint.Permission;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
 using NovaPointLibrary.Solutions.Report;

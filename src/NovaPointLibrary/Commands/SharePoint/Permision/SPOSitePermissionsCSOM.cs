@@ -2,14 +2,14 @@
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Permision.Utilities;
+using NovaPointLibrary.Commands.SharePoint.Permission.Utilities;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
 using System.Data;
 using System.Linq.Expressions;
 
-namespace NovaPointLibrary.Commands.SharePoint.Permision
+namespace NovaPointLibrary.Commands.SharePoint.Permission
 {
     internal class SPOSitePermissionsCSOM
     {

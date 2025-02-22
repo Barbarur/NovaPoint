@@ -1,6 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.AzureAD;
-using NovaPointLibrary.Commands.SharePoint.Permision.Utilities;
+using NovaPointLibrary.Commands.SharePoint.Permission.Utilities;
 using NovaPointLibrary.Commands.SharePoint.SharingLinks;
 using NovaPointLibrary.Commands.SharePoint.User;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
@@ -8,7 +8,7 @@ using NovaPointLibrary.Core.Logging;
 using System.Data;
 using System.Text;
 
-namespace NovaPointLibrary.Commands.SharePoint.Permision
+namespace NovaPointLibrary.Commands.SharePoint.Permission
 {
     internal class SPORoleAssignmentUsersCSOM
     {
@@ -39,7 +39,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             int skippedGroupsCounter = 0;
             foreach (var role in roleAssignmentCollection)
             {
-                _logger.Info(GetType().Name, $"Gettig Permissions for '{role.Member.PrincipalType}' '{role.Member.Title}'");
+                _logger.Info(GetType().Name, $"Getting Permissions for '{role.Member.PrincipalType}' '{role.Member.Title}'");
 
                 string accessType = "Direct Permissions";
                 var permissionLevels = GetPermissionLevels(role.RoleDefinitionBindings);
@@ -106,9 +106,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             List<SPOKnownSharePointGroupUsers> collKnownGroups = _knownGroups.FindSharePointGroups(siteUrl, spGroup.Title);
             if (collKnownGroups.Any())
             {
-                foreach (var oKnowngroup in collKnownGroups)
+                foreach (var oKnownGroup in collKnownGroups)
                 {
-                    yield return record.GetRecordWithUsers(oKnowngroup.AccountType, oKnowngroup.Users, oKnowngroup.Remarks);
+                    yield return record.GetRecordWithUsers(oKnownGroup.AccountType, oKnownGroup.Users, oKnownGroup.Remarks);
                 }
                 yield break;
             }
@@ -118,11 +118,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             try
             {
                 groupMembers = await new SPOSiteGroupUsersCSOM(_logger, _appInfo).GetAsync(siteUrl, spGroup.Title);
-
-                if (!groupMembers.Any())
-                {
-                    exception = new("SharePoint group with no users");
-                }
             }
             catch (Exception ex)
             {
@@ -137,16 +132,24 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
                 _knownGroups._groupsSharePoint.Add(new(siteUrl, spGroup.Title, "", "", exception.Message));
 
                 yield return record.GetRecordWithUsers("", "", exception.Message);
-                yield break;
             }
             else if (groupMembers != null)
             {
+                if (!groupMembers.Any())
+                {
+                    var emptyGroupMessage = "SharePoint group with no users";
+                    _knownGroups._groupsSharePoint.Add(new(siteUrl, spGroup.Title, emptyGroupMessage, emptyGroupMessage, ""));
+                    yield return SPORoleAssignmentUserRecord.GetRecordBlank(emptyGroupMessage);
+                    yield break;
+                }
+
+
                 var users = String.Join(" ", groupMembers.Where(gm => gm.PrincipalType.ToString() == "User").Select(m => m.UserPrincipalName).ToList());
                 if (!string.IsNullOrWhiteSpace(users))
                 {
-                    yield return record.GetRecordWithUsers("User", users);
-
                     _knownGroups._groupsSharePoint.Add(new(siteUrl, spGroup.Title, "Users", users, ""));
+
+                    yield return record.GetRecordWithUsers("User", users);
                 }
 
                 var collSecurityGroups = groupMembers.Where(gm => gm.PrincipalType.ToString() == "SecurityGroup").ToList();
@@ -187,15 +190,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
 
             SpoSharingLinksRecord recordSharingLink = await _restSharingLinks.GetFromPrincipalAsync(siteUrl, spGroup);
 
-            SPORoleAssignmentUserRecord record;
-            if (string.IsNullOrWhiteSpace(recordSharingLink.Remarks))
-            {
-                record = new($"Sharing link '{recordSharingLink.SharingLink}' ({spGroup.Title})", spGroup.Id.ToString(), "User", recordSharingLink.Users, permissionLevels, $"RequiresPassword: {recordSharingLink.SharingLinkRequiresPassword}, Expiration: {recordSharingLink.SharingLinkExpiration}");
-            }
-            else
-            {
-                record = new($"Sharing link 'Unknown' ({spGroup.Title})", spGroup.Id.ToString(), "User", recordSharingLink.Users, permissionLevels, recordSharingLink.Remarks);
-            }
+            SPORoleAssignmentUserRecord record = new($"Sharing link '{recordSharingLink.SharingLink}'", spGroup.Id.ToString(), "User", recordSharingLink.Users, permissionLevels, recordSharingLink.Remarks);
 
             return record;
         }

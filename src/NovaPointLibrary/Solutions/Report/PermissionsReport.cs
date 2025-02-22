@@ -1,4 +1,4 @@
-﻿using NovaPointLibrary.Commands.SharePoint.Permision;
+﻿using NovaPointLibrary.Commands.SharePoint.Permission;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.User;
 using NovaPointLibrary.Core.Logging;
@@ -125,39 +125,48 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void FilterRecord(SPOLocationPermissionsRecord record)
         {
-
-            if (_param.UserParam.AllUsers)
+            if (!string.IsNullOrWhiteSpace(record._role.Remarks))
             {
                 AddRecord(record);
             }
+
+            else if (_param.UserParam.AllUsers)
+            {
+                AddRecord(record);
+            }
+
+
             else if (!string.IsNullOrWhiteSpace(_param.UserParam.IncludeUserUPN) && record._role.Users.Contains(_param.UserParam.IncludeUserUPN, StringComparison.OrdinalIgnoreCase))
             {
                 AddRecord(record);
             }
-            else if (!string.IsNullOrWhiteSpace(_param.UserParam.IncludeUserUPN) && record._role.AccessType.Contains("organization") && record._role.AccessType.Contains("Sharing link"))
+            else if (!string.IsNullOrWhiteSpace(_param.UserParam.IncludeUserUPN) && record._role.AccessType.Contains("organization", StringComparison.OrdinalIgnoreCase) && record._role.AccessType.Contains("Sharing link", StringComparison.OrdinalIgnoreCase))
             {
                 AddRecord(record);
             }
+
+
             else if (_param.UserParam.IncludeExternalUsers && (record._role.Users.Contains("#ext#", StringComparison.OrdinalIgnoreCase) || record._role.Users.Contains("urn:spo:guest", StringComparison.OrdinalIgnoreCase)))
             {
                 AddRecord(record);
+                
             }
             else if (_param.UserParam.IncludeExternalUsers && record._role.AccessType.Contains("Anyone") && record._role.AccessType.Contains("Sharing link"))
             {
                 AddRecord(record);
             }
+
+
             else if (_param.UserParam.IncludeEveryone && record._role.AccountType.Contains("Everyone", StringComparison.OrdinalIgnoreCase))
             {
                 AddRecord(record);
             }
+
             else if (_param.UserParam.IncludeEveryoneExceptExternal && record._role.AccountType.Contains("Everyone except external users", StringComparison.OrdinalIgnoreCase))
             {
                 AddRecord(record);
             }
-            else
-            {
-                AddRecord(record);
-            }
+
         }
 
         private void AddRecord(SPOLocationPermissionsRecord record)

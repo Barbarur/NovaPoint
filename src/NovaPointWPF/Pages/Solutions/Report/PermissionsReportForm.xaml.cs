@@ -16,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NovaPointLibrary.Commands.SharePoint.User;
-using NovaPointLibrary.Commands.SharePoint.Permision;
+using NovaPointLibrary.Commands.SharePoint.Permission;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointWPF.UserControls;

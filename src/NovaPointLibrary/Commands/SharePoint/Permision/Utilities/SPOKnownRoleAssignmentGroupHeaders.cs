@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NovaPointLibrary.Commands.SharePoint.Permision.Utilities
+namespace NovaPointLibrary.Commands.SharePoint.Permission.Utilities
 {
     internal class SPOKnownRoleAssignmentGroupHeaders
     {

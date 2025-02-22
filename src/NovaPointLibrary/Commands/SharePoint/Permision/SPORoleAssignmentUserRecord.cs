@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NovaPointLibrary.Commands.SharePoint.Permision
+namespace NovaPointLibrary.Commands.SharePoint.Permission
 {
     internal class SPORoleAssignmentUserRecord
     {
@@ -77,13 +77,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Permision
             return record;
         }
 
-        private static SPORoleAssignmentUserRecord GetRecordBlank(string blank)
+        internal static SPORoleAssignmentUserRecord GetRecordBlank(string blank)
         {
             SPORoleAssignmentUserRecord record = new(blank, blank, blank)
             {
                 AccountType = blank,
                 Users = blank,
-                Remarks = blank
             };
             return record;
         }
