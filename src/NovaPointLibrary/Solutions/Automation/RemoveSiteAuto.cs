@@ -1,6 +1,6 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.AzureAD;
+using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Core.Logging;
 using PnP.Framework;

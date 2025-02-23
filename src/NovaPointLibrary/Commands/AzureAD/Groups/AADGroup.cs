@@ -29,50 +29,59 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
 
             return group;
         }
+
+        internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft.SharePoint.Client.Principal principal, List<AADGroupUserEmails>? listKnownGroups = null)
+        {
+            List<AADGroupUserEmails> listOfUsers = GetSystemGroup(principal.Title);
+
+            if (!listOfUsers.Any())
+            {
+                listOfUsers = await GetUsersAsync(principal.Title, principal.LoginName, listKnownGroups);
+            }
+
+            return listOfUsers;
+        }
+
         internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft.SharePoint.Client.User secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
         {
-            if (IsSystemGroup(secGroup.Title))
+            List<AADGroupUserEmails> listOfUsers = GetSystemGroup(secGroup.Title);
+
+            if (!listOfUsers.Any())
             {
-                List<AADGroupUserEmails> listOfUsers = new()
-                {
-                    new("", secGroup.Title, secGroup.Title)
-                };
-                return listOfUsers;
+                listOfUsers = await GetUsersAsync(secGroup.Title, secGroup.AadObjectId.NameId, listKnownGroups);
             }
-            else
-            {
-                return await GetUsersAsync(secGroup.Title, secGroup.AadObjectId.NameId, listKnownGroups);
-            }
+
+            return listOfUsers;
         }
 
         internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft365User secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
         {
-            if (IsSystemGroup(secGroup.DisplayName))
+            List<AADGroupUserEmails> listOfUsers = GetSystemGroup(secGroup.DisplayName);
+
+            if (!listOfUsers.Any())
             {
-                List<AADGroupUserEmails> listOfUsers = new()
-                {
-                    new("", secGroup.DisplayName, secGroup.DisplayName)
-                };
-                return listOfUsers;
+                listOfUsers = await GetUsersAsync(secGroup.DisplayName, secGroup.Id, listKnownGroups);
             }
-            else
-            {
-                return await GetUsersAsync(secGroup.DisplayName, secGroup.Id, listKnownGroups);
-            }
+
+            return listOfUsers;
         }
 
-        internal async Task<List<AADGroupUserEmails>> GetUsersAsync(string secGroupTitle, string secGroupId, List<AADGroupUserEmails>? listKnownGroups = null)
+        internal async Task<List<AADGroupUserEmails>> GetUsersAsync(
+            string secGroupTitle, 
+            string secGroupId, 
+            List<AADGroupUserEmails>? listKnownGroups = null)
         {
-            _appInfo.IsCancelled();
             _logger.Info(GetType().Name, $"Getting users from Security Group '{secGroupTitle}'");
 
-            List<AADGroupUserEmails> listOfUsers = new();
+            List<AADGroupUserEmails> collSgUserEmails = new();
+
+            if (secGroupTitle.Contains("SLinkClaim")) { return collSgUserEmails; }
 
             if (listKnownGroups != null)
             {
-                List<AADGroupUserEmails> knownGroups = listKnownGroups.Where(sg => sg.GroupID == secGroupId).ToList();
+                collSgUserEmails = listKnownGroups.Where(sg => sg.GroupID == secGroupId).ToList();
 
-                if (knownGroups.Any()) { return knownGroups; }
+                if (collSgUserEmails.Any()) { return collSgUserEmails; }
             }
 
             try
@@ -88,35 +97,33 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
                 }
 
 
-                IEnumerable<Microsoft365User> groupUsers;
-                if (needOwners) { groupUsers = await GetOwnersAsync(secGroupId); }
-                else { groupUsers = await GetMembersAsync(secGroupId); }
+                IEnumerable<Microsoft365User> sgMembers;
+                if (needOwners) { sgMembers = await GetOwnersAsync(secGroupId); }
+                else { sgMembers = await GetMembersAsync(secGroupId); }
 
 
-                if (!groupUsers.Any())
+                if (!sgMembers.Any())
                 {
-                    listOfUsers.Add(new(secGroupId, secGroupTitle, "Empty Group"));
+                    collSgUserEmails.Add(new(secGroupId, secGroupTitle, "Security group is empty"));
                 }
                 else
                 {
-                    string users = string.Join(" ", groupUsers.Where(com => com.Type.ToString() == "user").Select(com => com.UserPrincipalName).ToList());
+                    string users = string.Join(" ", sgMembers.Where(com => com.Type.ToString() == "user").Select(com => com.UserPrincipalName).ToList());
 
                     AADGroupUserEmails usersRecord;
                     if (users.Any()) { usersRecord = new(secGroupId, secGroupTitle, users); }
                     else { usersRecord = new(secGroupId, secGroupTitle, "Group has no direct users"); }
-                    listKnownGroups?.Add(usersRecord);
-                    listOfUsers.Add(usersRecord);
+                    collSgUserEmails.Add(usersRecord);
 
-                    var collSecurityGroups = groupUsers.Where(gm => gm.Type.ToString() == "SecurityGroup").ToList();
-                    foreach (var securityGroup in collSecurityGroups)
+                    var collSgGroups = sgMembers.Where(gm => gm.Type.ToString() == "SecurityGroup").ToList();
+                    foreach (var securityGroup in collSgGroups)
                     {
-                        List<AADGroupUserEmails> listSubgroupUsers = await GetUsersAsync(securityGroup, listKnownGroups);
+                        List<AADGroupUserEmails> collChildSgUsers = await GetUsersAsync(securityGroup, listKnownGroups);
 
-                        foreach (var subgroupUsers in listSubgroupUsers)
+                        foreach (var childSgUsers in collChildSgUsers)
                         {
-                            AADGroupUserEmails subgroupUsersRecord = new(secGroupId, secGroupTitle, subgroupUsers);
-                            if (listKnownGroups != null && string.IsNullOrWhiteSpace(subgroupUsersRecord.Remarks)) { listKnownGroups.Add(subgroupUsersRecord); }
-                            listOfUsers.Add(subgroupUsersRecord);
+                            AADGroupUserEmails subgroupUsersRecord = new(secGroupId, secGroupTitle, childSgUsers);
+                            collSgUserEmails.Add(subgroupUsersRecord);
                         }
                     }
                 }
@@ -124,9 +131,20 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
             catch (Exception ex)
             {
                 _logger.Error(GetType().Name, "Security Group", secGroupTitle, ex);
-                listOfUsers.Add(new(secGroupId, secGroupTitle, "", ex.Message));
+                collSgUserEmails.Add(new(secGroupId, secGroupTitle, "", ex.Message));
             }
 
+            listKnownGroups?.AddRange(collSgUserEmails);
+            return collSgUserEmails;
+        }
+
+        private List<AADGroupUserEmails> GetSystemGroup(string groupTitle)
+        {
+            List<AADGroupUserEmails> listOfUsers = new();
+            if (IsSystemGroup(groupTitle))
+            {
+                listOfUsers.Add(new("", groupTitle, groupTitle));
+            }
             return listOfUsers;
         }
 
@@ -168,6 +186,16 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
             var collMembers = await new GraphAPIHandler(_logger, _appInfo).GetCollectionAsync<Microsoft365User>(url);
 
             return collMembers;
+        }
+
+        internal async Task RemoveGroupAsync(string groupId)
+        {
+            _appInfo.IsCancelled();
+            _logger.Info(GetType().Name, $"Removing Group '{groupId}'");
+
+            string url = $"/groups/{groupId}";
+
+            await new GraphAPIHandler(_logger, _appInfo).DeleteAsync(url);
         }
 
     }
