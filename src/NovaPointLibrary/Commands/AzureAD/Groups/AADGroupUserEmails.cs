@@ -24,7 +24,7 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
         {
             GroupID = groupID;
             GroupName = groupName;
-            AccountType = $"{groupName} holds {subgroup.AccountType}";
+            AccountType = $"Entra ID Group '{groupName}' ({groupID}) holds {subgroup.AccountType}";
             Users = subgroup.Users;
             Remarks = subgroup.Remarks;
         }

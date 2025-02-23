@@ -30,13 +30,23 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
             return group;
         }
 
-        internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft.SharePoint.Client.Principal principal, List<AADGroupUserEmails>? listKnownGroups = null)
+        internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft.SharePoint.Client.Principal secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
         {
-            List<AADGroupUserEmails> listOfUsers = GetSystemGroup(principal.Title);
+            List<AADGroupUserEmails> listOfUsers = GetSystemGroup(secGroup.Title);
 
             if (!listOfUsers.Any())
             {
-                listOfUsers = await GetUsersAsync(principal.Title, principal.LoginName, listKnownGroups);
+                try
+                {
+                    listOfUsers = await GetUsersAsync(secGroup.Title, secGroup.LoginName, listKnownGroups);
+                }
+                catch
+                {
+                    listOfUsers = new()
+                {
+                    new("", secGroup.Title, secGroup.Title)
+                };
+                }
             }
 
             return listOfUsers;
@@ -48,7 +58,17 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
 
             if (!listOfUsers.Any())
             {
-                listOfUsers = await GetUsersAsync(secGroup.Title, secGroup.AadObjectId.NameId, listKnownGroups);
+                try
+                {
+                    listOfUsers = await GetUsersAsync(secGroup.Title, secGroup.LoginName, listKnownGroups);
+                }
+                catch
+                {
+                    listOfUsers = new()
+                {
+                    new("", secGroup.Title, secGroup.Title)
+                };
+                }
             }
 
             return listOfUsers;
@@ -60,18 +80,25 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
 
             if (!listOfUsers.Any())
             {
-                listOfUsers = await GetUsersAsync(secGroup.DisplayName, secGroup.Id, listKnownGroups);
+                try
+                {
+                    listOfUsers = await GetUsersAsync(secGroup.DisplayName, secGroup.Id, listKnownGroups);
+                }
+                catch
+                {
+                    listOfUsers = new()
+                {
+                    new("", secGroup.DisplayName, secGroup.DisplayName)
+                };
+                }
             }
 
             return listOfUsers;
         }
 
-        internal async Task<List<AADGroupUserEmails>> GetUsersAsync(
-            string secGroupTitle, 
-            string secGroupId, 
-            List<AADGroupUserEmails>? listKnownGroups = null)
+        internal async Task<List<AADGroupUserEmails>> GetUsersAsync( string secGroupTitle, string secGroupId, List<AADGroupUserEmails>? listKnownGroups = null)
         {
-            _logger.Info(GetType().Name, $"Getting users from Security Group '{secGroupTitle}'");
+            _logger.Info(GetType().Name, $"Getting users from Security Group '{secGroupTitle}' ID '{secGroupId}'");
 
             List<AADGroupUserEmails> collSgUserEmails = new();
 
@@ -150,11 +177,14 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
 
         internal static bool IsSystemGroup(string secGroupTitle)
         {
+
             if (secGroupTitle == "Everyone"
                 || secGroupTitle == "Everyone except external users"
                 || secGroupTitle == "Global Administrator"
                 || secGroupTitle == "SharePoint Administrator"
-                || secGroupTitle == "All Company Members")
+                || secGroupTitle == "All Company Members"
+                || secGroupTitle == "All Users (windows)"
+                || secGroupTitle == "ReadOnlyAccessToTenantAdminSite")
             {
                 return true;
             }
