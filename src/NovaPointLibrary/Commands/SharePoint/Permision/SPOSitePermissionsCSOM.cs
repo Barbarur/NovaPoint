@@ -1,5 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Permission.Utilities;
@@ -156,10 +157,19 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
 
 
                 var collSecurityGroups = collSiteCollAdmins.Where(gm => gm.PrincipalType.ToString() == "SecurityGroup").ToList();
-                await foreach (var role in new SPORoleAssignmentUsersCSOM(_logger, _appInfo, _knownGroups).GetSecurityGroupUsersAsync(collSecurityGroups, accessType, permissionLevels))
+
+                foreach (var securityGroup in collSecurityGroups)
                 {
-                    yield return new("Site", oSite.Title, oSite.Url, role);
+                    var collSgUsersRecord = await new AADGroup(_logger, _appInfo).GetUsersAsync(securityGroup, _knownGroups.SecurityGroups);
+
+                    foreach (var sgUsersRecord in collSgUsersRecord)
+                    {
+                        SPORoleAssignmentUserRecord recordRole = new(accessType, "NA", sgUsersRecord.AccountType, sgUsersRecord.Users, permissionLevels, sgUsersRecord.Remarks);
+                        yield return new("Site", oSite.Title, oSite.Url, recordRole);
+                    }
+
                 }
+
             }
             else
             {

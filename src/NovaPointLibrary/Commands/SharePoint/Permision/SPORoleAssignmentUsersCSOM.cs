@@ -1,5 +1,5 @@
 ﻿using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.AzureAD;
+using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.SharePoint.Permission.Utilities;
 using NovaPointLibrary.Commands.SharePoint.SharingLinks;
 using NovaPointLibrary.Commands.SharePoint.User;
@@ -14,7 +14,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
     {
         private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
-        private readonly SPOKnownRoleAssignmentGroups _knownGroups;
+        private SPOKnownRoleAssignmentGroups KnownGroups { get; init; }
         private readonly SpoSharingLinksRest _restSharingLinks;
 
 
@@ -25,7 +25,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
         {
             _logger = logger;
             _appInfo = appInfo;
-            _knownGroups = knownGroups;
+            KnownGroups = knownGroups;
             _restSharingLinks = new SpoSharingLinksRest(_logger, _appInfo);
         }
 
@@ -50,6 +50,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                     _logger.Info(GetType().Name, $"No permissions found, skipping group");
                     continue;
                 }
+                // CHECK IF IT CAN BE REMOVED
                 else if (IsSystemGroup(role.Member.Title.ToString()) )
                 {
                     SPORoleAssignmentUserRecord record = new(accessType, "NA", permissionLevels);
@@ -79,11 +80,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 }
                 else if (role.Member.PrincipalType.ToString() == "SecurityGroup")
                 {
-                    SPOKnownRoleAssignmentGroupHeaders headers = new();
-                    SPORoleAssignmentUserRecord record = new(accessType, "NA", permissionLevels);
-                    await foreach (var sgRecord in GetSecurityGroupUsersAsync(role.Member.Title, role.Member.LoginName, record, headers))
+                    var collSgUsersRecord = await new AADGroup(_logger, _appInfo).GetUsersAsync(role.Member, KnownGroups.SecurityGroups);
+
+                    foreach (var sgUsersRecord in collSgUsersRecord)
                     {
-                        yield return sgRecord;
+                        yield return new(accessType, "NA", sgUsersRecord.AccountType, sgUsersRecord.Users, permissionLevels, sgUsersRecord.Remarks);
                     }
                 }
             }
@@ -96,14 +97,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
 
         internal async IAsyncEnumerable<SPORoleAssignmentUserRecord> ProcessSiteGroupUsersAsync(string siteUrl, Principal spGroup, string permissionLevels)
         {
-            _appInfo.IsCancelled();
             _logger.Info(GetType().Name, $"Processing SharePoint Group '{spGroup.Title}' ({spGroup.Id})");
 
             string accessType = $"SharePoint Group '{spGroup.Title}'";
 
             SPORoleAssignmentUserRecord record = new($"SharePoint Group '{spGroup.Title}'", spGroup.Id.ToString(), permissionLevels);
 
-            List<SPOKnownSharePointGroupUsers> collKnownGroups = _knownGroups.FindSharePointGroups(siteUrl, spGroup.Title);
+            List<SPOKnownSharePointGroupUsers> collKnownGroups = KnownGroups.FindSharePointGroups(siteUrl, spGroup.Title);
             if (collKnownGroups.Any())
             {
                 foreach (var oKnownGroup in collKnownGroups)
@@ -129,7 +129,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
 
             if (exception != null)
             {
-                _knownGroups._groupsSharePoint.Add(new(siteUrl, spGroup.Title, "", "", exception.Message));
+                KnownGroups.GroupsSharePoint.Add(new(siteUrl, spGroup.Title, "", "", exception.Message));
 
                 yield return record.GetRecordWithUsers("", "", exception.Message);
             }
@@ -138,7 +138,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 if (!groupMembers.Any())
                 {
                     var emptyGroupMessage = "SharePoint group with no users";
-                    _knownGroups._groupsSharePoint.Add(new(siteUrl, spGroup.Title, emptyGroupMessage, emptyGroupMessage, ""));
+                    KnownGroups.GroupsSharePoint.Add(new(siteUrl, spGroup.Title, emptyGroupMessage, emptyGroupMessage, ""));
                     yield return SPORoleAssignmentUserRecord.GetRecordBlank(emptyGroupMessage);
                     yield break;
                 }
@@ -147,7 +147,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 var users = String.Join(" ", groupMembers.Where(gm => gm.PrincipalType.ToString() == "User").Select(m => m.UserPrincipalName).ToList());
                 if (!string.IsNullOrWhiteSpace(users))
                 {
-                    _knownGroups._groupsSharePoint.Add(new(siteUrl, spGroup.Title, "Users", users, ""));
+                    KnownGroups.GroupsSharePoint.Add(new(siteUrl, spGroup.Title, "Users", users, ""));
 
                     yield return record.GetRecordWithUsers("User", users);
                 }
@@ -155,23 +155,14 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 var collSecurityGroups = groupMembers.Where(gm => gm.PrincipalType.ToString() == "SecurityGroup").ToList();
                 foreach (var securityGroup in collSecurityGroups)
                 {
-                    if (IsSystemGroup(securityGroup.Title))
+                    var collSgUsersRecord = await new AADGroup(_logger, _appInfo).GetUsersAsync(securityGroup, KnownGroups.SecurityGroups);
+
+                    foreach (var sgUsersRecord in collSgUsersRecord)
                     {
-                        var sysGroup = GetSystemGroup(record, "", securityGroup.Title);
-
-                        _knownGroups._groupsSharePoint.Add(new(siteUrl, spGroup.Title, sysGroup.AccountType, sysGroup.Users, ""));
-
-                        yield return sysGroup;
-                        continue;
+                        KnownGroups.GroupsSharePoint.Add(new(siteUrl, spGroup.Title, sgUsersRecord.AccountType, sgUsersRecord.Users, sgUsersRecord.Remarks));
+                        yield return new(accessType, spGroup.Id.ToString(), sgUsersRecord.AccountType, sgUsersRecord.Users, permissionLevels, sgUsersRecord.Remarks);
                     }
 
-                    SPOKnownRoleAssignmentGroupHeaders headers = new();
-                    headers._groupsSharePoint.Add(new(siteUrl, spGroup.Title, "", "", ""));
-
-                    await foreach (var recordSecGroup in GetSecurityGroupUsersAsync(securityGroup.Title, securityGroup.AadObjectId.NameId, record, headers))
-                    {
-                        yield return recordSecGroup;
-                    }
                 }
             }
             else
@@ -239,126 +230,6 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 return record.GetRecordWithUsers(thisAccountType, "Unknown users on this group");
             }
 
-        }
-        
-        internal async IAsyncEnumerable<SPORoleAssignmentUserRecord> GetSecurityGroupUsersAsync(List<Microsoft.SharePoint.Client.User> listSecurityGroup, string accessType, string permissionLevels)
-        {
-            _appInfo.IsCancelled();
-            _logger.Info(GetType().Name, $"Getting users from List of Security Groups");
-
-            foreach (var securityGroup in listSecurityGroup)
-            {
-                SPORoleAssignmentUserRecord record = new(accessType, "NA", permissionLevels);
-                
-                if (IsSystemGroup(securityGroup.Title))
-                {
-                    var sysGroup = GetSystemGroup(record, "", securityGroup.Title);
-
-                    yield return sysGroup;
-                    continue;
-                }
-
-                SPOKnownRoleAssignmentGroupHeaders headers = new();
-                await foreach (var sgRecord in GetSecurityGroupUsersAsync(securityGroup.Title, securityGroup.AadObjectId.NameId, record, headers))
-                {
-                    yield return sgRecord;
-                }
-            }
-        }
-
-        private async IAsyncEnumerable<SPORoleAssignmentUserRecord> GetSecurityGroupUsersAsync(string sgName, string sgID, SPORoleAssignmentUserRecord record, SPOKnownRoleAssignmentGroupHeaders groupHeaders)
-        {
-            _appInfo.IsCancelled();
-            _logger.Info(GetType().Name, $"Getting users from Security Group '{sgName}' with ID '{sgID}'");
-
-            if (sgName.Contains("SLinkClaim")) { yield break; }
-
-            string groupUsersToCollect = "Members";
-            if (sgID.Contains("c:0t.c|tenant|")) { sgID = sgID.Substring(sgID.IndexOf("c:0t.c|tenant|") + 14); }
-            if (sgID.Contains("c:0u.c|tenant|")) { sgID = sgID.Substring(sgID.IndexOf("c:0u.c|tenant|") + 14); }
-            if (sgID.Contains("c:0o.c|federateddirectoryclaimprovider|")) { sgID = sgID.Substring(sgID.IndexOf("c:0o.c|federateddirectoryclaimprovider|") + 39); }
-            if (sgID.Contains("_o"))
-            {
-                sgID = sgID.Substring(0, sgID.IndexOf("_o"));
-                groupUsersToCollect = "Owners";
-            }
-            if (String.IsNullOrWhiteSpace(groupHeaders._accountType))
-            {
-                groupHeaders._accountType += $"Security Group '{sgName}' ({sgID})";
-            }
-            else
-            {
-                groupHeaders._accountType += $" holds Security Group '{sgName}' ({sgID})";
-            }
-
-            List<SPOKnownSecurityGroupUsers> collKnownGroups = _knownGroups.FindSecurityGroups(sgID, sgName);
-            if (collKnownGroups.Any())
-            {
-                foreach (var oKnowngroup in collKnownGroups)
-                {
-                    _knownGroups.AddNewGroupsFromHeaders(groupHeaders, oKnowngroup.Users, oKnowngroup.Remarks);
-
-                    yield return record.GetRecordWithUsers(groupHeaders._accountType, oKnowngroup.Users, oKnowngroup.Remarks);
-                }
-                yield break;
-            }
-
-            groupHeaders._groupsSecurity.Add( new(sgID, sgName, "", "", "") );
-
-
-            IEnumerable<Microsoft365User>? groupUsers = null;
-            string exceptionMessage = string.Empty;
-            try
-            {
-                if (groupUsersToCollect == "Owners") { groupUsers = await new AADGroup(_logger, _appInfo).GetOwnersAsync(sgID); }
-                else { groupUsers = await new AADGroup(_logger, _appInfo).GetMembersAsync(sgID); }
-
-                if (!groupUsers.Any())
-                {
-                    groupUsers = null;
-                    exceptionMessage = "Security group with no users";
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(GetType().Name, "Security Group", $"{sgName}' with ID {sgID}", ex);
-                groupUsers = null;
-                exceptionMessage = ex.Message;
-            }
-
-            if (string.IsNullOrWhiteSpace(exceptionMessage) && groupUsers != null)
-            {
-                string users = string.Join(" ", groupUsers.Where(com => com.Type.ToString() == "user").Select(com => com.UserPrincipalName).ToList());
-                _knownGroups.AddNewGroupsFromHeaders(groupHeaders, users, "");
-                yield return record.GetRecordWithUsers(groupHeaders._accountType, users);
-
-
-                var collSecurityGroups = groupUsers.Where(gm => gm.Type.ToString() == "SecurityGroup").ToList();
-                foreach (var securityGroup in collSecurityGroups)
-                {
-                    if (IsSystemGroup(securityGroup.DisplayName))
-                    {
-                        var sysGroup = GetSystemGroup(record, groupHeaders._accountType, securityGroup.DisplayName);
-
-                        _knownGroups.AddNewGroupsFromHeaders(groupHeaders, sysGroup.Users, sysGroup.Remarks);
-
-                        yield return sysGroup;
-                        continue;
-                    }
-
-                    await foreach (var group in GetSecurityGroupUsersAsync(securityGroup.DisplayName, securityGroup.Id, record, groupHeaders))
-                    {
-                        yield return group;
-                    }
-                }
-            }
-            else
-            {
-                _knownGroups.AddNewGroupsFromHeaders(groupHeaders, "", exceptionMessage);
-
-                yield return record.GetRecordWithUsers(groupHeaders._accountType, "", exceptionMessage); ;
-                yield break;
-            }
         }
 
         private string GetPermissionLevels(RoleDefinitionBindingCollection roleDefinitionsCollection)
