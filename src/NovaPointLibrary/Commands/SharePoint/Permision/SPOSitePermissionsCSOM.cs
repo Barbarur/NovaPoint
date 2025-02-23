@@ -71,14 +71,22 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
             i => i.Versions,
         };
 
-        public SPOSitePermissionsCSOM(LoggerSolution logger, AppInfo appInfo, SPOSitePermissionsCSOMParameters parameters)
+        public SPOSitePermissionsCSOM(LoggerSolution logger, AppInfo appInfo, SPOSitePermissionsCSOMParameters parameters, SPOKnownRoleAssignmentGroups? knownGroups = null)
         {
+            _logger = logger;
+            _appInfo = appInfo;
             _param = parameters;
             _param.ListsParam.ListExpressions = _listExpresions;
             _param.ItemsParam.FileExpresions = _fileExpressions;
             _param.ItemsParam.ItemExpresions = _itemExpressions;
-            _logger = logger;
-            _appInfo = appInfo;
+            if (knownGroups != null)
+            {
+                _knownGroups = knownGroups;
+            }
+            else
+            {
+                _knownGroups = new();
+            }
         }
 
 
@@ -90,11 +98,16 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
 
             Web oSite = await new SPOWebCSOM(_logger, _appInfo).GetAsync(siteUrl, siteExpressions);
 
-            if(!oSite.IsSubSite() && _param.IncludeAdmins)
+            if(!oSite.IsSubSite())
             {
-                await foreach (var record in GetSiteAdminAsync(oSite))
+                _knownGroups.ResetSiteGroups();
+
+                if (_param.IncludeAdmins)
                 {
-                    yield return record;
+                    await foreach (var record in GetSiteAdminAsync(oSite))
+                    {
+                        yield return record;
+                    }
                 }
             }
 

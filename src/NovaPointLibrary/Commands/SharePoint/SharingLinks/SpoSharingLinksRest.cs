@@ -12,14 +12,23 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
 {
     internal class SpoSharingLinksRest
     {
+        private readonly Dictionary<string, KnownItemGroups> Dictionary = new();
         private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
         private readonly Dictionary<string, KnownItemGroups> _dKnownSharingInfo = new();
 
-        internal SpoSharingLinksRest(LoggerSolution logger, Authentication.AppInfo appInfo)
+        internal SpoSharingLinksRest(LoggerSolution logger, Authentication.AppInfo appInfo, Dictionary<string, KnownItemGroups>? dKnownSharingInfo = null)
         {
             _logger = logger;
             _appInfo = appInfo;
+            if (dKnownSharingInfo != null)
+            {
+                _dKnownSharingInfo = dKnownSharingInfo;
+            }
+            else
+            {
+                _dKnownSharingInfo = new();
+            }
         }
 
         internal async Task<SpoSharingLinksRecord> GetFromPrincipalAsync(string siteUrl, Microsoft.SharePoint.Client.Principal principal)
