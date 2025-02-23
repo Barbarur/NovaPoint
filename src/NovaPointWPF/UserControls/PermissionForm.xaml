@@ -34,8 +34,8 @@
 
                             <RadioButton
                                 Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Detailed report"
-                                IsChecked="{Binding DetailedReport, ElementName=root}"/>
+                                Content="Include Permissions"
+                                IsChecked="{Binding IncludePermissions, ElementName=root}"/>
 
                         </StackPanel>
 

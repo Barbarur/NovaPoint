@@ -17,8 +17,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NovaPointLibrary.Commands.SharePoint.User;
 using NovaPointLibrary.Commands.SharePoint.Permission;
-using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointWPF.UserControls;
 
 namespace NovaPointWPF.Pages.Solutions.Report
@@ -28,8 +26,25 @@ namespace NovaPointWPF.Pages.Solutions.Report
     /// </summary>
     public partial class PermissionsReportForm : Page, ISolutionForm
     {
-
-        public bool UserListOnly { get; set; }
+        public bool _userListOnly = false;
+        public bool UserListOnly
+        {
+            get { return _userListOnly; }
+            set
+            {
+                _userListOnly = value;
+                if (value)
+                {
+                    UserForm.AllUsers = true;
+                    UserForm.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    UserForm.Visibility = Visibility.Visible;
+                    UserForm.SingleUser = true;
+                }
+            }
+        }
 
         public bool IncludeAdmins { get; set; }
         public bool IncludeSiteAccess { get; set; }

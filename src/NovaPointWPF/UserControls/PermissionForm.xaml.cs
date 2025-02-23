@@ -1,18 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace NovaPointWPF.UserControls
 {
@@ -30,14 +18,20 @@ namespace NovaPointWPF.UserControls
         public static readonly DependencyProperty UserListOnlyProperty =
             DependencyProperty.Register("UserListOnly", typeof(bool), typeof(PermissionForm), new FrameworkPropertyMetadata(defaultValue: false));
 
-        private bool _detailedReport = true;
-        public bool DetailedReport
+        private bool _includePermissions = true;
+        public bool IncludePermissions
         {
-            get { return _detailedReport; }
+            get { return _includePermissions; }
             set
             {
-                _detailedReport = value;
-                if (value) { DetailPanel.Visibility = Visibility.Visible; }
+                _includePermissions = value;
+                if (value)
+                { 
+                    DetailPanel.Visibility = Visibility.Visible;
+                    IncludeAdmins = true;
+                    IncludeSiteAccess = true;
+                    IncludeUniquePermissions = true;
+                }
                 else
                 {
                     DetailPanel.Visibility = Visibility.Collapsed;
