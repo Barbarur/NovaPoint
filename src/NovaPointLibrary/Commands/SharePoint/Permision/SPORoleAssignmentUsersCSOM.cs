@@ -129,7 +129,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
 
             if (exception != null)
             {
-                KnownGroups.GroupsSharePoint.Add(new(siteUrl, spGroup.Title, "", "", exception.Message));
+                KnownGroups.SharePointGroup.Add(new(siteUrl, spGroup.Title, "", "", exception.Message));
 
                 yield return record.GetRecordWithUsers("", "", exception.Message);
             }
@@ -138,7 +138,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 if (!groupMembers.Any())
                 {
                     var emptyGroupMessage = "SharePoint group with no users";
-                    KnownGroups.GroupsSharePoint.Add(new(siteUrl, spGroup.Title, emptyGroupMessage, emptyGroupMessage, ""));
+                    KnownGroups.SharePointGroup.Add(new(siteUrl, spGroup.Title, emptyGroupMessage, emptyGroupMessage, ""));
                     yield return SPORoleAssignmentUserRecord.GetRecordBlank(emptyGroupMessage);
                     yield break;
                 }
@@ -147,7 +147,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 var users = String.Join(" ", groupMembers.Where(gm => gm.PrincipalType.ToString() == "User").Select(m => m.UserPrincipalName).ToList());
                 if (!string.IsNullOrWhiteSpace(users))
                 {
-                    KnownGroups.GroupsSharePoint.Add(new(siteUrl, spGroup.Title, "Users", users, ""));
+                    KnownGroups.SharePointGroup.Add(new(siteUrl, spGroup.Title, "Users", users, ""));
 
                     yield return record.GetRecordWithUsers("User", users);
                 }
@@ -159,7 +159,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
 
                     foreach (var sgUsersRecord in collSgUsersRecord)
                     {
-                        KnownGroups.GroupsSharePoint.Add(new(siteUrl, spGroup.Title, sgUsersRecord.AccountType, sgUsersRecord.Users, sgUsersRecord.Remarks));
+                        KnownGroups.SharePointGroup.Add(new(siteUrl, spGroup.Title, sgUsersRecord.AccountType, sgUsersRecord.Users, sgUsersRecord.Remarks));
                         yield return new(accessType, spGroup.Id.ToString(), sgUsersRecord.AccountType, sgUsersRecord.Users, permissionLevels, sgUsersRecord.Remarks);
                     }
 
