@@ -34,6 +34,7 @@ namespace NovaPointWPF.UserControls
             set
             {
                 _singleUser = value;
+                CheckDetailed();
                 OnPropertyChanged();
 
                 if (value)
@@ -66,7 +67,9 @@ namespace NovaPointWPF.UserControls
             set
             { 
                 Parameters.IncludeExternalUsers = value;
+                CheckDetailed();
                 OnPropertyChanged();
+                
                 if (value)
                 {
                     AllUsers = false;
@@ -74,9 +77,19 @@ namespace NovaPointWPF.UserControls
                 }
                 else
                 {
-                    CheckUsers(); 
-                    ExternalLabel.Visibility = Visibility.Collapsed; 
+                    CheckUsers();
+                    ExternalLabel.Visibility = Visibility.Collapsed;
                 }
+            }
+        }
+
+        public bool Detailed
+        {
+            get { return Parameters.Detailed; }
+            set
+            {
+                Parameters.Detailed = value;
+                OnPropertyChanged();
             }
         }
 
@@ -152,6 +165,19 @@ namespace NovaPointWPF.UserControls
                 return true;
             }
             else { return false; }
+        }
+
+        private void CheckDetailed()
+        {
+            if (SingleUser || IncludeExternalUsers)
+            {
+                DetailedButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                DetailedButton.Visibility = Visibility.Collapsed;
+                Detailed = false;
+            }
         }
     }
 }

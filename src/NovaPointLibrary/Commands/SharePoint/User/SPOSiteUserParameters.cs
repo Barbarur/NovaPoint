@@ -19,5 +19,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
         public bool IncludeExternalUsers { get; set; } = false;
         public bool IncludeEveryone { get; set; } = false;
         public bool IncludeEveryoneExceptExternal { get; set; } = false;
+
+        public bool Detailed { get; set; } = false;
     }
 }

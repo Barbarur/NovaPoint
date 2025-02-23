@@ -58,6 +58,15 @@
                             Style="{DynamicResource TextBlockBody}"
                             Text="Solution will include all users, guest users and groups."/>
 
+                        <ToggleButton
+                            x:Name="DetailedButton"
+                            Visibility="Collapsed"
+                            Content="Detailed"
+                            Style="{DynamicResource ToggleButtonSolutionForm}"
+                            IsChecked="{Binding Detailed, ElementName=root}"
+                            HorizontalAlignment="Left"
+                            Margin="0,16,0,0"/>
+
                         <StackPanel
                             x:Name="SingleUserPanel"
                             Visibility="Visible">
@@ -80,7 +89,7 @@
                             Visibility="Collapsed"
                             Style="{DynamicResource TextBlockBody}"
                             Text="Solution will include all External users."/>
-
+                        
                         <StackPanel
                             x:Name="SystemGroupPanel"
                             Visibility="Collapsed">

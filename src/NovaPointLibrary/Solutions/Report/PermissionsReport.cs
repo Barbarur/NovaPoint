@@ -1,5 +1,10 @@
-﻿using NovaPointLibrary.Commands.SharePoint.Permission;
+﻿using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Commands.AzureAD.Groups;
+using NovaPointLibrary.Commands.SharePoint.Permission;
+using NovaPointLibrary.Commands.SharePoint.Permission.Utilities;
+using NovaPointLibrary.Commands.SharePoint.SharingLinks;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Commands.SharePoint.User;
 using NovaPointLibrary.Core.Logging;
 using System.Dynamic;
@@ -27,7 +32,11 @@ namespace NovaPointLibrary.Solutions.Report
             u => u.UserPrincipalName,
             u => u.Email,
             u => u.UserId,
+            u => u.PrincipalType,
+            u => u.AadObjectId
         };
+
+        private readonly SPOKnownRoleAssignmentGroups _knownGroups = new();
 
         private PermissionsReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, PermissionsReportParameters parameters)
         {
@@ -59,56 +68,108 @@ namespace NovaPointLibrary.Solutions.Report
             _appInfo.IsCancelled();
 
             SPOSitePermissionsCSOM sitePermissions = new(_logger, _appInfo, _param.PermissionsParam);
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
             {
                 _appInfo.IsCancelled();
 
-                if (siteResults.Ex != null)
+                if (siteRecord.Ex != null)
                 {
-                    AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, SPORoleAssignmentUserRecord.GetRecordBlankException(siteResults.Ex.Message)));
+                    AddRecord(new("Site", siteRecord.SiteName, siteRecord.SiteUrl, SPORoleAssignmentUserRecord.GetRecordBlankException(siteRecord.Ex.Message)));
                     continue;
                 }
 
-                if (_param.OnlyUserList)
+                try
                 {
-                    StringBuilder sb = new();
-                    
-                    await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteResults.SiteUrl, _param.UserParam, _userRetrievalExpressions))
-                    {
-                        _appInfo.IsCancelled();
-
-                        sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
-                    }
-
-                    if (string.IsNullOrWhiteSpace(sb.ToString())) { continue; }
-
-                    SPORoleAssignmentUserRecord record = new("Site user List", "NA", "");
-                    AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, record.GetRecordWithUsers("Site user List", sb.ToString())));
+                    await ProcessSite(siteRecord, sitePermissions);
                 }
-                else
+                catch (Exception ex)
                 {
-                    if (!await IsTargetSite(siteResults.SiteUrl)) { continue; }
-
-                    try
-                    {
-                        await foreach(var record in sitePermissions.GetAsync(siteResults.SiteUrl, siteResults.Progress))
-                        {
-                            _appInfo.IsCancelled();
-
-                            FilterRecord(record);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
-                        AddRecord(new("Site", siteResults.SiteName, siteResults.SiteUrl, SPORoleAssignmentUserRecord.GetRecordBlankException(ex.Message)));
-                    }
+                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    AddRecord(new("Site", siteRecord.SiteName, siteRecord.SiteUrl, SPORoleAssignmentUserRecord.GetRecordBlankException(ex.Message)));
                 }
+                //if (_param.OnlyUserList)
+                //{
+                //    StringBuilder sb = new();
+
+                //    await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _param.UserParam, _userRetrievalExpressions))
+                //    {
+                //        _appInfo.IsCancelled();
+
+                //        sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
+                //    }
+
+                //    if (string.IsNullOrWhiteSpace(sb.ToString())) { continue; }
+
+                //    SPORoleAssignmentUserRecord record = new("Site user List", "NA", "");
+                //    AddRecord(new("Site", siteRecord.SiteName, siteRecord.SiteUrl, record.GetRecordWithUsers("Site user List", sb.ToString())));
+                //}
+                //else
+                //{
+                //    if (!await IsTargetSite(siteRecord.SiteUrl)) { continue; }
+
+                //    try
+                //    {
+                //        await foreach(var record in sitePermissions.GetAsync(siteRecord.SiteUrl, siteRecord.Progress))
+                //        {
+                //            _appInfo.IsCancelled();
+
+                //            if (IsTargetRecord(record))
+                //            {
+                //                AddRecord(record);
+                //            }
+
+                //        }
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                //        AddRecord(new("Site", siteRecord.SiteName, siteRecord.SiteUrl, SPORoleAssignmentUserRecord.GetRecordBlankException(ex.Message)));
+                //    }
+                //}
+
+            }
+        }
+
+        private async Task ProcessSite(SPOTenantSiteUrlsRecord siteRecord, SPOSitePermissionsCSOM sitePermissions)
+        {
+            if (_param.OnlyUserList)
+            {
+                StringBuilder sb = new();
+
+                await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _param.UserParam, _userRetrievalExpressions))
+                {
+                    _appInfo.IsCancelled();
+
+                    sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
+                }
+
+                if (string.IsNullOrWhiteSpace(sb.ToString())) { return; }
+
+                SPORoleAssignmentUserRecord record = new("Site user List", "NA", "");
+                AddRecord(new("Site", siteRecord.SiteName, siteRecord.SiteUrl, record.GetRecordWithUsers("Site user List", sb.ToString())));
+            }
+            else
+            {
+                if (!await IsTargetSite(siteRecord.SiteUrl)) { return; }
+
+                await foreach (var record in sitePermissions.GetAsync(siteRecord.SiteUrl, siteRecord.Progress))
+                {
+                    _appInfo.IsCancelled();
+
+                    if (IsTargetRecord(record))
+                    {
+                        AddRecord(record);
+                    }
+
+                }
+
             }
         }
 
         private async Task<bool> IsTargetSite(string siteUrl)
         {
+            _logger.Info(GetType().Name, $"Checking if site {siteUrl} is target site");
+            
             if (_param.UserParam.AllUsers)
             {
                 return true;
@@ -119,55 +180,144 @@ namespace NovaPointLibrary.Solutions.Report
                 return true;
             }
 
+            if (_param.UserParam.Detailed)
+            {
+                if (await IsTargetSecurityGroup(siteUrl))
+                {
+                    return true;
+                }
+
+                if (await IsTargetInsideSharingLink(siteUrl))
+                {
+                    return true;
+                }
+
+
+            }
+
             return false;
             
         }
 
-        private void FilterRecord(SPOLocationPermissionsRecord record)
+        private async Task<bool> IsTargetSecurityGroup(string siteUrl)
+        {
+            _logger.Info(GetType().Name, $"Checking if site {siteUrl} has target Security Groups");
+
+            var collSiteUsers = await new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteUrl, _userRetrievalExpressions);
+
+            if (collSiteUsers != null)
+            {
+                var collSecurityGroups = collSiteUsers.Where(gm => gm.PrincipalType.ToString() == "SecurityGroup").ToList();
+
+                foreach (var securityGroup in collSecurityGroups)
+                {
+                    var collSgUsersRecord = await new AADGroup(_logger, _appInfo).GetUsersAsync(securityGroup, _knownGroups.SecurityGroups);
+
+                    foreach (var sgUsersRecord in collSgUsersRecord)
+                    {
+                        SPORoleAssignmentUserRecord role = new("", "", sgUsersRecord.AccountType, sgUsersRecord.Users, "", "");
+                        if (IsTargetRole(role))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private async Task<bool> IsTargetInsideSharingLink(string siteUrl)
+        {
+            _logger.Info(GetType().Name, $"Checking if site {siteUrl} has target Sharing Links");
+
+            var collGroups = await new SPOSiteGroupCSOM(_logger, _appInfo).GetSharingLinksAsync(siteUrl);
+
+            SpoSharingLinksRest spoLinks = new(_logger, _appInfo, _knownGroups.SharingLinks);
+            foreach (Group oGroup in collGroups)
+            {
+                _appInfo.IsCancelled();
+
+                var linkInfo = await spoLinks.GetFromGroupAsync(siteUrl, oGroup);
+                SPORoleAssignmentUserRecord role = new($"Sharing link '{linkInfo.SharingLink}'", linkInfo.GroupId, "User", linkInfo.Users, "", "");
+
+                if (IsTargetRole(role))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool IsTargetRecord(SPOLocationPermissionsRecord record)
         {
             if (!string.IsNullOrWhiteSpace(record._role.Remarks))
             {
-                AddRecord(record);
+                return true;
             }
 
-            else if (_param.UserParam.AllUsers)
+            if (_param.UserParam.AllUsers)
             {
-                AddRecord(record);
+                return true;
             }
 
-
-            else if (!string.IsNullOrWhiteSpace(_param.UserParam.IncludeUserUPN) && record._role.Users.Contains(_param.UserParam.IncludeUserUPN, StringComparison.OrdinalIgnoreCase))
+            if (IsTargetRole(record._role))
             {
-                AddRecord(record);
-            }
-            else if (!string.IsNullOrWhiteSpace(_param.UserParam.IncludeUserUPN) && record._role.AccessType.Contains("organization", StringComparison.OrdinalIgnoreCase) && record._role.AccessType.Contains("Sharing link", StringComparison.OrdinalIgnoreCase))
-            {
-                AddRecord(record);
+                return true;
             }
 
-
-            else if (_param.UserParam.IncludeExternalUsers && (record._role.Users.Contains("#ext#", StringComparison.OrdinalIgnoreCase) || record._role.Users.Contains("urn:spo:guest", StringComparison.OrdinalIgnoreCase)))
-            {
-                AddRecord(record);
-                
-            }
-            else if (_param.UserParam.IncludeExternalUsers && record._role.AccessType.Contains("Anyone") && record._role.AccessType.Contains("Sharing link"))
-            {
-                AddRecord(record);
-            }
-
-
-            else if (_param.UserParam.IncludeEveryone && record._role.AccountType.Contains("Everyone", StringComparison.OrdinalIgnoreCase))
-            {
-                AddRecord(record);
-            }
-
-            else if (_param.UserParam.IncludeEveryoneExceptExternal && record._role.AccountType.Contains("Everyone except external users", StringComparison.OrdinalIgnoreCase))
-            {
-                AddRecord(record);
-            }
-
+            return false;
         }
+
+        private bool IsTargetRole(SPORoleAssignmentUserRecord role)
+        {
+
+            if (!string.IsNullOrWhiteSpace(_param.UserParam.IncludeUserUPN))
+            {
+                if (role.Users.Contains(_param.UserParam.IncludeUserUPN, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+                if (role.AccessType.Contains("Sharing link", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (role.AccessType.Contains("organization", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                    if (role.AccessType.Contains("Anyone", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+
+            if (_param.UserParam.IncludeExternalUsers)
+            {
+                if (role.Users.Contains("#ext#", StringComparison.OrdinalIgnoreCase) || role.Users.Contains("urn:spo:guest", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+                else if (role.AccessType.Contains("Anyone") && role.AccessType.Contains("Sharing link", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+
+            if (_param.UserParam.IncludeEveryone && role.AccountType.Contains("Everyone", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+            if (_param.UserParam.IncludeEveryoneExceptExternal && role.AccountType.Contains("Everyone except external users", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
 
         private void AddRecord(SPOLocationPermissionsRecord record)
         {
@@ -195,10 +345,10 @@ namespace NovaPointLibrary.Solutions.Report
     public class PermissionsReportParameters : ISolutionParameters
     {
         public bool OnlyUserList { get; set; } = false;
-        public SPOSiteUserParameters UserParam {  get; set; }
-        internal readonly SPOAdminAccessParameters AdminAccess;
-        internal readonly SPOTenantSiteUrlsParameters SiteParam;
-        public SPOTenantSiteUrlsWithAccessParameters SiteAccParam
+        public SPOSiteUserParameters UserParam { get; set; }
+        public SPOAdminAccessParameters AdminAccess { get; set; }
+        public SPOTenantSiteUrlsParameters SiteParam { get; set; }
+        internal SPOTenantSiteUrlsWithAccessParameters SiteAccParam
         {
             get
             {
@@ -206,6 +356,7 @@ namespace NovaPointLibrary.Solutions.Report
             }
         }
         public SPOSitePermissionsCSOMParameters PermissionsParam {  get; set; }
+        
         public PermissionsReportParameters(
             SPOSiteUserParameters userParam,
             SPOAdminAccessParameters adminAccess, 
