@@ -107,7 +107,7 @@
 
                                 <ToggleButton
                                     Style="{DynamicResource ToggleButtonSites}"
-                                    Content="Team sites (with Teams)"
+                                    Content="Team sites (w/ Teams)"
                                     IsChecked="{Binding IncludeTeamSiteWithTeams, ElementName=root}"
                                     Margin="0,0,8,0"/>
 

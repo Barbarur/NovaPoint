@@ -26,17 +26,15 @@
             VerticalAlignment="Center"
             Margin="0,0,0,30">
 
-            <Image Source="pack://application:,,,/res/img/LogoNovaPoint150x150.png"
-                   Width="150"
-                   Height="150"/>
+            <Image
+                Source="pack://application:,,,/res/img/LogoNovaPoint150x150.png"
+                Width="150"
+                Height="150"/>
 
-            <Label
-                Style="{DynamicResource MenuMainTitleLabel}"
-                Content="NovaPoint"
-                HorizontalAlignment="Center"
-                FontWeight="Heavy"
-                FontSize="40"
-                Margin="0,0,0,9"/>
+            <Image
+                Source="pack://application:,,,/res/img/NovaPointName.png"
+                Width="300"
+                Height="110"/>
 
             <TextBlock
                 Style="{DynamicResource TextBlockSubtitle}"
@@ -50,11 +48,12 @@
 
             <StackPanel
                 Orientation="Horizontal"
-                HorizontalAlignment="Center">
+                HorizontalAlignment="Center"
+                Margin="0, 12">
  
                 <Button
                     Style="{DynamicResource AboutPageButton}"
-                    Content="Documentation"
+                    Content="Read the Docs"
                     Click="GoToDocsClick"/>
                 <Button
                     Style="{DynamicResource AboutPageButton}"
@@ -67,7 +66,7 @@
             <StackPanel
                 Orientation="Horizontal"
                 HorizontalAlignment="Center"
-                Margin="6">
+                Margin="0, 12">
 
                 <NPCustomControls:ButtonSocialMedia
                     ImagePath="pack://application:,,,/res/img/LogoYoutube.png"
@@ -95,6 +94,23 @@
 
 
             </StackPanel>
+
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Text="Do you have any suggestions?"
+                HorizontalAlignment="Center"
+                Margin="0,6"/>
+
+
+            <TextBlock
+                Style="{DynamicResource TextBlockBodyStrong}"
+                HorizontalAlignment="Center">
+                <TextBlock.Inlines>
+                    <Run Text="Contact at"/>
+                    <Run FontWeight="Bold" Text="novapointapp@protonmail.com"/>
+                </TextBlock.Inlines>
+
+            </TextBlock>
 
         </StackPanel>
 

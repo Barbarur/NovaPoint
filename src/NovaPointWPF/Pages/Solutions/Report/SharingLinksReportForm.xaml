@@ -31,7 +31,7 @@
 
                         <ToggleButton
                             Style="{DynamicResource ToggleButtonSolutionForm}"
-                            Content="Breakdown Invitations"
+                            Content="Breakdown Invites"
                             IsChecked="{Binding BreakdownInvitations, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                             Margin="0,0,8,0"/>
 
