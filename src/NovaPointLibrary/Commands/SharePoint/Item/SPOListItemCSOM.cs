@@ -107,9 +107,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
                 if (exception != null)
                 {
-                    if (exception.Message.Contains("exceeds the list view threshold"))
+                    if (camlQuery.FolderServerRelativeUrl != null)
                     {
-                        _logger.UI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Soution will collect all the items and then filter.");
+                        _logger.UI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Solution will collect all the items and then filter.");
                         camlQuery.FolderServerRelativeUrl = null;
                         LongListNotification(list);
                         shouldContinue = true;
