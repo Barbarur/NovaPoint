@@ -22,7 +22,7 @@
             pack://application:,,,/res/font/#Open Sans
         </FontFamily>
 
-        <!--BACKGROUND-->
+        <!--BACKGROUND COLORS-->
 
         <Style x:Key="BorderPrimaryBackgroud" TargetType="{x:Type Border}">
             <Setter Property="Background" Value="{DynamicResource PrimaryBackgroudColor}"/>
@@ -43,7 +43,7 @@
         </Style>
 
 
-        <!--TEXT-->
+        <!--TEXT BLOCKS AND LABELS-->
         
         <Style x:Key="MenuMainTitleLabel" TargetType="{x:Type Label}">
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
@@ -110,9 +110,91 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
 
-
         
-        <!--CONTROL-->
+        
+
+        <!--TEXT BOX-->
+
+        <Style x:Key="TextBoxBase" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="3"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource NPRegularFont}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource LogoPinkColor}"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6"
+                            Padding="9, 7">
+
+                            <ScrollViewer
+                                x:Name="PART_ContentHost"
+                                Focusable="false"
+                                HorizontalScrollBarVisibility="Hidden" 
+                                VerticalScrollBarVisibility="Hidden"
+                                VerticalContentAlignment="Center"/>
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsReadOnly" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Background" Value="{DynamicResource HoverButtonColor}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource HoverButtonColor}"/>
+                            </MultiTrigger>
+                            
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsKeyboardFocusWithin" Value="True"/>
+                                    <Condition Property="IsReadOnly" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource LogoPinkColor}"/>
+                            </MultiTrigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            
+        </Style>
+
+        <Style x:Key="TextBoxBody" BasedOn="{StaticResource TextBoxBase}" TargetType="{x:Type TextBox}">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Regular"/>
+        </Style>
+
+        <Style x:Key="TextBoxSubtitle" BasedOn="{StaticResource TextBoxBase}" TargetType="{x:Type TextBox}">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style x:Key="TextBoxTitle" BasedOn="{StaticResource TextBoxBase}" TargetType="{x:Type TextBox}">
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+
+        <Style x:Key="TextBoxSolutionFormTextInput" BasedOn="{StaticResource TextBoxBody}" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryButtonColor}"/>
+
+        </Style>
+        
+
+        <!--BUTTONS-->
 
         <Style x:Key="ButtonSolutionMainAction" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
@@ -338,6 +420,19 @@
 
         </Style>
 
+        <Style x:Key="ToggleButtonSolutionFormYesNo" BasedOn="{StaticResource ToggleButtonSolutionForm}" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Content" Value="No"/>
+            <Setter Property="Width" Value="90"/>
+
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
+                    <Setter Property="Content" Value="Yes"/>
+                </Trigger>
+            </Style.Triggers>
+
+        </Style>
+
 
         
         
@@ -441,55 +536,6 @@
 
 
 
-        <Style x:Key="TextBoxSolutionFormTextInput" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryButtonColor}"/>
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
-            <Setter Property="BorderThickness" Value="3"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="Regular"/>
-            <Setter Property="FontFamily" Value="Segoe UI Variable Text"/>
-            <Setter Property="SelectionBrush" Value="{DynamicResource CheckedButtonColor}"/>
-            <Setter Property="SelectionTextBrush" Value="{DynamicResource PrimaryBackgroudColor}"/>
-            <Setter Property="SelectionBrush" Value="{DynamicResource LogoPinkColor}"/>
-
-
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="6"
-                            Padding="9, 7">
-
-                            <ScrollViewer
-                                x:Name="PART_ContentHost"
-                                Focusable="false"
-                                HorizontalScrollBarVisibility="Hidden" 
-                                VerticalScrollBarVisibility="Hidden"
-                                VerticalContentAlignment="Center"/>
-
-                        </Border>
-
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource HoverButtonColor}"/>
-                                <Setter Property="BorderBrush" Value="{DynamicResource HoverButtonColor}"/>
-                            </Trigger>
-
-                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
-                                <Setter Property="BorderBrush" Value="{DynamicResource LogoPinkColor}"/>
-                            </Trigger>
-
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
 
 
 
