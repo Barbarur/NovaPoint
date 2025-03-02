@@ -5,7 +5,7 @@ using System.IO;
 
 namespace NovaPointLibrary.Core.Logging
 {
-    internal class SolutionLog
+    public class SolutionLog
     {
         internal string TimeStamp;
         internal string LogType;

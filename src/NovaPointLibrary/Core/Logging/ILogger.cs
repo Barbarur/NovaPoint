@@ -1,24 +1,22 @@
 ﻿using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace NovaPointLibrary.Core.Logging
 {
-    internal interface ILogger
+    public interface ILogger
     {
-        public Action<LogInfo> UiAddLog { get; init; }
+        Action<LogInfo> UiAddLog { get; init; }
 
-        public Task<ILogger> GetSubThreadLogger();
-        public void Info(string classMethod, string log);
-        public void Debug(string classMethod, string log);
-        public void UI(string classMethod, string log);
-        public void Progress(double progress);
-        public void Error(string classMethod, string type, string URL, Exception ex);
+        Task<ILogger> GetSubThreadLogger();
+        void Info(string classMethod, string log);
+        void Debug(string classMethod, string log);
+        void UI(string classMethod, string log);
+        void Progress(double progress);
+        void Error(string classMethod, string type, string URL, Exception ex);
+        void End(Exception? ex = null);
 
-        public void WriteLog(SolutionLog log);
+        void WriteLog(SolutionLog log);
 
+        void WriteRecord<T>(T record);
     }
 }

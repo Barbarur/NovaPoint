@@ -23,8 +23,8 @@ namespace NovaPointLibrary.Core.Logging
         private readonly List<SolutionLog> _cachedLogs = new();
 
         private readonly string _solutionName;
-        private readonly string _solutionFolderPath;
-        private readonly string _solutionFileName;
+        internal readonly string _solutionFolderPath;
+        internal readonly string _solutionFileName;
 
         private  Dictionary<Type, string>? _solutionReports = null;
         private readonly SqliteHandler _sql = SqliteHandler.GetCacheHandler();
@@ -146,6 +146,25 @@ namespace NovaPointLibrary.Core.Logging
             UiAddLog(LogInfo.ErrorNotification($"Error processing {type} '{URL}'."));
         }
 
+        public void End(Exception? ex = null)
+        {
+            if (ex != null)
+            {
+                Error(_solutionName, "Solution", _solutionName, ex);
+                UiAddLog(LogInfo.ErrorNotification($"Exception: {ex.Message}"));
+                UiAddLog(LogInfo.ErrorNotification($"StackTrace: {ex.StackTrace}"));
+                UiAddLog(LogInfo.ErrorNotification($"COMPLETED: Solution has finished with errors!"));
+            }
+            else
+            {
+                UI(GetType().Name, $"COMPLETED: Solution has finished correctly!");
+            }
+
+            SW.Stop();
+            Progress(100);
+        }
+
+
         private void WriteLog(List<SolutionLog> collRecord)
         {
             foreach (var record in collRecord)
@@ -218,32 +237,39 @@ namespace NovaPointLibrary.Core.Logging
 
 
         // SOLUTION FINISH
-        internal void SolutionFinish()
-        {
-            SolutionFinishNotice();
-            UI(GetType().Name, $"COMPLETED: Solution has finished correctly!");
-        }
+        //internal void SolutionFinish()
+        //{
+        //    SolutionFinishNotice();
+        //    UI(GetType().Name, $"COMPLETED: Solution has finished correctly!");
+        //}
 
-        internal void SolutionFinish(Exception ex)
+        internal void SolutionFinish(Exception? ex = null)
         {
-            Error(_solutionName, "Solution", _solutionName, ex);
-            UiAddLog(LogInfo.ErrorNotification($"Exception: {ex.Message}"));
-            UiAddLog(LogInfo.ErrorNotification($"StackTrace: {ex.StackTrace}"));
-
+            Info(GetType().Name, "Finishing solution");
             SolutionFinishNotice();
-            UiAddLog(LogInfo.ErrorNotification($"COMPLETED: Solution has finished with errors!"));
+
+            if (ex != null)
+            {
+                Error(_solutionName, "Solution", _solutionName, ex);
+                UiAddLog(LogInfo.ErrorNotification($"Exception: {ex.Message}"));
+                UiAddLog(LogInfo.ErrorNotification($"StackTrace: {ex.StackTrace}"));
+                UiAddLog(LogInfo.ErrorNotification($"COMPLETED: Solution has finished with errors!"));
+            }
+            else
+            {
+                UI(GetType().Name, $"COMPLETED: Solution has finished correctly!");
+            }
+
+            SW.Stop();
+            Progress(100);
         }
 
         private void SolutionFinishNotice()
         {
-            Info(GetType().Name, "Finishing solution");
-
             ExportAllReports();
 
             ClearCache();
 
-            SW.Stop();
-            Progress(100);
         }
 
 
@@ -259,7 +285,7 @@ namespace NovaPointLibrary.Core.Logging
             }
         }
 
-        internal void WriteRecord<T>(T record)
+        public void WriteRecord<T>(T record)
         {
             _sql.InsertValue(this, record);
         }

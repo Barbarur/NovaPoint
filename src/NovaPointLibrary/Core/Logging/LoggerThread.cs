@@ -76,6 +76,11 @@ namespace NovaPointLibrary.Core.Logging
             UiAddLog(LogInfo.ErrorNotification($"Error processing {type} '{URL}'."));
         }
 
+        public void End(Exception? ex = null)
+        {
+            throw new("End method shouldn't be used on second thread logger");
+        }
+
         private void WriteLog(List<SolutionLog> collRecord)
         {
             foreach (var record in collRecord)
@@ -87,6 +92,11 @@ namespace NovaPointLibrary.Core.Logging
         public void WriteLog(SolutionLog log)
         {
             _parentLogger.WriteLog(log);
+        }
+
+        public void WriteRecord<T>(T record)
+        {
+            _parentLogger.WriteRecord(record);
         }
 
     }
