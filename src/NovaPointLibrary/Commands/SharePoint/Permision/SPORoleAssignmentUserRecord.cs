@@ -32,21 +32,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
             PermissionLevels = permissionLevel;
         }
 
-        internal SPORoleAssignmentUserRecord GetRecordWithUsers(string accountType, string user, string remarks)
+        internal SPORoleAssignmentUserRecord GetRecordWithUsers(string accountType, string user, string remarks = "")
         {
-            SPORoleAssignmentUserRecord record = GetRecordWithUsers(accountType, user);
-            record.Remarks = remarks;
-            return record;
-        }
-
-        internal SPORoleAssignmentUserRecord GetRecordWithUsers(string accountType, string user)
-        {
-            SPORoleAssignmentUserRecord record = new(AccessType, GroupId, PermissionLevels)
-            {
-                AccountType = accountType,
-                Users = user
-            };
-            
+            SPORoleAssignmentUserRecord record = new(AccessType, GroupId, accountType, user, PermissionLevels, remarks);
             return record;
         }
 
@@ -77,7 +65,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
             return record;
         }
 
-        internal static SPORoleAssignmentUserRecord GetRecordBlank(string blank)
+        private static SPORoleAssignmentUserRecord GetRecordBlank(string blank)
         {
             SPORoleAssignmentUserRecord record = new(blank, blank, blank)
             {

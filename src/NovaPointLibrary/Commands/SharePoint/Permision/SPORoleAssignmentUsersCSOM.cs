@@ -139,7 +139,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 {
                     var emptyGroupMessage = "SharePoint group with no users";
                     KnownGroups.SharePointGroup.Add(new(siteUrl, spGroup.Title, emptyGroupMessage, emptyGroupMessage, ""));
-                    yield return SPORoleAssignmentUserRecord.GetRecordBlank(emptyGroupMessage);
+                    yield return record.GetRecordWithUsers(emptyGroupMessage, emptyGroupMessage);
                     yield break;
                 }
 
