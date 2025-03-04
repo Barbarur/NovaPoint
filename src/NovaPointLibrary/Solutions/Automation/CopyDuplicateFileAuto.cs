@@ -67,7 +67,7 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             parameters.SourceItemsParam.FileExpresions = _fileExpressions;
 
-            LoggerSolution logger = new(uiAddLog, "CopyDuplicateFileAuto", parameters);
+            LoggerSolution logger = new(uiAddLog, typeof(CopyDuplicateFileAuto).Name, parameters);
 
             try
             {
@@ -194,6 +194,8 @@ namespace NovaPointLibrary.Solutions.Automation
             sql.ResetTable(_logger, typeof(RESTCopyMoveFileFolder));
             await foreach (var oListItem in new SPOListItemCSOM(_logger, _appInfo).GetAsync(oSourceWeb.Url, oSourceList, _param.SourceItemsParam))
             {
+                _logger.Debug(GetType().Name, $"Caching information for item ({oListItem.Id}) '{oListItem["FileRef"]}'");
+
                 string listItemServerRelativeUrl = (string)oListItem["FileRef"];
                 string listItemFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, oListItem.ParentList.RootFolder.ServerRelativeUrl.Length);
 

@@ -35,8 +35,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         }
         private string _folderDestinationServerRelativeUrl = string.Empty;
 
-        public int FileSizeBytes { get; set; } = -1;
-        public int FileTotalSizeBytes { get; set; } = -1;
+        //public int FileSizeBytes { get; set; } = -1;
+        //public int FileTotalSizeBytes { get; set; } = -1;
 
         internal double _waitingTime = 1000;
 
@@ -51,12 +51,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             SourceServerRelativeUrl = (string)listItem["FileRef"];
             DestinationServerRelativeUrl = destinationServerRelativeUrl;
 
-            if (listItem.FileSystemObjectType.ToString() != "Folder")
-            {
-                FileSizeBytes = Convert.ToInt32(listItem["File_x0020_Size"]);
-                FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)listItem["SMTotalSize"];
-                FileTotalSizeBytes = FileSizeTotalBytes.LookupId;
-            }
+            // TO BE EDITED IN THE FUTURE TO SUPPORT FILES +10Gb
+            //if (listItem.FileSystemObjectType.ToString() != "Folder")
+            //{
+            //    FileSizeBytes = Convert.ToInt32(listItem["File_x0020_Size"]);
+            //    FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)listItem["SMTotalSize"];
+            //    FileTotalSizeBytes = FileSizeTotalBytes.LookupId;
+            //}
 
         }
 
@@ -115,7 +116,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             var contentGetCopyJobProgress = JsonConvert.SerializeObject(copyJobInfo);
 
             api = SiteUrl + "/_api/site/GetCopyJobProgress";
-            logger.Info(GetType().Name, $"Waiting for job to complete {_waitingTime} milliseconds to process {FileSizeBytes} bytes and total {FileTotalSizeBytes} bytes.");
+            //logger.Info(GetType().Name, $"Waiting for job to complete {_waitingTime} milliseconds to process {FileSizeBytes} bytes and total {FileTotalSizeBytes} bytes.");
+            logger.Info(GetType().Name, $"Waiting for job to complete.");
             await Task.Delay((int)_waitingTime);
             string responseGetCopyJobProgress = await new RESTAPIHandler(logger, appInfo).PostAsync(api, contentGetCopyJobProgress);
             logger.Debug(GetType().Name, $"Job progress for {contentCreateCopyJobs} is {responseGetCopyJobProgress}");
@@ -123,7 +125,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             var copyJobProgress = JsonConvert.DeserializeObject<RESTCopyJobProgress>(responseGetCopyJobProgress);
             if (copyJobProgress == null)
             {
-                throw new($"Copy job progress respose is empty.");
+                throw new($"Copy job progress response is empty.");
             }
 
             while (copyJobProgress.JobState != 0)
@@ -136,7 +138,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 copyJobProgress = JsonConvert.DeserializeObject<RESTCopyJobProgress>(responseGetCopyJobProgress);
                 if (copyJobProgress == null)
                 {
-                    throw new($"Copy job progress respose is empty.");
+                    throw new($"Copy job progress response is empty.");
                 }
             }
 
