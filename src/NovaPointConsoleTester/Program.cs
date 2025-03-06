@@ -15,7 +15,7 @@ namespace NovaPointConsoleTester
 
             try
             {
-                //await new SolutionsTester().TestSolution();
+                await new SolutionsTester().TestSolution();
             }
             catch (Exception ex)
             {

@@ -98,34 +98,32 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 _appInfo.IsCancelled();
 
+                ItemReportRecord record = new(tenantItemRecord);
                 if (tenantItemRecord.Ex != null)
                 {
-                    ItemReportRecord record = new(tenantItemRecord);
                     RecordCSV(record);
                     continue;
                 }
 
                 if (tenantItemRecord.Item == null || tenantItemRecord.List == null)
                 {
-                    ItemReportRecord record = new(tenantItemRecord)
-                    {
-                        Remarks = "Item or List is null",
-                    };
+                    record.Remarks = "Item or List is null";
                     RecordCSV(record);
                     continue;
                 }
 
+
                 try
                 {
-                    ItemReportRecord record = new(tenantItemRecord);
                     await record.AddDetails(_logger, _appInfo, tenantItemRecord.Item);
-                    RecordCSV(record);
                 }
                 catch (Exception ex)
                 {
                     _logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
-
-                    ItemReportRecord record = new(tenantItemRecord, ex.Message);
+                    record.Remarks = ex.Message;
+                }
+                finally
+                {
                     RecordCSV(record);
                 }
             }
@@ -217,8 +215,16 @@ namespace NovaPointLibrary.Solutions.Report
             else if (oItem.ParentList.BaseType == BaseType.DocumentLibrary)
             {
                 ItemSizeMb = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2).ToString();
-                FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)oItem["SMTotalSize"];
-                ItemSizeTotalMB = Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2).ToString();
+                try
+                {
+                    FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)oItem["SMTotalSize"];
+                    ItemSizeTotalMB = Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2).ToString();
+                }
+                catch
+                {
+                    string FileSizeTotalBytes = (string)oItem["SMTotalSize"];
+                    ItemSizeTotalMB = Math.Round(long.Parse(FileSizeTotalBytes) / Math.Pow(1024, 2), 2).ToString();
+                }
 
                 FileCheckOut = oItem.File.CheckOutType.ToString();
             }
