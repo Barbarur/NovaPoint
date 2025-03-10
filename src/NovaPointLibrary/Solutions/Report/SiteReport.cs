@@ -200,6 +200,9 @@ namespace NovaPointLibrary.Solutions.Report
             }
             catch (Exception ex)
             {
+                siteRecord.IsHubSite = "Error";
+                siteRecord.HubSiteId = ex.Message;
+                siteRecord.Remarks = "Error while processing the site. Check the columns on this for the error message.";
                 _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
             }
         }
@@ -214,8 +217,9 @@ namespace NovaPointLibrary.Solutions.Report
             }
             catch (Exception ex)
             {
-                _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                 countSharingLinks = ex.Message;
+                siteRecord.Remarks = "Error while processing the site. Check the columns on this for the error message.";
+                _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
             }
             siteRecord.AddSharingLinks(countSharingLinks);
         }
@@ -232,8 +236,10 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     privacy = ex.Message;
+                    siteRecord.Remarks = "Error while processing the site. Check the columns on this for the error message.";
+                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+
                 }
             }
             else
