@@ -38,8 +38,8 @@ namespace NovaPointLibrary.Commands.Utilities.RESTModel
         public string odataeditLink { get; set; }
         public string AdditionalFileStreamSize { get; set; }
         public DateTime LastModified { get; set; }
-        public int TotalFileCount { get; set; }
-        public int TotalFileStreamSize { get; set; }
-        public int TotalSize { get; set; }
+        public long TotalFileCount { get; set; }
+        public long TotalFileStreamSize { get; set; }
+        public long TotalSize { get; set; }
     }
 }
