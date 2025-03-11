@@ -46,7 +46,11 @@ namespace NovaPointLibrary.Core.SQLite
             foreach (var propertyInfo in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 sbColumns.Append($"{propertyInfo.Name},");
-                sbValues.Append($"'{propertyInfo.GetValue(obj)}',");
+
+                object? propertyValue = propertyInfo.GetValue(obj);
+                string stringValue = propertyValue?.ToString() ?? string.Empty;
+                string sanitizedValue = stringValue.Replace("'", string.Empty);
+                sbValues.Append($"'{sanitizedValue}',");
             }
             sbColumns.Length--;
             sbColumns.Append(")");
