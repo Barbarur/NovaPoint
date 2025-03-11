@@ -296,7 +296,7 @@ namespace NovaPointLibrary.Core.Logging
 
             foreach (var key in _solutionReports.Keys)
             {
-                _sql.DropTable(this, key.GetType());
+                _sql.DropTable(this, key);
             }
         }
 
