@@ -14,7 +14,7 @@ namespace NovaPointLibrary.Solutions.Automation
         public readonly static String s_SolutionName = "Copy or Duplicate Files across Sites";
         public readonly static String s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-CopyDuplicateFileAuto";
 
-        private CopyDuplicateFileAutoParameters _param;
+        private readonly CopyDuplicateFileAutoParameters _param;
         private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
@@ -146,7 +146,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 destinationServerRelativeUrl = oDestinationFolder.ServerRelativeUrl;
             }
 
-            _logger.UI(GetType().Name, "Getting Files from source locaton.");
+            _logger.UI(GetType().Name, "Getting Files from source location.");
             var sql = SqliteHandler.GetCacheHandler();
             try
             {
@@ -162,26 +162,26 @@ namespace NovaPointLibrary.Solutions.Automation
             {
                 try
                 {
-                    _logger.UI(GetType().Name, "Adding Site Collection Admin from source site.");
+                    _logger.UI(GetType().Name, "Removing Site Collection Admin from source site.");
                     await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(oSourceWeb.Url, adminUPN);
                 }
                 catch (Exception ex)
                 {
                     _logger.Error(GetType().Name, "Site", oSourceWeb.Url, ex);
-                    string errorMessage = $"Error removing Site Collection Admin fromm site {oSourceWeb.Url}. {ex.Message}";
+                    string errorMessage = $"Error removing Site Collection Admin from site {oSourceWeb.Url}. {ex.Message}";
 
                     RecordCSV(new(_param, "Failed", remarks: errorMessage));
                 }
 
                 try
                 {
-                    _logger.UI(GetType().Name, "Adding Site Collection Admin from destination site.");
+                    _logger.UI(GetType().Name, "Removing Site Collection Admin from destination site.");
                     await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(oDestinationWeb.Url, adminUPN);
                 }
                 catch (Exception ex)
                 {
                     _logger.Error(GetType().Name, "Site", oDestinationWeb.Url, ex);
-                    string errorMessage = $"Error removing Site Collection Admin fromm site {oDestinationWeb.Url}. {ex.Message}";
+                    string errorMessage = $"Error removing Site Collection Admin from site {oDestinationWeb.Url}. {ex.Message}";
 
                     RecordCSV(new(_param, "Failed", remarks: errorMessage));
                 }
