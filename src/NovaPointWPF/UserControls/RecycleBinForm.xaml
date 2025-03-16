@@ -45,7 +45,7 @@
 
                         <StackPanel
                             x:Name="FilterPanel"
-                            Visibility="Visible">
+                            Visibility="Collapsed">
 
                             <TextBlock
                                 Style="{DynamicResource TextBlockBody}"
