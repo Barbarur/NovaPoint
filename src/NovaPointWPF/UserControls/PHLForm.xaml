@@ -79,18 +79,21 @@
 
                                         <ComboBox
                                             x:Name="CBAfterMonth"
+                                            Margin="2,0,0,0"
                                             Style="{DynamicResource SolutionFormComboBox}"
                                             SelectionChanged="DateTimeAfterSelectionChanged"
                                             Width="90"/>
 
                                         <ComboBox
                                             x:Name="CBAfterDay"
+                                            Margin="2,0,0,0"
                                             Style="{DynamicResource SolutionFormComboBox}"
                                             Width="45"
                                             SelectionChanged="DateTimeAfterSelectionChanged"/>
 
                                         <ComboBox
                                             x:Name="CBAfterHour"
+                                            Margin="2,0,0,0"
                                             Style="{DynamicResource SolutionFormComboBox}"
                                             Width="65"
                                             SelectionChanged="DateTimeAfterSelectionChanged"/>
@@ -118,18 +121,21 @@
 
                                         <ComboBox
                                             x:Name="CBBeforeMonth"
+                                            Margin="2,0,0,0"
                                             Style="{DynamicResource SolutionFormComboBox}"
                                             SelectionChanged="DateTimeBeforeSelectionChanged"
                                             Width="90"/>
 
                                         <ComboBox
                                             x:Name="CBBeforeDay"
+                                            Margin="2,0,0,0"
                                             Style="{DynamicResource SolutionFormComboBox}"
                                             Width="45"
                                             SelectionChanged="DateTimeBeforeSelectionChanged"/>
 
                                         <ComboBox
                                             x:Name="CBBeforeHour"
+                                            Margin="2,0,0,0"
                                             Style="{DynamicResource SolutionFormComboBox}"
                                             Width="65"
                                             SelectionChanged="DateTimeBeforeSelectionChanged"/>

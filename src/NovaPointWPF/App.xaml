@@ -442,7 +442,6 @@
         <!--https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/combobox-styles-and-templates?view=netframeworkdesktop-4.8-->
         <Style x:Key="SolutionFormComboBox" TargetType="{x:Type ComboBox}">
             <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
-            <Setter Property="Margin" Value="2, 2, 2, 2"/>
             <Setter Property="Width" Value="150"/>
             <Setter Property="Template">
                 <Setter.Value>
