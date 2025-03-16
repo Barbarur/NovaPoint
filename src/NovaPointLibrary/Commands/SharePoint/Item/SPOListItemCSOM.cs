@@ -2,6 +2,7 @@
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
+using System.Text;
 using System.Xml.Linq;
 
 
@@ -38,35 +39,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             _appInfo.IsCancelled();
             _logger.Info(GetType().Name, $"Start getting Items by batch");
 
-            CamlQuery camlQuery = CamlQuery.CreateAllItemsQuery();
-
-            if (parameters.AllItems)
-            {
-                LongListNotification(list);
-            }
-            else
-            {
-                string folderServerRelativeUrl = parameters.GetFolderServerRelativeURL(siteUrl);
-                camlQuery.FolderServerRelativeUrl = folderServerRelativeUrl;
-                _logger.Debug(GetType().Name, $"Folder ServerRelativeUrl {folderServerRelativeUrl}");
-            }
-
-            var queryElement = XElement.Parse(camlQuery.ViewXml);
-            var rowLimit = queryElement.Descendants("RowLimit").FirstOrDefault();
-            if (rowLimit != null)
-            {
-                rowLimit.RemoveAll();
-            }
-            else
-            {
-                rowLimit = new XElement("RowLimit");
-                queryElement.Add(rowLimit);
-            }
-
-            rowLimit.SetAttributeValue("Paged", "TRUE");
-            rowLimit.SetValue(5000);
-
-            camlQuery.ViewXml = queryElement.ToString();
+            CamlQuery camlQuery = GetCamlQuery(siteUrl, parameters);
 
             Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] expressions;
             if (list.BaseType == BaseType.DocumentLibrary)
@@ -87,6 +60,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             Microsoft.SharePoint.Client.List oList;
             _logger.Info(GetType().Name, $"Start Loop");
             bool shouldContinue = false;
+            bool firstTry = true;
             do
             {
                 _appInfo.IsCancelled();
@@ -107,12 +81,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
                 if (exception != null)
                 {
-                    if (camlQuery.FolderServerRelativeUrl != null)
+                    if (parameters.AllItems == false && firstTry)
                     {
-                        _logger.UI(GetType().Name, $"The number of files in the target location exceeds the list view threshold. The Solution will collect all the items and then filter.");
-                        camlQuery.FolderServerRelativeUrl = null;
                         LongListNotification(list);
                         shouldContinue = true;
+                        firstTry = false;
+                        camlQuery = GetCamlQuery("", "");
                     }
                     else
                     {
@@ -155,20 +129,80 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             {
                 foreach (var oItem in listItemCollection)
                 {
-                    if (parameters.AllItems)
+                    if (parameters.MatchParameters(oItem))
                     {
                         yield return oItem;
-                    }
-                    else if (!String.IsNullOrWhiteSpace(parameters.FolderSiteRelativeUrl))
-                    {
-                        if (oItem["FileRef"].ToString() != null && oItem["FileRef"].ToString().Contains(folderServerRelativeUrl))
-                        {
-                            yield return oItem;
-                        }
                     }
                 }
             }
         }
+
+        internal CamlQuery GetCamlQuery(string siteUrl, SPOItemsParameters parameters)
+        {
+            StringBuilder sbQuery = new();
+            if (parameters.CreatedAfter > DateTime.MinValue)
+            {
+                sbQuery.Append($"<Gt><FieldRef Name='Created'/><Value IncludeTimeValue='TRUE' Type='DateTime'>{parameters.CreatedAfter}</Value></Gt>");
+            }
+            if (parameters.CreatedBefore < DateTime.MaxValue)
+            {
+                sbQuery.Append($"<Lt><FieldRef Name='Created'/><Value IncludeTimeValue='TRUE' Type='DateTime'>{parameters.CreatedBefore}</Value></Lt>");
+            }
+            if (parameters.ModifiedAfter > DateTime.MinValue)
+            {
+                sbQuery.Append($"<Gt><FieldRef Name='Modified'/><Value IncludeTimeValue='TRUE' Type='DateTime'>{parameters.ModifiedAfter}</Value></Gt>");
+            }
+            if (parameters.ModifiedBefore < DateTime.MaxValue)
+            {
+                sbQuery.Append($"<Lt><FieldRef Name='Modified'/><Value IncludeTimeValue='TRUE' Type='DateTime'>{parameters.ModifiedBefore}</Value></Lt>");
+            }
+
+            string viewXml;
+            if (sbQuery.Length > 0)
+            {
+                viewXml = $"<View Scope='RecursiveAll'><Query><Where>{sbQuery}</Where></Query></View>";
+                _logger.Debug(GetType().Name, $"ViewXml = {viewXml}");
+            }
+            else
+            {
+                viewXml = "";
+            }
+
+            return GetCamlQuery(viewXml, parameters.GetFolderServerRelativeURL(siteUrl));
+        }
+
+        internal CamlQuery GetCamlQuery(string viewXml, string folderServerRelativeUrl)
+        {
+            _logger.Debug(GetType().Name, $"Getting CAML Query: ViewXml {viewXml}, FolderServerRelativeUrl {folderServerRelativeUrl}");
+
+            CamlQuery camlQuery = string.IsNullOrWhiteSpace(viewXml) ? CamlQuery.CreateAllItemsQuery() : new CamlQuery { ViewXml = viewXml };
+
+            if (!string.IsNullOrWhiteSpace(folderServerRelativeUrl))
+            {
+                _logger.Debug(GetType().Name, $"Folder ServerRelativeUrl {folderServerRelativeUrl}");
+                camlQuery.FolderServerRelativeUrl = folderServerRelativeUrl;
+            }
+            
+            var queryElement = XElement.Parse(camlQuery.ViewXml);
+            var rowLimit = queryElement.Descendants("RowLimit").FirstOrDefault();
+            if (rowLimit != null)
+            {
+                rowLimit.RemoveAll();
+            }
+            else
+            {
+                rowLimit = new XElement("RowLimit");
+                queryElement.Add(rowLimit);
+            }
+
+            rowLimit.SetAttributeValue("Paged", "TRUE");
+            rowLimit.SetValue(5000);
+
+            camlQuery.ViewXml = queryElement.ToString();
+
+            return camlQuery;
+        }
+
 
         internal void LongListNotification(Microsoft.SharePoint.Client.List oList)
         {
