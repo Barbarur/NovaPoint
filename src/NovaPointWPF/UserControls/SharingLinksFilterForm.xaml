@@ -52,7 +52,7 @@
 
                         <TextBlock
                             Style="{DynamicResource TextBlockBody}"
-                            Text="Type of Sharing link"
+                            Text="Permissions for the link"
                             Margin="0,16,0,0"/>
 
                         <ToggleButton
@@ -65,24 +65,24 @@
                         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                             <ToggleButton
                                 Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Can Edit"
+                                Content="Can edit"
                                 IsChecked="{Binding IncludeCanEdit, ElementName=root}"/>
 
                             <ToggleButton
                                 Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Can Review"
+                                Content="Can review"
                                 IsChecked="{Binding IncludeCanReview, ElementName=root}"
                                 Margin=" 8, 0, 0, 0"/>
 
                             <ToggleButton
                                 Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Can't Download"
+                                Content="Can't download"
                                 IsChecked="{Binding IncludeCanNotDownload, ElementName=root}"
                                 Margin=" 8, 0, 0, 0"/>
 
                             <ToggleButton
                                 Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Can View"
+                                Content="Can view"
                                 IsChecked="{Binding IncludeCanView, ElementName=root}"
                                 Margin=" 8, 0, 0, 0"/>
                         </StackPanel>
