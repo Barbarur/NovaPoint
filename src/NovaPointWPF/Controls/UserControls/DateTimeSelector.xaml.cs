@@ -102,20 +102,19 @@ namespace NovaPointWPF.Controls.UserControls
         private void AddYears()
         {
             int todayYear = DateTime.Today.Year;
-            List<string> listYears = [];
+            ListYears = [];
             for (int year = FirstYear; year <= todayYear; year++)
             {
-                listYears.Add(year.ToString());
+                ListYears.Add(year.ToString());
             }
-            ComboBoxYear.ItemsSource = listYears;
-            ListYears = listYears;
+            ComboBoxYear.ItemsSource = ListYears;
             if (IsAfter)
             {
                 int y = ListYears.IndexOf(SelectedYear.ToString());
                 if (y > -1) { ComboBoxYear.SelectedIndex = y; }
                 else { ComboBoxYear.SelectedIndex = 0; }
             }
-            else { ComboBoxYear.SelectedIndex = listYears.Count - 1; }
+            else { ComboBoxYear.SelectedIndex = ListYears.Count - 1; }
         }
 
         private void AddMonths()
@@ -126,6 +125,7 @@ namespace NovaPointWPF.Controls.UserControls
         }
         private void AddDays()
         {
+            ListDays = [];
             for (int day = 1; day <= 31; day++)
             {
                 ListDays.Add(day.ToString());
@@ -137,6 +137,7 @@ namespace NovaPointWPF.Controls.UserControls
 
         private void AddHours()
         {
+            ListHours = [];
             List<string> hours = new() { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" };
             foreach (var h in hours)
             {
@@ -151,31 +152,6 @@ namespace NovaPointWPF.Controls.UserControls
         private void DateTimeAfterSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SetDateTimeSelected();
-            //string? year = ComboBoxYear.SelectedItem as string;
-            //string? month = ComboBoxMonth.SelectedItem as string;
-            //string? day = ComboBoxDay.SelectedItem as string;
-            //string? hour = ComboBoxHour.SelectedItem as string;
-
-            //if (!string.IsNullOrWhiteSpace(year) && !string.IsNullOrWhiteSpace(month) && !string.IsNullOrWhiteSpace(day) && !string.IsNullOrWhiteSpace(hour))
-            //{
-            //    string value = year + " " + month + " " + day + " " + hour;
-
-            //    DateTime dateTime;
-            //    try
-            //    {
-            //        dateTime = DateTime.ParseExact(value, "yyyy MMMM d HH:mm",
-            //                            System.Globalization.CultureInfo.InvariantCulture);
-
-            //        DateTimeSelected = dateTime;
-            //    }
-            //    catch
-            //    {
-            //        int y = FirstYear + ListYears.IndexOf(year);
-            //        int m = ListMonths.IndexOf(month) + 1;
-            //        var daysMonth = DateTime.DaysInMonth(y, m);
-            //        ComboBoxDay.SelectedIndex = daysMonth - 1;
-            //    }
-            //}
         }
 
         private void SetDateTimeSelected()
