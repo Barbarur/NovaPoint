@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NovaPointWPF.UserControls"
+             xmlns:npusercontrols="clr-namespace:NovaPointWPF.Controls.UserControls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              x:Name="root">
@@ -14,10 +15,10 @@
 
         <StackPanel>
 
-            <TextBlock
-                x:Name="MainLabel"
-                Style="{DynamicResource TextBlockBodyStrong}"
-                Text="Library and List filter"/>
+            <npusercontrols:FilterTitle
+                x:Name="FilterTitleLabel"
+                Title="Library and List filter"
+                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-library-and-list-filter"/>
 
             <Grid Style="{DynamicResource SolutionMenuGrid}">
 

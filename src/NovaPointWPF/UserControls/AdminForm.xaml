@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NovaPointWPF.UserControls"
+             xmlns:npusercontrols="clr-namespace:NovaPointWPF.Controls.UserControls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="600"
              x:Name="root">
@@ -13,9 +14,10 @@
 
         <StackPanel>
 
-            <TextBlock
-                Style="{DynamicResource TextBlockBodyStrong}"
-                Text="Site Collection Administrator is required to run the Solution"/>
+            <npusercontrols:FilterTitle
+                x:Name="FilterTitleLabel"
+                Title="Site Collection Administrator is required to run the Solution"
+                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-site-collection-admin"/>
 
             <Grid Style="{DynamicResource SolutionMenuGrid}">
 

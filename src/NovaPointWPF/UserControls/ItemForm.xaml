@@ -14,21 +14,10 @@
 
         <StackPanel>
 
-            <StackPanel Orientation="Horizontal">
-                <TextBlock
-                    x:Name="MainLabel"
-                    Style="{DynamicResource TextBlockBodyStrong}"
-                    Text="Files and Items filter"/>
-
-                <TextBlock Style="{DynamicResource TextBlockBody}" Margin="8,0,0,0" VerticalAlignment="Bottom">
-                    <TextBlock.Inlines>
-                        <Hyperlink Click="ReadTheDocsClick"  Foreground="{DynamicResource PrimaryTextColor}" FontStyle="Italic">
-                            <Run Text="Learn more"/>
-                        </Hyperlink>
-                    </TextBlock.Inlines>
-
-                </TextBlock>
-            </StackPanel>
+            <npusercontrols:FilterTitle
+                x:Name="FilterTitleLabel"
+                Title="Files and Items filter"
+                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-files-and-items-filter"/>
 
             <Grid Style="{DynamicResource SolutionMenuGrid}">
 

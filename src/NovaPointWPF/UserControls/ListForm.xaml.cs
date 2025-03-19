@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Commands.SharePoint.List;
+using NovaPointWPF.Controls.UserControls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -34,19 +35,19 @@ namespace NovaPointWPF.UserControls
                 _filterTarget = value;
                 if (value == "List")
                 {
-                    MainLabel.Text= "List filter";
+                    FilterTitleLabel.Title = "List filter";
                     AllButton.Content = "All lists";
                     SingleButton.Content = "Single list";
                 }
                 else if (value == "Library")
                 {
-                    MainLabel.Text = "Library filter";
+                    FilterTitleLabel.Title = "Library filter";
                     AllButton.Content = "All libraries";
                     SingleButton.Content = "Single library";
                 }
                 else
                 {
-                    MainLabel.Text = "Library and List filter";
+                    FilterTitleLabel.Title = "Library and List filter";
                     AllButton.Content = "All libraries and lists";
                     SingleButton.Content = "Single library or list";
                 }

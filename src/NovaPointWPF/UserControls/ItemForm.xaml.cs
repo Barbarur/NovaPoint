@@ -261,17 +261,17 @@ namespace NovaPointWPF.UserControls
                 _filterTarget = value;
                 if (value == "List")
                 {
-                    MainLabel.Text = "Item filter";
+                    FilterTitleLabel.Title = "Item filter";
                     AllButton.Content = "All Items";
                 }
                 else if (value == "Library")
                 {
-                    MainLabel.Text = "File filter";
+                    FilterTitleLabel.Title = "File filter";
                     AllButton.Content = "All files";
                 }
                 else
                 {
-                    MainLabel.Text = "Files and Items filter";
+                    FilterTitleLabel.Title = "Files and Items filter";
                     AllButton.Content = "All files and items";
                 }
             }
