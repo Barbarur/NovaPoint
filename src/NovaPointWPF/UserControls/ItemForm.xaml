@@ -9,8 +9,7 @@
              d:DesignHeight="600" d:DesignWidth="800"
              x:Name="root">
 
-    <Grid
-        Background="Transparent">
+    <Grid>
 
         <StackPanel>
 
@@ -47,166 +46,90 @@
                             Visibility="Collapsed"
                             Margin="0,16,0,0">
 
-                            <Grid Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <TextBlock Style="{DynamicResource TextBlockBody}" Text="Created by"/>
 
-                                <ToggleButton
-                                    Grid.Column="0"
-                                    HorizontalAlignment="Left"
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Created after"
-                                    IsChecked="{Binding CreatedAfter, ElementName=root}"/>
-
-                                <npusercontrols:DateTimeSelector
-                                    x:Name="ComboBoxCreatedAfter"
-                                    Grid.Column="1"
-                                    IsAfter="true"
-                                    Visibility="Collapsed"
-                                    Margin="8,0,0,0"
-                                    DateTimeSelected="{Binding CreatedAfterDateTime, Mode=TwoWay, ElementName=root}"/>
-
-                            </Grid>
-
-                            <Grid Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <ToggleButton
-                                    Grid.Column="0"
-                                    HorizontalAlignment="Left"
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Created before"
-                                    IsChecked="{Binding CreatedBefore, ElementName=root}"/>
-
-                                <npusercontrols:DateTimeSelector
-                                    x:Name="ComboBoxCreatedBefore"
-                                    Grid.Column="1"
-                                    IsAfter="false"
-                                    Visibility="Collapsed"
-                                    Margin="8,0,0,0"
-                                    DateTimeSelected="{Binding CreatedBeforeDateTime, Mode=TwoWay, ElementName=root}"/>
-
-                            </Grid>
-
-                            <Grid Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <ToggleButton
-                                    Grid.Column="0"
-                                    HorizontalAlignment="Left"
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Created by"
-                                    IsChecked="{Binding CreatedBy, ElementName=root}"/>
-
-                                <TextBox
-                                    x:Name="TextBoxCreatedBy"
-                                    Grid.Column="1"
-                                    Visibility="Collapsed"
-                                    Margin="8,0,0,0"
-                                    Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                                    Text="{Binding CreatedByEmail, ElementName=root}"/>
-
-                            </Grid>
-
-                            <Grid Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <ToggleButton
-                                    Grid.Column="0"
-                                    HorizontalAlignment="Left"
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Modified after"
-                                    IsChecked="{Binding ModifiedAfter, ElementName=root}"/>
-
-                                <npusercontrols:DateTimeSelector
-                                    x:Name="ComboBoxModifiedAfter"
-                                    Grid.Column="1"
-                                    IsAfter="true"
-                                    Visibility="Collapsed"
-                                    Margin="8,0,0,0"
-                                    DateTimeSelected="{Binding ModifiedAfterDateTime, Mode=TwoWay, ElementName=root}"/>
-
-
-                            </Grid>
-
-                            <Grid Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <ToggleButton
-                                    Grid.Column="0"
-                                    HorizontalAlignment="Left"
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Modified before"
-                                    IsChecked="{Binding ModifiedBefore, ElementName=root}"/>
-
-                                <npusercontrols:DateTimeSelector
-                                    x:Name="ComboBoxModifiedBefore"
-                                    Grid.Column="1"
-                                    IsAfter="false"
-                                    Visibility="Collapsed"
-                                    Margin="8,0,0,0"
-                                    DateTimeSelected="{Binding ModifiedBeforeDateTime, Mode=TwoWay, ElementName=root}"/>
-
-                            </Grid>
-
-                            <Grid Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <ToggleButton
-                                    Grid.Column="0"
-                                    HorizontalAlignment="Left"
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Modified by"
-                                    IsChecked="{Binding ModifiedBy, ElementName=root}"/>
-
-                                <TextBox
-                                    x:Name="TextBoxModifiedBy"
-                                    Grid.Column="1"
-                                    Margin="8,0,0,0"
-                                    Visibility="Collapsed"
-                                    Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                                    Text="{Binding ModifiedByEmail, ElementName=root}"
-                                    HorizontalAlignment="Stretch"/>
-
-                            </Grid>
-
-                            <ToggleButton
+                            <TextBox
+                                x:Name="TextBoxCreatedBy"
                                 Margin="0,8,0,0"
-                                HorizontalAlignment="Left"
-                                Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Folder path"
-                                IsChecked="{Binding FolderPath, ElementName=root}"/>
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding CreatedByEmail, ElementName=root}"/>
 
-                            <StackPanel
-                                x:Name="PanelFolderPath"
+
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Style="{DynamicResource TextBlockBody}" Text="Created after"/>
+
+                                    <npusercontrols:DateTimeSelector
+                                        x:Name="ComboBoxCreatedAfter"
+                                        IsAfter="true"
+                                        Margin="0,8,0,0"
+                                        DateTimeSelected="{Binding CreatedAfterDateTime, Mode=TwoWay, ElementName=root}"/>
+
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Style="{DynamicResource TextBlockBody}" Text="Created before"/>
+
+                                    <npusercontrols:DateTimeSelector
+                                        x:Name="ComboBoxCreatedBefore"
+                                        IsAfter="false"
+                                        Margin="0,8,0,0"
+                                        DateTimeSelected="{Binding CreatedBeforeDateTime, Mode=TwoWay, ElementName=root}"/>
+
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Style="{DynamicResource TextBlockBody}" Text="Modified by" Margin="0,8,0,0"/>
+
+                            <TextBox
+                                x:Name="TextBoxModifiedBy"
+                                Grid.Column="1"
                                 Margin="0,8,0,0"
-                                Visibility="Collapsed">
-                                
-                                <TextBlock
-                                    Style="{DynamicResource TextBlockBody}"
-                                    Text="Site relative path of the folder"
-                                    Margin="0,0,0,2"/>
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding ModifiedByEmail, ElementName=root}"/>
+
+
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Style="{DynamicResource TextBlockBody}" Text="Modified after"/>
+
+                                    <npusercontrols:DateTimeSelector
+                                        x:Name="ComboBoxModifiedAfter"
+                                        IsAfter="true"
+                                        Margin="0,8,0,0"
+                                        DateTimeSelected="{Binding ModifiedAfterDateTime, Mode=TwoWay, ElementName=root}"/>
+
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Style="{DynamicResource TextBlockBody}" Text="Modified before"/>
+
+                                    <npusercontrols:DateTimeSelector
+                                        x:Name="ComboBoxModifiedBefore"
+                                        IsAfter="false"
+                                        Margin="0,8,0,0"
+                                        DateTimeSelected="{Binding ModifiedBeforeDateTime, Mode=TwoWay, ElementName=root}"/>
+
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Margin="0,8,0,0" >
 
                                 <TextBlock
                                     Style="{DynamicResource TextBlockBody}"
-                                    Margin="16,0,0,2">
+                                    Text="Site relative path of the folder"/>
+
+                                <TextBlock Style="{DynamicResource TextBlockBody}" Margin="16,2,0,0">
                                     <TextBlock.Inlines>
                                         <Run Text="If the folder path is"/>
                                         <Run FontStyle="Italic" Text="https://domain.sharepoint.com/sites/SiteName"/>
@@ -215,9 +138,7 @@
 
                                 </TextBlock>
 
-                                <TextBlock
-                                    Style="{DynamicResource TextBlockBody}"
-                                    Margin="16,0,0,8">
+                                <TextBlock Style="{DynamicResource TextBlockBody}" Margin="16,2,0,8">
                                     <TextBlock.Inlines>
                                         <Run Text="You should write"/>
                                         <Run FontWeight="Bold" FontStyle="Italic" Text="/Library Name/Folder/Subfolder"/>
@@ -229,7 +150,7 @@
                                     x:Name="SiteUrlTextBox"
                                     Style="{DynamicResource TextBoxSolutionFormTextInput}"
                                     Text="{Binding FolderSiteRelativeUrl, ElementName=root}"/>
-                            
+
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>

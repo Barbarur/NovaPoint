@@ -1,7 +1,6 @@
 ﻿using NovaPointLibrary.Commands.SharePoint.Item;
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,102 +31,40 @@ namespace NovaPointWPF.UserControls
                 if (value)
                 {
                     FilterPanel.Visibility = Visibility.Visible;
+                    ComboBoxCreatedAfter.Reset();
+                    ComboBoxCreatedBefore.Reset();
+                    ComboBoxModifiedAfter.Reset();
+                    ComboBoxModifiedBefore.Reset();
                 }
                 else
                 {
                     FilterPanel.Visibility = Visibility.Collapsed;
-                    CreatedAfter = false;
-                    CreatedBefore = false;
-                    CreatedBy = false;
 
-                    ModifiedAfter = false;
-                    ModifiedBefore = false;
-                    ModifiedBy = false;
-
-                    FolderPath = false;
-                }
-            }
-        }
-
-
-        private bool _createdAfter = false;
-        public bool CreatedAfter
-        {
-            get { return _createdAfter; }
-            set
-            {
-                _createdAfter = value;
-                if (value)
-                {
-                    ComboBoxCreatedAfter.Visibility = Visibility.Visible;
-                    ComboBoxCreatedAfter.Reset();
-                }
-                else
-                {
-                    ComboBoxCreatedAfter.Visibility = Visibility.Collapsed;
                     Parameters.CreatedAfter = DateTime.MinValue;
+                    Parameters.CreatedBefore = DateTime.MaxValue;
+                    CreatedByEmail = string.Empty;
+
+                    Parameters.ModifiedAfter = DateTime.MinValue;
+                    Parameters.ModifiedBefore = DateTime.MaxValue;
+                    ModifiedByEmail = string.Empty;
+
+                    FolderSiteRelativeUrl = string.Empty;
                 }
-                OnPropertyChanged();
             }
         }
+
         public DateTime CreatedAfterDateTime
         {
             get { return Parameters.CreatedAfter; }
-            set
-            {
-                Parameters.CreatedAfter = value;
-                OnPropertyChanged();
-            }
+            set { Parameters.CreatedAfter = value; }
         }
 
-        private bool _createdBefore = false;
-        public bool CreatedBefore
-        {
-            get { return _createdBefore; }
-            set
-            {
-                _createdBefore = value;
-                if (value)
-                {
-                    ComboBoxCreatedBefore.Visibility = Visibility.Visible;
-                    ComboBoxCreatedBefore.Reset();
-                }
-                else
-                {
-                    ComboBoxCreatedBefore.Visibility = Visibility.Collapsed;
-                    Parameters.CreatedBefore = DateTime.MaxValue;
-                }
-                OnPropertyChanged();
-            }
-        }
         public DateTime CreatedBeforeDateTime
         {
             get { return Parameters.CreatedBefore; }
-            set
-            {
-                Parameters.CreatedBefore = value;
-            }
+            set { Parameters.CreatedBefore = value; }
         }
 
-        private bool _createdBy = false;
-        public bool CreatedBy
-        {
-            get { return _createdBy; }
-            set
-            {
-                _createdBy = value;
-                if (value)
-                {
-                    TextBoxCreatedBy.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    TextBoxCreatedBy.Visibility = Visibility.Collapsed;
-                    CreatedByEmail = string.Empty;
-                }
-                OnPropertyChanged();
-            }
-        }
         public string CreatedByEmail
         {
             get { return Parameters.CreatedByEmail; }
@@ -139,77 +76,18 @@ namespace NovaPointWPF.UserControls
         }
 
 
-        private bool _modifiedAfter = false;
-        public bool ModifiedAfter
-        {
-            get { return _modifiedAfter; }
-            set
-            {
-                _modifiedAfter = value;
-                if (value)
-                {
-                    ComboBoxModifiedAfter.Visibility = Visibility.Visible;
-                    ComboBoxModifiedAfter.Reset();
-                }
-                else
-                {
-                    ComboBoxModifiedAfter.Visibility = Visibility.Collapsed;
-                    Parameters.ModifiedAfter = DateTime.MinValue;
-                }
-                OnPropertyChanged();
-            }
-        }
         public DateTime ModifiedAfterDateTime
         {
             get { return Parameters.ModifiedAfter; }
             set { Parameters.ModifiedAfter = value; }
         }
 
-        private bool _modifiedBefore = false;
-        public bool ModifiedBefore
-        {
-            get { return _modifiedBefore; }
-            set
-            {
-                _modifiedBefore = value;
-                if (value)
-                {
-                    ComboBoxModifiedBefore.Visibility = Visibility.Visible;
-                    ComboBoxModifiedBefore.Reset();
-                }
-                else
-                {
-                    ComboBoxModifiedBefore.Visibility = Visibility.Collapsed;
-                    Parameters.ModifiedBefore = DateTime.MaxValue;
-                }
-                OnPropertyChanged();
-            }
-
-        }
         public DateTime ModifiedBeforeDateTime
         {
             get { return Parameters.ModifiedBefore; }
             set { Parameters.ModifiedBefore = value; }
         }
-        private bool _modifiedBy = false;
-        public bool ModifiedBy
-        {
-            get { return _modifiedBy; }
-            set
-            {
-                _modifiedBy = value;
-                if (value)
-                {
-                    TextBoxModifiedBy.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    TextBoxModifiedBy.Visibility = Visibility.Collapsed;
-                    ModifiedByEmail = string.Empty;
-                }
-                    OnPropertyChanged();
-            }
-        }
+
         public string ModifiedByEmail
         {
             get { return Parameters.ModifiedByEmail; }
@@ -221,25 +99,6 @@ namespace NovaPointWPF.UserControls
         }
 
 
-        private bool _folderPath = false;
-        public bool FolderPath
-        {
-            get { return _folderPath; }
-            set
-            {
-                _folderPath = value;
-                if (value)
-                {
-                    PanelFolderPath.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    PanelFolderPath.Visibility = Visibility.Collapsed;
-                    FolderSiteRelativeUrl = string.Empty;
-                }
-                OnPropertyChanged();
-            }
-        }
         public string FolderSiteRelativeUrl
         {
             get { return Parameters.FolderSiteRelativeUrl; }
@@ -249,7 +108,6 @@ namespace NovaPointWPF.UserControls
                 OnPropertyChanged();
             }
         }
-
 
 
         private string _filterTarget = "Both";
@@ -277,11 +135,6 @@ namespace NovaPointWPF.UserControls
             }
         }
 
-
-
-        public string DefinitionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Definitions-files-and-items-filter";
-
-
         public ItemForm()
         {
             InitializeComponent();
@@ -293,12 +146,6 @@ namespace NovaPointWPF.UserControls
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-
-        private void ReadTheDocsClick(object sender, RoutedEventArgs e)
-        {
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {DefinitionDocs}") { CreateNoWindow = true });
         }
 
     }
