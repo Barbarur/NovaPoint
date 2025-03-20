@@ -36,9 +36,14 @@
                                 Margin=" 0, 0, 8, 0"/>
 
                             <RadioButton
-                                x:Name="SingleButton"
+                                 Style="{DynamicResource ToggleButtonSolutionForm}"
+                                 IsChecked="{Binding CollectionLists, ElementName=root}"
+                                 Content="Collection of Lists"
+                                 Margin=" 0, 0, 8, 0"/>
+
+                            <RadioButton
                                 Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Single library or list"
+                                Content="Single List"
                                 IsChecked="{Binding SingleList, ElementName=root}"/>
                     
                         </StackPanel>
@@ -92,6 +97,34 @@
 
                         </StackPanel>
 
+                        <StackPanel x:Name="CollectionListsPanel" Visibility="Collapsed" Margin="0,16,0,0">
+
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                Text="File with the collection of lists"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+
+                                <Button
+                                        Style="{DynamicResource ButtonSolutionForm}"
+                                        Content="Select file"
+                                        Click="OpenFileClick"/>
+
+                                <TextBlock
+                                    MaxWidth="420"
+                                    Margin="6, 0, 0, 0"
+                                    TextWrapping="Wrap"
+                                    FontFamily="Calibri"
+                                    FontSize="14"
+                                    LineHeight="21"
+                                    FontStyle="Italic"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource PrimaryTextColor}"
+                                    Text="{Binding CollectionListsPath, ElementName=root}"/>
+
+                            </StackPanel>
+
+                        </StackPanel>
 
                         <StackPanel
                             x:Name="SingleListTitle"

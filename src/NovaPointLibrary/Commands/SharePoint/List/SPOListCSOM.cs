@@ -10,12 +10,27 @@ namespace NovaPointLibrary.Commands.SharePoint.List
         private readonly LoggerSolution _logger;
         private readonly Authentication.AppInfo _appInfo;
 
+        private readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _defaultExpressions =
+        [
+            l => l.Hidden,
+            l => l.IsSystemList,
+            l => l.ParentWeb.Url,
+
+            l => l.BaseType,
+            l => l.DefaultViewUrl,
+            l => l.Id,
+            l => l.ItemCount,
+            l => l.Title,
+            l => l.RootFolder.ServerRelativeUrl,
+        ];
+
         internal SPOListCSOM(LoggerSolution logger, Authentication.AppInfo appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
         }
 
+        // TO BE REMOVED AND REPACED BE GetAsync
         internal async Task<List<Microsoft.SharePoint.Client.List>> GetAsyncAll(string siteUrl)
         {
             SPOListsParameters parameters = new()
@@ -36,35 +51,12 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             string methodName = $"{GetType().Name}.Get";
             _logger.Info(methodName, $"Start getting Lists");
 
-            var defaultExpressions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
-            {
-                l => l.Hidden,
-                l => l.IsSystemList,
-                l => l.ParentWeb.Url,
-
-                l => l.BaseType,
-                l => l.DefaultViewUrl,
-                l => l.Id,
-                l => l.ItemCount,
-                l => l.Title,
-                l => l.RootFolder.ServerRelativeUrl,
-            };
-
-            var expressions = defaultExpressions.Union(parameters.ListExpressions).ToArray();
-
-
             if (parameters.AllLists)
             {
-                ClientContext clientContext = await _appInfo.GetContext(siteUrl);
-
-                ListCollection collList = clientContext.Web.Lists;
-                clientContext.Load(collList, l => l.Include(expressions));
-                clientContext.ExecuteQuery();
-
-                _logger.Info(methodName, $"Finish getting Lists: {collList.Count}");
+                var listCollection = await GetList(siteUrl, parameters.ListExpressions);
 
                 List<Microsoft.SharePoint.Client.List> finalCollList = new();
-                foreach (Microsoft.SharePoint.Client.List oList in collList)
+                foreach (Microsoft.SharePoint.Client.List oList in listCollection)
                 {
                     if (!parameters.IncludeHiddenLists && oList.Hidden == true) { continue; }
 
@@ -81,23 +73,70 @@ namespace NovaPointLibrary.Commands.SharePoint.List
                 }
 
                 _logger.Info(methodName, $"Finish filtering lists: {finalCollList.Count}");
-
                 return finalCollList;
+
+            }
+            
+            else if (!string.IsNullOrWhiteSpace(parameters.CollectionListsPath))
+            {
+                var listCollection = await GetList(siteUrl, parameters.ListExpressions);
+
+                if (System.IO.File.Exists(parameters.CollectionListsPath))
+                {
+                    var matchingLists = listCollection
+                        .Where(list => parameters.CollectionLists.Contains(list.Title, StringComparer.OrdinalIgnoreCase))
+                        .ToList();
+
+                    return matchingLists;
+                }
+                else
+                {
+                    throw new Exception("File with collection of lists doesn't exist.");
+                }
             }
 
-            else
+            else if (!string.IsNullOrWhiteSpace(parameters.ListTitle))
             {
-                var list = await GetList(siteUrl, parameters.ListTitle, expressions);
+                var list = await GetList(siteUrl, parameters.ListTitle, parameters.ListExpressions);
 
-                List<Microsoft.SharePoint.Client.List> collList = new() { list };
+                List<Microsoft.SharePoint.Client.List> collList = [list];
 
                 return collList;
             }
+            
+            else
+            {
+                throw new Exception("No list was required for this site");
+            }
+
         }
 
-        internal async Task<Microsoft.SharePoint.Client.List> GetList(string siteUrl, string listTitle, Expression<Func<Microsoft.SharePoint.Client.List, object>>[] expressions)
+        internal async Task<ListCollection> GetList(string siteUrl, Expression<Func<Microsoft.SharePoint.Client.List, object>>[] requestedExpressions)
         {
+            _appInfo.IsCancelled();
+            _logger.Info(GetType().Name, $"Start getting all lists");
+
+            var expressions = _defaultExpressions.Union(requestedExpressions).ToArray();
+
             ClientContext clientContext = await _appInfo.GetContext(siteUrl);
+            ListCollection collList = clientContext.Web.Lists;
+            clientContext.Load(collList, l => l.Include(expressions));
+            clientContext.ExecuteQueryRetry();
+
+            _logger.Info(GetType().Name, $"Finish getting Lists: {collList.Count}");
+
+            return collList;
+        }
+
+
+        internal async Task<Microsoft.SharePoint.Client.List> GetList(string siteUrl, string listTitle, Expression<Func<Microsoft.SharePoint.Client.List, object>>[] requestedExpressions)
+        {
+            _appInfo.IsCancelled();
+            _logger.Info(GetType().Name, $"Start getting list {listTitle}");
+
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
+
+            var expressions = _defaultExpressions.Union(requestedExpressions).ToArray();
 
             Microsoft.SharePoint.Client.List list = clientContext.Web.GetListByTitle(listTitle, expressions) ?? throw new Exception($"List '{listTitle}' not found");
 

@@ -1,27 +1,14 @@
-﻿using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointWPF.Controls.UserControls;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.Win32;
+using NovaPointLibrary.Commands.SharePoint.List;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace NovaPointWPF.UserControls
 {
-    /// <summary>
-    /// Interaction logic for ListForm.xaml
-    /// </summary>
+
     public partial class ListForm : UserControl, INotifyPropertyChanged
     {
         public SPOListsParameters Parameters { get; set; } = new();
@@ -37,30 +24,25 @@ namespace NovaPointWPF.UserControls
                 {
                     FilterTitleLabel.Title = "List filter";
                     AllButton.Content = "All lists";
-                    SingleButton.Content = "Single list";
                 }
                 else if (value == "Library")
                 {
                     FilterTitleLabel.Title = "Library filter";
                     AllButton.Content = "All libraries";
-                    SingleButton.Content = "Single library";
                 }
                 else
                 {
                     FilterTitleLabel.Title = "Library and List filter";
                     AllButton.Content = "All libraries and lists";
-                    SingleButton.Content = "Single library or list";
                 }
             }
         }
 
-        private bool _allLists = true;
         public bool AllLists
         {
-            get { return _allLists; }
+            get { return Parameters.AllLists; }
             set
             {
-                _allLists = value;
                 Parameters.AllLists = value;
                 if (value)
                 {
@@ -103,54 +85,73 @@ namespace NovaPointWPF.UserControls
         }
 
 
-        public bool _includeLibraries = true;
         public bool IncludeLibraries
         {
-            get { return _includeLibraries; }
+            get { return Parameters.IncludeLibraries; }
             set
             {
-                _includeLibraries = value;
                 Parameters.IncludeLibraries = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool _includeLists = true;
         public bool IncludeLists
         {
-            get { return _includeLists; }
+            get { return Parameters.IncludeLists; }
             set
             {
-                _includeLists = value;
                 Parameters.IncludeLists = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool _includeHiddenLists = false;
         public bool IncludeHiddenLists
         {
-            get { return _includeHiddenLists; }
+            get { return Parameters.IncludeHiddenLists; }
             set
             {
-                _includeHiddenLists = value;
                 Parameters.IncludeHiddenLists = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool _includeSystemLists = false;
         public bool IncludeSystemLists
         {
-            get { return _includeSystemLists; }
+            get { return Parameters.IncludeSystemLists; }
             set
             {
-                _includeSystemLists = value;
                 Parameters.IncludeSystemLists = value;
                 OnPropertyChanged();
             }
         }
 
+
+        private bool _collectionLists = false;
+        public bool CollectionLists
+        {
+            get { return _collectionLists; }
+            set
+            {
+                _collectionLists = value;
+                if (value) { CollectionListsPanel.Visibility = Visibility.Visible; }
+                else
+                {
+                    CollectionListsPanel.Visibility = Visibility.Collapsed;
+                    CollectionListsPath = string.Empty;
+                }
+                OnPropertyChanged();
+            }
+        }
+
+        public string CollectionListsPath
+        {
+            get { return Parameters.CollectionListsPath; }
+            set
+            {
+                Parameters.CollectionListsPath = value;
+                OnPropertyChanged();
+            }
+        }
 
 
         private bool _singleList = false;
@@ -170,28 +171,37 @@ namespace NovaPointWPF.UserControls
             }
         }
 
-        private string _listTitle = string.Empty;
         public string ListTitle
         {
-            get { return _listTitle; }
+            get { return Parameters.ListTitle; }
             set
             {
-                _listTitle = value;
                 Parameters.ListTitle = value;
                 OnPropertyChanged();
             }
         }
+
 
         public ListForm()
         {
             InitializeComponent();
         }
 
+
         public event PropertyChangedEventHandler? PropertyChanged;
+
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        private void OpenFileClick(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            if (openFileDialog.ShowDialog() == true)
+                CollectionListsPath = openFileDialog.FileName;
+        }
+
     }
 }
