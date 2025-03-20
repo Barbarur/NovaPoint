@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:NovaPointWPF.UserControls"
              xmlns:npusercontrols="clr-namespace:NovaPointWPF.Controls.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="600"
+             d:DesignHeight="450" d:DesignWidth="800"
              x:Name="root">
     
     <Grid
@@ -21,65 +21,79 @@
 
             <Grid Style="{DynamicResource SolutionMenuGrid}">
 
-                <Border
-                    Style="{DynamicResource BorderPrimaryBackgroud}">
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
 
-                    <StackPanel>
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}">
-                            <TextBlock.Inlines>
-                                <Run Text="Should the solution"/>
-                                <Run FontWeight="Bold" TextDecorations="Underline" Text="add"/>
-                                <Run Text="your account as Site Collection Admin?"/>
-                            </TextBlock.Inlines>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.45*"/>
+                            <ColumnDefinition Width="0.55*"/>
+                        </Grid.ColumnDefinitions>
 
-                        </TextBlock>
+                        <StackPanel>
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                HorizontalAlignment="Center">
+                                <TextBlock.Inlines>
+                                    <Run FontWeight="Bold" TextDecorations="Underline" Text="Add"/>
+                                    <Run Text="my account as Site Collection Admin."/>
+                                </TextBlock.Inlines>
+                            </TextBlock>
 
-                        <StackPanel
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Left"
-                            Margin="0,12,0,16">
+                            <StackPanel
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0,12,0,0">
+                                
+                                <RadioButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Yes"
+                                    Width="120"
+                                    IsChecked="{Binding AddAdmin, ElementName=root}"
+                                    Margin="0,0,8,0"/>
 
-                            <RadioButton
-                                Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Yes"
-                                IsChecked="{Binding AddAdmin, ElementName=root}"
-                                Margin="0,0,8,0"/>
+                                <RadioButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Width="120"
+                                    Content="No"/>
 
-                            <RadioButton
-                                Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="No"/>
-
+                            </StackPanel>
                         </StackPanel>
-
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}">
-                            <TextBlock.Inlines>
-                                <Run Text="Once the solution finishes, should it"/>
-                                <Run FontWeight="Bold" TextDecorations="Underline" Text="remove"/>
-                                <Run Text="your account as Site Collection Admin?"/>
-                            </TextBlock.Inlines>
-                            
-                        </TextBlock>
                         
-                        <StackPanel
-                            Orientation="Horizontal"
-                            Margin="0,12,0,0">
+                        <StackPanel Grid.Column="1">
 
-                            <RadioButton
-                                Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="Yes"
-                                IsChecked="{Binding RemoveAdmin, ElementName=root}"
-                                Margin="0,0,8,0"/>
+                            <TextBlock
+                                Style="{DynamicResource TextBlockBody}"
+                                HorizontalAlignment="Center">
+                                <TextBlock.Inlines>
+                                    <Run FontWeight="Bold" TextDecorations="Underline" Text="Remove"/>
+                                    <Run Text="my account as Site Collection Admin at the end."/>
+                                </TextBlock.Inlines>
+                            
+                            </TextBlock>
+                        
+                            <StackPanel
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0,12,0,0">
 
-                            <RadioButton
-                                Style="{DynamicResource ToggleButtonSolutionForm}"
-                                Content="No"/>
+                                <RadioButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Yes"
+                                    Width="120"
+                                    IsChecked="{Binding RemoveAdmin, ElementName=root}"
+                                    Margin="0,0,8,0"/>
+
+                                <RadioButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Width="120"
+                                    Content="No"/>
+
+                            </StackPanel>
 
                         </StackPanel>
-
-                    </StackPanel>
                 
+                    
+                    </Grid>
                 </Border>
 
 
