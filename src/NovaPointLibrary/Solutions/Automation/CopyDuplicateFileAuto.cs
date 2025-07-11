@@ -223,7 +223,7 @@ namespace NovaPointLibrary.Solutions.Automation
             int totalCount = sql.GetCountTotalRecord(_logger, typeof(RESTCopyMoveFileFolder));
             ProgressTracker progress = new(_logger, totalCount);
 
-            _logger.UI(GetType().Name, "Coping items...");
+            _logger.UI(GetType().Name, "Copying items...");
             for (int depth = tableFloor; depth <= deepest; depth++)
             {
                 int batchCount = 0;
