@@ -248,7 +248,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             ParallelOptions par = new()
             {
-                MaxDegreeOfParallelism = 9,
+                MaxDegreeOfParallelism = 2, // Changed from 9 to 2 to avoid throttling
                 CancellationToken = _appInfo.CancelToken,
             };
             await Parallel.ForEachAsync(batch, par, async (copyMoveItem, _) =>
