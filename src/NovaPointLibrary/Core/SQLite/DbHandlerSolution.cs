@@ -102,7 +102,7 @@ namespace NovaPointLibrary.Core.SQLite
                     foreach (var propertyInfo in properties)
                     {
                         string s = $"{propertyInfo.GetValue(record)}";
-                        sb.Append($"\"{s.Replace("\"", "'")}\",");
+                        sb.Append($"\"{s.Replace("\"", "\"\"")}\",");
                     }
                     if (sb.Length > 0) { sb.Length--; }
                     string output = Regex.Replace(sb.ToString(), @"\r\n?|\n", "");
