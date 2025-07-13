@@ -77,8 +77,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
             _appInfo = appInfo;
             _param = parameters;
             _param.ListsParam.ListExpressions = _listExpresions;
-            _param.ItemsParam.FileExpresions = _fileExpressions;
-            _param.ItemsParam.ItemExpresions = _itemExpressions;
+            _param.ItemsParam.FileExpressions = _fileExpressions;
+            _param.ItemsParam.ItemExpressions = _itemExpressions;
             if (knownGroups != null)
             {
                 _knownGroups = knownGroups;

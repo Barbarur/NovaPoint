@@ -16,7 +16,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         ];
 
         private Expression<Func<ListItem, object>>[] _itemExpressions = [];
-        internal Expression<Func<ListItem, object>>[] ItemExpresions
+        internal Expression<Func<ListItem, object>>[] ItemExpressions
         {
             get
             {
@@ -29,7 +29,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         }
 
         private Expression<Func<ListItem, object>>[] _fileExpressions = [];
-        internal Expression<Func<ListItem, object>>[] FileExpresions
+        internal Expression<Func<ListItem, object>>[] FileExpressions
         {
             get
             {

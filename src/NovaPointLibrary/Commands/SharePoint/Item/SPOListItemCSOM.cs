@@ -44,11 +44,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] expressions;
             if (list.BaseType == BaseType.DocumentLibrary)
             {
-                expressions = _defaultExpressions.Union(parameters.FileExpresions).ToArray();
+                expressions = _defaultExpressions.Union(parameters.FileExpressions).ToArray();
             }
             else if (list.BaseType == BaseType.GenericList)
             {
-                expressions = _defaultExpressions.Union(parameters.ItemExpresions).ToArray();
+                expressions = _defaultExpressions.Union(parameters.ItemExpressions).ToArray();
             }
             else
             {

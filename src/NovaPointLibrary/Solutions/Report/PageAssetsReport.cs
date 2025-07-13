@@ -39,7 +39,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private readonly SPOItemsParameters _assetsParam = new()
         {
-            FileExpresions = _assetsExpressions,
+            FileExpressions = _assetsExpressions,
             AllItems = false,
             FolderSiteRelativeUrl = "SiteAssets/SitePages/"
         };
@@ -67,7 +67,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private readonly SPOItemsParameters _pagesParam = new()
         {
-            FileExpresions = _pageExpressions,
+            FileExpressions = _pageExpressions,
             AllItems = true,
         };
 

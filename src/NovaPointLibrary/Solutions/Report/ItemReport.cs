@@ -71,8 +71,8 @@ namespace NovaPointLibrary.Solutions.Report
 
         public static async Task RunAsync(ItemReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            parameters.ItemsParam.FileExpresions = _fileExpressions;
-            parameters.ItemsParam.ItemExpresions = _itemExpressions;
+            parameters.ItemsParam.FileExpressions = _fileExpressions;
+            parameters.ItemsParam.ItemExpressions = _itemExpressions;
 
             LoggerSolution logger = new(uiAddLog, "ItemReport", parameters);
             try

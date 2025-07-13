@@ -65,7 +65,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public static async Task RunAsync(CopyDuplicateFileAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            parameters.SourceItemsParam.FileExpresions = _fileExpressions;
+            parameters.SourceItemsParam.FileExpressions = _fileExpressions;
 
             LoggerSolution logger = new(uiAddLog, typeof(CopyDuplicateFileAuto).Name, parameters);
 

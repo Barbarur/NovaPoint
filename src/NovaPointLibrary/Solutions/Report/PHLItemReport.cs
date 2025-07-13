@@ -56,7 +56,7 @@ namespace NovaPointLibrary.Solutions.Report
             parameters.ListsParam.IncludeLists = false;
             parameters.ListsParam.IncludeLibraries = false;
             parameters.ListsParam.ListTitle = "Preservation Hold Library";
-            parameters.ItemsParam.FileExpresions = _fileExpressions;
+            parameters.ItemsParam.FileExpressions = _fileExpressions;
 
             LoggerSolution logger = new(uiAddLog, "PHLItemReport", parameters);
             try

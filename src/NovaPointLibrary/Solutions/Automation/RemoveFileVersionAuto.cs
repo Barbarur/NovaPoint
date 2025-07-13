@@ -39,7 +39,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public static async Task RunAsync(RemoveFileVersionAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            parameters.ItemsParam.FileExpresions = _fileExpressions;
+            parameters.ItemsParam.FileExpressions = _fileExpressions;
             parameters.ListsParam.IncludeLibraries = true;
             parameters.ListsParam.IncludeLists = false;
             parameters.ListsParam.IncludeHiddenLists = false;

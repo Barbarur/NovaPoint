@@ -181,7 +181,7 @@ namespace NovaPointLibrary.Solutions.Report
             ListsParam.IncludeLists = false;
             ListsParam.IncludeLibraries = false;
             ListsParam.ListTitle = "Documents";
-            ItemsParam.FileExpresions = _fileExpressions;
+            ItemsParam.FileExpressions = _fileExpressions;
         }
     }
 }
