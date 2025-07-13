@@ -223,7 +223,7 @@ namespace NovaPointLibrary.Solutions.Automation
             int totalCount = sql.GetCountTotalRecord(_logger, typeof(RESTCopyMoveFileFolder));
             ProgressTracker progress = new(_logger, totalCount);
 
-            _logger.UI(GetType().Name, "Coping items...");
+            _logger.UI(GetType().Name, "Copying items...");
             for (int depth = tableFloor; depth <= deepest; depth++)
             {
                 int batchCount = 0;
@@ -248,7 +248,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             ParallelOptions par = new()
             {
-                MaxDegreeOfParallelism = 9,
+                MaxDegreeOfParallelism = 2, // Changed from 9 to 2 to avoid throttling
                 CancellationToken = _appInfo.CancelToken,
             };
             await Parallel.ForEachAsync(batch, par, async (copyMoveItem, _) =>

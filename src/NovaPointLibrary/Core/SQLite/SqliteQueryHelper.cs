@@ -49,7 +49,7 @@ namespace NovaPointLibrary.Core.SQLite
 
                 object? propertyValue = propertyInfo.GetValue(obj);
                 string stringValue = propertyValue?.ToString() ?? string.Empty;
-                string sanitizedValue = stringValue.Replace("'", string.Empty);
+                string sanitizedValue = stringValue.Replace("'", "''");
                 sbValues.Append($"'{sanitizedValue}',");
             }
             sbColumns.Length--;
