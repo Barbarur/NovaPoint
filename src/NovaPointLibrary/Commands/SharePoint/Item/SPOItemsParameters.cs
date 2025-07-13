@@ -1,5 +1,4 @@
-﻿using CamlBuilder;
-using Microsoft.SharePoint.Client;
+﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
 using System.Linq.Expressions;
 
@@ -7,8 +6,40 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 {
     public class SPOItemsParameters : ISolutionParameters
     {
-        internal Expression<Func<ListItem, object>>[] ItemExpresions = [];
-        internal Expression<Func<ListItem, object>>[] FileExpresions = [];
+        private readonly Expression<Func<ListItem, object>>[] _defaultExpressions =
+        [
+            i => i["FileRef"],
+            i => i["Created"],
+            i => i["Author"],
+            i => i["Modified"],
+            i => i["Editor"],
+        ];
+
+        private Expression<Func<ListItem, object>>[] _itemExpressions = [];
+        internal Expression<Func<ListItem, object>>[] ItemExpresions
+        {
+            get
+            {
+                return _itemExpressions;
+            }
+            set
+            {
+                _itemExpressions = _defaultExpressions.Union(value).ToArray();
+            } 
+        }
+
+        private Expression<Func<ListItem, object>>[] _fileExpressions = [];
+        internal Expression<Func<ListItem, object>>[] FileExpresions
+        {
+            get
+            {
+                return _fileExpressions;
+            }
+            set
+            {
+                _fileExpressions = _defaultExpressions.Union(value).ToArray();
+            }
+        }
 
         public bool AllItems { get; set; } = true;
 
@@ -45,9 +76,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     {
                         _folderSiteRelativeUrl = "/" + _folderSiteRelativeUrl;
                     }
-                    if (!_folderSiteRelativeUrl.EndsWith('/'))
+                    if (_folderSiteRelativeUrl.EndsWith('/'))
                     {
-                        _folderSiteRelativeUrl = _folderSiteRelativeUrl + "/";
+                        _folderSiteRelativeUrl = _folderSiteRelativeUrl.Remove(_folderSiteRelativeUrl.LastIndexOf("/"));
                     }
                 }
             }
@@ -113,11 +144,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 }
                 else { matchEditor = true; }
 
-                    bool matchFolder;
+                bool matchFolder;
                 if (!String.IsNullOrWhiteSpace(FolderSiteRelativeUrl))
                 {
                     string itemPath = (string)oItem["FileRef"];
-                    if (itemPath.Contains(FolderSiteRelativeUrl)) { return matchFolder = true; }
+                    if (itemPath.Contains(FolderSiteRelativeUrl)) { matchFolder = true; }
                     else { matchFolder = false; }
                 }
                 else { matchFolder = true; }
