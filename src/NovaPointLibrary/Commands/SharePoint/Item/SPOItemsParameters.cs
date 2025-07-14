@@ -148,7 +148,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 if (!String.IsNullOrWhiteSpace(FolderSiteRelativeUrl))
                 {
                     string itemPath = (string)oItem["FileRef"];
-                    if (itemPath.Contains(FolderSiteRelativeUrl)) { matchFolder = true; }
+                    if (itemPath.Contains(FolderSiteRelativeUrl, StringComparison.OrdinalIgnoreCase)) { matchFolder = true; }
                     else { matchFolder = false; }
                 }
                 else { matchFolder = true; }
