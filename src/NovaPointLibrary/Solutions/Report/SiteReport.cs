@@ -261,6 +261,7 @@ namespace NovaPointLibrary.Solutions.Report
     {
         internal string SiteTitle { get; set; } = String.Empty;
         internal string SiteUrl { get; set; }
+        internal string SiteId { get; set; } = String.Empty;
         internal string GroupId { get; set; } = String.Empty;
         internal string SiteTemplate { get; set; } = String.Empty;
         internal string IsSubsite { get; set; } = String.Empty;
@@ -290,6 +291,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             SiteTitle = oSiteCollection.Title;
             SiteUrl = oSiteCollection.Url;
+            SiteId = oSiteCollection.SiteId.ToString();
             GroupId = oSiteCollection.GroupId.ToString();
             SiteTemplate = SPOWeb.GetSiteTemplateName(oSiteCollection.Template, oSiteCollection.IsTeamsConnected);
             IsSubsite = "False";
@@ -313,7 +315,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             SiteTitle = web.Title;
             SiteUrl = web.Url;
-            GroupId = web.Id.ToString();
+            SiteId = web.Id.ToString();
             SiteTemplate = SPOWeb.GetSiteTemplateName(web.WebTemplate, false);
             IsSubsite = web.IsSubSite().ToString();
 
