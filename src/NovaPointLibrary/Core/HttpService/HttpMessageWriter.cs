@@ -20,11 +20,11 @@ namespace NovaPointLibrary.Core.HttpService
 
         internal async Task<HttpRequestMessage> GetMessageAsync()
         {
-            if (_UriString.Contains("sharepoint.com") && _UriString.Contains("_api"))
+            if (_UriString.Contains("SharePoint.com", StringComparison.OrdinalIgnoreCase) && _UriString.Contains("_api", StringComparison.OrdinalIgnoreCase))
             {
-                return await GetResttMessage();
+                return await GetRestMessage();
             }
-            else if (_UriString.Contains("https://graph.microsoft.com"))
+            else if (_UriString.Contains("https://graph.microsoft.com", StringComparison.OrdinalIgnoreCase))
             {
                 return await GetGraphMessage();
             }
@@ -34,7 +34,7 @@ namespace NovaPointLibrary.Core.HttpService
             }
         }
 
-        private async Task<HttpRequestMessage> GetResttMessage()
+        private async Task<HttpRequestMessage> GetRestMessage()
         {
             HttpRequestMessage request = new()
             {
