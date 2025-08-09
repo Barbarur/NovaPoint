@@ -1,9 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.Utilities.GraphModel
 {
@@ -28,7 +23,7 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
         public string Surname { get; set; }
 
         [JsonProperty("mail")]
-        public string Mail { get; set; }
+        public string Email { get; set; }
 
         [JsonProperty("mobilePhone")]
         public string MobilePhone { get; set; }
