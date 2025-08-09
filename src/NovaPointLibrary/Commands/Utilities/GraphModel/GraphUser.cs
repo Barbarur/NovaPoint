@@ -7,6 +7,16 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
         [JsonProperty("@odata.context")]
         public string Context { get; set; }
 
+        private string _type;
+        [JsonProperty("@odata.type")]
+        public string Type
+        {
+            get { return _type; }
+            set { _type = value[(value.IndexOf("graph.") + 6)..]; }
+        }
+        //[JsonProperty("@odata.type")]
+        //public string Type { get; set; }
+
         [JsonProperty("id")]
         public string Id { get; set; }
 

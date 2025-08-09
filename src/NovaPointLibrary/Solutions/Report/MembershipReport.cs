@@ -1,6 +1,7 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.AzureAD.Groups;
+using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Core.Logging;
@@ -213,7 +214,7 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 string ownersGroupId = groupId + "_o";
 
-                var listSecGroupUsers = await new AADGroup(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Owners", ownersGroupId, _listKnownGroups);
+                var listSecGroupUsers = await new DirectoryGroup(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Owners", ownersGroupId, _listKnownGroups);
 
                 foreach (var secGRoupUsers in listSecGroupUsers)
                 {
@@ -235,7 +236,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             try
             {
-                var listSecGroupUsers = await new AADGroup(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Members", groupId, _listKnownGroups);
+                var listSecGroupUsers = await new DirectoryGroup(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Members", groupId, _listKnownGroups);
 
                 foreach (var secGRoupUsers in listSecGroupUsers)
                 {
@@ -295,7 +296,7 @@ namespace NovaPointLibrary.Solutions.Report
                 {
                     _appInfo.IsCancelled();
 
-                    var listSecGroupUsers = await new AADGroup(_logger, _appInfo).GetUsersAsync(secGroup, _listKnownGroups);
+                    var listSecGroupUsers = await new DirectoryGroup(_logger, _appInfo).GetUsersAsync(secGroup, _listKnownGroups);
 
                     foreach(var secGRoupUsers in listSecGroupUsers)
                     {
