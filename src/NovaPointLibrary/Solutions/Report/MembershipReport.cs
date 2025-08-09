@@ -4,7 +4,6 @@ using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Core.Logging;
-using PnP.Core.Model.SharePoint;
 using System.Linq.Expressions;
 
 
@@ -13,14 +12,14 @@ namespace NovaPointLibrary.Solutions.Report
     public class MembershipReport
     {
         public static readonly string s_SolutionName = "Site Membership report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-MembershipReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{typeof(MembershipReport).Name}";
 
         private MembershipReportParameters _param;
         private readonly LoggerSolution _logger;
         private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private readonly Expression<Func<SiteProperties, object>>[] _sitePropertiesExpressions = new Expression<Func<SiteProperties, object>>[]
-        {
+        private static readonly Expression<Func<SiteProperties, object>>[] _sitePropertiesExpressions =
+        [
             p => p.Title,
             p => p.Url,
             p => p.GroupId,
@@ -33,16 +32,16 @@ namespace NovaPointLibrary.Solutions.Report
             p => p.OwnerName,
 
             p => p.IsGroupOwnerSiteAdmin,
-        };
+        ];
 
-        private readonly Expression<Func<Web, object>>[] _webExpressions = new Expression<Func<Web, object>>[]
-        {
+        private static readonly Expression<Func<Web, object>>[] _webExpressions =
+        [
             w => w.HasUniqueRoleAssignments,
             w => w.Id,
             w => w.Title,
             w => w.Url,
             w => w.WebTemplate,
-        };
+        ];
 
         private readonly List<AADGroupUserEmails>? _listKnownGroups = new();
 
@@ -55,7 +54,10 @@ namespace NovaPointLibrary.Solutions.Report
 
         public static async Task RunAsync(MembershipReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
         {
-            LoggerSolution logger = new(uiAddLog, "MembershipReport", parameters);
+            parameters.SiteParam.SitePropertiesExpressions = _sitePropertiesExpressions;
+            parameters.SiteParam.WebExpressions = _webExpressions;
+
+            LoggerSolution logger = new(uiAddLog, typeof(MembershipReport).Name, parameters);
             try
             {
                 Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);

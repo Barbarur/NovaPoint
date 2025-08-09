@@ -1,15 +1,43 @@
-﻿using Microsoft.Graph;
+﻿using Microsoft.Online.SharePoint.TenantAdministration;
+using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     public class SPOTenantSiteUrlsParameters : ISolutionParameters
     {
+        private Expression<Func<SiteProperties, object>>[] _sitePropertiesExpressions = [];
+        internal Expression<Func<SiteProperties, object>>[] SitePropertiesExpressions
+        {
+            get { return _sitePropertiesExpressions; }
+            set
+            {
+                Expression<Func<SiteProperties, object>>[] defaultExpressions =
+                    [
+                        p => p.Title,
+                        p => p.Url,
+                    ];
+                _sitePropertiesExpressions = [.. defaultExpressions.Union(value)];
+            }
+        }
+
+        private Expression<Func<Web, object>>[] _webExpressions = [];
+        internal Expression<Func<Web, object>>[] WebExpressions
+        {
+            get { return _webExpressions; }
+            set
+            {
+                Expression<Func<Web, object>>[] defaultExpressions =
+                    [
+                        w => w.Id,
+                        w => w.Title,
+                        w => w.Url,
+                    ];
+                _webExpressions = [.. defaultExpressions.Union(value)]; 
+            }
+        }
+
         public bool ActiveSites { get; set; } = false;
         public bool IncludePersonalSite { get; set; } = false;
         public bool IncludeCommunication { get; set; } = false;
