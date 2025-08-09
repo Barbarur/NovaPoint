@@ -1,6 +1,6 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.AzureAD.Groups;
+using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
@@ -231,7 +231,7 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 try
                 {
-                    var group = await new AADGroup(_logger, _appInfo).GetInfoAsync(groupId.ToString(), "?$select=visibility");
+                    var group = await new DirectoryGroup(_logger, _appInfo).GetAsync(groupId.ToString(), "?$select=visibility");
                     privacy = group.Visibility;
                 }
                 catch (Exception ex)
