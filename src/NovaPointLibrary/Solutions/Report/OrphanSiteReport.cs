@@ -1,6 +1,7 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.AzureAD.User;
+using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
@@ -96,34 +97,16 @@ namespace NovaPointLibrary.Solutions.Report
                     {
                         try
                         {
-                            var listSecGroupUsers = await new AADGroup(_logger, _appInfo).GetUsersAsync(siteProperties.OwnerName, siteProperties.Owner);
+                            var listSecGroupUsers = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync(siteProperties.OwnerName, guid, true);
 
-                            if(!listSecGroupUsers.Where( u => u.Users.Contains("@")).Any())
+                            if (!listSecGroupUsers.Users.Contains("@"))
                             {
-                                if (listSecGroupUsers.Where(u => u.Remarks.Contains("ResourceNotFound")).Any())
-                                {
-                                    foreach (var sgUser in listSecGroupUsers)
-                                    {
-                                        AddRecord(record.ReportUsers($"{sgUser.AccountType}", $"Group", "Deleted Group", $"{sgUser.Remarks}"));
-                                    }
-                                }
-                                else if (listSecGroupUsers.Where(u => !string.IsNullOrWhiteSpace(u.Remarks)).Any())
-                                {
-                                    foreach (var sgUser in listSecGroupUsers)
-                                    {
-                                        AddRecord(record.ReportUsers($"{sgUser.AccountType}", $"Group", "Unknown", $"{sgUser.Remarks}"));
-                                    }
-                                }
-                                else
-                                {
-                                    foreach (var sgUser in listSecGroupUsers)
-                                    {
-                                        AddRecord(record.ReportUsers($"{sgUser.AccountType}", $"Group", "Empty Group", $"{sgUser.Remarks}"));
-                                    }
-                                }
+                                if (listSecGroupUsers.Remarks.Contains("ResourceNotFound")) { AddRecord(record.ReportUsers($"{listSecGroupUsers.AccountType}", $"Group", "Deleted Group", $"{listSecGroupUsers.Remarks}")); }
 
+                                if (!string.IsNullOrWhiteSpace(listSecGroupUsers.Remarks)) { AddRecord(record.ReportUsers($"{listSecGroupUsers.AccountType}", $"Group", "Unknown", $"{listSecGroupUsers.Remarks}")); }
+
+                                else { AddRecord(record.ReportUsers($"{listSecGroupUsers.AccountType}", $"Group", "Empty Group", $"{listSecGroupUsers.Remarks}")); }
                             }
-
                         }
                         catch (Exception ex)
                         {

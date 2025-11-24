@@ -44,7 +44,7 @@ namespace NovaPointLibrary.Solutions.Report
             w => w.WebTemplate,
         ];
 
-        private readonly List<AADGroupUserEmails>? _listKnownGroups = new();
+        private readonly List<DirectoryGroupUserEmails>? _listKnownGroups = new();
 
         private MembershipReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, MembershipReportParameters parameters)
         {
@@ -212,14 +212,9 @@ namespace NovaPointLibrary.Solutions.Report
 
             try
             {
-                string ownersGroupId = groupId + "_o";
+                var listSecGroupUsers = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Owners", Guid.Parse(groupId), true, _listKnownGroups);
 
-                var listSecGroupUsers = await new DirectoryGroup(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Owners", ownersGroupId, _listKnownGroups);
-
-                foreach (var secGRoupUsers in listSecGroupUsers)
-                {
-                    AddRecord(record.ReportAadGroupUsers(membership, secGRoupUsers));
-                }
+                AddRecord(record.ReportAadGroupUsers(membership, listSecGroupUsers));
             }
             catch (Exception ex)
             {
@@ -236,12 +231,9 @@ namespace NovaPointLibrary.Solutions.Report
 
             try
             {
-                var listSecGroupUsers = await new DirectoryGroup(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Members", groupId, _listKnownGroups);
+                var listSecGroupUsers = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Members", Guid.Parse(groupId), false, _listKnownGroups);
 
-                foreach (var secGRoupUsers in listSecGroupUsers)
-                {
-                    AddRecord(record.ReportAadGroupUsers(membership, secGRoupUsers));
-                }
+                AddRecord(record.ReportAadGroupUsers(membership, listSecGroupUsers));
             }
             catch (Exception ex)
             {
@@ -296,12 +288,11 @@ namespace NovaPointLibrary.Solutions.Report
                 {
                     _appInfo.IsCancelled();
 
-                    var listSecGroupUsers = await new DirectoryGroup(_logger, _appInfo).GetUsersAsync(secGroup, _listKnownGroups);
+                    if (secGroup.Title.Contains("SLinkClaim")) { continue; }
 
-                    foreach(var secGRoupUsers in listSecGroupUsers)
-                    {
-                        AddRecord(record.ReportAadGroupUsers(membership, secGRoupUsers));
-                    }
+                    var listSecGroupUsers = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync(secGroup, _listKnownGroups);
+
+                    AddRecord(record.ReportAadGroupUsers(membership, listSecGroupUsers));
                 }
             }
             else
@@ -364,7 +355,7 @@ namespace NovaPointLibrary.Solutions.Report
             return r;
         }
 
-        internal MembershipReportRecord ReportAadGroupUsers(string membership, AADGroupUserEmails aadGroupUsers)
+        internal MembershipReportRecord ReportAadGroupUsers(string membership, DirectoryGroupUserEmails aadGroupUsers)
         {
             MembershipReportRecord r = new(SiteTitle, SiteUrl, SiteTemplate, IsSubsite)
             {

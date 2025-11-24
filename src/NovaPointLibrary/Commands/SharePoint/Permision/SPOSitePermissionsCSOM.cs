@@ -1,6 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.AzureAD.Groups;
+using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Permission.Utilities;
@@ -45,7 +45,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
             l => l.Title,
         };
 
-        private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
+        private readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
         {
             f => f.HasUniqueRoleAssignments,
             f => f["ID"],
@@ -58,7 +58,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
             f => f.Versions,
         };
 
-        private readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _itemExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
+        private readonly Expression<Func<ListItem, object>>[] _itemExpressions = new Expression<Func<ListItem, object>>[]
         {
             i => i.HasUniqueRoleAssignments,
             i => i["ID"],
@@ -173,14 +173,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
 
                 foreach (var securityGroup in collSecurityGroups)
                 {
-                    var collSgUsersRecord = await new AADGroup(_logger, _appInfo).GetUsersAsync(securityGroup, _knownGroups.SecurityGroups);
+                    if (securityGroup.Title.Contains("SLinkClaim")) { continue; }
 
-                    foreach (var sgUsersRecord in collSgUsersRecord)
-                    {
-                        SPORoleAssignmentUserRecord recordRole = new(accessType, "NA", sgUsersRecord.AccountType, sgUsersRecord.Users, permissionLevels, sgUsersRecord.Remarks);
-                        yield return new("Site", oSite.Title, oSite.Url, recordRole);
-                    }
+                    var groupUsersEmails = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync(securityGroup, _knownGroups.SecurityGroups);
 
+                    SPORoleAssignmentUserRecord recordRole = new(accessType, "NA", groupUsersEmails.AccountType, groupUsersEmails.Users, permissionLevels, groupUsersEmails.Remarks);
+                    yield return new("Site", oSite.Title, oSite.Url, recordRole);
                 }
 
             }

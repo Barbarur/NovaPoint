@@ -2,7 +2,6 @@
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Logging;
-using System.Reflection.Metadata.Ecma335;
 
 
 namespace NovaPointLibrary.Commands.Directory
@@ -30,8 +29,6 @@ namespace NovaPointLibrary.Commands.Directory
                 DirectoryGroupUserEmails sgUserEmails;
                 try
                 {
-                    // Manage this here
-                    //if (sgTitle.Contains("SLinkClaim")) { return collSgUserEmails; }
                     bool isOwner = IsOwnerAndPurgeGroupId(out Guid sgGuid, secGroup.LoginName);
 
                     sgUserEmails = await GetUsersAsync(secGroup.Title, sgGuid, isOwner, listKnownGroups);
@@ -46,7 +43,6 @@ namespace NovaPointLibrary.Commands.Directory
 
         }
 
-        // CHANGE TO PRIVATE
         private static bool IsOwnerAndPurgeGroupId(out Guid groupId, string secGroupId)
         {
             bool isOwners = false;
@@ -67,8 +63,6 @@ namespace NovaPointLibrary.Commands.Directory
         internal async Task<DirectoryGroupUserEmails> GetUsersAsync(string sgTitle, Guid sgId, bool isOwner, List<DirectoryGroupUserEmails>? listKnownGroups = null)
         {
             _logger.Info(GetType().Name, $"Getting users from Security Group '{sgTitle}' ID '{sgId}'");
-
-            //DirectoryGroupUserEmails collSgUserEmails;
 
             if (listKnownGroups != null)
             {
@@ -110,42 +104,13 @@ namespace NovaPointLibrary.Commands.Directory
         {
             groupUserEmails = new(Guid.Empty, groupTitle, false, groupTitle);
 
-            if (groupTitle == "Everyone"
-                || groupTitle == "Everyone except external users"
-                || groupTitle == "Global Administrator"
-                || groupTitle == "SharePoint Administrator"
-                || groupTitle == "All Company Members"
-                || groupTitle == "All Users (windows)"
-                || groupTitle == "ReadOnlyAccessToTenantAdminSite")
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private static List<DirectoryGroupUserEmails> GetSystemGroup(string groupTitle)
-        {
-            List<DirectoryGroupUserEmails> listOfUsers = [];
-            if (IsSystemGroup(groupTitle))
-            {
-                listOfUsers.Add(new(Guid.Empty, groupTitle, false, groupTitle));
-            }
-            return listOfUsers;
-        }
-
-        internal static bool IsSystemGroup(string secGroupTitle)
-        {
-
-            if (secGroupTitle == "Everyone"
-                || secGroupTitle == "Everyone except external users"
-                || secGroupTitle == "Global Administrator"
-                || secGroupTitle == "SharePoint Administrator"
-                || secGroupTitle == "All Company Members"
-                || secGroupTitle == "All Users (windows)"
-                || secGroupTitle == "ReadOnlyAccessToTenantAdminSite")
+            if (groupTitle.Equals("Everyone", StringComparison.OrdinalIgnoreCase)
+                || groupTitle.Equals("Everyone except external users", StringComparison.OrdinalIgnoreCase)
+                || groupTitle.Equals("Global Administrator", StringComparison.OrdinalIgnoreCase)
+                || groupTitle.Equals("SharePoint Administrator", StringComparison.OrdinalIgnoreCase)
+                || groupTitle.Equals("All Company Members", StringComparison.OrdinalIgnoreCase)
+                || groupTitle.Equals("All Users (windows)", StringComparison.OrdinalIgnoreCase)
+                || groupTitle.Equals("ReadOnlyAccessToTenantAdminSite", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -182,6 +147,32 @@ namespace NovaPointLibrary.Commands.Directory
             return collMembers;
         }
 
+        internal async Task<string> GetMembersTotalCountAsync(Guid groupId)
+        {
+            _appInfo.IsCancelled();
+            _logger.Info(GetType().Name, $"Getting total count of members from Group '{groupId}'");
+
+            string endpointPath = $"/groups/{groupId}/transitiveMembers/$count";
+
+            // THIS IS NOT CORRECT BECAUSE IT NEEDS BELOW HEADERS. IT NEEDS A NEW HEADER
+            // ConsistencyLevel: eventual
+            // Accept: text / plain
+
+            Dictionary<string, string> additionalHeader = new()
+            {
+                {"ConsistencyLevel", "eventual" }
+            };
+
+            //var uriString = new GraphAPIHandler(_logger, _appInfo).GetUriString(endpointPath);
+            //HttpMessageWriter messageWriter = new(_appInfo, HttpMethod.Get, uriString, "text/plain", additionalHeaders: additionalHeader);
+
+            //string response = await HttpClientService.SendHttpRequestMessageAsync(_logger, messageWriter, _appInfo.CancelToken);
+
+            var response = await new GraphAPIHandler(_logger, _appInfo).GetAsync(endpointPath, "text/plain", additionalHeader);
+
+            return response;
+
+        }
 
     }
 }
