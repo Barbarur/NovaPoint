@@ -12,15 +12,8 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
         [JsonProperty("@odata.context")]
         public string Context { get; set; }
 
-        [JsonProperty("nextLink")]
-        public string NextLink { get; set; }
-
         [JsonProperty("@odata.nextLink")]
-        public string ODataNextLink // { get; set; }
-        {
-            get { return NextLink; }
-            set { NextLink = value; }
-        }
+        public string NextLink { get; set; }
 
         [JsonProperty("value")]
         public IEnumerable<T> Items { get; set; }

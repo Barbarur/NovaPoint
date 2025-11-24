@@ -11,7 +11,7 @@ namespace NovaPointLibrary.Commands.Utilities
         private readonly LoggerSolution _logger;
         private readonly AppInfo _appInfo;
 
-        private readonly string _graphUrl = "https://graph.microsoft.com/v1.0";
+        private static readonly string _graphUrl = "https://graph.microsoft.com/v1.0";
 
         internal GraphAPIHandler(LoggerSolution logger, AppInfo appInfo)
         {
@@ -21,9 +21,7 @@ namespace NovaPointLibrary.Commands.Utilities
 
         internal async Task<IEnumerable<T>> GetCollectionAsync<T>(string url)
         {
-            _appInfo.IsCancelled();
-
-            List<T> results = new();
+            List<T> results = [];
 
             var request = await GetObjectAsync<GraphtResultCollection<T>>(url);
 
@@ -32,6 +30,8 @@ namespace NovaPointLibrary.Commands.Utilities
                 results.AddRange(request.Items);
                 while (!string.IsNullOrEmpty(request.NextLink))
                 {
+                    _appInfo.IsCancelled();
+
                     request = await GetObjectAsync<GraphtResultCollection<T>>(request.NextLink);
                     if (request != null && request.Items.Any())
                     {
@@ -45,9 +45,7 @@ namespace NovaPointLibrary.Commands.Utilities
 
         internal async Task<T> GetObjectAsync<T>(string url)
         {
-            _appInfo.IsCancelled();
-
-            string responseContent = await GetResponseJSONAsync(url);
+            string responseContent = await GetJSONAsync(url);
 
             if (responseContent != null)
             {
@@ -61,11 +59,21 @@ namespace NovaPointLibrary.Commands.Utilities
             }
         }
 
-        internal async Task<string> GetResponseJSONAsync(string apiEndpoint)
+        private async Task<string> GetJSONAsync(string apiEndpoint)
         {
             _appInfo.IsCancelled();
 
-            HttpMessageWriter messageWriter = new(_appInfo, HttpMethod.Get, GetUriString(apiEndpoint), "");
+            HttpMessageWriter messageWriter = new(_logger, _appInfo, HttpMethod.Get, GetUriString(apiEndpoint));
+            string response = await HttpClientService.SendHttpRequestMessageAsync(_logger, messageWriter, _appInfo.CancelToken);
+
+            return response;
+        }
+
+        internal async Task<string> GetAsync(string apiEndpoint, string accept, Dictionary<string, string>? additionalHeaders = null)
+        {
+            _appInfo.IsCancelled();
+
+            HttpMessageWriter messageWriter = new(_logger, _appInfo, HttpMethod.Get, GetUriString(apiEndpoint), accept: accept, additionalHeaders: additionalHeaders);
             string response = await HttpClientService.SendHttpRequestMessageAsync(_logger, messageWriter, _appInfo.CancelToken);
 
             return response;
@@ -75,21 +83,19 @@ namespace NovaPointLibrary.Commands.Utilities
         {
             _appInfo.IsCancelled();
 
-            HttpMessageWriter messageWriter = new(_appInfo, HttpMethod.Delete, GetUriString(apiEndpoint));
+            HttpMessageWriter messageWriter = new(_logger, _appInfo, HttpMethod.Delete, GetUriString(apiEndpoint));
             string response = await HttpClientService.SendHttpRequestMessageAsync(_logger, messageWriter, _appInfo.CancelToken);
 
             _logger.Info(GetType().Name, response);
         }
 
-        private string GetUriString(string apiEndpoint)
+        public static string GetUriString(string apiEndpoint)
         {
             if (apiEndpoint.StartsWith("/"))
             {
                 apiEndpoint = apiEndpoint.Substring(1);
             }
             string uri = !apiEndpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? $"{_graphUrl}/{apiEndpoint}" : apiEndpoint;
-
-            _logger.Info(GetType().Name, $"URI: {uri}");
 
             return uri;
         }

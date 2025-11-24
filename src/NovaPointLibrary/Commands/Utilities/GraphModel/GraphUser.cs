@@ -1,9 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Commands.Utilities.GraphModel
 {
@@ -11,6 +6,16 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
     {
         [JsonProperty("@odata.context")]
         public string Context { get; set; }
+
+        private string _type;
+        [JsonProperty("@odata.type")]
+        public string Type
+        {
+            get { return _type; }
+            set { _type = value[(value.IndexOf("graph.") + 6)..]; }
+        }
+        //[JsonProperty("@odata.type")]
+        //public string Type { get; set; }
 
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -28,7 +33,7 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
         public string Surname { get; set; }
 
         [JsonProperty("mail")]
-        public string Mail { get; set; }
+        public string Email { get; set; }
 
         [JsonProperty("mobilePhone")]
         public string MobilePhone { get; set; }

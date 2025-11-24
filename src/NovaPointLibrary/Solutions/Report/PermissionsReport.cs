@@ -1,5 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.AzureAD.Groups;
+using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Permission;
 using NovaPointLibrary.Commands.SharePoint.Permission.Utilities;
 using NovaPointLibrary.Commands.SharePoint.SharingLinks;
@@ -211,15 +212,14 @@ namespace NovaPointLibrary.Solutions.Report
 
                 foreach (var securityGroup in collSecurityGroups)
                 {
-                    var collSgUsersRecord = await new AADGroup(_logger, _appInfo).GetUsersAsync(securityGroup, _knownGroups.SecurityGroups);
+                    if (securityGroup.Title.Contains("SLinkClaim")) { continue; }
 
-                    foreach (var sgUsersRecord in collSgUsersRecord)
+                    var groupUsersEmails = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync(securityGroup, _knownGroups.SecurityGroups);
+
+                    SPORoleAssignmentUserRecord recordRole = new("", "", groupUsersEmails.AccountType, groupUsersEmails.Users, "", groupUsersEmails.Remarks);
+                    if (IsTargetRole(recordRole))
                     {
-                        SPORoleAssignmentUserRecord role = new("", "", sgUsersRecord.AccountType, sgUsersRecord.Users, "", "");
-                        if (IsTargetRole(role))
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }

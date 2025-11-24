@@ -20,9 +20,7 @@ namespace NovaPointLibrary.Commands.Utilities
         {
             _appInfo.IsCancelled();
 
-            _logger.Info(GetType().Name, $"GET '{uriString}'");
-
-            HttpMessageWriter messageWriter = new(_appInfo, HttpMethod.Get, uriString);
+            HttpMessageWriter messageWriter = new(_logger, _appInfo, HttpMethod.Get, uriString);
             string response = await HttpClientService.SendHttpRequestMessageAsync(_logger, messageWriter, _appInfo.CancelToken);
 
             return response;
@@ -33,7 +31,7 @@ namespace NovaPointLibrary.Commands.Utilities
             _appInfo.IsCancelled();
             _logger.Info(GetType().Name, $"POST '{uriString}' with content '{content}'");
 
-            HttpMessageWriter messageWriter = new(_appInfo, HttpMethod.Post, uriString, content);
+            HttpMessageWriter messageWriter = new(_logger, _appInfo, HttpMethod.Post, uriString, content: content);
             string response = await HttpClientService.SendHttpRequestMessageAsync(_logger, messageWriter, _appInfo.CancelToken);
 
 

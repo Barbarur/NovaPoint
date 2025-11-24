@@ -1,9 +1,8 @@
 ﻿using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.AzureAD.Groups;
+using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Permission.Utilities;
 using NovaPointLibrary.Commands.SharePoint.SharingLinks;
 using NovaPointLibrary.Commands.SharePoint.User;
-using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Logging;
 using System.Data;
 using System.Text;
@@ -80,12 +79,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 }
                 else if (role.Member.PrincipalType.ToString() == "SecurityGroup")
                 {
-                    var collSgUsersRecord = await new AADGroup(_logger, _appInfo).GetUsersAsync(role.Member, KnownGroups.SecurityGroups);
+                    if (role.Member.Title.Contains("SLinkClaim")) { continue; }
 
-                    foreach (var sgUsersRecord in collSgUsersRecord)
-                    {
-                        yield return new(accessType, "NA", sgUsersRecord.AccountType, sgUsersRecord.Users, permissionLevels, sgUsersRecord.Remarks);
-                    }
+                    var groupUsersEmails = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync(role.Member, KnownGroups.SecurityGroups);
+
+                    yield return new(accessType, "NA", groupUsersEmails.AccountType, groupUsersEmails.Users, permissionLevels, groupUsersEmails.Remarks);
                 }
             }
 
@@ -155,14 +153,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 var collSecurityGroups = groupMembers.Where(gm => gm.PrincipalType.ToString() == "SecurityGroup").ToList();
                 foreach (var securityGroup in collSecurityGroups)
                 {
-                    var collSgUsersRecord = await new AADGroup(_logger, _appInfo).GetUsersAsync(securityGroup, KnownGroups.SecurityGroups);
+                    if (securityGroup.Title.Contains("SLinkClaim")) { continue; }
 
-                    foreach (var sgUsersRecord in collSgUsersRecord)
-                    {
-                        KnownGroups.SharePointGroup.Add(new(siteUrl, spGroup.Title, sgUsersRecord.AccountType, sgUsersRecord.Users, sgUsersRecord.Remarks));
-                        yield return new(accessType, spGroup.Id.ToString(), sgUsersRecord.AccountType, sgUsersRecord.Users, permissionLevels, sgUsersRecord.Remarks);
-                    }
+                    var groupUsersEmails = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync(securityGroup, KnownGroups.SecurityGroups);
 
+                    yield return new(accessType, "NA", groupUsersEmails.AccountType, groupUsersEmails.Users, permissionLevels, groupUsersEmails.Remarks);
                 }
             }
             else

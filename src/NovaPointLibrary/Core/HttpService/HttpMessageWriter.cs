@@ -1,32 +1,27 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Core.Logging;
 using System.Net.Http.Headers;
 
 namespace NovaPointLibrary.Core.HttpService
 {
-    internal class HttpMessageWriter
+    internal class HttpMessageWriter(
+        ILogger logger,
+        AppInfo appInfo,
+        HttpMethod method,
+        string uriString,
+        string accept = "application/json",
+        string content = "",
+        Dictionary<string, string>? additionalHeaders = null)
     {
-        private AppInfo _appInfo;
-
-        private readonly HttpMethod _method;
-        private readonly string _UriString;
-        private readonly string _content;
-        public HttpMessageWriter(AppInfo appInfo, HttpMethod method, string apiUrl, string content = "")
-        {
-            _appInfo = appInfo;
-            _method = method;
-            _UriString = apiUrl;
-            _content = content;
-        }
-
         internal async Task<HttpRequestMessage> GetMessageAsync()
         {
-            if (_UriString.Contains("sharepoint.com") && _UriString.Contains("_api"))
+            if (uriString.Contains("SharePoint.com", StringComparison.OrdinalIgnoreCase) && uriString.Contains("_api", StringComparison.OrdinalIgnoreCase))
             {
-                return await GetResttMessage();
+                return GetMessage(await appInfo.GetSPOAccessToken(uriString));
             }
-            else if (_UriString.Contains("https://graph.microsoft.com"))
+            else if (uriString.Contains("https://graph.microsoft.com", StringComparison.OrdinalIgnoreCase))
             {
-                return await GetGraphMessage();
+                return GetMessage(await appInfo.GetGraphAccessToken());
             }
             else
             {
@@ -34,45 +29,60 @@ namespace NovaPointLibrary.Core.HttpService
             }
         }
 
-        private async Task<HttpRequestMessage> GetResttMessage()
+        private HttpRequestMessage GetMessage(string accessToken)
         {
-            HttpRequestMessage request = new()
+            HttpRequestMessage message = new(method, uriString);
+
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            message.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(accept));
+
+            if (additionalHeaders != null)
             {
-                Method = _method,
-                RequestUri = new Uri(_UriString)
-            };
-
-            string accessToken = await _appInfo.GetSPOAccessToken(_UriString);
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
-
-
-            if (_method == HttpMethod.Post || _method == HttpMethod.Put || _method.Method == "PATCH")
-            {
-                request.Content = new StringContent(_content, System.Text.Encoding.UTF8);
-                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                foreach (var header in additionalHeaders)
+                {
+                    message.Headers.Add(header.Key, header.Value);
+                }
             }
 
-            return request;
-        }
+            if (method == HttpMethod.Post || method == HttpMethod.Put || method.Method == "PATCH")
+            {
+                message.Content = new StringContent(content, System.Text.Encoding.UTF8);
+                message.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            }
 
-        private async Task<HttpRequestMessage> GetGraphMessage()
-        {
-            HttpRequestMessage message = new(_method, _UriString);
-
-            string accessToken = await _appInfo.GetGraphAccessToken();
-            message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-
-
-            // MISSING:
-            // Header.Accept
-            // Content
-            // Additional Headers
-            // Content header content type
-
+            LogMessage(message);
 
             return message;
+        }
+
+        private void LogMessage(HttpRequestMessage request)
+        {
+            //logger.Info(GetType().Name, $"=== HttpRequestMessage ===");
+            logger.Info(GetType().Name, $"Method: {request.Method}, Request URI: {request.RequestUri}");
+
+            //logger.Debug(GetType().Name, $"Headers:");
+            //foreach (var header in request.Headers)
+            //{
+            //    logger.Debug(GetType().Name, $"{header.Key}: {header.Value}");
+            //}
+
+            //if (request.Content != null)
+            //{
+            //    logger.Debug(GetType().Name, $"Content Headers:");
+            //    foreach (var header in request.Content.Headers)
+            //    {
+            //        logger.Debug(GetType().Name, $"{header.Key}: {header.Value}");
+            //    }
+
+            //    // Read and log the content body (for non-GET requests)
+            //    if (request.Method != HttpMethod.Get)
+            //    {
+            //        var content = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            //        logger.Debug(GetType().Name, $"Body: {content}");
+            //    }
+            //}
+
+            //logger.Debug(GetType().Name, $"==========================");
         }
     }
 }

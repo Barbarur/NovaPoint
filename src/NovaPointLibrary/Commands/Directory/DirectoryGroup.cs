@@ -1,40 +1,50 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Logging;
 
 
-namespace NovaPointLibrary.Commands.AzureAD.Groups
+namespace NovaPointLibrary.Commands.Directory
 {
-    internal class AADGroup
+    internal class DirectoryGroup
     {
-        //private readonly LoggerSolution _logger;
-        //private readonly AppInfo _appInfo;
+        private readonly LoggerSolution _logger;
+        private readonly AppInfo _appInfo;
 
 
-        //internal AADGroup(LoggerSolution logger, AppInfo appInfo)
-        //{
-        //    _logger = logger;
-        //    _appInfo = appInfo;
-        //}
+        internal DirectoryGroup(LoggerSolution logger, AppInfo appInfo)
+        {
+            _logger = logger;
+            _appInfo = appInfo;
+        }
+
+        internal async Task<GraphGroup> GetAsync(string groupId, string optionalQuery = "")
+        {
+            string api = $"/groups/{groupId}" + optionalQuery;
+
+            var group = await new GraphAPIHandler(_logger, _appInfo).GetObjectAsync<GraphGroup>(api);
+
+            return group;
+        }
+
+        internal async Task<IEnumerable<GraphGroup>> GetAllAsync(string optionalQuery = "")
+        {
+            string endpointPath = $"/groups" + optionalQuery;
+
+            var groups = await new GraphAPIHandler(_logger, _appInfo).GetCollectionAsync<GraphGroup>(endpointPath);
+
+            return groups;
+        }
 
         //internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft.SharePoint.Client.Principal secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
         //{
         //    List<AADGroupUserEmails> listOfUsers = GetSystemGroup(secGroup.Title);
 
-        //    if (!listOfUsers.Any())
+        //    if (listOfUsers.Count == 0)
         //    {
-        //        try
-        //        {
-        //            listOfUsers = await GetUsersAsync(secGroup.Title, secGroup.LoginName, listKnownGroups);
-        //        }
-        //        catch
-        //        {
-        //            listOfUsers = new()
-        //        {
-        //            new("", secGroup.Title, secGroup.Title)
-        //        };
-        //        }
+        //        try { listOfUsers = await GetUsersAsync(secGroup.Title, secGroup.LoginName, listKnownGroups); }
+        //        catch { listOfUsers = [ new("", secGroup.Title, secGroup.Title) ]; }
         //    }
 
         //    return listOfUsers;
@@ -44,47 +54,29 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
         //{
         //    List<AADGroupUserEmails> listOfUsers = GetSystemGroup(secGroup.Title);
 
-        //    if (!listOfUsers.Any())
+        //    if (listOfUsers.Count == 0)
         //    {
-        //        try
-        //        {
-        //            listOfUsers = await GetUsersAsync(secGroup.Title, secGroup.LoginName, listKnownGroups);
-        //        }
-        //        catch
-        //        {
-        //            listOfUsers = new()
-        //        {
-        //            new("", secGroup.Title, secGroup.Title)
-        //        };
-        //        }
+        //        try { listOfUsers = await GetUsersAsync(secGroup.Title, secGroup.LoginName, listKnownGroups); }
+        //        catch { listOfUsers = [ new("", secGroup.Title, secGroup.Title) ]; }
         //    }
 
         //    return listOfUsers;
         //}
 
-        //internal async Task<List<AADGroupUserEmails>> GetUsersAsync(Microsoft365User secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
+        //internal async Task<List<AADGroupUserEmails>> GetUsersAsync(GraphUser secGroup, List<AADGroupUserEmails>? listKnownGroups = null)
         //{
         //    List<AADGroupUserEmails> listOfUsers = GetSystemGroup(secGroup.DisplayName);
 
-        //    if (!listOfUsers.Any())
+        //    if (listOfUsers.Count == 0)
         //    {
-        //        try
-        //        {
-        //            listOfUsers = await GetUsersAsync(secGroup.DisplayName, secGroup.Id, listKnownGroups);
-        //        }
-        //        catch
-        //        {
-        //            listOfUsers = new()
-        //        {
-        //            new("", secGroup.DisplayName, secGroup.DisplayName)
-        //        };
-        //        }
+        //        try { listOfUsers = await GetUsersAsync(secGroup.DisplayName, secGroup.Id, listKnownGroups); }
+        //        catch { listOfUsers = [ new("", secGroup.DisplayName, secGroup.DisplayName) ]; }
         //    }
 
         //    return listOfUsers;
         //}
 
-        //internal async Task<List<AADGroupUserEmails>> GetUsersAsync( string secGroupTitle, string secGroupId, List<AADGroupUserEmails>? listKnownGroups = null)
+        //internal async Task<List<AADGroupUserEmails>> GetUsersAsync(string secGroupTitle, string secGroupId, List<AADGroupUserEmails>? listKnownGroups = null)
         //{
         //    _logger.Info(GetType().Name, $"Getting users from Security Group '{secGroupTitle}' ID '{secGroupId}'");
 
@@ -96,7 +88,7 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
         //    {
         //        collSgUserEmails = listKnownGroups.Where(sg => sg.GroupID == secGroupId).ToList();
 
-        //        if (collSgUserEmails.Any()) { return collSgUserEmails; }
+        //        if (collSgUserEmails.Count != 0) { return collSgUserEmails; }
         //    }
 
         //    try
@@ -112,7 +104,7 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
         //        }
 
 
-        //        IEnumerable<Microsoft365User> sgMembers;
+        //        IEnumerable<GraphUser> sgMembers;
         //        if (needOwners) { sgMembers = await GetOwnersAsync(secGroupId); }
         //        else { sgMembers = await GetMembersAsync(secGroupId); }
 
@@ -159,7 +151,7 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
         //    if (IsSystemGroup(groupTitle))
         //    {
         //        listOfUsers.Add(new("", groupTitle, groupTitle));
-        //    }
+        //}
         //    return listOfUsers;
         //}
 
@@ -182,29 +174,12 @@ namespace NovaPointLibrary.Commands.AzureAD.Groups
         //    }
         //}
 
-        //internal async Task<IEnumerable<Microsoft365User>> GetOwnersAsync(string groupId)
-        //{
-        //    _appInfo.IsCancelled();
-        //    _logger.Info(GetType().Name, $"Getting Owners of Group '{groupId}'");
+        internal async Task RemoveGroupAsync(string groupId)
+        {
+            string url = $"/groups/{groupId}";
 
-        //    string url = $"/groups/{groupId}/owners?$select=*";
-
-        //    var collMembers = await new GraphAPIHandler(_logger, _appInfo).GetCollectionAsync<Microsoft365User>(url);
-
-        //    return collMembers;
-        //}
-
-        //internal async Task<IEnumerable<Microsoft365User>> GetMembersAsync(string groupId)
-        //{
-        //    _appInfo.IsCancelled();
-        //    _logger.Info(GetType().Name, $"Getting Members of Group '{groupId}'");
-
-        //    string url = $"/groups/{groupId}/members?$select=*";
-
-        //    var collMembers = await new GraphAPIHandler(_logger, _appInfo).GetCollectionAsync<Microsoft365User>(url);
-
-        //    return collMembers;
-        //}
+            await new GraphAPIHandler(_logger, _appInfo).DeleteAsync(url);
+        }
 
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.AzureAD.Groups;
+using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Core.Logging;
 using PnP.Framework;
@@ -113,7 +113,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 
                 if (oSite.GroupId.ToString() != "00000000-0000-0000-0000-000000000000")
                 {
-                    await new AADGroup(_logger, _appInfo).RemoveGroupAsync(oSite.GroupId.ToString());
+                    await new DirectoryGroup(_logger, _appInfo).RemoveGroupAsync(oSite.GroupId.ToString());
                     AddRecord(siteUrl, "Deleted Microsoft365 group. Site Collection will be deleted by the system automatically");
                 }
                 else

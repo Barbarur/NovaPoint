@@ -84,7 +84,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             List<Web>? collSubsites = null;
             try
             {
-                collSubsites = await new SPOSubsiteCSOM(_logger, _appInfo).GetAsync(recordSite.SiteUrl);
+                collSubsites = await new SPOSubsiteCSOM(_logger, _appInfo).GetAsync(recordSite.SiteUrl, _param.SiteParam.WebExpressions);
             }
             catch (Exception ex)
             {
