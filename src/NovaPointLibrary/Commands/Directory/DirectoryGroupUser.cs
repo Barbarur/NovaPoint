@@ -149,24 +149,12 @@ namespace NovaPointLibrary.Commands.Directory
 
         internal async Task<string> GetMembersTotalCountAsync(Guid groupId)
         {
-            _appInfo.IsCancelled();
-            _logger.Info(GetType().Name, $"Getting total count of members from Group '{groupId}'");
-
             string endpointPath = $"/groups/{groupId}/transitiveMembers/$count";
-
-            // THIS IS NOT CORRECT BECAUSE IT NEEDS BELOW HEADERS. IT NEEDS A NEW HEADER
-            // ConsistencyLevel: eventual
-            // Accept: text / plain
 
             Dictionary<string, string> additionalHeader = new()
             {
                 {"ConsistencyLevel", "eventual" }
             };
-
-            //var uriString = new GraphAPIHandler(_logger, _appInfo).GetUriString(endpointPath);
-            //HttpMessageWriter messageWriter = new(_appInfo, HttpMethod.Get, uriString, "text/plain", additionalHeaders: additionalHeader);
-
-            //string response = await HttpClientService.SendHttpRequestMessageAsync(_logger, messageWriter, _appInfo.CancelToken);
 
             var response = await new GraphAPIHandler(_logger, _appInfo).GetAsync(endpointPath, "text/plain", additionalHeader);
 
@@ -175,4 +163,5 @@ namespace NovaPointLibrary.Commands.Directory
         }
 
     }
+
 }
