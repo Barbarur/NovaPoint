@@ -33,7 +33,29 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
 
         [JsonProperty("description")]
         public string Description { get; set; }
-    }
 
+        public bool IsMS365Group { get; set; } = false;
+        public bool IsEmailEnabledSecurityGroup { get; set; } = false;
+        public bool IsSecurityGroup { get; set; } = false;
+        public bool IsDistributionList { get; set; } = false;
+
+        internal void DefineTypeGroup()
+        {
+            if (this.GroupTypes != null && this.GroupTypes.Contains("Unified")) { this.IsMS365Group = true; }
+            else if (this.SecurityEnabled)
+            {
+                if (this.MailEnabled)
+                {
+                    this.IsEmailEnabledSecurityGroup = true;
+                }
+                else
+                {
+                    this.IsSecurityGroup = true;
+                }
+            }
+            else if (this.MailEnabled) { this.IsDistributionList = true; }
+        }
+
+    }
 
 }
