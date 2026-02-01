@@ -31,6 +31,11 @@ namespace NovaPointWPF.Pages
             }
         }
 
+        private void Directory_Click(object sender, RoutedEventArgs e)
+        {
+            SolutionListFrame.Content = new Pages.Menus.MenuDirectoryPage();
+        }
+
         private void Reports_Click(object sender, RoutedEventArgs e)
         {
             SolutionListFrame.Content = new Pages.Menus.MenuReportPage();

@@ -1,0 +1,123 @@
+﻿<UserControl x:Class="NovaPointWPF.Pages.SolutionsFormParameters.DirectoryGroupParametersForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NovaPointWPF.Pages.SolutionsFormParameters"
+             xmlns:npusercontrols="clr-namespace:NovaPointWPF.Controls.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             x:Name="root">
+    
+    <Grid
+    Background="Transparent">
+
+        <StackPanel>
+
+            <npusercontrols:FilterTitle
+                Title="Directory Group Filter"
+                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-site-collection-admin"/>
+
+            <Grid Style="{DynamicResource SolutionMenuGrid}">
+
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+                    
+
+                    <Grid>
+                        <StackPanel>
+                            
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Style="{DynamicResource TextBlockBody}" Text="Created after"/>
+
+                                    <npusercontrols:DateTimeSelector
+                                        x:Name="ComboBoxCreatedAfter"
+                                        IsAfter="true"
+                                        Margin="0,8,0,0"
+                                        DateTimeSelected="{Binding CreatedAfterDateTime, Mode=TwoWay, ElementName=root}"/>
+
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Style="{DynamicResource TextBlockBody}" Text="Created before"/>
+
+                                    <npusercontrols:DateTimeSelector
+                                        x:Name="ComboBoxCreatedBefore"
+                                        IsAfter="false"
+                                        Margin="0,8,0,0"
+                                        DateTimeSelected="{Binding CreatedBeforeDateTime, Mode=TwoWay, ElementName=root}"/>
+
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Style="{DynamicResource TextBlockBody}" Text="Type of groups to include" Margin="0, 16, 0, 0"/>
+                            
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Margin="0, 8, 0, 0">
+                                
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="MS365 groups"
+                                    IsChecked="{Binding IncludeMS365, Mode=TwoWay, ElementName=root}"
+                                    Margin=" 0,0,8,0"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Email-Enabled Sec Groups"
+                                    IsChecked="{Binding IncludeEmailSecurity, Mode=TwoWay, ElementName=root}"
+                                    Width="200"
+                                    Margin=" 0,0,8,0"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Security Groups"
+                                    IsChecked="{Binding IncludeSecurity, ElementName=root}"
+                                    Margin=" 0,0,8,0"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Distribution Lits"
+                                    IsChecked="{Binding IncludeDistributionList, ElementName=root}"
+                                    Margin=" 0,0,8,0"/>
+
+
+                            </StackPanel>
+
+                            <TextBlock Style="{DynamicResource TextBlockBody}" Text="Information to include" Margin="0, 16, 0, 0"/>
+
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Margin="0, 8, 0, 0">
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="Include Owners"
+                                    IsChecked="{Binding IncludeOwners, ElementName=root}"
+                                    Margin=" 0,0,8,0"/>
+
+                                <ToggleButton
+                                    Style="{DynamicResource ToggleButtonSolutionForm}"
+                                    Content="include Members count"
+                                    IsChecked="{Binding IncludeMembersCount, ElementName=root}"
+                                    Width="200"
+                                    Margin=" 0,0,8,0"/>
+
+                            </StackPanel>
+
+                        </StackPanel>
+
+                    </Grid>
+                </Border>
+
+            </Grid>
+
+        </StackPanel>
+    </Grid>
+    
+</UserControl>

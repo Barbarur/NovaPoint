@@ -27,6 +27,12 @@
 
                 <RadioButton
                     Style="{DynamicResource MainPageToggleButton}"
+                    Content="Directory"
+                    Click="Directory_Click"
+                    DockPanel.Dock="Top"/>
+                
+                <RadioButton
+                    Style="{DynamicResource MainPageToggleButton}"
                     Content="Reports"
                     Click="Reports_Click"
                     DockPanel.Dock="Top"/>
@@ -43,22 +49,32 @@
                     Click="QuickFix_Click"
                     DockPanel.Dock="Top"/>
 
-                <RadioButton
-                    Style="{DynamicResource MainPageToggleButton}"
-                    Content="About"
-                    Click="AboutClick"
-                    DockPanel.Dock="Bottom"/>
+                <Rectangle
+                    DockPanel.Dock="Top"
+                    Height="3"
+                    Width="175"
+                    Fill="{DynamicResource SecondaryBackgroudColor}"
+                    Margin="0, 8"/>
+
 
                 <RadioButton
                     Style="{DynamicResource MainPageToggleButton}"
                     x:Name="SettingsButton"
                     Content="Settings"
                     Click="Settings_Click"
-                    DockPanel.Dock="Bottom"/>
+                    DockPanel.Dock="Top"/>
+                
+                <RadioButton
+                    Style="{DynamicResource MainPageToggleButton}"
+                    Content="About"
+                    Click="AboutClick"
+                    DockPanel.Dock="Top"/>
 
                 <TextBlock
-                    DockPanel.Dock="Top"
+                    DockPanel.Dock="Bottom"
                     Height="Auto"/>
+                
+
 
             </DockPanel>
             

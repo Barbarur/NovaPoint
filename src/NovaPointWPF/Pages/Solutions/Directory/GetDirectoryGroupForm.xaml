@@ -1,0 +1,27 @@
+﻿<Page x:Class="NovaPointWPF.Pages.Solutions.Directory.GetDirectoryGroupForm"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Directory"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
+      xmlns:solutionformparameters="clr-namespace:NovaPointWPF.Pages.SolutionsFormParameters"
+      mc:Ignorable="d" 
+      d:DesignHeight="900" d:DesignWidth="600"
+      Title="GetDirectoryGroupForm">
+
+    <Grid Margin="0,0,0,16">
+
+        <StackPanel>
+
+            <designmaterial:FormHeader
+                x:Name="SolutionHeader"/>
+
+            <solutionformparameters:DirectoryGroupParametersForm
+                x:Name="GroupF"/>
+
+
+        </StackPanel>
+
+    </Grid>
+</Page>
