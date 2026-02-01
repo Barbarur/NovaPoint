@@ -1,4 +1,5 @@
-﻿using NovaPointLibrary.Commands.Directory;
+﻿using AngleSharp.Css.Dom;
+using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Logging;
@@ -30,7 +31,7 @@ namespace NovaPointLibrary.Solutions.Directory
             {
                 Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
 
-                await new GetDirectoryGroup(logger, appInfo, parameters).RunScriptAsync();
+                 await new GetDirectoryGroup(logger, appInfo, parameters).RunScriptAsync();
 
                 logger.SolutionFinish();
 
@@ -174,9 +175,9 @@ namespace NovaPointLibrary.Solutions.Directory
 
     }
 
-    public class GetDirectoryGroupParameters : ISolutionParameters
+    public class GetDirectoryGroupParameters(DirectoryGroupParameters groupParam) : ISolutionParameters
     {
-        public required DirectoryGroupParameters GroupParam { get; set; }
+        public DirectoryGroupParameters GroupParam { get; init; } = groupParam;
 
     }
 }
