@@ -30,7 +30,7 @@ namespace NovaPointWPF.Pages.Solutions
             }
             set
             {
-                if (Directory.Exists(value))
+                if (System.IO.Directory.Exists(value))
                 {
                     _solutionFolder = value;
                 };
@@ -159,7 +159,7 @@ namespace NovaPointWPF.Pages.Solutions
 
         private void FilesButton_Click(object sender, RoutedEventArgs e)
         {
-            if (Directory.Exists(SolutionFolder))
+            if (System.IO.Directory.Exists(SolutionFolder))
             {
                 try { Process.Start("explorer.exe", @SolutionFolder); }
                 catch (Exception ex)
