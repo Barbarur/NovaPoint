@@ -70,6 +70,7 @@
                         <ToggleButton
                             x:Name="ButtonAppCache"
                             Style="{DynamicResource ToggleButtonSolutionFormYesNo}"
+                            IsChecked="{Binding CachingToken, Mode=TwoWay}"
                             Margin="8,0,0,0"
                             DockPanel.Dock="Right"/>
 

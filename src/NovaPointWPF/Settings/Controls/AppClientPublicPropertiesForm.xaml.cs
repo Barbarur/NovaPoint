@@ -10,7 +10,7 @@ namespace NovaPointWPF.Settings.Controls
     public partial class AppClientPublicPropertiesForm : UserControl, IPropertiesForm
     {
         private readonly AppClientPublicProperties _properties;
-        private AppConfig _appConfig;
+        private readonly AppConfig _appConfig;
 
         private AppClientPublicPropertiesForm(AppClientPublicProperties properties, AppConfig appConfig)
         {
