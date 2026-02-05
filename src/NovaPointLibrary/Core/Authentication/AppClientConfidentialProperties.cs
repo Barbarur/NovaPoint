@@ -3,7 +3,7 @@
 
 namespace NovaPointLibrary.Core.Authentication
 {
-    public class AppClientConfidentialProperties
+    public class AppClientConfidentialProperties : IAppClientProperties
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string ClientTitle { get; set; } = "New App-Only";
@@ -41,7 +41,7 @@ namespace NovaPointLibrary.Core.Authentication
             {
                 throw new Exception("Missing certificate path");
             }
-            if (File.Exists(CertificatePath))
+            if (!File.Exists(CertificatePath))
             {
                 throw new Exception("Certificate no found on path");
             }

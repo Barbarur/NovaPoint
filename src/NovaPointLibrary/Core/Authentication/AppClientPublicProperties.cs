@@ -2,7 +2,7 @@
 
 namespace NovaPointLibrary.Core.Authentication
 {
-    public class AppClientPublicProperties
+    public class AppClientPublicProperties : IAppClientProperties
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string ClientTitle { get; set; } = "New delegated app";
