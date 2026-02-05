@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:NovaPointWPF"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
 
@@ -18,11 +19,8 @@
         <SolidColorBrush x:Key="CheckedButtonColor" Color="#484D65"/>
         <SolidColorBrush x:Key="PrimaryBorderColor" Color="#3E4852"/>
 
-        <FontFamily x:Key="NPRegularFont">
-            pack://application:,,,/res/font/#Open Sans
-        </FontFamily>
 
-        <!--BACKGROUND COLORS-->
+        <!--COLORS BACKGROUND-->
 
         <Style x:Key="BorderPrimaryBackgroud" TargetType="{x:Type Border}">
             <Setter Property="Background" Value="{DynamicResource PrimaryBackgroudColor}"/>
@@ -41,6 +39,17 @@
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="16"/>
         </Style>
+
+
+        <!--TEXT-->
+        <FontFamily x:Key="NPRegularFont">
+            pack://application:,,,/res/font/#Open Sans
+        </FontFamily>
+
+        <system:Double x:Key="FontSizeBodyNP">14</system:Double>
+        <system:Double x:Key="FontSizeBodyStrongNP">16</system:Double>
+        <system:Double x:Key="FontSizeSubtitleNP">20</system:Double>
+        <system:Double x:Key="FontSizeTitleNP">30</system:Double>
 
 
         <!--TEXT BLOCKS AND LABELS-->
@@ -192,7 +201,57 @@
             <Setter Property="BorderBrush" Value="{DynamicResource PrimaryButtonColor}"/>
 
         </Style>
-        
+
+
+        <!--PASSWORD BOX-->
+
+        <Style x:Key="PasswordBoxForm" TargetType="{x:Type PasswordBox}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="BorderThickness" Value="3"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource NPRegularFont}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource LogoPinkColor}"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6"
+                            Padding="9, 8">
+
+                            <ScrollViewer
+                                x:Name="PART_ContentHost"
+                                Focusable="false"
+                                HorizontalScrollBarVisibility="Hidden" 
+                                VerticalScrollBarVisibility="Hidden"
+                                VerticalContentAlignment="Center"/>
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource HoverButtonColor}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource HoverButtonColor}"/>
+                            </Trigger>
+
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource LogoPinkColor}"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
 
         <!--BUTTONS-->
 
@@ -434,9 +493,213 @@
         </Style>
 
 
+
+
         
-        
-        
+        <!--COMBOBOX-->
+
+        <Style x:Key="ComboBoxItemForm" TargetType="{x:Type ComboBoxItem}">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="Foreground" Value="BlueViolet"/>
+            <Setter Property="FontFamily" Value="{DynamicResource NPRegularFont}"/>
+            <Setter Property="FontSize" Value="{DynamicResource FontSizeBodyNP}"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                        <Border
+                            x:Name="Border"
+                            Style="{DynamicResource SolutionFormControlBorder}"
+                            SnapsToDevicePixels="true"
+                            Padding="18"
+                            Margin="3">
+
+                            <!--<Label
+                                x:Name="Label"
+                                Margin="10, 0, 10, 0"
+                                Style="{DynamicResource SolutionFormControlText}"
+                                Content="{TemplateBinding Content}"/>-->
+                            <ContentPresenter
+                                x:Name="ContentSite"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+
+
+                            <!--<ContentPresenter />-->
+
+                        </Border>
+                        <ControlTemplate.Triggers>
+
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource HoverButtonColor}"/>
+                            </MultiTrigger>
+
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
+                                <Setter Property="Foreground" Value="IndianRed"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ComboBoxItemFormTEXTONE" TargetType="ComboBoxItem">
+
+        </Style>
+
+        <Style x:Key="ComboBoxFormTEXTONE" TargetType="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="Foreground" Value="Purple"/>
+            <Setter Property="Margin" Value="2, 2, 2, 2"/>
+            <Setter Property="Width" Value="160"/>
+
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <StaticResource ResourceKey="ComboBoxItemFormTEXTONE" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <!--Reference:-->
+        <!--https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/combobox-styles-and-templates?view=netframeworkdesktop-4.8-->
+
+        <Style x:Key="ComboBoxForm" TargetType="{x:Type ComboBox}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonColor}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource NPRegularFont}"/>
+            <Setter Property="FontSize" Value="{DynamicResource FontSizeBodyNP}"/>
+            <Setter Property="Width" Value="160"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <ToggleButton
+                                x:Name="ToggleButton"
+                                Style="{DynamicResource ToggleButtonSolutionForm}"
+                                Width="{TemplateBinding Width}"
+                                IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+
+                            </ToggleButton>
+                            <ContentPresenter 
+                                x:Name="ContentSite"
+                                IsHitTestVisible="False"
+                                Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"/>
+
+                            <Popup
+                                x:Name="PART_Popup"
+                                Placement="Bottom"
+                                IsOpen="{TemplateBinding IsDropDownOpen}"
+                                AllowsTransparency="True"
+                                Focusable="False"
+                                PopupAnimation="Slide">
+
+                                <Grid
+                                    x:Name="DropDown"
+                                    MinWidth="{TemplateBinding ActualWidth}"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                    SnapsToDevicePixels="True">
+
+                                    <Border
+                                        Name="DropDownBorder"
+                                        CornerRadius="8"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}">
+
+                                        <ScrollViewer Style="{DynamicResource LeftScrollViewer}">
+
+                                            <ItemsPresenter />
+
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="{x:Type ComboBoxItem}">
+                        <Setter Property="SnapsToDevicePixels" Value="true" />
+                        <Setter Property="OverridesDefaultStyle" Value="true" />
+                        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+                        <Setter Property="FontFamily" Value="{DynamicResource NPRegularFont}"/>
+                        <Setter Property="FontSize" Value="{DynamicResource FontSizeBodyNP}"/>
+
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                                    <Border
+                                        x:Name="Border"
+                                        Style="{DynamicResource SolutionFormControlBorder}"
+                                        SnapsToDevicePixels="true"
+                                        Margin="3">
+
+                                        <!-- Use a TextBlock to ensure Foreground is applied -->
+                                        <!--<TextBlock
+                                            Style="{DynamicResource TextBlockBody}"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Left"
+                                            Text="{Binding}"
+                                            Margin="10,0"
+                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />-->
+
+                                        <ContentPresenter
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Left"
+                                            Margin="10,0"/>
+
+                                        <!--<ContentPresenter 
+                        Content="{Binding Converter={StaticResource ObjectToStringConverter}}"
+                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                                            Margin="10,0"
+                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />-->
+
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsMouseOver" Value="True"/>
+                                                <Condition Property="IsSelected" Value="False"/>
+                                            </MultiTrigger.Conditions>
+                                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource HoverButtonColor}"/>
+                                        </MultiTrigger>
+
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource CheckedButtonColor}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
 
         <!--Reference:-->
         <!--https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/combobox-styles-and-templates?view=netframeworkdesktop-4.8-->
@@ -462,13 +725,14 @@
                                 Focusable="False"
                                 PopupAnimation="Slide">
 
-                                <Grid Name="DropDown"
+                                <Grid
+                                    x:Name="DropDown"
                                     MinWidth="{TemplateBinding FrameworkElement.ActualWidth}"
                                     MaxHeight="{TemplateBinding ComboBox.MaxDropDownHeight}"
                                     SnapsToDevicePixels="True">
 
                                     <Border
-                                        Name="DropDownBorder"
+                                        x:Name ="DropDownBorder"
                                         CornerRadius="8"
                                         Background="{TemplateBinding ComboBox.Background}">
 
@@ -492,12 +756,12 @@
             </Setter>
         </Style>
 
-        <Style x:Key="{x:Type ComboBoxItem}" TargetType="{x:Type ComboBoxItem}">
+        <Style TargetType="{x:Type ComboBoxItem}">
             <Setter Property="SnapsToDevicePixels" Value="true" />
             <Setter Property="OverridesDefaultStyle" Value="true" />
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                    <ControlTemplate TargetType="ComboBoxItem">
                         <Grid
                             Margin="3, 3">
 
@@ -541,7 +805,7 @@
 
 
 
-
+        <!--SCROLLVIEWER-->
 
         <Style x:Key="LeftScrollViewer" TargetType="{x:Type ScrollViewer}">
             <Setter Property="OverridesDefaultStyle" Value="True" />
