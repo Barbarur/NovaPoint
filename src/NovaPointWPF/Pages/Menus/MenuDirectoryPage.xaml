@@ -30,7 +30,7 @@
 
                     <Button
                     Style="{DynamicResource SolutionMenuButton}"
-                    Content="Groups"
+                    Content="Report groups"
                     Click="GoGetDirectoryGroupForm"/>
 
                 </StackPanel>

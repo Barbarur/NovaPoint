@@ -16,7 +16,7 @@
 
             <npusercontrols:FilterTitle
                 Title="Directory Group Filter"
-                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-site-collection-admin"/>
+                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-Directory-Groups"/>
 
             <Grid Style="{DynamicResource SolutionMenuGrid}">
 
@@ -69,14 +69,14 @@
 
                                 <ToggleButton
                                     Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Email-Enabled Sec Groups"
+                                    Content="Email-Enabled sec. groups"
                                     IsChecked="{Binding IncludeEmailSecurity, Mode=TwoWay, ElementName=root}"
                                     Width="200"
                                     Margin=" 0,0,8,0"/>
 
                                 <ToggleButton
                                     Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Security Groups"
+                                    Content="Security groups"
                                     IsChecked="{Binding IncludeSecurity, ElementName=root}"
                                     Margin=" 0,0,8,0"/>
 
@@ -97,13 +97,13 @@
 
                                 <ToggleButton
                                     Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Include Owners"
+                                    Content="Include owners"
                                     IsChecked="{Binding IncludeOwners, ElementName=root}"
                                     Margin=" 0,0,8,0"/>
 
                                 <ToggleButton
                                     Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="include Members count"
+                                    Content="Include members count"
                                     IsChecked="{Binding IncludeMembersCount, ElementName=root}"
                                     Width="200"
                                     Margin=" 0,0,8,0"/>
