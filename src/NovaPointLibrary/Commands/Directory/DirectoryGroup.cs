@@ -1,7 +1,6 @@
-﻿using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.AzureAD.Groups;
-using NovaPointLibrary.Commands.Utilities;
+﻿using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 
 
@@ -9,11 +8,11 @@ namespace NovaPointLibrary.Commands.Directory
 {
     internal class DirectoryGroup
     {
-        private readonly LoggerSolution _logger;
-        private readonly AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
 
 
-        internal DirectoryGroup(LoggerSolution logger, AppInfo appInfo)
+        internal DirectoryGroup(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

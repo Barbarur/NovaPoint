@@ -2,6 +2,7 @@
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.AzureAD;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
 
@@ -10,10 +11,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
     internal class SPOTenantSiteUrlsWithAccessCSOM
     {
         private readonly LoggerSolution _logger;
-        private readonly Authentication.AppInfo _appInfo;
+        private readonly IAppClient _appInfo;
         private readonly SPOTenantSiteUrlsWithAccessParameters _param;
 
-        internal SPOTenantSiteUrlsWithAccessCSOM(LoggerSolution logger, Authentication.AppInfo appInfo, SPOTenantSiteUrlsWithAccessParameters parameters)
+        internal SPOTenantSiteUrlsWithAccessCSOM(LoggerSolution logger, IAppClient appInfo, SPOTenantSiteUrlsWithAccessParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;

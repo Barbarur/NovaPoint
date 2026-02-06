@@ -4,6 +4,7 @@ using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 
@@ -17,7 +18,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private MembershipReportParameters _param;
         private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
+        private readonly IAppClient _appInfo;
 
         private static readonly Expression<Func<SiteProperties, object>>[] _sitePropertiesExpressions =
         [
@@ -46,7 +47,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private readonly List<DirectoryGroupUserEmails>? _listKnownGroups = new();
 
-        private MembershipReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, MembershipReportParameters parameters)
+        private MembershipReport(LoggerSolution logger, IAppClient appInfo, MembershipReportParameters parameters)
         {
             _param = parameters;
             _logger = logger;

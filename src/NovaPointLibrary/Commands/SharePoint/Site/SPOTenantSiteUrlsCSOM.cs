@@ -1,4 +1,5 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
 
@@ -7,10 +8,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
     internal class SPOTenantSiteUrlsCSOM
     {
         private readonly LoggerSolution _logger;
-        private readonly Authentication.AppInfo _appInfo;
+        private readonly IAppClient _appInfo;
         private readonly SPOTenantSiteUrlsParameters _param;
 
-        internal SPOTenantSiteUrlsCSOM(LoggerSolution logger, Authentication.AppInfo appInfo, SPOTenantSiteUrlsParameters parameters)
+        internal SPOTenantSiteUrlsCSOM(LoggerSolution logger, IAppClient appInfo, SPOTenantSiteUrlsParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;

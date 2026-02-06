@@ -1,20 +1,17 @@
-﻿using NovaPointLibrary.Commands.Utilities.GraphModel;
-using NovaPointLibrary.Commands.Utilities;
+﻿using NovaPointLibrary.Commands.Utilities;
+using NovaPointLibrary.Commands.Utilities.GraphModel;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace NovaPointLibrary.Commands.AzureAD.User
 {
     internal class AADUser
     {
         private readonly LoggerSolution _logger;
-        private readonly Authentication.AppInfo _appInfo;
+        private readonly IAppClient _appInfo;
 
-        internal AADUser(LoggerSolution logger, Authentication.AppInfo appInfo)
+        internal AADUser(LoggerSolution logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

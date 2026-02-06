@@ -4,7 +4,7 @@ namespace NovaPointLibrary.Solutions
 {
     internal class ProgressTracker
     {
-        internal readonly LoggerSolution _logger;
+        internal readonly ILogger _logger;
 
         private int _counter;
         private int _totalUnits;
@@ -24,7 +24,7 @@ namespace NovaPointLibrary.Solutions
         private double _counterStep = 0;
         private readonly ProgressTracker? _parentProgress = null;
 
-        internal ProgressTracker(LoggerSolution logger, int totalCount)
+        internal ProgressTracker(ILogger logger, int totalCount)
         {
             _logger = logger;
             _counter = 0;

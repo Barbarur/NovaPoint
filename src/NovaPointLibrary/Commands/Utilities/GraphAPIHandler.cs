@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.HttpService;
 using NovaPointLibrary.Core.Logging;
 
@@ -8,12 +9,12 @@ namespace NovaPointLibrary.Commands.Utilities
 {
     internal class GraphAPIHandler
     {
-        private readonly LoggerSolution _logger;
-        private readonly AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
 
         private static readonly string _graphUrl = "https://graph.microsoft.com/v1.0";
 
-        internal GraphAPIHandler(LoggerSolution logger, AppInfo appInfo)
+        internal GraphAPIHandler(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

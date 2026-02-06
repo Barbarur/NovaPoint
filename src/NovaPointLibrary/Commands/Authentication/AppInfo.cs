@@ -1,18 +1,17 @@
 ﻿using Microsoft.Identity.Client;
 using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Utilities.GraphModel;
-using NovaPointLibrary.Commands.Utilities;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 
 
 namespace NovaPointLibrary.Commands.Authentication
 {
-    public class AppInfo
+    public class AppInfo : IAppClient
     {
         private readonly LoggerSolution _logger;
 
         private string _adminUrl = string.Empty;
-        internal string AdminUrl
+        public string AdminUrl
         {
             get { return _adminUrl; }
             set
@@ -23,7 +22,7 @@ namespace NovaPointLibrary.Commands.Authentication
         }
 
         private string _rootPersonalUrl = string.Empty;
-        internal string RootPersonalUrl
+        public string RootPersonalUrl
         {
             get { return _rootPersonalUrl; }
             set
@@ -33,7 +32,7 @@ namespace NovaPointLibrary.Commands.Authentication
             }
         }
         private string _rootSharedUrl = string.Empty;
-        internal string RootSharedUrl
+        public string RootSharedUrl
         {
             get { return _rootSharedUrl; }
             set
@@ -43,7 +42,7 @@ namespace NovaPointLibrary.Commands.Authentication
             }
         }
         private string _domain = string.Empty;
-        internal string Domain
+        public string Domain
         {
             get { return _domain; }
             set
@@ -56,7 +55,7 @@ namespace NovaPointLibrary.Commands.Authentication
         }
 
         internal AppSettings Settings { get; set; }
-        internal CancellationToken CancelToken { get; init; }
+        public CancellationToken CancelToken { get; init; }
 
         private static readonly SemaphoreSlim _semaphore = new(1, 1);
         private readonly IPublicClientApplication _app;
@@ -99,12 +98,12 @@ namespace NovaPointLibrary.Commands.Authentication
         }
 
 
-        internal void IsCancelled()
+        public void IsCancelled()
         {
             if ( CancelToken.IsCancellationRequested ) { CancelToken.ThrowIfCancellationRequested(); }
         }
 
-        internal async Task<string> GetGraphAccessToken()
+        public async Task<string> GetGraphAccessToken()
         {
             this.IsCancelled();
 
@@ -124,7 +123,7 @@ namespace NovaPointLibrary.Commands.Authentication
             }
         }
 
-        internal async Task<ClientContext> GetContext(string siteUrl)
+        public async Task<ClientContext> GetContext(string siteUrl)
         {
             string accessToken = await GetSPOAccessToken(siteUrl);
 
@@ -137,7 +136,7 @@ namespace NovaPointLibrary.Commands.Authentication
             return clientContext;
         }
 
-        internal async Task<string> GetSPOAccessToken(string siteUrl)
+        public async Task<string> GetSPOAccessToken(string siteUrl)
         {
             this.IsCancelled();
 

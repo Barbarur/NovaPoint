@@ -1,5 +1,6 @@
 ﻿using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 
 namespace NovaPointLibrary.Commands.AzureAD
@@ -7,9 +8,9 @@ namespace NovaPointLibrary.Commands.AzureAD
     internal class GetAADUser
     {
         private readonly LoggerSolution _logger;
-        private readonly Authentication.AppInfo _appInfo;
+        private readonly IAppClient _appInfo;
 
-        internal GetAADUser(LoggerSolution logger, Authentication.AppInfo appInfo)
+        internal GetAADUser(LoggerSolution logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

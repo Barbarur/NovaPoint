@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using System.Net.Http.Headers;
 
@@ -6,7 +7,7 @@ namespace NovaPointLibrary.Core.HttpService
 {
     internal class HttpMessageWriter(
         ILogger logger,
-        AppInfo appInfo,
+        IAppClient appInfo,
         HttpMethod method,
         string uriString,
         string accept = "application/json",

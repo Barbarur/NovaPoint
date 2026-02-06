@@ -1,5 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 
@@ -8,9 +9,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
     internal class SPOWebCSOM
     {
         private readonly LoggerSolution _logger;
-        private readonly AppInfo _appInfo;
+        private readonly IAppClient _appInfo;
         
-        internal SPOWebCSOM(LoggerSolution logger, AppInfo appInfo)
+        internal SPOWebCSOM(LoggerSolution logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

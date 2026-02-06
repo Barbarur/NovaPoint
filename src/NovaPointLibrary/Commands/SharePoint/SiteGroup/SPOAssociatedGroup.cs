@@ -1,5 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 
@@ -9,9 +10,9 @@ namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
     internal class SPOAssociatedGroup
     {
         private readonly LoggerSolution _logger;
-        private readonly AppInfo _appInfo;
+        private readonly IAppClient _appInfo;
 
-        internal SPOAssociatedGroup(LoggerSolution logger, AppInfo appInfo)
+        internal SPOAssociatedGroup(LoggerSolution logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
