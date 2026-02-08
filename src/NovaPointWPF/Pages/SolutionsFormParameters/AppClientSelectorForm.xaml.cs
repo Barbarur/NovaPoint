@@ -1,7 +1,6 @@
 ﻿using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Settings;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,13 +9,13 @@ using System.Windows.Controls;
 namespace NovaPointWPF.Pages.SolutionsFormParameters
 {
 
-    public partial class AppPropertiesSelector : UserControl
+    public partial class AppClientSelectorForm : UserControl
     {
         private readonly AppConfig _appConfig;
 
         public IAppClientProperties? AppClient = null;
 
-        public AppPropertiesSelector()
+        public AppClientSelectorForm()
         {
             InitializeComponent();
 
@@ -30,8 +29,9 @@ namespace NovaPointWPF.Pages.SolutionsFormParameters
             ComboBoxAppProperties.SelectedValuePath = "ClientTitle";
             ComboBoxAppProperties.SelectedIndex = 0;
 
-            if (!appProperties.Any())
+            if (appProperties.Count == 0)
             {
+                SelectorPanel.Visibility = Visibility.Collapsed;
                 NoAppNotification.Visibility = Visibility.Visible;
             }
         }
