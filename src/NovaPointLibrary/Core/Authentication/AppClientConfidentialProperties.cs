@@ -45,6 +45,10 @@ namespace NovaPointLibrary.Core.Authentication
             {
                 throw new Exception("Certificate no found on path");
             }
+            if (string.IsNullOrWhiteSpace(Password))
+            {
+                throw new Exception("Certificate password is empty");
+            }
         }
     }
 }
