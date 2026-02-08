@@ -1,5 +1,7 @@
 ﻿using Microsoft.Identity.Client;
 using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Commands.Utilities;
+using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 
