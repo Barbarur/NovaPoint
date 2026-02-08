@@ -54,8 +54,7 @@ namespace NovaPointLibrary.Core.Authentication
             }
         }
 
-        internal AppSettings Settings { get; set; }
-        private bool _cachingToken;
+        private readonly bool _cachingToken;
         public CancellationToken CancelToken { get; init; }
 
         private static readonly SemaphoreSlim _semaphore = new(1, 1);
@@ -68,9 +67,6 @@ namespace NovaPointLibrary.Core.Authentication
         internal AppClientPublic(AppClientPublicProperties properties, ILogger logger, CancellationTokenSource cancelTokenSource)
         {
             _logger = logger;
-
-            Settings = AppSettings.GetSettings();
-            Settings.ValidateSettings();
 
             this.CancelToken = cancelTokenSource.Token;
             this._cachingToken = properties.CachingToken;
@@ -193,7 +189,7 @@ namespace NovaPointLibrary.Core.Authentication
             try
             {
 
-                if (Settings.CachingToken)
+                if (_cachingToken)
                 {
                     var cacheHelper = await TokenCacheHelper.GetCache();
                     cacheHelper.RegisterCache(_app.UserTokenCache);
