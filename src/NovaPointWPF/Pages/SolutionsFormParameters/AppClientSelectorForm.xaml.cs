@@ -1,7 +1,8 @@
 ﻿using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Settings;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Security;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -12,8 +13,6 @@ namespace NovaPointWPF.Pages.SolutionsFormParameters
     public partial class AppClientSelectorForm : UserControl
     {
         private readonly AppConfig _appConfig;
-
-        public IAppClientProperties? AppClient = null;
 
         public AppClientSelectorForm()
         {
@@ -40,7 +39,6 @@ namespace NovaPointWPF.Pages.SolutionsFormParameters
         {
             if (ComboBoxAppProperties.SelectedItem is IAppClientProperties properties)
             {
-                AppClient = properties;
                 NoAppNotification.Visibility = Visibility.Collapsed;
                 if (ComboBoxAppProperties.SelectedItem is AppClientConfidentialProperties)
                 {
@@ -54,10 +52,29 @@ namespace NovaPointWPF.Pages.SolutionsFormParameters
             }
             else
             {
-                AppClient = null;
                 NoAppNotification.Visibility = Visibility.Visible;
                 NoAppNotification.Text = "This App is not correct.";
             }
+        }
+
+        internal IAppClientProperties GetClient()
+        {
+            if (ComboBoxAppProperties.SelectedItem is AppClientConfidentialProperties confidentialProperties)
+            {
+                SecureString securePassword = TextBoxCertificatePassword.SecurePassword;
+                securePassword.MakeReadOnly();
+                confidentialProperties.Password = securePassword;
+                return confidentialProperties;
+            }
+            else if (ComboBoxAppProperties.SelectedItem is AppClientPublicProperties publicProperties)
+            {
+                return publicProperties;
+            }
+            else
+            {
+                throw new Exception("App properties is neither public or confidential. Please check your settings.");
+            }
+
         }
     }
 }

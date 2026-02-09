@@ -10,7 +10,7 @@ namespace NovaPointLibrary.Core.Authentication
         public Guid TenantId { get; set; } = Guid.Empty;
         public Guid ClientId { get; set; } = Guid.Empty;
         public string CertificatePath { get; set; } = string.Empty;
-        public string Password {  get; set; } = string.Empty;
+        public System.Security.SecureString? Password { get; set; } = null;
         internal X509Certificate2 Certificate
         {
             get
@@ -44,10 +44,6 @@ namespace NovaPointLibrary.Core.Authentication
             if (!File.Exists(CertificatePath))
             {
                 throw new Exception("Certificate no found on path");
-            }
-            if (string.IsNullOrWhiteSpace(Password))
-            {
-                throw new Exception("Certificate password is empty");
             }
         }
     }
