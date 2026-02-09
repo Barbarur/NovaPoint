@@ -3,36 +3,61 @@ using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Core.Logging;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 
 namespace NovaPointLibrary.Solutions
 {
-    public class SolutionHandler(Func<ContextSolution, ISolutionParameters, ISolution> solutionCreate, ISolutionParameters param, IAppClientProperties appProperties)
+    public class SolutionHandler(Func<ContextSolution, ISolutionParameters, ISolution> solutionCreate, ISolutionParameters param, IAppClientProperties appProperties) : INotifyPropertyChanged
     {
 
         private readonly string _solutionName = solutionCreate.Method.DeclaringType != null ? solutionCreate.Method.DeclaringType.Name : "unknown";
+        
         public CancellationTokenSource CancelTokenSource { get; set; } = new();
+        
+        public string SolutionFolder { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-        private string _solutionFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        private string SolutionFolder
+        private static readonly ReaderWriterLock rwl = new();
+
+        private string _percentageCompleted = "0%";
+        public string PercentageCompleted
         {
-            get
-            {
-                return _solutionFolder;
-            }
+            get { return _percentageCompleted; }
             set
             {
-                if (System.IO.Directory.Exists(value))
-                {
-                    _solutionFolder = value;
-                }
-                ;
+                _percentageCompleted = $"{value}%";
+                OnPropertyChanged();
+            }
+        }
+
+        private double _progress = 0;
+        public double Progress
+        {
+            get { return _progress; }
+            set
+            {
+                _progress = value;
+                PercentageCompleted = value.ToString();
+                OnPropertyChanged();
+            }
+        }
+
+        private string _pendingTime = "Calculating time to complete";
+        public string PendingTime
+        {
+            get { return _pendingTime; }
+            set
+            {
+                _pendingTime = value;
+                OnPropertyChanged();
             }
         }
 
         public Task RunSolution()
         {
             LoggerSolution logger = new(UILog, _solutionName, param);
+            SolutionFolder = logger._solutionFolderPath;
 
             return Task.Run(async () =>
             {
@@ -100,35 +125,55 @@ namespace NovaPointLibrary.Solutions
 
         public void UILog(LogInfo logInfo)
         {
-            //// Reference: https://stackoverflow.com/questions/2382663/ensuring-that-things-run-on-the-ui-thread-in-wpf
-            //rwl.AcquireWriterLock(3000);
-            //try
-            //{
-            //    if (!string.IsNullOrEmpty(logInfo.SolutionFolder))
-            //    {
-            //        SolutionFolder = logInfo.SolutionFolder;
-            //    }
+            // Reference: https://stackoverflow.com/questions/2382663/ensuring-that-things-run-on-the-ui-thread-in-wpf
+            rwl.AcquireWriterLock(3000);
+            try
+            {
+                //if (!string.IsNullOrEmpty(logInfo.SolutionFolder))
+                //{
+                //    SolutionFolder = logInfo.SolutionFolder;
+                //}
 
-            //    if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { UiTxtLogs.Add(logInfo); }
+                //if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { UiTxtLogs.Add(logInfo); }
 
-            //    if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { UiTxtLogs.Add(logInfo); }
+                //if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { UiTxtLogs.Add(logInfo); }
 
-            //    // TEST
-            //    if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { Notification += logInfo.TextError; }
+                //// TEST
+                //if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { Notification += logInfo.TextError; }
 
-            //    if (logInfo.PercentageProgress != -1)
-            //    {
-            //        PendingTimeSpan = logInfo.PendingTime;
-            //        Progress = logInfo.PercentageProgress;
-            //        PercentageCompleted = $"{logInfo.PercentageProgress}%";
-            //    }
-            //}
+                if (logInfo.PercentageProgress != -1)
+                {
+                    SetPendingTime(logInfo.PendingTime);
+                    Progress = logInfo.PercentageProgress;
+                }
+            }
 
-            //finally
-            //{
-            //    rwl.ReleaseLock();
-            //}
+            finally
+            {
+                rwl.ReleaseLock();
+            }
         }
 
+        private string SetPendingTime(TimeSpan pendingTimeSpan)
+        {
+            string stringPendingTime = $"Pending Time: ";
+
+            if (pendingTimeSpan.Days > 0)
+            {
+                stringPendingTime += $"{pendingTimeSpan.Days}d:";
+            }
+            stringPendingTime += $"{pendingTimeSpan.Hours}h:{pendingTimeSpan.Minutes}m:{pendingTimeSpan.Seconds}s";
+
+            PendingTime = stringPendingTime;
+
+            return stringPendingTime;
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }
