@@ -1,7 +1,6 @@
 ﻿using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Core.SQLite;
 using NovaPointLibrary.Solutions;
-using PnP.Framework.Diagnostics;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
@@ -54,7 +53,6 @@ namespace NovaPointLibrary.Core.Logging
             _csvPath = Path.Combine(_solutionFolderPath, _solutionFileName + "_Report.csv");
 
             Info(GetType().Name, $"Solution folder: {_solutionFolderPath}");
-            UiAddLog(LogInfo.FolderInfo(_solutionFolderPath));
 
             SolutionLog logEntry = new("Info", _threadCode, GetType().Name, $"Version: v{VersionControl.GetVersion()}");
             WriteLog(logEntry);
@@ -126,6 +124,8 @@ namespace NovaPointLibrary.Core.Logging
         {
             if (progress < 0.01) { return; }
 
+            if (progress > 99.99) { progress = 99.99; }
+
             TimeSpan timeSpan = TimeSpan.FromMilliseconds((SW.Elapsed.TotalMilliseconds * 100 / progress - SW.Elapsed.TotalMilliseconds));
 
             UiAddLog(LogInfo.ProgressUpdate(progress, timeSpan));
@@ -161,7 +161,8 @@ namespace NovaPointLibrary.Core.Logging
             }
 
             SW.Stop();
-            Progress(100);
+            TimeSpan timeSpan = TimeSpan.FromMilliseconds((SW.Elapsed.TotalMilliseconds * 100 / 100 - SW.Elapsed.TotalMilliseconds));
+            UiAddLog(LogInfo.ProgressUpdate(100, timeSpan));
         }
 
 
@@ -261,7 +262,6 @@ namespace NovaPointLibrary.Core.Logging
             }
 
             SW.Stop();
-            Progress(100);
         }
 
         private void SolutionFinishNotice()
@@ -269,7 +269,6 @@ namespace NovaPointLibrary.Core.Logging
             ExportAllReports();
 
             ClearCache();
-
         }
 
 
