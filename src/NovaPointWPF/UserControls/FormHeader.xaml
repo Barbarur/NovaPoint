@@ -5,11 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NovaPointWPF.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="200" d:DesignWidth="800"
+             d:DesignHeight="150" d:DesignWidth="800"
              x:Name="root">
 
-    <Grid
-        Background="Transparent">
+    <Grid Margin="8">
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -26,7 +25,7 @@
 
             <TextBlock
                 Style="{DynamicResource TextBlockBody}"
-                Margin="0,8,0,28">
+                Margin="0,8,0,0">
 
                 <TextBlock.Inlines>
                     <Run Text="Solution Code: "/>
@@ -39,11 +38,11 @@
         <Button
             Grid.Column="1"
             Style="{DynamicResource ButtonSolutionMainAction}"
-            DockPanel.Dock="Right"
             Content="Learn More"
             FontWeight="Normal"
             Click="ReadTheDocsClick"
-            Margin="16, 0, 0, 32"/>
+            VerticalAlignment="Top"
+            HorizontalAlignment="Right"/>
 
 
     </Grid>
