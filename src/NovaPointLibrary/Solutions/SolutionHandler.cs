@@ -54,6 +54,19 @@ namespace NovaPointLibrary.Solutions
             }
         }
 
+        private string _uiText = string.Empty;
+        public string UiText
+        {
+            get { return _uiText; }
+            set
+            {
+                _uiText = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+
         public Task RunSolution()
         {
             LoggerSolution logger = new(UILog, _solutionName, param);
@@ -121,25 +134,15 @@ namespace NovaPointLibrary.Solutions
             }
         }
 
-
-
         public void UILog(LogInfo logInfo)
         {
             // Reference: https://stackoverflow.com/questions/2382663/ensuring-that-things-run-on-the-ui-thread-in-wpf
             rwl.AcquireWriterLock(3000);
             try
             {
-                //if (!string.IsNullOrEmpty(logInfo.SolutionFolder))
-                //{
-                //    SolutionFolder = logInfo.SolutionFolder;
-                //}
+                if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { UiText += $"{logInfo.TextBase} \n"; }
 
-                //if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { UiTxtLogs.Add(logInfo); }
-
-                //if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { UiTxtLogs.Add(logInfo); }
-
-                //// TEST
-                //if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { Notification += logInfo.TextError; }
+                if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { UiText += $"ERROR: {logInfo.TextError} \n"; }
 
                 if (logInfo.PercentageProgress != -1)
                 {
@@ -147,7 +150,6 @@ namespace NovaPointLibrary.Solutions
                     Progress = logInfo.PercentageProgress;
                 }
             }
-
             finally
             {
                 rwl.ReleaseLock();
@@ -176,4 +178,6 @@ namespace NovaPointLibrary.Solutions
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+
+   
 }
