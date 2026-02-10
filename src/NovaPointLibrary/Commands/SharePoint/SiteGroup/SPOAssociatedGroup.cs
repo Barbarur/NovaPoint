@@ -9,10 +9,10 @@ namespace NovaPointLibrary.Commands.SharePoint.SiteGroup
 {
     internal class SPOAssociatedGroup
     {
-        private readonly LoggerSolution _logger;
+        private readonly ILogger _logger;
         private readonly IAppClient _appInfo;
 
-        internal SPOAssociatedGroup(LoggerSolution logger, IAppClient appInfo)
+        internal SPOAssociatedGroup(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
-using NovaPointLibrary.Commands.Utilities.RESTModel;
+﻿using Microsoft.SharePoint.Client;
+using Newtonsoft.Json;
 using NovaPointLibrary.Commands.Utilities;
+using NovaPointLibrary.Commands.Utilities.RESTModel;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
-using Microsoft.SharePoint.Client;
 
 namespace NovaPointLibrary.Commands.SharePoint.Item
 {
@@ -66,7 +67,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         // https://learn.microsoft.com/en-us/sharepoint/dev/apis/spod-copy-move-api
         internal async Task CopyMoveAsync(
             ILogger logger,
-            Authentication.AppInfo appInfo,
+            IAppClient appInfo,
             bool isMove,
             bool sameWebCopyMoveOptimization)
         {

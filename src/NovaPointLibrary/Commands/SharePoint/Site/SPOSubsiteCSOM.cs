@@ -8,10 +8,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
     internal class SPOSubsiteCSOM
     {
-        private readonly LoggerSolution _logger;
+        private readonly ILogger _logger;
         private readonly IAppClient _appInfo;
 
-        internal SPOSubsiteCSOM(LoggerSolution logger, IAppClient appInfo)
+        internal SPOSubsiteCSOM(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

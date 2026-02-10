@@ -8,10 +8,10 @@ namespace NovaPointLibrary.Commands.AzureAD.User
 {
     internal class AADUser
     {
-        private readonly LoggerSolution _logger;
+        private readonly ILogger _logger;
         private readonly IAppClient _appInfo;
 
-        internal AADUser(LoggerSolution logger, IAppClient appInfo)
+        internal AADUser(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

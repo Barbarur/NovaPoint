@@ -1,4 +1,5 @@
 ﻿using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 
@@ -7,8 +8,8 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 
     internal class SPOListCSOM
     {
-        private readonly LoggerSolution _logger;
-        private readonly Authentication.AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
 
         private readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _defaultExpressions =
         [
@@ -24,7 +25,7 @@ namespace NovaPointLibrary.Commands.SharePoint.List
             l => l.RootFolder.ServerRelativeUrl,
         ];
 
-        internal SPOListCSOM(LoggerSolution logger, Authentication.AppInfo appInfo)
+        internal SPOListCSOM(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

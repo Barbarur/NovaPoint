@@ -7,10 +7,10 @@ namespace NovaPointLibrary.Commands.AzureAD
 {
     internal class GetAADUser
     {
-        private readonly LoggerSolution _logger;
+        private readonly ILogger _logger;
         private readonly IAppClient _appInfo;
 
-        internal GetAADUser(LoggerSolution logger, IAppClient appInfo)
+        internal GetAADUser(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

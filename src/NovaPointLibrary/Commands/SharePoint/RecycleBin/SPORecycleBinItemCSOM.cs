@@ -1,4 +1,5 @@
 ﻿using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using System.Net;
 
@@ -6,10 +7,10 @@ namespace NovaPointLibrary.Commands.SharePoint.RecycleBin
 {
     internal class SPORecycleBinItemCSOM
     {
-        private readonly LoggerSolution _logger;
-        private readonly Authentication.AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
 
-        internal SPORecycleBinItemCSOM(LoggerSolution logger, Authentication.AppInfo appInfo)
+        internal SPORecycleBinItemCSOM(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

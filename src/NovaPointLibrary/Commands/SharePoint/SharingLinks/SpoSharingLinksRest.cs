@@ -3,8 +3,9 @@ using Newtonsoft.Json;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
-using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Commands.Utilities;
+using NovaPointLibrary.Commands.Utilities.RESTModel;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 
 
@@ -13,11 +14,11 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
     internal class SpoSharingLinksRest
     {
         private readonly Dictionary<string, KnownItemGroups> Dictionary = new();
-        private readonly LoggerSolution _logger;
-        private readonly Authentication.AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
         private readonly Dictionary<string, KnownItemGroups> _dKnownSharingInfo = new();
 
-        internal SpoSharingLinksRest(LoggerSolution logger, Authentication.AppInfo appInfo, Dictionary<string, KnownItemGroups>? dKnownSharingInfo = null)
+        internal SpoSharingLinksRest(ILogger logger, IAppClient appInfo, Dictionary<string, KnownItemGroups>? dKnownSharingInfo = null)
         {
             _logger = logger;
             _appInfo = appInfo;

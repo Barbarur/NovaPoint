@@ -5,6 +5,7 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Permission.Utilities;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
 using System.Data;
@@ -14,8 +15,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
 {
     internal class SPOSitePermissionsCSOM
     {
-        private readonly LoggerSolution _logger;
-        private readonly AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
         private readonly SPOSitePermissionsCSOMParameters _param;
 
         private readonly SPOKnownRoleAssignmentGroups _knownGroups = new();
@@ -71,7 +72,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
             i => i.Versions,
         };
 
-        public SPOSitePermissionsCSOM(LoggerSolution logger, AppInfo appInfo, SPOSitePermissionsCSOMParameters parameters, SPOKnownRoleAssignmentGroups? knownGroups = null)
+        public SPOSitePermissionsCSOM(ILogger logger, IAppClient appInfo, SPOSitePermissionsCSOMParameters parameters, SPOKnownRoleAssignmentGroups? knownGroups = null)
         {
             _logger = logger;
             _appInfo = appInfo;

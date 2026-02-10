@@ -1,5 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 
@@ -7,10 +8,10 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     internal class SPOSiteCSOM
     {
-        private readonly LoggerSolution _logger;
-        private readonly AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
 
-        internal SPOSiteCSOM(LoggerSolution logger, AppInfo appInfo)
+        internal SPOSiteCSOM(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

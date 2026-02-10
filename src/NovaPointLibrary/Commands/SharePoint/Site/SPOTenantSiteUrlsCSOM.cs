@@ -7,11 +7,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 {
     internal class SPOTenantSiteUrlsCSOM
     {
-        private readonly LoggerSolution _logger;
+        private readonly ILogger _logger;
         private readonly IAppClient _appInfo;
         private readonly SPOTenantSiteUrlsParameters _param;
 
-        internal SPOTenantSiteUrlsCSOM(LoggerSolution logger, IAppClient appInfo, SPOTenantSiteUrlsParameters parameters)
+        internal SPOTenantSiteUrlsCSOM(ILogger logger, IAppClient appInfo, SPOTenantSiteUrlsParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;

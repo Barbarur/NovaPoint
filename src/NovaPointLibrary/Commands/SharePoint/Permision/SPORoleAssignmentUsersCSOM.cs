@@ -3,6 +3,7 @@ using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Permission.Utilities;
 using NovaPointLibrary.Commands.SharePoint.SharingLinks;
 using NovaPointLibrary.Commands.SharePoint.User;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using System.Data;
 using System.Text;
@@ -11,15 +12,15 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
 {
     internal class SPORoleAssignmentUsersCSOM
     {
-        private readonly LoggerSolution _logger;
-        private readonly Authentication.AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
         private SPOKnownRoleAssignmentGroups KnownGroups { get; init; }
         private readonly SpoSharingLinksRest _restSharingLinks;
 
 
         internal SPORoleAssignmentUsersCSOM(
-            LoggerSolution logger,
-            Authentication.AppInfo appInfo,
+            ILogger logger,
+            IAppClient appInfo,
             SPOKnownRoleAssignmentGroups knownGroups)
         {
             _logger = logger;

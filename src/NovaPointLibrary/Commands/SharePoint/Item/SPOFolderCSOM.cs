@@ -1,19 +1,20 @@
 ﻿using Microsoft.SharePoint.Client;
 using Newtonsoft.Json;
-using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Commands.Utilities;
-using System.Linq.Expressions;
+using NovaPointLibrary.Commands.Utilities.RESTModel;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
+using System.Linq.Expressions;
 
 
 namespace NovaPointLibrary.Commands.SharePoint.Item
 {
     internal class SPOFolderCSOM
     {
-        private readonly LoggerSolution _logger;
-        private readonly Authentication.AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
 
-        internal SPOFolderCSOM(LoggerSolution logger, Authentication.AppInfo appInfo)
+        internal SPOFolderCSOM(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

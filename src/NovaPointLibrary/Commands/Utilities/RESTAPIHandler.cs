@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.HttpService;
 using NovaPointLibrary.Core.Logging;
 
@@ -8,9 +9,9 @@ namespace NovaPointLibrary.Commands.Utilities
     internal class RESTAPIHandler
     {
         private readonly ILogger _logger;
-        private AppInfo _appInfo;
+        private IAppClient _appInfo;
 
-        internal RESTAPIHandler(ILogger logger, AppInfo appInfo)
+        internal RESTAPIHandler(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;

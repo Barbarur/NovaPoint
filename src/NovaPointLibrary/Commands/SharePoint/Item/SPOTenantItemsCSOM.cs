@@ -1,5 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.SharePoint.List;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
 using System.Linq.Expressions;
@@ -9,8 +10,8 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 {
     internal class SPOTenantItemsCSOM
     {
-        private readonly LoggerSolution _logger;
-        private readonly Authentication.AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
         private readonly SPOTenantItemsParameters _param;
 
         private readonly Expression<Func<ListItem, object>>[] _defaultExpressions = new Expression<Func<ListItem, object>>[]
@@ -24,7 +25,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             i => i.ParentList.ParentWeb.Url,
         };
 
-        internal SPOTenantItemsCSOM(LoggerSolution logger, Authentication.AppInfo appInfo, SPOTenantItemsParameters parameters)
+        internal SPOTenantItemsCSOM(ILogger logger, IAppClient appInfo, SPOTenantItemsParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;

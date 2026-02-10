@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
 
@@ -6,11 +7,11 @@ namespace NovaPointLibrary.Commands.SharePoint.List
 {
     internal class SPOTenantListsCSOM
     {
-        private readonly LoggerSolution _logger;
-        private readonly Authentication.AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
         private readonly SPOTenantListsParameters _param;
 
-        internal SPOTenantListsCSOM(LoggerSolution logger, Authentication.AppInfo appInfo, SPOTenantListsParameters parameters)
+        internal SPOTenantListsCSOM(ILogger logger, IAppClient appInfo, SPOTenantListsParameters parameters)
         {
             _logger = logger;
             _appInfo = appInfo;
