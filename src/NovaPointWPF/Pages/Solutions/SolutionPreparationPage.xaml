@@ -1,0 +1,93 @@
+﻿<Page x:Class="NovaPointWPF.Pages.Solutions.SolutionPreparationPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions"
+      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
+      xmlns:solutionformparameters="clr-namespace:NovaPointWPF.Pages.SolutionsFormParameters"
+      mc:Ignorable="d" 
+      d:DesignHeight="900" d:DesignWidth="1600"
+      Title="SolutionPreparationPage">
+
+    <Grid Style="{DynamicResource WindowGrid}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="800"/>
+            <ColumnDefinition Width="16"/>
+            <ColumnDefinition MinWidth="500"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Background="Transparent" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="100"/>
+            </Grid.RowDefinitions>
+
+            <Border
+                Style="{DynamicResource BorderSecondaryBackgroud}"
+                Grid.Row="0"
+                Grid.Column="0"/>
+
+            <ScrollViewer
+                Style="{DynamicResource LeftScrollViewer}"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                Grid.Row="0"
+                Grid.Column="0">
+
+                <StackPanel>
+                    <designmaterial:FormHeader x:Name="SolutionHeader" Margin="0,0,0,8"/>
+
+                    <solutionformparameters:AppClientSelectorForm x:Name="AppSelector"/>
+                    
+                    <Frame
+                        x:Name="SolutionFormFrame"
+                        NavigationUIVisibility="Hidden"
+                        Margin="0"/>
+                    
+                </StackPanel>
+
+            </ScrollViewer>
+
+            <Grid Grid.Row="2">
+
+                <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+
+                    <DockPanel HorizontalAlignment="Stretch">
+
+                        <Button
+                        Style="{DynamicResource ButtonSolutionMainAction}"
+                        x:Name="BackButton"
+                        Content="Back to Menu"
+                        Click="Back_Click"
+                        Width="150"
+                        DockPanel.Dock="Left"/>
+
+                        <Label DockPanel.Dock="Right"/>
+
+                        <Button
+                        Style="{DynamicResource ButtonSolutionMainAction}"
+                        x:Name="RunButton"
+                        Content="Run Solution"
+                        Click="RunButton_ClickAsync"
+                        Width="150"
+                        DockPanel.Dock="Right"/>
+
+                        <Label DockPanel.Dock="Right"/>
+
+
+                    </DockPanel>
+
+                </Border>
+            </Grid>
+
+        </Grid>
+
+        <Frame
+            x:Name="SolutionProgressViewFrame"
+            NavigationUIVisibility="Hidden"
+            Margin="0"
+            Grid.Column="2"/>
+
+    </Grid>
+</Page>

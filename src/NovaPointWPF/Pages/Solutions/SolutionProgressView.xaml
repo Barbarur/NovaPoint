@@ -1,0 +1,110 @@
+﻿<UserControl x:Class="NovaPointWPF.Pages.Solutions.SolutionProgressView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions"
+             mc:Ignorable="d" 
+             d:DesignHeight="900" d:DesignWidth="500">
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+
+        <Border Style="{DynamicResource BorderSecondaryBackgroud}"
+                Grid.Row="0"/>
+
+        <StackPanel Grid.Row="0" Margin="8">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="160"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+
+                    <TextBlock
+                        Style="{DynamicResource TextBlockTitle}"
+                        Text="Solution Progress"/>
+
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Margin="0,8,0,0">
+
+                        <TextBlock
+                            x:Name="PercentageCompleted"
+                            Style="{DynamicResource TextBlockBody}"
+                            Margin="0,0,8,0"
+                            Text="{Binding PercentageCompleted, Mode=OneWay}"/>
+
+                        <TextBlock
+                            x:Name="PendingTime"
+                            Style="{DynamicResource TextBlockBody}"
+                            Margin="0,0,0,0"
+                            Text="{Binding PendingTime, Mode=OneWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                    </StackPanel>
+                </StackPanel>
+
+                <Button
+                    x:Name="FolderButton"
+                    Grid.Column="1"
+                    Style="{DynamicResource ButtonSolutionMainAction}"
+                    Content="Solution folder"
+                    Click="FolderClick"
+                    IsEnabled="false"
+                    Margin="16,0,0,2"/>
+            </Grid>
+
+            <ProgressBar
+                Grid.Row="1"
+                x:Name="Progress"
+                Margin="0,16,0,0"
+                Height="6"
+                Orientation="Horizontal"
+                Minimum="0"
+                Maximum="100"
+                Value="{Binding Progress, Mode=OneWay}"
+                BorderThickness="0"
+                Foreground="{DynamicResource LogoPinkColor}"
+                Background="{DynamicResource PrimaryBorderColor}"/>
+
+            <ScrollViewer
+            Grid.Row="2"
+            VerticalAlignment="Top"
+            Style="{DynamicResource LeftScrollViewer}"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            Margin="0,28,0,8">
+
+                <TextBlock
+                x:Name="BoxText"
+                Style="{DynamicResource TextBlockBody}"
+                Text="{Binding Notification, Mode=OneWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                TextWrapping="Wrap"/>
+
+            </ScrollViewer>
+
+        </StackPanel>
+
+        <Grid Grid.Row="2">
+
+            <Border Style="{DynamicResource BorderPrimaryBackgroud}">
+
+                <Button
+                    Style="{DynamicResource ButtonSolutionMainAction}"
+                    x:Name="CancelButton"
+                    Content="Cancel Solution"
+                    Click="CancelButton_Click"
+                    Width="150"
+                    IsEnabled="False"
+                    DockPanel.Dock="Right"/>
+
+            </Border>
+        </Grid>
+
+    </Grid>
+</UserControl>
