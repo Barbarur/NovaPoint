@@ -10,5 +10,7 @@ namespace NovaPointLibrary.Core.Authentication
     {
         Guid Id { get; set; }
         string ClientTitle { get; set; }
+        Guid TenantId { get; set; }
+        Guid ClientId { get; set; }
     }
 }

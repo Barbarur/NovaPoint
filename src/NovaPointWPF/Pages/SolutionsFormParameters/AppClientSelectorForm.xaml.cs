@@ -2,6 +2,7 @@
 using NovaPointLibrary.Core.Settings;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,9 +21,9 @@ namespace NovaPointWPF.Pages.SolutionsFormParameters
 
             _appConfig = AppConfig.GetSettings();
 
-            var appProperties = new List<IAppClientProperties>();
-            appProperties.AddRange(_appConfig.ListPublicApps);
-            appProperties.AddRange(_appConfig.ListConfidentialApps);
+            List<IAppClientProperties> appProperties = [.. _appConfig.ListPublicApps, .. _appConfig.ListConfidentialApps];
+            appProperties = [.. appProperties.OrderBy(p => p.ClientTitle)];
+
             ComboBoxAppProperties.ItemsSource = appProperties;
             ComboBoxAppProperties.DisplayMemberPath = "ClientTitle";
             ComboBoxAppProperties.SelectedValuePath = "ClientTitle";

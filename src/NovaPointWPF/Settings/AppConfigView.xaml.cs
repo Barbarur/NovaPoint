@@ -1,8 +1,14 @@
-﻿using NovaPointLibrary.Commands.Utilities;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Identity.Client;
+using Microsoft.SharePoint.Client;
+using NovaPointLibrary.Commands.Utilities;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Settings;
 using NovaPointWPF.Settings.Controls;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
@@ -12,25 +18,30 @@ namespace NovaPointWPF.Settings
 {
     public partial class AppConfigView : Page
     {
-        private AppConfig _appConfig;
+        private readonly AppConfig _appConfig;
         public AppConfigView()
         {
             InitializeComponent();
 
             _appConfig = AppConfig.GetSettings();
 
-            foreach (var publicApp in _appConfig.ListPublicApps)
-            {
-                AppClientPublicPropertiesForm publicProperties = AppClientPublicPropertiesForm.GetExistingForm(publicApp, _appConfig);
-                PropertiesFormController formController = PropertiesFormController.GetExistingForm(publicProperties, RemovePropertiesForm);
-                SettingsPanel.Children.Add(formController);
-            }
+            List<IAppClientProperties> appProperties = [.. _appConfig.ListPublicApps, .. _appConfig.ListConfidentialApps];
+            appProperties = [.. appProperties.OrderBy(p => p.ClientTitle)];
 
-            foreach (var confidentialApp in _appConfig.ListConfidentialApps)
+            foreach (IAppClientProperties client in appProperties)
             {
-                AppClientConfidentialPropertiesForm confidentialProperties = AppClientConfidentialPropertiesForm.GetExistingForm(confidentialApp, _appConfig);
-                PropertiesFormController formController = PropertiesFormController.GetExistingForm(confidentialProperties, RemovePropertiesForm);
-                SettingsPanel.Children.Add(formController);
+                if (client is AppClientConfidentialProperties confidentialProperties)
+                {
+                    AppClientConfidentialPropertiesForm confidentialPropertiesForm = AppClientConfidentialPropertiesForm.GetExistingForm(confidentialProperties, _appConfig);
+                    PropertiesFormController formController = PropertiesFormController.GetExistingForm(confidentialPropertiesForm, RemovePropertiesForm);
+                    SettingsPanel.Children.Add(formController);
+                }
+                else if (client is AppClientPublicProperties publicProperties)
+                {
+                    AppClientPublicPropertiesForm publicPropertiesForm = AppClientPublicPropertiesForm.GetExistingForm(publicProperties, _appConfig);
+                    PropertiesFormController formController = PropertiesFormController.GetExistingForm(publicPropertiesForm, RemovePropertiesForm);
+                    SettingsPanel.Children.Add(formController);
+                }
             }
         }
 
