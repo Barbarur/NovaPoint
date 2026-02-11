@@ -13,9 +13,6 @@
 
         <StackPanel>
 
-            <designmaterial:FormHeader
-                x:Name="SolutionHeader"/>
-
             <designmaterial:PermissionForm
                 UserListOnly="{Binding UserListOnly, Mode=OneWayToSource}"
                 IncludeAdmins="{Binding IncludeAdmins, Mode=OneWayToSource}"

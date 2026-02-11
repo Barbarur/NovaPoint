@@ -1,30 +1,35 @@
-﻿using NovaPointLibrary.Commands.Directory;
+﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Directory;
-using NovaPointWPF.Pages.SolutionsFormParameters;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 
 namespace NovaPointWPF.Pages.Solutions.Directory
 {
-    /// <summary>
-    /// Interaction logic for GetDirectoryGroupForm.xaml
-    /// </summary>
     public partial class GetDirectoryGroupForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
         public GetDirectoryGroupForm()
         {
             InitializeComponent();
+
+            SolutionName = GetDirectoryGroup.s_SolutionName;
+            SolutionCode = nameof(GetDirectoryGroup);
+            SolutionDocs = GetDirectoryGroup.s_SolutionDocs;
+
+            SolutionCreate = GetDirectoryGroup.Create;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
-            GetDirectoryGroupParameters parameters = new GetDirectoryGroupParameters(GroupF.Parameters);
-
-            await GetDirectoryGroup.RunAsync(parameters, uiLog, cancelTokenSource);
+            GetDirectoryGroupParameters parameters = new(GroupF.Parameters);
+            return parameters;
         }
 
     }

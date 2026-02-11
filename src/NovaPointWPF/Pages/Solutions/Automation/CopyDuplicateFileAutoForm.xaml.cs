@@ -1,28 +1,20 @@
-﻿using NovaPointLibrary.Solutions;
+﻿using NovaPointLibrary.Core.Context;
+using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace NovaPointWPF.Pages.Solutions.Automation
 {
-    /// <summary>
-    /// Interaction logic for CopyDuplicateFileAutoForm.xaml
-    /// </summary>
     public partial class CopyDuplicateFileAutoForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
         public string SourceSiteURL { get; set; } = string.Empty;
         public string SourceListTitle { get; set; } = string.Empty;
 
@@ -36,14 +28,16 @@ namespace NovaPointWPF.Pages.Solutions.Automation
         {
             InitializeComponent();
 
-            DataContext = this;
+            SolutionName = CopyDuplicateFileAuto.s_SolutionName;
+            SolutionCode = nameof(CopyDuplicateFileAuto);
+            SolutionDocs = CopyDuplicateFileAuto.s_SolutionDocs;
 
-            SolutionHeader.SolutionTitle = CopyDuplicateFileAuto.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(CopyDuplicateFileAuto);
-            SolutionHeader.SolutionDocs = CopyDuplicateFileAuto.s_SolutionDocs;
+            SolutionCreate = CopyDuplicateFileAuto.Create;
+
+            DataContext = this;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
             CopyDuplicateFileAutoParameters parameters = new(
                 ModeF.ReportMode,
@@ -56,7 +50,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 DestinationListTitle,
                 DestinationFolderServerRelativeUrl);
 
-            await CopyDuplicateFileAuto.RunAsync(parameters, uiLog, cancelTokenSource);
+            return parameters;
         }
 
     }

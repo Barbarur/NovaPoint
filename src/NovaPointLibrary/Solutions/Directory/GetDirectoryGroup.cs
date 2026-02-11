@@ -1,60 +1,49 @@
-﻿using AngleSharp.Css.Dom;
-using NovaPointLibrary.Commands.Directory;
-using NovaPointLibrary.Commands.SharePoint.Site;
+﻿using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 
 
 namespace NovaPointLibrary.Solutions.Directory
 {
-    public class GetDirectoryGroup
+    public class GetDirectoryGroup : ISolution
     {
         public static readonly string s_SolutionName = "Directory Groups report";
-        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/{typeof(GetDirectoryGroup).Name}";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-{typeof(GetDirectoryGroup).Name}";
 
+        private ContextSolution _ctx;
         private readonly GetDirectoryGroupParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private GetDirectoryGroup(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, GetDirectoryGroupParameters parameters)
+
+        private GetDirectoryGroup(ContextSolution context, GetDirectoryGroupParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
+
+            Dictionary<Type, string> solutionReports = new()
+            {
+                { typeof(GetDirectoryGroupRecord), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        public static async Task RunAsync(GetDirectoryGroupParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, typeof(GetDirectoryGroup).Name, parameters);
-
-            try
-            {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                 await new GetDirectoryGroup(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new GetDirectoryGroup(context, (GetDirectoryGroupParameters)parameters);
         }
 
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             string selectedProperties = "?$select=id,displayName,createdDateTime,mail,groupTypes,mailEnabled,securityEnabled,visibility,description";
             
-            var collGroups = await new DirectoryGroup(_logger, _appInfo).GetAllAsync(selectedProperties);
+            var collGroups = await new DirectoryGroup(_ctx.Logger, _ctx.AppClient).GetAllAsync(selectedProperties);
 
-            ProgressTracker progress = new(_logger, collGroups.Count());
+            ProgressTracker progress = new(_ctx.Logger, collGroups.Count());
             foreach (var group in collGroups)
             {
                 
-                SolutionGetDirectoryGroupRecord groupRecord = new(group);
+                GetDirectoryGroupRecord groupRecord = new(group);
                 
                 if (!_param.GroupParam.IsTargetGroup(group))
                 { 
@@ -67,20 +56,20 @@ namespace NovaPointLibrary.Solutions.Directory
                 {
                     if (_param.GroupParam.IncludeOwners)
                     {
-                        var collOwners = await new DirectoryGroupUser(_logger, _appInfo).GetOwnersAsync(groupRecord.Id);
+                        var collOwners = await new DirectoryGroupUser(_ctx.Logger, _ctx.AppClient).GetOwnersAsync(Guid.Parse(groupRecord.Id));
                         groupRecord.AddOwners(collOwners);
                     }
 
                     if (_param.GroupParam.IncludeMembersCount)
                     {
-                        var membersTotal = await new DirectoryGroupUser(_logger, _appInfo).GetMembersTotalCountAsync(groupRecord.Id);
+                        var membersTotal = await new DirectoryGroupUser(_ctx.Logger, _ctx.AppClient).GetMembersTotalCountAsync(Guid.Parse(groupRecord.Id));
                         groupRecord.AddMembersCount(membersTotal);
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Group", groupRecord.Id.ToString(), ex);
+                    _ctx.Logger.Error(GetType().Name, "Group", groupRecord.Id.ToString(), ex);
                     groupRecord.Remarks = ex.Message;
                 }
 
@@ -91,36 +80,39 @@ namespace NovaPointLibrary.Solutions.Directory
 
         }
 
-        private void AddRecord(SolutionGetDirectoryGroupRecord record)
+        private void AddRecord(GetDirectoryGroupRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
     }
 
-    internal class SolutionGetDirectoryGroupRecord : ISolutionRecord
+    internal class GetDirectoryGroupRecord : ISolutionRecord
     {
-        internal Guid Id { get; set; }
-        internal string DisplayName { get; set; }
-        internal string Type { get; set; } = "Unknown";
-        internal string CreatedDate { get; set; }
-        internal string OwnersTotal { get; set; } = "Unknown";
-        internal string OwnersEmail { get; set; } = "Unknown";
-        internal string MembershipType { get; set; }
+        public string Id { get; set; } = String.Empty;
+        public string DisplayName { get; set; } = String.Empty;
+        public string Type { get; set; } = "Unknown";
+        public string CreatedDate { get; set; } = String.Empty;
+        public string OwnersTotal { get; set; } = "Unknown";
+        public string OwnersEmail { get; set; } = "Unknown";
+        public string MembershipType { get; set; } = String.Empty;
 
         // EXPLAIN USERS INSIDE AS MEMBERS ARE NOT INCLUDED AS IT WOULD BE A VERY LONG LIST.
-        internal string MembersTotal { get; set; } = "Unknown";
-        internal string Email { get; set; }
-        internal bool MailEnabled { get; set; }
-        internal bool SecurityEnabled { get; set; }
-        internal string Visibility { get; set; }
-        internal string Description { get; set; }
+        public string MembersTotal { get; set; } = "Unknown";
+        public string MailEnabled { get; set; } = String.Empty;
+        public string Email { get; set; } = String.Empty;
+        public string SecurityEnabled { get; set; } = String.Empty;
+        public string Visibility { get; set; } = String.Empty;
+        public string Description { get; set; } = String.Empty;
 
 
-        internal string Remarks { get; set; } = string.Empty;
+        public string Remarks { get; set; } = string.Empty;
 
-        internal SolutionGetDirectoryGroupRecord(GraphGroup group)
+        public GetDirectoryGroupRecord() { }
+
+
+        internal GetDirectoryGroupRecord(GraphGroup group)
         {
-            Id = Guid.Parse(group.Id);
+            Id = group.Id;
             DisplayName = group.DisplayName;
 
             group.DefineTypeGroup();
@@ -154,8 +146,8 @@ namespace NovaPointLibrary.Solutions.Directory
             CreatedDate = group.CreatedDateTime.ToString();
 
             Email = group.Email;
-            MailEnabled = group.MailEnabled;
-            SecurityEnabled = group.SecurityEnabled;
+            MailEnabled = group.MailEnabled.ToString();
+            SecurityEnabled = group.SecurityEnabled.ToString();
             Visibility = group.Visibility;
             Description = group.Description;
 

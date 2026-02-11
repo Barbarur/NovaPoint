@@ -1,10 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.SharePoint.Client;
-using Microsoft.SharePoint.News.DataModel;
-using NovaPointLibrary.Commands.Authentication;
+﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.SharePoint.RecycleBin;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Dynamic;
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -14,46 +11,38 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionName = "Delete items from recycle bin";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-ClearRecycleBinAuto";
 
+        private ContextSolution _ctx;
         private ClearRecycleBinAutoParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly AppInfo _appInfo;
 
-        private ClearRecycleBinAuto(LoggerSolution logger, AppInfo appInfo, ClearRecycleBinAutoParameters parameters)
+
+        private ClearRecycleBinAuto(ContextSolution context, ClearRecycleBinAutoParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
+
+            Dictionary<Type, string> solutionReports = new()
+            {
+                { typeof(ClearRecycleBinAuto), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        public static async Task RunAsync(ClearRecycleBinAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "ClearRecycleBinAuto", parameters);
-            try
-            {
-                AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new ClearRecycleBinAuto(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new ClearRecycleBinAuto(context, (ClearRecycleBinAutoParameters)parameters);
         }
 
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
                 
                 if (siteResults.Ex != null)
                 {
-                    _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, siteResults.Ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteResults.SiteUrl, siteResults.Ex);
                     AddRecord(siteResults.SiteUrl, remarks: siteResults.Ex.Message);
                     continue;
                 }
@@ -69,11 +58,11 @@ namespace NovaPointLibrary.Solutions.Automation
                         if (ex.Message.Contains("The attempted operation is prohibited because it exceeds the list view threshold"))
                         {
                             _param.RecycleBinParam.AllItems = false;
-                            _logger.UI(GetType().Name, "Recycle bin cannot be cleared in bulk due view threshold limitation. Recycle bin items will be deleted individually.");
+                            _ctx.Logger.UI(GetType().Name, "Recycle bin cannot be cleared in bulk due view threshold limitation. Recycle bin items will be deleted individually.");
                         }
                         else
                         {
-                            _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                            _ctx.Logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
                             AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                         }
                     }
@@ -87,7 +76,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     }
                     catch (Exception ex)
                     {
-                        _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                        _ctx.Logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
                         AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                     }
                 }
@@ -96,9 +85,9 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task DeleteAllRecycleBinItemsAsync(string siteUrl)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
+            ClientContext clientContext = await _ctx.AppClient.GetContext(siteUrl);
             clientContext.Web.RecycleBin.DeleteAll();
             clientContext.ExecuteQueryRetry();
             AddRecord(siteUrl, remarks: "All recycle bin items have been deleted") ;
@@ -106,26 +95,26 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task ProcessRecycleBinItemsAsync(string siteUrl, ProgressTracker parentProgress)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             ProgressTracker progress = new(parentProgress, 5000);
             int itemCounter = 0;
             int itemExpectedCount = 5000;
-            var spoRecycleBinItem = new SPORecycleBinItemCSOM(_logger, _appInfo);
+            var spoRecycleBinItem = new SPORecycleBinItemCSOM(_ctx.Logger, _ctx.AppClient);
             await foreach (RecycleBinItem oRecycleBinItem in spoRecycleBinItem.GetAsync(siteUrl, _param.RecycleBinParam))
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 string remarks = string.Empty;
 
                 try
                 {
-                    await new SPORecycleBinItemREST(_logger, _appInfo).RemoveAsync(siteUrl, oRecycleBinItem);
+                    await new SPORecycleBinItemREST(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteUrl, oRecycleBinItem);
                     remarks = "Item removed from Recycle bin";
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Recycle bin item", oRecycleBinItem.Title, ex);
+                    _ctx.Logger.Error(GetType().Name, "Recycle bin item", oRecycleBinItem.Title, ex);
                     remarks = ex.Message;
                 }
 
@@ -140,7 +129,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
             }
 
-            _logger.Info(GetType().Name, $"Finish processing recycle bin items for '{siteUrl}'");
+            _ctx.Logger.Info(GetType().Name, $"Finish processing recycle bin items for '{siteUrl}'");
         }
 
         private void AddRecord(string siteUrl,
@@ -167,7 +156,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             recordItem.Remarks = remarks;
 
-            _logger.DynamicCSV(recordItem);
+            _ctx.Logger.WriteRecord(recordItem);
         }
     }
 

@@ -10,12 +10,9 @@
       d:DesignHeight="900" d:DesignWidth="600"
       Title="GetDirectoryGroupForm">
 
-    <Grid Margin="0,0,0,16">
+    <Grid Margin="8">
 
         <StackPanel>
-
-            <designmaterial:FormHeader
-                x:Name="SolutionHeader"/>
 
             <solutionformparameters:DirectoryGroupParametersForm
                 x:Name="GroupF"/>

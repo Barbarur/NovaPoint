@@ -1,34 +1,37 @@
-﻿using NovaPointLibrary.Solutions.Report;
+﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
+using NovaPointLibrary.Solutions.Report;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace NovaPointWPF.Pages.Solutions.Report
 {
-    /// <summary>
-    /// Interaction logic for PageAssetsReportForm.xaml
-    /// </summary>
     public partial class PageAssetsReportForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
         public PageAssetsReportForm()
         {
             InitializeComponent();
 
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = PageAssetsReport.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(PageAssetsReport);
-            SolutionHeader.SolutionDocs = PageAssetsReport.s_SolutionDocs;
+            SolutionName = PageAssetsReport.s_SolutionName;
+            SolutionCode = nameof(PageAssetsReport);
+            SolutionDocs = PageAssetsReport.s_SolutionDocs;
+
+            SolutionCreate = PageAssetsReport.Create;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
             PageAssetsReportParameters parameters = new(AdminF.Parameters, SiteF.Parameters);
-
-            await PageAssetsReport.RunAsync(parameters, uiLog, cancelTokenSource);
+            return parameters;
         }
-    }
 
+    }
 }

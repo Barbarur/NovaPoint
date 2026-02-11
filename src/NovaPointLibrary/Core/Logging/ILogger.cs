@@ -18,5 +18,7 @@ namespace NovaPointLibrary.Core.Logging
         void WriteLog(SolutionLog log);
 
         void WriteRecord<T>(T record);
+
+        void DynamicCSV(dynamic o);
     }
 }

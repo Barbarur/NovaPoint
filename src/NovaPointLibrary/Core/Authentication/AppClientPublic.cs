@@ -10,6 +10,26 @@ namespace NovaPointLibrary.Core.Authentication
     {
         private readonly ILogger _logger;
 
+        private Guid _tenantId;
+        public Guid TenantId
+        {
+            get { return _tenantId; }
+            set
+            {
+                _tenantId = value;
+            }
+        }
+
+        private Guid _clientId;
+        public Guid ClientId
+        {
+            get { return _clientId; }
+            set
+            {
+                _clientId = value;
+            }
+        }
+
         private string _adminUrl = string.Empty;
         public string AdminUrl
         {
@@ -76,6 +96,9 @@ namespace NovaPointLibrary.Core.Authentication
                                                  .WithAuthority(authority)
                                                  .WithDefaultRedirectUri()
                                                  .Build();
+
+            TenantId = properties.TenantId;
+            ClientId = properties.ClientId;
         }
 
         public void IsCancelled()

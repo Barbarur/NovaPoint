@@ -1,19 +1,19 @@
-﻿using NovaPointLibrary.Commands.Authentication;
+﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace NovaPointWPF.Pages.Solutions
 {
     public interface ISolutionForm
     {
-        async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
-        {
+        string SolutionName { get; init; }
+        string SolutionCode { get; init; }
+        string SolutionDocs { get; init; }
 
-        }
+        Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
+        ISolutionParameters GetParameters();
+
     }
 }

@@ -1,33 +1,20 @@
-﻿using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Site;
+﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
-using NovaPointLibrary.Solutions.Report;
-using NovaPointWPF.UserControls;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace NovaPointWPF.Pages.Solutions.Automation
 {
-    /// <summary>
-    /// Interaction logic for SetVersioningLimitAutoForm.xaml
-    /// </summary>
     public partial class SetVersioningLimitAutoForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
         public int LibraryMajorVersionLimit { get; set; } = 500;
         public int LibraryMinorVersionLimit { get; set; } = 0;
         public int ListMajorVersionLimit { get; set; } = 500;
@@ -39,20 +26,21 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = SetVersioningLimitAuto.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(SetVersioningLimitAuto);
-            SolutionHeader.SolutionDocs = SetVersioningLimitAuto.s_SolutionDocs;
+            SolutionName = SetVersioningLimitAuto.s_SolutionName;
+            SolutionCode = nameof(SetVersioningLimitAuto);
+            SolutionDocs = SetVersioningLimitAuto.s_SolutionDocs;
+
+            SolutionCreate = SetVersioningLimitAuto.Create;
 
             this.LibraryMajorVersionLimit = 500;
             this.LibraryMinorVersionLimit = 0;
             this.ListMajorVersionLimit = 500;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
             SetVersioningLimitAutoParameters parameters = new(AdminF.Parameters, SiteF.Parameters, VersioningF.Parameters);
-
-            await SetVersioningLimitAuto.RunAsync(parameters, uiLog, cancelTokenSource);
+            return parameters;
         }
     }
 }

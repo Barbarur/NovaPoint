@@ -1,17 +1,19 @@
-﻿using NovaPointLibrary.Solutions;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+﻿using NovaPointLibrary.Core.Context;
+using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Report;
+using System;
+using System.Windows.Controls;
 
 namespace NovaPointWPF.Pages.Solutions.Report
 {
-    /// <summary>
-    /// Interaction logic for SharingLinksReportForm.xaml
-    /// </summary>
     public partial class SharingLinksReportForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
         public bool BreakdownInvitations { get; set; } = true;
 
         public SharingLinksReportForm()
@@ -20,17 +22,18 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = SharingLinksReport.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(SharingLinksReport);
-            SolutionHeader.SolutionDocs = SharingLinksReport.s_SolutionDocs;
+            SolutionName = SharingLinksReport.s_SolutionName;
+            SolutionCode = nameof(SharingLinksReport);
+            SolutionDocs = SharingLinksReport.s_SolutionDocs;
 
+            SolutionCreate = SharingLinksReport.Create;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
             SharingLinksReportParameters parameters = new(BreakdownInvitations, LinkF.Parameters, SiteF.Parameters, AdminF.Parameters);
-
-            await SharingLinksReport.RunAsync(parameters, uiLog, cancelTokenSource);
+            return parameters;
         }
+
     }
 }

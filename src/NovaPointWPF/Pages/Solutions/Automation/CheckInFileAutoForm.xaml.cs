@@ -1,32 +1,25 @@
-﻿using NovaPointLibrary.Solutions.Automation;
+﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
+using NovaPointLibrary.Solutions.Automation;
+using NovaPointLibrary.Solutions.Directory;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Controls.Primitives;
-using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Site;
+
 
 namespace NovaPointWPF.Pages.Solutions.Automation
 {
-    /// <summary>
-    /// Interaction logic for CheckInFileAutoForm.xaml
-    /// </summary>
     public partial class CheckInFileAutoForm : Page, ISolutionForm
     {
-        public string CheckinType { get; set; }
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
+        public string CheckingType { get; set; }
         public bool Major {  get; set; }
         public bool Minor { get; set; }
         public bool Discard { get; set; }
@@ -36,39 +29,40 @@ namespace NovaPointWPF.Pages.Solutions.Automation
         {
             InitializeComponent();
 
+            SolutionName = CheckInFileAuto.s_SolutionName;
+            SolutionCode = nameof(CheckInFileAuto);
+            SolutionDocs = CheckInFileAuto.s_SolutionDocs;
+
+            SolutionCreate = CheckInFileAuto.Create;
+
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = CheckInFileAuto.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(CheckInFileAuto);
-            SolutionHeader.SolutionDocs = CheckInFileAuto.s_SolutionDocs;
-
-            this.CheckinType = "Major";
+            this.CheckingType = "Major";
             this.Major = true;
             this.Minor = false;
             this.Discard = false;
             this.Comment = string.Empty;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
-        {
-            CheckInFileAutoParameters parameters = new(Mode.ReportMode, this.CheckinType, this.Comment,
-                AdminF.Parameters, SiteF.Parameters, ListForm.Parameters, ItemForm.Parameters);
-
-            await CheckInFileAuto.RunAsync(parameters, uiLog, cancelTokenSource);
-        }
-
         private void CheckInTypeClick(object sender, RoutedEventArgs e)
         {
-            if (Major) { this.CheckinType = "Major"; }
-            if (Minor) { this.CheckinType = "Minor"; }
+            if (Major) { this.CheckingType = "Major"; }
+            if (Minor) { this.CheckingType = "Minor"; }
             if (Discard)
             {
-                this.CheckinType = "Discard";
+                this.CheckingType = "Discard";
                 CommentTextBox.Text = string.Empty;
                 this.Comment = string.Empty;
                 CheckInCommentForm.Visibility = Visibility.Collapsed;
             }
             if (!Discard) { CheckInCommentForm.Visibility = Visibility.Visible; }
+        }
+
+        public ISolutionParameters GetParameters()
+        {
+            CheckInFileAutoParameters parameters = new(Mode.ReportMode, this.CheckingType, this.Comment,
+                AdminF.Parameters, SiteF.Parameters, ListForm.Parameters, ItemForm.Parameters);
+            return parameters;
         }
 
     }

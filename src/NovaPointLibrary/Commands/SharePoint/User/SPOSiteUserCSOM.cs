@@ -1,5 +1,6 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using System.Linq.Expressions;
 
@@ -7,8 +8,8 @@ namespace NovaPointLibrary.Commands.SharePoint.User
 {
     internal class SPOSiteUserCSOM
     {
-        private readonly LoggerSolution _logger;
-        private readonly AppInfo _appInfo;
+        private readonly ILogger _logger;
+        private readonly IAppClient _appInfo;
 
         private readonly Expression<Func<Microsoft.SharePoint.Client.User, object>>[] _retrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
         {
@@ -20,7 +21,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
             u => u.UserId,
         };
 
-        internal SPOSiteUserCSOM(LoggerSolution logger, AppInfo appInfo)
+        internal SPOSiteUserCSOM(ILogger logger, IAppClient appInfo)
         {
             _logger = logger;
             _appInfo = appInfo;
@@ -169,7 +170,7 @@ namespace NovaPointLibrary.Commands.SharePoint.User
 
             try
             {
-                Microsoft.SharePoint.Client.User user = clientContext.Web.SiteUsers.GetByLoginName($"c:0-.f|rolemanager|spo-grid-all-users/{_appInfo.Settings.TenantID}");
+                Microsoft.SharePoint.Client.User user = clientContext.Web.SiteUsers.GetByLoginName($"c:0-.f|rolemanager|spo-grid-all-users/{_appInfo.TenantId}");
 
                 clientContext.Load(user, expressions);
                 clientContext.ExecuteQueryRetry();

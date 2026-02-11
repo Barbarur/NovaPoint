@@ -3,7 +3,7 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Linq.Expressions;
 
 
@@ -14,9 +14,8 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionName = "Libraries and Lists report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ListReport";
 
+        private ContextSolution _ctx;
         private ListReportParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpresions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
         {
@@ -53,41 +52,32 @@ namespace NovaPointLibrary.Solutions.Report
             l => l.VersionPolicies,
         };
 
-        private ListReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, ListReportParameters parameters)
+        private ListReport(ContextSolution context, ListReportParameters parameters)
         {
-            _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
-        }
+            _ctx = context;
 
-        public static async Task RunAsync(ListReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        {
             parameters.ListsParam.ListExpressions = _listExpresions;
+            _param = parameters;
 
-            LoggerSolution logger = new(uiAddLog, "ListReport", parameters);
-
-            try
+            Dictionary<Type, string> solutionReports = new()
             {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new ListReport(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+                { typeof(ListReportRecord), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        private async Task RunScriptAsync()
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            _appInfo.IsCancelled();
+            return new ListReport(context, (ListReportParameters)parameters);
+        }
 
-            await foreach (var listRecord in new SPOTenantListsCSOM(_logger, _appInfo, _param.TListsParam).GetAsync())
+        public async Task RunAsync()
+        {
+            _ctx.AppClient.IsCancelled();
+
+            await foreach (var listRecord in new SPOTenantListsCSOM(_ctx.Logger, _ctx.AppClient, _param.TListsParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (listRecord.Ex != null)
                 {
@@ -107,7 +97,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", listRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", listRecord.SiteUrl, ex);
                     AddRecord(new(listRecord.SiteUrl, listRecord.List, ex.Message));
                 }
 
@@ -116,7 +106,7 @@ namespace NovaPointLibrary.Solutions.Report
         
         private async Task ProcessList(string siteUrl, List list)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             ListReportRecord record = new(siteUrl, list);
 
@@ -130,7 +120,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             if (_param.IncludeStorageMetrics)
             {
-                var storageMetricsResponse = await new SPOFolderCSOM(_logger, _appInfo).GetFolderStorageMetricAsync(siteUrl, list.RootFolder);
+                var storageMetricsResponse = await new SPOFolderCSOM(_ctx.Logger, _ctx.AppClient).GetFolderStorageMetricAsync(siteUrl, list.RootFolder);
                 record.AddStorageMetrics(storageMetricsResponse.StorageMetrics);
             }
 
@@ -139,7 +129,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void AddRecord(ListReportRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
 
     }

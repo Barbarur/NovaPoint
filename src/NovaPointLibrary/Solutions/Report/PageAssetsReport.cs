@@ -2,19 +2,20 @@
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Linq.Expressions;
+
 
 namespace NovaPointLibrary.Solutions.Report
 {
-    public class PageAssetsReport
+    public class PageAssetsReport : ISolution
     {
         public static readonly string s_SolutionName = "Page assets report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PageAssetsReport";
 
+        private ContextSolution _ctx;
         private PageAssetsReportParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
+
 
         private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpressions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
         {
@@ -71,48 +72,31 @@ namespace NovaPointLibrary.Solutions.Report
             AllItems = true,
         };
 
-        private PageAssetsReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, PageAssetsReportParameters parameters)
+        private PageAssetsReport(ContextSolution context, PageAssetsReportParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
-        }
-
-        public static async Task RunAsync(PageAssetsReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        {
-
-            LoggerSolution logger = new(uiAddLog, "PageAssetsReport", parameters);
 
             Dictionary<Type, string> solutionReports = new()
             {
                 { typeof(PageAssetsReportRecord), "PageAssetsReport" },
                 { typeof(UnusedPageAssetsReportRecord), "UnusedAssetsReport" },
             };
-            logger.AddSolutionReports(solutionReports);
-
-            try
-            {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new PageAssetsReport(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
-
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        private async Task RunScriptAsync()
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            _appInfo.IsCancelled();
+            return new PageAssetsReport(context, (PageAssetsReportParameters)parameters);
+        }
 
-            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+        public async Task RunAsync()
+        {
+            _ctx.AppClient.IsCancelled();
+
+            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (siteRecord.Ex != null)
                 {
@@ -127,7 +111,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     PageAssetsReportRecord siteReportRecord = new(siteRecord.SiteUrl, ex.Message);
                     RecordCSV(siteReportRecord);
                 }
@@ -136,29 +120,29 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task ProcessSite(string siteUrl)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            var siteAssetsLibrary = await new SPOListCSOM(_logger, _appInfo).GetList(siteUrl, "Site Assets", _listExpressions);
+            var siteAssetsLibrary = await new SPOListCSOM(_ctx.Logger, _ctx.AppClient).GetList(siteUrl, "Site Assets", _listExpressions);
 
             List<ListItem> collAssets = new();
-            await foreach (var sitePageAsset in new SPOListItemCSOM(_logger, _appInfo).GetAsync(siteUrl, siteAssetsLibrary, _assetsParam))
+            await foreach (var sitePageAsset in new SPOListItemCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteUrl, siteAssetsLibrary, _assetsParam))
             {
                 if (sitePageAsset.FileSystemObjectType == FileSystemObjectType.Folder) { continue; }
                 collAssets.Add(sitePageAsset);
             }
 
 
-            var sitePagesLibrary = await new SPOListCSOM(_logger, _appInfo).GetList(siteUrl, "Site Pages", _listExpressions);
+            var sitePagesLibrary = await new SPOListCSOM(_ctx.Logger, _ctx.AppClient).GetList(siteUrl, "Site Pages", _listExpressions);
 
             List<ListItem> collUsedAssets = new();
-            await foreach (var page in new SPOListItemCSOM(_logger, _appInfo).GetAsync(siteUrl, sitePagesLibrary, _pagesParam))
+            await foreach (var page in new SPOListItemCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteUrl, sitePagesLibrary, _pagesParam))
             {
                 foreach (var asset in collAssets)
                 {
                     string pageCanvasContent = (string)page["CanvasContent1"];
-                    _logger.Debug(GetType().Name, $"Page canvas: {pageCanvasContent}");
+                    _ctx.Logger.Debug(GetType().Name, $"Page canvas: {pageCanvasContent}");
                     string assetUrl = (string)asset["FileLeafRef"];
-                    _logger.Debug(GetType().Name, $"Asset URL: {assetUrl}");
+                    _ctx.Logger.Debug(GetType().Name, $"Asset URL: {assetUrl}");
                     if (!string.IsNullOrWhiteSpace(pageCanvasContent) && !string.IsNullOrWhiteSpace(assetUrl) && pageCanvasContent.Contains(assetUrl))
                     {
                         collUsedAssets.Add(asset); 
@@ -181,7 +165,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(ISolutionRecord record)
         {
-            _logger.WriteRecord(record);
+            _ctx.Logger.WriteRecord(record);
         }
 
     }

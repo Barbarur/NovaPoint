@@ -1,47 +1,38 @@
-﻿using NovaPointLibrary.Commands.SharePoint.Site;
+﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace NovaPointWPF.Pages.Solutions.Automation
 {
-    /// <summary>
-    /// Interaction logic for RemoveSiteUserAutoForm.xaml
-    /// </summary>
     public partial class RemoveSiteUserAutoForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
 
         public RemoveSiteUserAutoForm()
         {
             InitializeComponent();
 
-            DataContext = this;
+            SolutionName = RemoveSiteUserAuto.s_SolutionName;
+            SolutionCode = nameof(RemoveSiteUserAuto);
+            SolutionDocs = RemoveSiteUserAuto.s_SolutionDocs;
 
-            SolutionHeader.SolutionTitle = RemoveSiteUserAuto.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(RemoveSiteUserAuto);
-            SolutionHeader.SolutionDocs = RemoveSiteUserAuto.s_SolutionDocs;
+            SolutionCreate = RemoveSiteUserAuto.Create;
+
+            DataContext = this;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
             RemoveUserAutoParameters parameters = new(UserF.Parameters, AdminF.Parameters, SiteF.Parameters);
-
-            await RemoveSiteUserAuto.RunAsync(parameters, uiLog, cancelTokenSource);
+            return parameters;
         }
+
     }
 }

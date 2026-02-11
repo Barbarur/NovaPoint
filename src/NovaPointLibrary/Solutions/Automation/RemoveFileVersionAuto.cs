@@ -2,7 +2,7 @@
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -12,9 +12,8 @@ namespace NovaPointLibrary.Solutions.Automation
         public readonly static String s_SolutionName =  "Remove file versions";
         public readonly static String s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveFileVersionAuto";
 
+        private ContextSolution _ctx;
         private RemoveFileVersionAutoParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] _fileExpressions = new Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[]
         {
@@ -30,44 +29,36 @@ namespace NovaPointLibrary.Solutions.Automation
             i => i.File.Length,
         };
 
-        private RemoveFileVersionAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, RemoveFileVersionAutoParameters parameters)
+        private RemoveFileVersionAuto(ContextSolution context, RemoveFileVersionAutoParameters parameters)
         {
-            _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
-        }
+            _ctx = context;
 
-        public static async Task RunAsync(RemoveFileVersionAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        {
             parameters.ItemsParam.FileExpressions = _fileExpressions;
             parameters.ListsParam.IncludeLibraries = true;
             parameters.ListsParam.IncludeLists = false;
             parameters.ListsParam.IncludeHiddenLists = false;
             parameters.ListsParam.IncludeSystemLists = false;
+            _param = parameters;
 
-            LoggerSolution logger = new(uiAddLog, "RemoveFileVersionAuto", parameters);
-            try
+            Dictionary<Type, string> solutionReports = new()
             {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new RemoveFileVersionAuto(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+                { typeof(RemoveFileVersionAutoRecord), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        private async Task RunScriptAsync()
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            _appInfo.IsCancelled();
+            return new RemoveFileVersionAuto(context, (RemoveFileVersionAutoParameters)parameters);
+        }
 
-            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
+        public async Task RunAsync()
+        {
+            _ctx.AppClient.IsCancelled();
+
+            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_ctx.Logger, _ctx.AppClient, _param.TItemsParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (tenantItemRecord.Ex != null)
                 {
@@ -82,7 +73,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _ctx.Logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
                     
                     RemoveFileVersionAutoRecord record = new(tenantItemRecord, ex.Message);
                     RecordCSV(record);
@@ -92,14 +83,14 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task RemoveFileVersions(SPOTenantItemRecord resultItem)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             if (resultItem.Item == null || resultItem.List == null) { return; }
             if (resultItem.Item.FileSystemObjectType.ToString() == "Folder") { return; }
 
-            _logger.Info(GetType().Name, $"Start processing File '{resultItem.Item.File.Name}'");
+            _ctx.Logger.Info(GetType().Name, $"Start processing File '{resultItem.Item.File.Name}'");
             
-            ClientContext clientContext = await _appInfo.GetContext(resultItem.SiteUrl);
+            ClientContext clientContext = await _ctx.AppClient.GetContext(resultItem.SiteUrl);
 
             string fileURL = resultItem.Item.File.ServerRelativeUrl;
             Microsoft.SharePoint.Client.File file = clientContext.Web.GetFileByServerRelativePath(ResourcePath.FromDecodedUrl(fileURL));
@@ -110,11 +101,11 @@ namespace NovaPointLibrary.Solutions.Automation
 
             if (_param.FileVersionParam.DeleteAll)
             {
-                _logger.Info(GetType().Name, $"Deleting all version '{resultItem.Item.File.Name}'");
+                _ctx.Logger.Info(GetType().Name, $"Deleting all version '{resultItem.Item.File.Name}'");
 
                 if (fileVersionCollection.Count < 1)
                 {
-                    _logger.Info(GetType().Name, $"NO VERSIONS");
+                    _ctx.Logger.Info(GetType().Name, $"NO VERSIONS");
                     RemoveFileVersionAutoRecord record = new(resultItem, "No versions to delete");
                     record.AddFileDetails(resultItem.Item, "0", "0");
                     RecordCSV(record);
@@ -151,7 +142,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 for (int i = 0; i < numberVersionsToDelete; i++)
                 {
-                    _appInfo.IsCancelled();
+                    _ctx.AppClient.IsCancelled();
 
                     FileVersion fileVersionToDelete = fileVersionCollection.ElementAt(i);
                     
@@ -168,12 +159,12 @@ namespace NovaPointLibrary.Solutions.Automation
                         {
                             if (_param.FileVersionParam.Recycle)
                             {
-                                _logger.Info(GetType().Name, $"Recycling {versionIdentity}");
+                                _ctx.Logger.Info(GetType().Name, $"Recycling {versionIdentity}");
                                 fileVersionCollection.RecycleByID(fileVersionToDelete.ID);
                             }
                             else
                             {
-                                _logger.Info(GetType().Name, $"Deleting {versionIdentity}");
+                                _ctx.Logger.Info(GetType().Name, $"Deleting {versionIdentity}");
                                 fileVersionCollection.DeleteByID(fileVersionToDelete.ID);
                             }
                             clientContext.ExecuteQueryRetry();
@@ -184,7 +175,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     }
                     catch (Exception ex)
                     {
-                        _logger.Error(GetType().Name, "Item", resultItem.Item.File.Name, ex);
+                        _ctx.Logger.Error(GetType().Name, "Item", resultItem.Item.File.Name, ex);
 
                         RemoveFileVersionAutoRecord errorRecord = new(resultItem, ex.Message);
                         RecordCSV(errorRecord);
@@ -206,7 +197,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void RecordCSV(RemoveFileVersionAutoRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
 
     }

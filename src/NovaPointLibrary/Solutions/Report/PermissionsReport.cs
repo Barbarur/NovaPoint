@@ -1,5 +1,4 @@
 ﻿using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Permission;
 using NovaPointLibrary.Commands.SharePoint.Permission.Utilities;
@@ -7,7 +6,7 @@ using NovaPointLibrary.Commands.SharePoint.SharingLinks;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Commands.SharePoint.User;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Text;
@@ -16,14 +15,13 @@ using System.Text;
 
 namespace NovaPointLibrary.Solutions.Report
 {
-    public class PermissionsReport
+    public class PermissionsReport : ISolution
     {
         public static readonly string s_SolutionName = "Permissions report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PermissionsReport";
 
+        private ContextSolution _ctx;
         private PermissionsReportParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
         private readonly Expression<Func<Microsoft.SharePoint.Client.User, object>>[] _userRetrievalExpressions = new Expression<Func<Microsoft.SharePoint.Client.User, object>>[]
         {
@@ -39,39 +37,25 @@ namespace NovaPointLibrary.Solutions.Report
 
         private readonly SPOKnownRoleAssignmentGroups _knownGroups = new();
 
-        private PermissionsReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, PermissionsReportParameters parameters)
+        private PermissionsReport(ContextSolution context, PermissionsReportParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
         }
 
-        public static async Task RunAsync(PermissionsReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "PermissionsReport", parameters);
-            try
-            {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new PermissionsReport(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new PermissionsReport(context, (PermissionsReportParameters)parameters);
         }
 
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            SPOSitePermissionsCSOM sitePermissions = new(_logger, _appInfo, _param.PermissionsParam);
-            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            SPOSitePermissionsCSOM sitePermissions = new(_ctx.Logger, _ctx.AppClient, _param.PermissionsParam);
+            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (siteRecord.Ex != null)
                 {
@@ -85,16 +69,16 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     AddRecord(new("Site", siteRecord.SiteName, siteRecord.SiteUrl, SPORoleAssignmentUserRecord.GetRecordBlankException(ex.Message)));
                 }
                 //if (_param.OnlyUserList)
                 //{
                 //    StringBuilder sb = new();
 
-                //    await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _param.UserParam, _userRetrievalExpressions))
+                //    await foreach (var oUser in new SPOSiteUserCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteRecord.SiteUrl, _param.UserParam, _userRetrievalExpressions))
                 //    {
-                //        _appInfo.IsCancelled();
+                //        _ctx.AppClient.IsCancelled();
 
                 //        sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
                 //    }
@@ -112,7 +96,7 @@ namespace NovaPointLibrary.Solutions.Report
                 //    {
                 //        await foreach(var record in sitePermissions.GetAsync(siteRecord.SiteUrl, siteRecord.Progress))
                 //        {
-                //            _appInfo.IsCancelled();
+                //            _ctx.AppClient.IsCancelled();
 
                 //            if (IsTargetRecord(record))
                 //            {
@@ -123,7 +107,7 @@ namespace NovaPointLibrary.Solutions.Report
                 //    }
                 //    catch (Exception ex)
                 //    {
-                //        _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                //        _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                 //        AddRecord(new("Site", siteRecord.SiteName, siteRecord.SiteUrl, SPORoleAssignmentUserRecord.GetRecordBlankException(ex.Message)));
                 //    }
                 //}
@@ -137,9 +121,9 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 StringBuilder sb = new();
 
-                await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _param.UserParam, _userRetrievalExpressions))
+                await foreach (var oUser in new SPOSiteUserCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteRecord.SiteUrl, _param.UserParam, _userRetrievalExpressions))
                 {
-                    _appInfo.IsCancelled();
+                    _ctx.AppClient.IsCancelled();
 
                     sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
                 }
@@ -155,7 +139,7 @@ namespace NovaPointLibrary.Solutions.Report
 
                 await foreach (var record in sitePermissions.GetAsync(siteRecord.SiteUrl, siteRecord.Progress))
                 {
-                    _appInfo.IsCancelled();
+                    _ctx.AppClient.IsCancelled();
 
                     if (IsTargetRecord(record))
                     {
@@ -169,14 +153,14 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task<bool> IsTargetSite(string siteUrl)
         {
-            _logger.Info(GetType().Name, $"Checking if site {siteUrl} is target site");
+            _ctx.Logger.Info(GetType().Name, $"Checking if site {siteUrl} is target site");
             
             if (_param.UserParam.AllUsers)
             {
                 return true;
             }
 
-            await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteUrl, _param.UserParam, _userRetrievalExpressions))
+            await foreach (var oUser in new SPOSiteUserCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteUrl, _param.UserParam, _userRetrievalExpressions))
             {
                 return true;
             }
@@ -202,9 +186,9 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task<bool> IsTargetSecurityGroup(string siteUrl)
         {
-            _logger.Info(GetType().Name, $"Checking if site {siteUrl} has target Security Groups");
+            _ctx.Logger.Info(GetType().Name, $"Checking if site {siteUrl} has target Security Groups");
 
-            var collSiteUsers = await new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteUrl, _userRetrievalExpressions);
+            var collSiteUsers = await new SPOSiteUserCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteUrl, _userRetrievalExpressions);
 
             if (collSiteUsers != null)
             {
@@ -214,7 +198,7 @@ namespace NovaPointLibrary.Solutions.Report
                 {
                     if (securityGroup.Title.Contains("SLinkClaim")) { continue; }
 
-                    var groupUsersEmails = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync(securityGroup, _knownGroups.SecurityGroups);
+                    var groupUsersEmails = await new DirectoryGroupUser(_ctx.Logger, _ctx.AppClient).GetUsersAsync(securityGroup, _knownGroups.SecurityGroups);
 
                     SPORoleAssignmentUserRecord recordRole = new("", "", groupUsersEmails.AccountType, groupUsersEmails.Users, "", groupUsersEmails.Remarks);
                     if (IsTargetRole(recordRole))
@@ -229,14 +213,14 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task<bool> IsTargetInsideSharingLink(string siteUrl)
         {
-            _logger.Info(GetType().Name, $"Checking if site {siteUrl} has target Sharing Links");
+            _ctx.Logger.Info(GetType().Name, $"Checking if site {siteUrl} has target Sharing Links");
 
-            var collGroups = await new SPOSiteGroupCSOM(_logger, _appInfo).GetSharingLinksAsync(siteUrl);
+            var collGroups = await new SPOSiteGroupCSOM(_ctx.Logger, _ctx.AppClient).GetSharingLinksAsync(siteUrl);
 
-            SpoSharingLinksRest spoLinks = new(_logger, _appInfo, _knownGroups.SharingLinks);
+            SpoSharingLinksRest spoLinks = new(_ctx.Logger, _ctx.AppClient, _knownGroups.SharingLinks);
             foreach (Group oGroup in collGroups)
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 var linkInfo = await spoLinks.GetFromGroupAsync(siteUrl, oGroup);
                 SPORoleAssignmentUserRecord role = new($"Sharing link '{linkInfo.SharingLink}'", linkInfo.GroupId, "User", linkInfo.Users, "", "");
@@ -321,7 +305,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void AddRecord(SPOLocationPermissionsRecord record)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             dynamic dynamicRecord = new ExpandoObject();
             dynamicRecord.LocationType = record._locationType;
@@ -336,7 +320,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             dynamicRecord.Remarks = record._role.Remarks;
 
-            _logger.DynamicCSV(dynamicRecord);
+            _ctx.Logger.DynamicCSV(dynamicRecord);
 
         }
 

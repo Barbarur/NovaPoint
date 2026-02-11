@@ -1,5 +1,5 @@
-﻿using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.Utilities;
+﻿using NovaPointLibrary.Commands.Utilities;
+using NovaPointWPF.Settings;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -53,7 +53,7 @@ namespace NovaPointWPF.Pages
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
-            SolutionListFrame.Content = new Pages.Menus.MenuSettingsPage();
+            SolutionListFrame.Content = new AppConfigView();
         }
 
         private void AboutClick(object sender, RoutedEventArgs e)

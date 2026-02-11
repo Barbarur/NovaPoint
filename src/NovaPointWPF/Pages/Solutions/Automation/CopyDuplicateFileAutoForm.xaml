@@ -13,9 +13,6 @@
 
         <StackPanel>
 
-            <designmaterial:FormHeader
-                x:Name="SolutionHeader"/>
-
             <designmaterial:ReportModeForm
                 x:Name="ModeF"/>
 

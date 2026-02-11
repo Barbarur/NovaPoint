@@ -1,8 +1,7 @@
-﻿using NovaPointLibrary.Solutions.Report;
+﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
+using NovaPointLibrary.Solutions.Report;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 
@@ -10,22 +9,29 @@ namespace NovaPointWPF.Pages.Solutions.Report
 {
     public partial class SiteReportForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
         public SiteReportForm()
         {
             InitializeComponent();
 
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = SiteReport.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(SiteReport);
-            SolutionHeader.SolutionDocs = SiteReport.s_SolutionDocs;
+            SolutionName = SiteReport.s_SolutionName;
+            SolutionCode = nameof(SiteReport);
+            SolutionDocs = SiteReport.s_SolutionDocs;
+
+            SolutionCreate = SiteReport.Create;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
             SiteReportParameters parameters = new(SiteDetails.Parameters, AdminF.Parameters, SiteF.Parameters);
-
-            await SiteReport.RunAsync(parameters, uiLog, cancelTokenSource);
+            return parameters;
         }
     }
 }

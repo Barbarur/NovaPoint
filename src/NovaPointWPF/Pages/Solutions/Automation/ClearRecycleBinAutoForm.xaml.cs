@@ -1,37 +1,40 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
-using NovaPointLibrary.Solutions.Report;
+using NovaPointLibrary.Solutions.Directory;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 
 namespace NovaPointWPF.Pages.Solutions.Automation
 {
-    /// <summary>
-    /// Interaction logic for ClearRecycleBinAutoForm.xaml
-    /// </summary>
     public partial class ClearRecycleBinAutoForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
         public ClearRecycleBinAutoForm()
         {
             InitializeComponent();
 
+            SolutionName = ClearRecycleBinAuto.s_SolutionName;
+            SolutionCode = nameof(ClearRecycleBinAuto);
+            SolutionDocs = ClearRecycleBinAuto.s_SolutionDocs;
+
+            SolutionCreate = ClearRecycleBinAuto.Create;
+
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = ClearRecycleBinAuto.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(ClearRecycleBinAuto);
-            SolutionHeader.SolutionDocs = ClearRecycleBinAuto.s_SolutionDocs;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
-            ClearRecycleBinAutoParameters parameters = new(RecycleF.Parameters, AdminF.Parameters, SiteF.Parameters);
-
-            await ClearRecycleBinAuto.RunAsync(parameters, uiLog, cancelTokenSource);
+            return new ClearRecycleBinAutoParameters(RecycleF.Parameters, AdminF.Parameters, SiteF.Parameters);
         }
     }
 }

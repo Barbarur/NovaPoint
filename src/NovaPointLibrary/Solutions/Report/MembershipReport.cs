@@ -1,24 +1,21 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
 using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
-using NovaPointLibrary.Core.Authentication;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Linq.Expressions;
 
 
 namespace NovaPointLibrary.Solutions.Report
 {
-    public class MembershipReport
+    public class MembershipReport : ISolution
     {
         public static readonly string s_SolutionName = "Site Membership report";
         public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{typeof(MembershipReport).Name}";
 
+        private ContextSolution _ctx;
         private MembershipReportParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly IAppClient _appInfo;
 
         private static readonly Expression<Func<SiteProperties, object>>[] _sitePropertiesExpressions =
         [
@@ -47,44 +44,36 @@ namespace NovaPointLibrary.Solutions.Report
 
         private readonly List<DirectoryGroupUserEmails>? _listKnownGroups = new();
 
-        private MembershipReport(LoggerSolution logger, IAppClient appInfo, MembershipReportParameters parameters)
+        private MembershipReport(ContextSolution context, MembershipReportParameters parameters)
         {
-            _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
-        }
+            _ctx = context;
 
-        public static async Task RunAsync(MembershipReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        {
             parameters.SiteParam.SitePropertiesExpressions = _sitePropertiesExpressions;
             parameters.SiteParam.WebExpressions = _webExpressions;
+            _param = parameters;
 
-            LoggerSolution logger = new(uiAddLog, typeof(MembershipReport).Name, parameters);
-            try
+            Dictionary<Type, string> solutionReports = new()
             {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new MembershipReport(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+                { typeof(MembershipReportRecord), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        private async Task RunScriptAsync()
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            _appInfo.IsCancelled();
+            return new MembershipReport(context, (MembershipReportParameters)parameters);
+        }
+
+        public async Task RunAsync()
+        {
+            _ctx.AppClient.IsCancelled();
 
             var emptyGuid = Guid.Empty;
-            _logger.Debug(GetType().Name, $"Blank Guid: {emptyGuid}");
+            _ctx.Logger.Debug(GetType().Name, $"Blank Guid: {emptyGuid}");
 
-            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (siteRecord.Ex != null)
                 {
@@ -98,14 +87,14 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     AddRecord(new(siteRecord.SiteUrl, ex.Message));
                 }
             }
         }
         private async Task ProcessSite(SPOTenantSiteUrlsRecord siteRecord)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             if (siteRecord.SiteProperties != null)
             {
@@ -119,7 +108,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             else
             {
-                Web web = await new SPOWebCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _webExpressions);
+                Web web = await new SPOWebCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteRecord.SiteUrl, _webExpressions);
 
                 if (web.IsSubSite())
                 {
@@ -127,7 +116,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 else
                 {
-                    var oSiteProperties = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(web.Url, _sitePropertiesExpressions);
+                    var oSiteProperties = await new SPOSiteCollectionCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(web.Url, _sitePropertiesExpressions);
                     await ProcessSiteCollection(oSiteProperties);
                 }
             }
@@ -137,7 +126,7 @@ namespace NovaPointLibrary.Solutions.Report
         private async Task ProcessSiteCollection(SiteProperties siteProperties)
         {
             string template = siteProperties.Template;
-            _logger.Debug(GetType().Name, $"Site Template: {siteProperties.Template}");
+            _ctx.Logger.Debug(GetType().Name, $"Site Template: {siteProperties.Template}");
 
             MembershipReportRecord record = new(siteProperties.Title, siteProperties.Url, SPOWeb.GetSiteTemplateName(siteProperties.Template, siteProperties.IsTeamsConnected), "False");
 
@@ -181,7 +170,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task GetMembershipUsersAsync(Func<MembershipReportRecord, string, Task> getMembershipUsers, MembershipReportRecord record, string membership)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             try
             {
@@ -189,56 +178,56 @@ namespace NovaPointLibrary.Solutions.Report
             }
             catch (Exception ex)
             {
-                _logger.Error(GetType().Name, "Site", record.SiteUrl, ex);
+                _ctx.Logger.Error(GetType().Name, "Site", record.SiteUrl, ex);
                 AddRecord(record.ReportError(membership, ex));
             }
         }
 
         private async Task GetSiteCollectionAdminsAsync(MembershipReportRecord record, string membership)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             if (!_param.MembershipParam.SiteAdmins) { return; }
 
-            IEnumerable<User> collUsers = await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).GetAsync(record.SiteUrl);
+            IEnumerable<User> collUsers = await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(record.SiteUrl);
 
             await ProcessUsersAsync(record, membership, collUsers);
         }
 
         private async Task GetMS365GroupOwnersAdminsAsync(MembershipReportRecord record, string groupId, string membership)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             if (!_param.MembershipParam.Owners) { return; }
 
             try
             {
-                var listSecGroupUsers = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Owners", Guid.Parse(groupId), true, _listKnownGroups);
+                var listSecGroupUsers = await new DirectoryGroupUser(_ctx.Logger, _ctx.AppClient).GetUsersAsync($"{record.SiteTitle} Owners", Guid.Parse(groupId), true, _listKnownGroups);
 
                 AddRecord(record.ReportAadGroupUsers(membership, listSecGroupUsers));
             }
             catch (Exception ex)
             {
-                _logger.Error(GetType().Name, "Site", record.SiteUrl, ex);
+                _ctx.Logger.Error(GetType().Name, "Site", record.SiteUrl, ex);
                 AddRecord(record.ReportError(membership, ex));
             }
         }
 
         private async Task GetMS365GroupMembersAdminsAsync(MembershipReportRecord record, string groupId, string membership)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
             
             if (!_param.MembershipParam.Members) { return; }
 
             try
             {
-                var listSecGroupUsers = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync($"{record.SiteTitle} Members", Guid.Parse(groupId), false, _listKnownGroups);
+                var listSecGroupUsers = await new DirectoryGroupUser(_ctx.Logger, _ctx.AppClient).GetUsersAsync($"{record.SiteTitle} Members", Guid.Parse(groupId), false, _listKnownGroups);
 
                 AddRecord(record.ReportAadGroupUsers(membership, listSecGroupUsers));
             }
             catch (Exception ex)
             {
-                _logger.Error(GetType().Name, "Site", record.SiteUrl, ex);
+                _ctx.Logger.Error(GetType().Name, "Site", record.SiteUrl, ex);
                 AddRecord(record.ReportError(membership, ex));
             }
         }
@@ -247,7 +236,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             if (!_param.MembershipParam.SiteOwners) { return; }
 
-            var userCollection = await new SPOAssociatedGroup(_logger, _appInfo).GetSiteOwnersAsync(record.SiteUrl);
+            var userCollection = await new SPOAssociatedGroup(_ctx.Logger, _ctx.AppClient).GetSiteOwnersAsync(record.SiteUrl);
 
             await ProcessUsersAsync(record, membership, userCollection.Users.ToList());
         }
@@ -256,7 +245,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             if (!_param.MembershipParam.SiteMembers) { return; }
 
-            var userCollection = await new SPOAssociatedGroup(_logger, _appInfo).GetSiteMembersAsync(record.SiteUrl);
+            var userCollection = await new SPOAssociatedGroup(_ctx.Logger, _ctx.AppClient).GetSiteMembersAsync(record.SiteUrl);
 
             await ProcessUsersAsync(record, membership, userCollection.Users.ToList());
         }
@@ -265,14 +254,14 @@ namespace NovaPointLibrary.Solutions.Report
         {
             if (!_param.MembershipParam.SiteVisitors) { return; }
 
-            var userCollection = await new SPOAssociatedGroup(_logger, _appInfo).GetSiteVisitorsAsync(record.SiteUrl);
+            var userCollection = await new SPOAssociatedGroup(_ctx.Logger, _ctx.AppClient).GetSiteVisitorsAsync(record.SiteUrl);
 
             await ProcessUsersAsync(record, membership, userCollection.Users.ToList());
         }
 
         private async Task ProcessUsersAsync(MembershipReportRecord record, string membership, IEnumerable<User> collUsers)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             if (collUsers.Any())
             {
@@ -287,11 +276,11 @@ namespace NovaPointLibrary.Solutions.Report
 
                 foreach (var secGroup in collSecurityGroups)
                 {
-                    _appInfo.IsCancelled();
+                    _ctx.AppClient.IsCancelled();
 
                     if (secGroup.Title.Contains("SLinkClaim")) { continue; }
 
-                    var listSecGroupUsers = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync(secGroup, _listKnownGroups);
+                    var listSecGroupUsers = await new DirectoryGroupUser(_ctx.Logger, _ctx.AppClient).GetUsersAsync(secGroup, _listKnownGroups);
 
                     AddRecord(record.ReportAadGroupUsers(membership, listSecGroupUsers));
                 }
@@ -304,7 +293,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void AddRecord(MembershipReportRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
     }
 

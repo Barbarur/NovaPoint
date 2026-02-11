@@ -3,20 +3,19 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.PreservationHoldLibrary;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Dynamic;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
-    public class RestorePHLItemAuto
+    public class RestorePHLItemAuto : ISolution
     {
         public static readonly string s_SolutionName = "Restore Files from Preservation";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RestorePHLItemAuto";
 
+        private ContextSolution _ctx;
         private RestorePHLItemAutoParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
         {
@@ -41,48 +40,32 @@ namespace NovaPointLibrary.Solutions.Automation
 
         };
 
-        private RestorePHLItemAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, RestorePHLItemAutoParameters parameters)
+        private RestorePHLItemAuto(ContextSolution context, RestorePHLItemAutoParameters parameters)
         {
-            _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
-        }
+            _ctx = context;
 
-        public static async Task RunAsync(RestorePHLItemAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        {
-            //parameters.TListsParam.SiteAccParam.SiteParam.IncludeSubsites = false;
             parameters.ListsParam.AllLists = false;
             parameters.ListsParam.IncludeLists = false;
             parameters.ListsParam.IncludeLibraries = false;
             parameters.ListsParam.ListTitle = "Preservation Hold Library";
             parameters.ItemsParam.FileExpressions = _fileExpressions;
-
-            LoggerSolution logger = new(uiAddLog, "RestorePHLItemAuto", parameters);
-            try
-            {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new RestorePHLItemAuto(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            _param = parameters;
         }
 
-
-        private async Task RunScriptAsync()
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            _appInfo.IsCancelled();
+            return new RestorePHLItemAuto(context, (RestorePHLItemAutoParameters)parameters);
+        }
+
+        public async Task RunAsync()
+        {
+            _ctx.AppClient.IsCancelled();
 
 
 
-            await foreach (var result in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
+            await foreach (var result in new SPOTenantItemsCSOM(_ctx.Logger, _ctx.AppClient, _param.TItemsParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (result.Ex != null)
                 {
@@ -94,7 +77,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 try
                 {
-                    ClientContext clientContext = await _appInfo.GetContext(result.ListRecord.SiteUrl);
+                    ClientContext clientContext = await _ctx.AppClient.GetContext(result.ListRecord.SiteUrl);
 
                     if (result.Item.FileSystemObjectType.ToString() == "Folder") { continue; }
 
@@ -140,7 +123,7 @@ namespace NovaPointLibrary.Solutions.Automation
                         var extension = Path.GetExtension((string)result.Item["FileLeafRef"]);
                         targetFilePath = targetFolderPath + "/" + itemNameOnly + "_restored" + extension;
 
-                        string newName = await new SPOFileCSOM(_logger, _appInfo).FindAvailableNameAsync(result.ListRecord.SiteUrl, targetFilePath);
+                        string newName = await new SPOFileCSOM(_ctx.Logger, _ctx.AppClient).FindAvailableNameAsync(result.ListRecord.SiteUrl, targetFilePath);
                         targetFilePath = targetFolderPath + "/" + newName;
                         oFile.CopyToUsingPath(ResourcePath.FromDecodedUrl(targetFilePath), false);
                         clientContext.ExecuteQueryRetry();
@@ -151,7 +134,7 @@ namespace NovaPointLibrary.Solutions.Automation
                         var extension = Path.GetExtension((string)result.Item["FileLeafRef"]);
                         targetFilePath = _param.RestoreTargetLocation + "/" + itemNameOnly + "_restored" + extension;
 
-                        string newName = await new SPOFileCSOM(_logger, _appInfo).FindAvailableNameAsync(result.ListRecord.SiteUrl, targetFilePath);
+                        string newName = await new SPOFileCSOM(_ctx.Logger, _ctx.AppClient).FindAvailableNameAsync(result.ListRecord.SiteUrl, targetFilePath);
                         targetFilePath = _param.RestoreTargetLocation + "/" + newName;
                         oFile.CopyToUsingPath(ResourcePath.FromDecodedUrl(targetFilePath), false);
                         clientContext.ExecuteQueryRetry();
@@ -163,7 +146,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Item", (string)result.Item["FileRef"], ex);
+                    _ctx.Logger.Error(GetType().Name, "Item", (string)result.Item["FileRef"], ex);
 
                     AddRecord(result.ListRecord.SiteUrl, result.ListRecord.List, result.Item, remarks: ex.Message);
                 }
@@ -172,16 +155,16 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task EnsureFolderPathExist(string siteUrl, string folderPath)
         {
-            _logger.Info(GetType().Name, $"Check folder path {folderPath}");
+            _ctx.Logger.Info(GetType().Name, $"Check folder path {folderPath}");
 
-            var folder = await new SPOFolderCSOM(_logger, _appInfo).GetFolderAsync(siteUrl, folderPath);
+            var folder = await new SPOFolderCSOM(_ctx.Logger, _ctx.AppClient).GetFolderAsync(siteUrl, folderPath);
 
             if (folder == null)
             {
                 string parentPath = folderPath.Remove(folderPath.LastIndexOf("/"));
                 await EnsureFolderPathExist(siteUrl, parentPath);
 
-                await new SPOFolderCSOM(_logger, _appInfo).CreateAsync(siteUrl, folderPath);
+                await new SPOFolderCSOM(_ctx.Logger, _ctx.AppClient).CreateAsync(siteUrl, folderPath);
             }
         }
 
@@ -190,7 +173,7 @@ namespace NovaPointLibrary.Solutions.Automation
             if (_param.RestoreOriginalLocation) { return; }
             else
             {
-                var folder = await new SPOFolderCSOM(_logger, _appInfo).GetFolderAsync(_param.SiteParam.SiteUrl, _param.RestoreTargetLocation);
+                var folder = await new SPOFolderCSOM(_ctx.Logger, _ctx.AppClient).GetFolderAsync(_param.SiteParam.SiteUrl, _param.RestoreTargetLocation);
                 if (folder == null) { throw new Exception("Target location does not exist."); }
             }
         }
@@ -224,7 +207,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             recordItem.Remarks = remarks;
 
-            _logger.DynamicCSV(recordItem);
+            _ctx.Logger.DynamicCSV(recordItem);
         }
     }
 

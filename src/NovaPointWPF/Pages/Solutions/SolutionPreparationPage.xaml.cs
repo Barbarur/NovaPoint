@@ -10,9 +10,9 @@ namespace NovaPointWPF.Pages.Solutions
     public partial class SolutionPreparationPage : Page
     {
         static ReaderWriterLock rwl = new ReaderWriterLock();
-        private readonly ISolutionFormTest _solutionForm;
+        private readonly ISolutionForm _solutionForm;
 
-        public SolutionPreparationPage(ISolutionFormTest solutionForm)
+        public SolutionPreparationPage(ISolutionForm solutionForm)
         {
             InitializeComponent();
 

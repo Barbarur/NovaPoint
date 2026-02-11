@@ -1,8 +1,7 @@
 ﻿using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.RecycleBin;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Dynamic;
 
 namespace NovaPointLibrary.Solutions.Report
@@ -12,63 +11,27 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionName = "Recycle bin report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-RecycleBinReport";
 
+        private ContextSolution _ctx;
         private RecycleBinReportParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly AppInfo _appInfo;
 
-        private RecycleBinReport(LoggerSolution logger, AppInfo appInfo, RecycleBinReportParameters parameters)
+
+        private RecycleBinReport(ContextSolution context, RecycleBinReportParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
         }
 
-        public static async Task RunAsync(RecycleBinReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "RecycleBinReport", parameters);
-            try
-            {
-                AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new RecycleBinReport(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new RecycleBinReport(context, (RecycleBinReportParameters)parameters);
         }
-
-        //public RecycleBinReport(RecycleBinReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        //{
-        //    _param = parameters;
-        //    _logger = new(uiAddLog, this.GetType().Name, _param);
-        //    _appInfo = new(_logger, cancelTokenSource);
-        //}
-
-        //public async Task RunAsync()
-        //{
-        //    try
-        //    {
-        //        await RunScriptAsync();
-                
-        //        _logger.ScriptFinish();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.ScriptFinish(ex);
-        //    }
-        //}
-
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (siteResults.Ex != null)
                 {
@@ -82,7 +45,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
                     AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                 }
             }
@@ -90,15 +53,15 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task ProcessRecycleBinItemsAsync(string siteUrl, ProgressTracker parentProgress)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             ProgressTracker progress = new(parentProgress, 5000);
             int itemCounter = 0;
             int itemExpectedCount = 5000;
-            var spoRecycleBinItem = new SPORecycleBinItemCSOM(_logger, _appInfo);
+            var spoRecycleBinItem = new SPORecycleBinItemCSOM(_ctx.Logger, _ctx.AppClient);
             await foreach (RecycleBinItem oRecycleBinItem in spoRecycleBinItem.GetAsync(siteUrl, _param.RecycleBinParam))
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 AddRecord(siteUrl, oRecycleBinItem);
 
@@ -136,7 +99,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             recordItem.Remarks = remarks;
 
-            _logger.DynamicCSV(recordItem);
+            _ctx.Logger.DynamicCSV(recordItem);
         }
     }
 

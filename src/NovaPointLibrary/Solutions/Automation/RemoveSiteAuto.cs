@@ -2,28 +2,20 @@
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using PnP.Framework;
 using System.Dynamic;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
-    public class RemoveSiteAuto
+    public class RemoveSiteAuto : ISolution
     {
         public static readonly string s_SolutionName = "Delete Site Collections and Subsites";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSiteAuto";
 
+        private ContextSolution _ctx;
         private RemoveSiteAutoParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
-
-        private RemoveSiteAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, RemoveSiteAutoParameters parameters)
-        {
-            _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
-        }
 
         private readonly Expression<Func<Web, object>>[] _siteExpressions = new Expression<Func<Web, object>>[]
         {
@@ -32,33 +24,25 @@ namespace NovaPointLibrary.Solutions.Automation
             w => w.Url,
         };
 
-        public static async Task RunAsync(RemoveSiteAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private RemoveSiteAuto(ContextSolution context, RemoveSiteAutoParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "RemoveSiteAuto", parameters);
-
-            try
-            {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new RemoveSiteAuto(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            _ctx = context;
+            _param = parameters;
         }
 
-        private async Task RunScriptAsync()
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            _appInfo.IsCancelled();
+            return new RemoveSiteAuto(context, (RemoveSiteAutoParameters)parameters);
+        }
+
+        public async Task RunAsync()
+        {
+            _ctx.AppClient.IsCancelled();
 
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if ( siteResults.Ex != null )
                 {
@@ -72,7 +56,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
 
                     AddRecord(siteResults.SiteUrl, ex.Message);
                 }
@@ -81,11 +65,11 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task ProcessSite(string siteUrl)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             await RemoveSubsites(siteUrl);
 
-            Web web = await new SPOWebCSOM(_logger, _appInfo).GetAsync(siteUrl, _siteExpressions);
+            Web web = await new SPOWebCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteUrl, _siteExpressions);
 
             if (web.IsSubSite())
             {
@@ -101,11 +85,11 @@ namespace NovaPointLibrary.Solutions.Automation
                     s => s.IsHubSite,
                     s => s.HubSiteId,
                 };
-                var oSite = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(siteUrl, expressions);
+                var oSite = await new SPOSiteCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteUrl, expressions);
 
                 if (oSite.IsHubSite)
                 {
-                    var tenant = new Tenant(await _appInfo.GetContext(_appInfo.AdminUrl));
+                    var tenant = new Tenant(await _ctx.AppClient.GetContext(_ctx.AppClient.AdminUrl));
                     tenant.UnregisterHubSiteById(oSite.HubSiteId);
                     tenant.Context.ExecuteQueryRetry();
                     AddRecord(siteUrl, "Unresgitered Site Colleciton as Hub");
@@ -113,12 +97,12 @@ namespace NovaPointLibrary.Solutions.Automation
                 
                 if (oSite.GroupId.ToString() != "00000000-0000-0000-0000-000000000000")
                 {
-                    await new DirectoryGroup(_logger, _appInfo).RemoveGroupAsync(oSite.GroupId.ToString());
+                    await new DirectoryGroup(_ctx.Logger, _ctx.AppClient).RemoveGroupAsync(oSite.GroupId.ToString());
                     AddRecord(siteUrl, "Deleted Microsoft365 group. Site Collection will be deleted by the system automatically");
                 }
                 else
                 {
-                    Tenant tenant = new(await _appInfo.GetContext(_appInfo.AdminUrl));
+                    Tenant tenant = new(await _ctx.AppClient.GetContext(_ctx.AppClient.AdminUrl));
                     tenant.DeleteSiteCollection(siteUrl, true, TimeoutFunction);
                     AddRecord(siteUrl, "Deleted Site Collection");
                 }
@@ -127,9 +111,9 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task RemoveSubsites(string siteUrl)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            List<Web> collSubsites = await new SPOSubsiteCSOM(_logger, _appInfo).GetAsync(siteUrl);
+            List<Web> collSubsites = await new SPOSubsiteCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteUrl);
             collSubsites = collSubsites.OrderByDescending( w => w.Url).ToList();
             foreach (var oSubsite in collSubsites)
             {
@@ -144,10 +128,10 @@ namespace NovaPointLibrary.Solutions.Automation
             switch (message)
             {
                 case TenantOperationMessage.DeletingSiteCollection:
-                    return _appInfo.CancelToken.IsCancellationRequested;
+                    return _ctx.AppClient.CancelToken.IsCancellationRequested;
 
                 case TenantOperationMessage.RemovingDeletedSiteCollectionFromRecycleBin:
-                    return _appInfo.CancelToken.IsCancellationRequested;
+                    return _ctx.AppClient.CancelToken.IsCancellationRequested;
                 default:
                     break;
             }
@@ -162,7 +146,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             recordItem.Remarks = remarks;
 
-            _logger.DynamicCSV(recordItem);
+            _ctx.Logger.DynamicCSV(recordItem);
         }
     }
 

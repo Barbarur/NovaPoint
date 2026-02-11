@@ -13,9 +13,6 @@
         
         <StackPanel>
 
-            <designmaterial:FormHeader
-                x:Name="SolutionHeader"/>
-
             <Label
                 Style="{DynamicResource MenuSectionTitleLabel}"
                 Content="File with the list of Sites to delete"/>

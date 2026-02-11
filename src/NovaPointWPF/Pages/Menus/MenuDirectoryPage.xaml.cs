@@ -5,9 +5,6 @@ using System.Windows.Controls;
 
 namespace NovaPointWPF.Pages.Menus
 {
-    /// <summary>
-    /// Interaction logic for MenuDirectoryPage.xaml
-    /// </summary>
     public partial class MenuDirectoryPage : Page
     {
         public MenuDirectoryPage()
@@ -17,7 +14,7 @@ namespace NovaPointWPF.Pages.Menus
 
         private void GoToSolutionForm(ISolutionForm solutionForm)
         {
-            Application.Current.MainWindow.Content = new SolutionBasePage(solutionForm);
+            Application.Current.MainWindow.Content = new SolutionPreparationPage(solutionForm);
         }
 
         private void GoGetDirectoryGroupForm(object sender, RoutedEventArgs e)

@@ -1,23 +1,20 @@
-﻿using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
-using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Site;
+﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Report;
 using NovaPointWPF.UserControls;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 
 namespace NovaPointWPF.Pages.Solutions.Report
 {
-    /// <summary>
-    /// Interaction logic for ShortcutODReportForm.xaml
-    /// </summary>
     public partial class ShortcutODReportForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
 
         public ShortcutODReportForm()
         {
@@ -25,16 +22,18 @@ namespace NovaPointWPF.Pages.Solutions.Report
 
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = ShortcutODReport.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(ShortcutODReport);
-            SolutionHeader.SolutionDocs = ShortcutODReport.s_SolutionDocs;
+            SolutionName = ShortcutODReport.s_SolutionName;
+            SolutionCode = nameof(ShortcutODReport);
+            SolutionDocs = ShortcutODReport.s_SolutionDocs;
+
+            SolutionCreate = ShortcutODReport.Create;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
             ShortcutODReportParameters parameters = new(AdminF.Parameters, SiteF.Parameters, ItemForm.Parameters);
-
-            await ShortcutODReport.RunAsync(parameters, uiLog, cancelTokenSource);
+            return parameters;
         }
+
     }
 }

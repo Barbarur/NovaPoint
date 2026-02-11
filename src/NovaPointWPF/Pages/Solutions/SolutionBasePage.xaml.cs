@@ -145,7 +145,7 @@ namespace NovaPointWPF.Pages.Solutions
         {
             return Task.Run(async() =>
             {
-                await _solutionForm.RunSolutionAsync(UILog, CancelTokenSource);
+                //await _solutionForm.RunSolutionAsync(UILog, CancelTokenSource);
             });
         }
 
@@ -175,7 +175,7 @@ namespace NovaPointWPF.Pages.Solutions
             rwl.AcquireWriterLock(3000);
             try
             {
-                if (!string.IsNullOrWhiteSpace(logInfo.TextBase) || !string.IsNullOrWhiteSpace(logInfo.TextError) || !string.IsNullOrEmpty(logInfo.SolutionFolder))
+                if (!string.IsNullOrWhiteSpace(logInfo.TextBase) || !string.IsNullOrWhiteSpace(logInfo.TextError))
                 {
                     if (BoxText.Dispatcher.CheckAccess())
                     {
@@ -189,7 +189,7 @@ namespace NovaPointWPF.Pages.Solutions
                         BoxText.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
                         new Action(() =>
                         {
-                            if (!string.IsNullOrEmpty(logInfo.SolutionFolder)) { SolutionFolder = logInfo.SolutionFolder; }
+                            //if (!string.IsNullOrEmpty(logInfo.SolutionFolder)) { SolutionFolder = logInfo.SolutionFolder; }
 
                             if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { BoxText.Inlines.Add(new Run($"{logInfo.TextBase} \n") ); }
 

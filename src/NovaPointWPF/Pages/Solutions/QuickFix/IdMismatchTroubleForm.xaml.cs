@@ -1,30 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.QuickFix;
-using System.Threading;
-using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointWPF.UserControls;
+using System;
+using System.Windows.Controls;
+
 
 namespace NovaPointWPF.Pages.Solutions.QuickFix
 {
-    /// <summary>
-    /// Interaction logic for IdMismatchTroubleForm.xaml
-    /// </summary>
     public partial class IdMismatchTroubleForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
         public string UserUpn { get; set; }
 
         public IdMismatchTroubleForm()
@@ -33,22 +23,23 @@ namespace NovaPointWPF.Pages.Solutions.QuickFix
 
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = IdMismatchTrouble._solutionName;
-            SolutionHeader.SolutionCode = nameof(IdMismatchTrouble);
-            SolutionHeader.SolutionDocs = IdMismatchTrouble._solutionDocs;
+            SolutionName = IdMismatchTrouble.s_SolutionName;
+            SolutionCode = nameof(IdMismatchTrouble);
+            SolutionDocs = IdMismatchTrouble.s_SolutionDocs;
+
+            SolutionCreate = IdMismatchTrouble.Create;
 
             this.UserUpn = string.Empty;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
             IdMismatchTroubleParameters parameters = new(AdminF.Parameters, SiteF.Parameters)
             {
                 ReportMode = Mode.ReportMode,
                 UserUpn = this.UserUpn,
             };
-
-            await IdMismatchTrouble.RunAsync(parameters, uiLog, cancelTokenSource);
+            return parameters;
         }
     }
 }

@@ -2,7 +2,8 @@
 using NovaPointLibrary.Commands.SharePoint.Admin;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
+
 
 namespace NovaPointLibrary.Solutions.Automation
 {
@@ -11,9 +12,8 @@ namespace NovaPointLibrary.Solutions.Automation
         public static readonly string s_SolutionName = "Set versioning limit";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-SetVersioningLimitAuto";
 
+        private ContextSolution _ctx;
         private SetVersioningLimitAutoParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly SPOListsParameters _allLibraries = new()
         {
@@ -24,11 +24,10 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private readonly SPOListsParameters _listParameters;
 
-        private SetVersioningLimitAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, SetVersioningLimitAutoParameters parameters)
+        private SetVersioningLimitAuto(ContextSolution context, SetVersioningLimitAutoParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
 
             _listParameters = new()
             {
@@ -37,40 +36,31 @@ namespace NovaPointLibrary.Solutions.Automation
                 IncludeLibraries = false,
                 ListTitle = parameters.VersionParam.ListApplySingleListTitle,
             };
+
+            Dictionary<Type, string> solutionReports = new()
+            {
+                { typeof(SetVersioningLimitAutoRecord), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        public static async Task RunAsync(SetVersioningLimitAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "SetVersioningLimitAuto", parameters);
-
-            try
-            {
-
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new SetVersioningLimitAuto(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new SetVersioningLimitAuto(context, (SetVersioningLimitAutoParameters)parameters);
         }
 
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             if (_param.VersionParam.LibraryInheritTenantVersionSettings && _param.VersionParam.LibraryExistingLibraries)
             {
                 await GetTenantVersionLimitsAsync();
             }
 
-            await foreach (var tenantSiteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            await foreach (var tenantSiteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (tenantSiteRecord.Ex != null)
                 {
@@ -81,7 +71,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 try
                 {
-                    var site = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(tenantSiteRecord.SiteUrl);
+                    var site = await new SPOSiteCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(tenantSiteRecord.SiteUrl);
 
                     if (_param.VersionParam.LibrarySetVersioningSettings)
                     {
@@ -97,7 +87,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", tenantSiteRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", tenantSiteRecord.SiteUrl, ex);
 
                     RecordCSV(new(tenantSiteRecord.SiteUrl, remarks: ex.Message));
                 }
@@ -107,27 +97,27 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task GetTenantVersionLimitsAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            _logger.Info(GetType().Name, $"Getting Tenant version history limits");
+            _ctx.Logger.Info(GetType().Name, $"Getting Tenant version history limits");
 
             _param.VersionParam.LibraryEnableVersioning = true;
             _param.VersionParam.LibraryMinorVersionLimit = 0;
 
-            var tenant = await new SPOTenant(_logger, _appInfo).GetAsync();
+            var tenant = await new SPOTenant(_ctx.Logger, _ctx.AppClient).GetAsync();
             _param.VersionParam.LibraryAutomaticVersionLimit = tenant.EnableAutoExpirationVersionTrim;
             _param.VersionParam.LibraryMajorVersionLimit = tenant.MajorVersionLimit;
             _param.VersionParam.LibraryExpirationDays = tenant.ExpireVersionsAfterDays;
 
-            _logger.Info(GetType().Name, $"EnableAutoExpirationVersionTrim: {tenant.EnableAutoExpirationVersionTrim}");
-            _logger.Info(GetType().Name, $"MajorVersionLimit: {tenant.MajorVersionLimit}");
-            _logger.Info(GetType().Name, $"ExpireVersionsAfterDays: {tenant.ExpireVersionsAfterDays}");
+            _ctx.Logger.Info(GetType().Name, $"EnableAutoExpirationVersionTrim: {tenant.EnableAutoExpirationVersionTrim}");
+            _ctx.Logger.Info(GetType().Name, $"MajorVersionLimit: {tenant.MajorVersionLimit}");
+            _ctx.Logger.Info(GetType().Name, $"ExpireVersionsAfterDays: {tenant.ExpireVersionsAfterDays}");
 
         }
 
         private void SetLibraryVersioningLimitsNew(Site site)
         {
-            _logger.UI(GetType().Name, $"Setting versioning limit on new libraries for site {site.Url}.");
+            _ctx.Logger.UI(GetType().Name, $"Setting versioning limit on new libraries for site {site.Url}.");
 
             try
             {
@@ -167,9 +157,9 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task SetLibraryVersioningLimitsExistingAsync(Site site)
         {
-            _logger.Info(GetType().Name, $"Setting versioning limit on existing libraries for site {site.Url}.");
+            _ctx.Logger.Info(GetType().Name, $"Setting versioning limit on existing libraries for site {site.Url}.");
 
-            List<Microsoft.SharePoint.Client.List> collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(site.Url, _param.LibraryParameters);
+            List<Microsoft.SharePoint.Client.List> collList = await new SPOListCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(site.Url, _param.LibraryParameters);
             foreach (var oList in collList)
             {
                 try
@@ -186,7 +176,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void SetLibraryVersioningLimitsAsync(List oList)
         {
-            _logger.Info(GetType().Name, $"Processing Library {oList.RootFolder.ServerRelativeUrl}.");
+            _ctx.Logger.Info(GetType().Name, $"Processing Library {oList.RootFolder.ServerRelativeUrl}.");
 
             oList.EnableVersioning = _param.VersionParam.LibraryEnableVersioning;
 
@@ -229,9 +219,9 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task SetListVersioningLimitsAsync(Site site)
         {
-            _logger.Info(GetType().Name, $"Setting versioning limit on existing lists for site {site.Url}.");
+            _ctx.Logger.Info(GetType().Name, $"Setting versioning limit on existing lists for site {site.Url}.");
 
-            List<Microsoft.SharePoint.Client.List> collList = await new SPOListCSOM(_logger, _appInfo).GetAsync(site.Url, _param.ListParameters);
+            List<Microsoft.SharePoint.Client.List> collList = await new SPOListCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(site.Url, _param.ListParameters);
             foreach (var oList in collList)
             {
                 try
@@ -248,7 +238,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void SetListVersioningLimits(List oList)
         {
-            _logger.Info(GetType().Name, $"Processing list {oList.RootFolder.ServerRelativeUrl}.");
+            _ctx.Logger.Info(GetType().Name, $"Processing list {oList.RootFolder.ServerRelativeUrl}.");
 
             oList.EnableVersioning = _param.VersionParam.ListEnableVersioning;
             if (_param.VersionParam.ListEnableVersioning)
@@ -263,7 +253,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void RecordCSV(SetVersioningLimitAutoRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
 
     }

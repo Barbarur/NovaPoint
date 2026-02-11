@@ -1,53 +1,43 @@
 ﻿using NovaPointLibrary.Commands.SharePoint.SharingLinks;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 
 
 namespace NovaPointLibrary.Solutions.Automation
 {
-    public class RemoveSharingLinksAuto
+    public class RemoveSharingLinksAuto : ISolution
     {
         public static readonly string s_SolutionName = "Remove Sharing Links";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSharingLinksAuto";
 
+        private ContextSolution _ctx;
         private RemoveSharingLinksAutoParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private RemoveSharingLinksAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, RemoveSharingLinksAutoParameters parameters)
+        private RemoveSharingLinksAuto(ContextSolution context, RemoveSharingLinksAutoParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
+
+            Dictionary<Type, string> solutionReports = new()
+            {
+                { typeof(SpoSharingLinksRecord), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        public static async Task RunAsync(RemoveSharingLinksAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "RemoveSharingLinksAuto", parameters);
-
-            try
-            {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new RemoveSharingLinksAuto(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new RemoveSharingLinksAuto(context, (RemoveSharingLinksAutoParameters)parameters);
         }
 
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
                 
                 if (siteRecord.Ex != null)
                 {
@@ -62,7 +52,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     SpoSharingLinksRecord record = new(siteRecord.SiteUrl, ex);
                     RecordCSV(record);
                 }
@@ -72,15 +62,15 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task ProcessSite(SPOTenantSiteUrlsRecord siteRecord)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            var collGroups = await new SPOSiteGroupCSOM(_logger, _appInfo).GetSharingLinksAsync(siteRecord.SiteUrl);
+            var collGroups = await new SPOSiteGroupCSOM(_ctx.Logger, _ctx.AppClient).GetSharingLinksAsync(siteRecord.SiteUrl);
 
-            SpoSharingLinksRest restSharingLinks = new(_logger, _appInfo);
+            SpoSharingLinksRest restSharingLinks = new(_ctx.Logger, _ctx.AppClient);
             ProgressTracker progress = new(siteRecord.Progress, collGroups.Count);
             foreach (var oGroup in collGroups)
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 var record = await restSharingLinks.GetFromGroupAsync(siteRecord.SiteUrl, oGroup);
 
@@ -88,7 +78,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 {
                     try
                     {
-                        await new SPOSiteGroupCSOM(_logger, _appInfo).RemoveAsync(siteRecord.SiteUrl, oGroup);
+                        await new SPOSiteGroupCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteRecord.SiteUrl, oGroup);
                         record.Remarks = "Sharing Link deleted";
                     }
                     catch (Exception ex)
@@ -108,7 +98,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void RecordCSV(SpoSharingLinksRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
     }
 

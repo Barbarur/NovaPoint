@@ -13,9 +13,6 @@
 
         <StackPanel>
 
-            <designmaterial:FormHeader
-            x:Name="SolutionHeader"/>
-
             <TextBlock
                 Style="{DynamicResource TextBlockBodyStrong}"
                 Text="This solution is ready to run."/>

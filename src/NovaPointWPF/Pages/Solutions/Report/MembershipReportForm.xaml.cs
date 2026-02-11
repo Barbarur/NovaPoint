@@ -1,8 +1,7 @@
-﻿using NovaPointLibrary.Solutions;
+﻿using NovaPointLibrary.Core.Context;
+using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Report;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 
@@ -10,22 +9,29 @@ namespace NovaPointWPF.Pages.Solutions.Report
 {
     public partial class MembershipReportForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
         public MembershipReportForm()
         {
             InitializeComponent();
 
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = MembershipReport.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(MembershipReport);
-            SolutionHeader.SolutionDocs = MembershipReport.s_SolutionDocs;
+            SolutionName = MembershipReport.s_SolutionName;
+            SolutionCode = nameof(MembershipReport);
+            SolutionDocs = MembershipReport.s_SolutionDocs;
+
+            SolutionCreate = MembershipReport.Create;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
             MembershipReportParameters parameters = new(MembershipF.Parameters, AdminF.Parameters, SiteF.Parameters);
-
-            await MembershipReport.RunAsync(parameters, uiLog, cancelTokenSource);
+            return parameters;
         }
     }
 }

@@ -3,21 +3,20 @@ using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.UserProfiles;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.User;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Dynamic;
 using System.Linq.Expressions;
 using User = Microsoft.SharePoint.Client.User;
 
 namespace NovaPointLibrary.Solutions.QuickFix
 {
-    public class IdMismatchTrouble
+    public class IdMismatchTrouble : ISolution
     {
-        public readonly static string _solutionName = "Resolve user ID Mismatch";
-        public readonly static string _solutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-IdMismatchTrouble";
+        public readonly static string s_SolutionName = "Resolve user ID Mismatch";
+        public readonly static string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-IdMismatchTrouble";
 
+        private ContextSolution _ctx;
         private IdMismatchTroubleParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static Expression<Func<User, object>>[] _userRetrievalExpressions = new Expression<Func<User, object>>[]
         {
@@ -27,40 +26,26 @@ namespace NovaPointLibrary.Solutions.QuickFix
             u => u.UserPrincipalName,
         };
 
-        private IdMismatchTrouble(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, IdMismatchTroubleParameters parameters)
+        private IdMismatchTrouble(ContextSolution context, IdMismatchTroubleParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
         }
 
-        public static async Task RunAsync(IdMismatchTroubleParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "IdMismatchTrouble", parameters);
-            try
-            {
-                var appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new IdMismatchTrouble(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new IdMismatchTrouble(context, (IdMismatchTroubleParameters)parameters);
         }
 
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            var tenant = new Tenant(await _appInfo.GetContext(_appInfo.AdminUrl));
+            var tenant = new Tenant(await _ctx.AppClient.GetContext(_ctx.AppClient.AdminUrl));
             var result = tenant.EncodeClaim(_param.UserUpn);
             tenant.Context.ExecuteQueryRetry();
             var accountName = result.Value;
-            _logger.UI(GetType().Name, $"Affected user account name: {accountName}");
+            _ctx.Logger.UI(GetType().Name, $"Affected user account name: {accountName}");
 
             var peopleManager = new PeopleManager(tenant.Context);
             var personProperties = peopleManager.GetPropertiesFor(accountName);
@@ -76,15 +61,15 @@ namespace NovaPointLibrary.Solutions.QuickFix
             {
                 throw new Exception("Unable to obtain users SID");
             }
-            _logger.Info(GetType().Name, $"Affected user account SID: {userSID}");
+            _ctx.Logger.Info(GetType().Name, $"Affected user account SID: {userSID}");
             userSID = userSID.Substring(userSID.IndexOf("i:0h.f|membership|") + 18);
             userSID = userSID[..(userSID.IndexOf("@live.com"))];
-            _logger.UI(GetType().Name, $"Affected user account SID: {userSID}");
+            _ctx.Logger.UI(GetType().Name, $"Affected user account SID: {userSID}");
 
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (siteResults.Ex != null)
                 {
@@ -98,7 +83,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
                     AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                 }
             }
@@ -106,38 +91,38 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
         private async Task FixIDMismatchAsync(string siteUrl, string correctUserID)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             try
             {
-                User? oUser = await new SPOSiteUserCSOM(_logger, _appInfo).GetByEmailAsync(siteUrl, _param.UserUpn, _userRetrievalExpressions);
+                User? oUser = await new SPOSiteUserCSOM(_ctx.Logger, _ctx.AppClient).GetByEmailAsync(siteUrl, _param.UserUpn, _userRetrievalExpressions);
 
                 if (oUser == null) { return; }
 
                 string siteUserID = ((UserIdInfo)oUser.UserId).NameId;
-                _logger.Info(GetType().Name, $"User found on site with ID '{siteUserID}', correct ID is {correctUserID}");
+                _ctx.Logger.Info(GetType().Name, $"User found on site with ID '{siteUserID}', correct ID is {correctUserID}");
                 if (siteUserID != correctUserID)
                 {
                     if (oUser.IsSiteAdmin)
                     {
-                        if (!_param.ReportMode) { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveForceAsync(siteUrl, oUser.LoginName); }
+                        if (!_param.ReportMode) { await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).RemoveForceAsync(siteUrl, oUser.LoginName); }
                         AddRecord(siteUrl, "User removed as Site Collection Admin");
                     }
 
-                    if (!_param.ReportMode) { await new SPOSiteUserCSOM(_logger, _appInfo).RemoveAsync(siteUrl, oUser); }
+                    if (!_param.ReportMode) { await new SPOSiteUserCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteUrl, oUser); }
                     AddRecord(siteUrl, "User removed from site");
                 }
 
                 string upnCoded = oUser.UserPrincipalName.Trim().Replace("@", "_").Replace(".", "_");
                 if (siteUrl.Contains(upnCoded, StringComparison.OrdinalIgnoreCase) && siteUrl.Contains("-my.sharepoint.com", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!_param.ReportMode) { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).AddPrimarySiteCollectionAdminAsync(siteUrl, oUser.UserPrincipalName); }
+                    if (!_param.ReportMode) { await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).AddPrimarySiteCollectionAdminAsync(siteUrl, oUser.UserPrincipalName); }
                     AddRecord(siteUrl, "Added user as Primary Site Collection Admin");
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error(GetType().Name, "Site", siteUrl, ex);
+                _ctx.Logger.Error(GetType().Name, "Site", siteUrl, ex);
                 AddRecord(siteUrl, $"Error while processing the site: {ex.Message}");
             }
         }
@@ -149,7 +134,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             recordItem.SiteUrl = siteUrl;
             recordItem.Remarks = remarks;
 
-            _logger.DynamicCSV(recordItem);
+            _ctx.Logger.DynamicCSV(recordItem);
         }
 
     }

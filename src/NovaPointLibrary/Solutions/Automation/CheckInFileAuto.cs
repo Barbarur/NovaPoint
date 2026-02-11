@@ -2,25 +2,23 @@
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
-    public class CheckInFileAuto
+    public class CheckInFileAuto : ISolution
     {
         public readonly static String s_SolutionName = "Check-In files";
         public readonly static String s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-CheckInFileAuto";
 
+        private ContextSolution _ctx;
         private CheckInFileAutoParameters _param;
         public ISolutionParameters Parameters
         {
             get { return _param; }
             set { _param = (CheckInFileAutoParameters)value; }
         }
-
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
         {
@@ -35,52 +33,43 @@ namespace NovaPointLibrary.Solutions.Automation
             f => f.File.Title,
         };
 
-        private readonly CheckinType _checkinType;
+        private readonly CheckinType _checkingType;
 
-        private CheckInFileAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, CheckInFileAutoParameters parameters)
+        private CheckInFileAuto(ContextSolution context, CheckInFileAutoParameters parameters)
         {
-            _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
+            _ctx = context;
 
-            if (_param.CheckinType == "Major") { _checkinType = CheckinType.MajorCheckIn; }
-            else if (_param.CheckinType == "Minor") { _checkinType = CheckinType.MinorCheckIn; }
-            else if (_param.CheckinType == "Discard") { _checkinType = CheckinType.OverwriteCheckIn; }
-            else { throw new("Check in type is incorrect."); }
-        }
-
-        public static async Task RunAsync(CheckInFileAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        {
             parameters.ItemsParam.FileExpressions = _fileExpressions;
             parameters.ListsParam.IncludeLibraries = true;
             parameters.ListsParam.IncludeLists = false;
             parameters.ListsParam.IncludeHiddenLists = false;
             parameters.ListsParam.IncludeSystemLists = false;
+            _param = parameters;
 
+            if (_param.CheckingType == "Major") { _checkingType = CheckinType.MajorCheckIn; }
+            else if (_param.CheckingType == "Minor") { _checkingType = CheckinType.MinorCheckIn; }
+            else if (_param.CheckingType == "Discard") { _checkingType = CheckinType.OverwriteCheckIn; }
+            else { throw new("Check in type is incorrect."); }
 
-            LoggerSolution logger = new(uiAddLog, "CheckInFileAuto", parameters);
-            try
+            Dictionary<Type, string> solutionReports = new()
             {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new CheckInFileAuto(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+                { typeof(CheckInFileAuto), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        private async Task RunScriptAsync()
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            _appInfo.IsCancelled();
+            return new CheckInFileAuto(context, (CheckInFileAutoParameters)parameters);
+        }
 
-            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
+        public async Task RunAsync()
+        {
+            _ctx.AppClient.IsCancelled();
+
+            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_ctx.Logger, _ctx.AppClient, _param.TItemsParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (tenantItemRecord.Ex != null)
                 {
@@ -109,7 +98,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _ctx.Logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     CheckInFileAutoRecord record = new(tenantItemRecord, ex.Message);
                     RecordCSV(record);
@@ -119,19 +108,19 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task ProcessItem(SPOTenantItemRecord resultItem)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             try
             {
                 if (!_param.ReportMode)
                 {
-                    await new SPOFileCSOM(_logger, _appInfo).CheckInAsync(resultItem.SiteUrl, resultItem.Item, _checkinType, _param.Comment);
+                    await new SPOFileCSOM(_ctx.Logger, _ctx.AppClient).CheckInAsync(resultItem.SiteUrl, resultItem.Item, _checkingType, _param.Comment);
                 }
 
                 CheckInFileAutoRecord record = new(resultItem)
                 {
                     CheckedOutByUser = resultItem.Item.File.CheckedOutByUser.UserPrincipalName,
-                    CheckinType = _param.CheckinType,
+                    CheckinType = _param.CheckingType,
                     Comment = _param.Comment,
                 };
                 RecordCSV(record);
@@ -146,7 +135,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void RecordCSV(CheckInFileAutoRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
 
     }
@@ -193,7 +182,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class CheckInFileAutoParameters : ISolutionParameters
     {
         public bool ReportMode { get; set; } = true;
-        public string CheckinType { get; set; } = string.Empty;
+        public string CheckingType { get; set; } = string.Empty;
         public string Comment { get; set; } = string.Empty;
 
         internal SPOAdminAccessParameters AdminAccess;
@@ -222,7 +211,7 @@ namespace NovaPointLibrary.Solutions.Automation
             SPOItemsParameters itemsParameters)
         {
             ReportMode = reportMode;
-            CheckinType = checkinType;
+            CheckingType = checkinType;
             Comment = comment;
 
             AdminAccess = adminAccess;

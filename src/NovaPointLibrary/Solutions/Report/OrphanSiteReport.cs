@@ -1,29 +1,20 @@
 ﻿using Microsoft.Online.SharePoint.TenantAdministration;
-using NovaPointLibrary.Commands.AzureAD.Groups;
 using NovaPointLibrary.Commands.AzureAD.User;
 using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Linq.Expressions;
 
 
 namespace NovaPointLibrary.Solutions.Report
 {
-    public class OrphanSiteReport
+    public class OrphanSiteReport : ISolution
     {
         public static readonly string s_SolutionName = "Orphan sites report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-OrphanSiteReport";
 
+        private ContextSolution _ctx;
         private OrphanSiteReportParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
-
-        private OrphanSiteReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, OrphanSiteReportParameters parameters)
-        {
-            _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
-        }
 
         private readonly Expression<Func<SiteProperties, object>>[] _siteExpressions = new Expression<Func<SiteProperties, object>>[]
         {
@@ -39,34 +30,33 @@ namespace NovaPointLibrary.Solutions.Report
             p => p.IsGroupOwnerSiteAdmin,
         };
 
-        public static async Task RunAsync(OrphanSiteReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        private OrphanSiteReport(ContextSolution context, OrphanSiteReportParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "OrphanSiteReport", parameters);
-            try
+            _ctx = context;
+            _param = parameters;
+
+            Dictionary<Type, string> solutionReports = new()
             {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new OrphanSiteReport(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+                { typeof(OrphanSiteReportRecord), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        private async Task RunScriptAsync()
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            _appInfo.IsCancelled();
+            return new OrphanSiteReport(context, (OrphanSiteReportParameters)parameters);
+        }
+
+        public async Task RunAsync()
+        {
+            _ctx.AppClient.IsCancelled();
 
             _param.SiteParam.IncludePersonalSite = false;
             _param.SiteParam.IncludeSubsites = false;
 
-            await foreach (var siteRecord in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param.SiteParam).GetAsync())
+            await foreach (var siteRecord in new SPOTenantSiteUrlsCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (siteRecord.Ex != null)
                 {
@@ -76,18 +66,18 @@ namespace NovaPointLibrary.Solutions.Report
 
                 try
                 {
-                    var siteProperties = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _siteExpressions);
+                    var siteProperties = await new SPOSiteCollectionCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteRecord.SiteUrl, _siteExpressions);
                     
-                    _logger.Debug(GetType().Name, $"Site Template: {siteProperties.Template}");
+                    _ctx.Logger.Debug(GetType().Name, $"Site Template: {siteProperties.Template}");
                     if (siteProperties.Template.Contains("SPSPERS", StringComparison.OrdinalIgnoreCase)) { continue; }
 
                     OrphanSiteReportRecord record = new(siteProperties.Title, siteProperties.Url, SPOWeb.GetSiteTemplateName(siteProperties.Template, siteProperties.IsTeamsConnected), siteProperties.OwnerName, siteProperties.Owner, siteProperties.OwnerLoginName, siteProperties.OwnerEmail);
 
-                    _logger.Debug(GetType().Name, $"Owner: {siteProperties.Owner}");
-                    _logger.Debug(GetType().Name, $"OwnerEmail: {siteProperties.OwnerEmail}");
-                    _logger.Debug(GetType().Name, $"OwnerLoginName: {siteProperties.OwnerLoginName}");
-                    _logger.Debug(GetType().Name, $"OwnerName: {siteProperties.OwnerName}");
-                    _logger.Debug(GetType().Name, $"IsGroupOwnerSiteAdmin: {siteProperties.IsGroupOwnerSiteAdmin}");
+                    _ctx.Logger.Debug(GetType().Name, $"Owner: {siteProperties.Owner}");
+                    _ctx.Logger.Debug(GetType().Name, $"OwnerEmail: {siteProperties.OwnerEmail}");
+                    _ctx.Logger.Debug(GetType().Name, $"OwnerLoginName: {siteProperties.OwnerLoginName}");
+                    _ctx.Logger.Debug(GetType().Name, $"OwnerName: {siteProperties.OwnerName}");
+                    _ctx.Logger.Debug(GetType().Name, $"IsGroupOwnerSiteAdmin: {siteProperties.IsGroupOwnerSiteAdmin}");
 
                     if (string.IsNullOrWhiteSpace(siteProperties.Owner))
                     {
@@ -97,7 +87,7 @@ namespace NovaPointLibrary.Solutions.Report
                     {
                         try
                         {
-                            var listSecGroupUsers = await new DirectoryGroupUser(_logger, _appInfo).GetUsersAsync(siteProperties.OwnerName, guid, true);
+                            var listSecGroupUsers = await new DirectoryGroupUser(_ctx.Logger, _ctx.AppClient).GetUsersAsync(siteProperties.OwnerName, guid, true);
 
                             if (!listSecGroupUsers.Users.Contains("@"))
                             {
@@ -117,7 +107,7 @@ namespace NovaPointLibrary.Solutions.Report
                     {
                         try
                         {
-                            var user = await new AADUser(_logger, _appInfo).GetUserAsync(siteProperties.Owner, "accountEnabled,displayName,mail");
+                            var user = await new AADUser(_ctx.Logger, _ctx.AppClient).GetUserAsync(siteProperties.Owner, "accountEnabled,displayName,mail");
                             if (!user.AccountEnabled)
                             {
                                 AddRecord(record.ReportUsers($"{siteProperties.OwnerName}", "User", "Blocked sign-in"));
@@ -136,7 +126,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     AddRecord(new(siteRecord.SiteUrl, ex.Message));
                 }
             }
@@ -144,7 +134,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void AddRecord(OrphanSiteReportRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
     }
 

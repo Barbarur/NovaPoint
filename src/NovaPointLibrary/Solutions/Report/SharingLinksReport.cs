@@ -3,53 +3,44 @@ using NovaPointLibrary.Commands.SharePoint.SharingLinks;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 
 
 namespace NovaPointLibrary.Solutions.Report
 {
-    public class SharingLinksReport
+    public class SharingLinksReport : ISolution
     {
         public static readonly string s_SolutionName = "Sharing Links report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-SharingLinksReport";
 
+        private ContextSolution _ctx;
         private SharingLinksReportParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
-        private SharingLinksReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, SharingLinksReportParameters parameters)
+
+        private SharingLinksReport(ContextSolution context, SharingLinksReportParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
+
+            Dictionary<Type, string> solutionReports = new()
+            {
+                { typeof(SharingLinksReportRecord), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        public static async Task RunAsync(SharingLinksReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "SharingLinksReport", parameters);
-
-            try
-            {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new SharingLinksReport(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new SharingLinksReport(context, (SharingLinksReportParameters)parameters);
         }
 
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (siteRecord.Ex != null)
                 {
@@ -64,7 +55,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     SharingLinksReportRecord record = new(siteRecord.SiteUrl, ex);
                     RecordCSV(record);
                 }
@@ -73,15 +64,15 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task ProcessSite(SPOTenantSiteUrlsRecord siteRecord)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            var collGroups = await new SPOSiteGroupCSOM(_logger, _appInfo).GetSharingLinksAsync(siteRecord.SiteUrl);
+            var collGroups = await new SPOSiteGroupCSOM(_ctx.Logger, _ctx.AppClient).GetSharingLinksAsync(siteRecord.SiteUrl);
 
-            SpoSharingLinksRest spoLinks = new(_logger, _appInfo);
+            SpoSharingLinksRest spoLinks = new(_ctx.Logger, _ctx.AppClient);
             ProgressTracker groupProgress = new(siteRecord.Progress, collGroups.Count);
             foreach (Group oGroup in collGroups)
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 var linkInfo = await spoLinks.GetFromGroupAsync(siteRecord.SiteUrl, oGroup);
                 if (_param.SharingLinks.MatchFilters(linkInfo))
@@ -113,7 +104,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(SharingLinksReportRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
     }
 

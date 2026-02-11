@@ -232,8 +232,7 @@ namespace NovaPointLibrary.Core.Logging
 
             WriteLog(logEntry);
 
-            // Keep for using during testing
-            //_uiAddLog(LogInfo.TextNotification(property));
+            UI(GetType().Name, property);
         }
 
 
@@ -358,7 +357,7 @@ namespace NovaPointLibrary.Core.Logging
 
 
         // TO RETIRE
-        internal void DynamicCSV(dynamic o)
+        public void DynamicCSV(dynamic o)
         {
             try
             {

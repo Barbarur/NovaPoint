@@ -1,29 +1,19 @@
-﻿using NovaPointLibrary.Solutions.Report;
+﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using NovaPointLibrary.Solutions.Automation;
+using System;
+using System.Windows.Controls;
 
 namespace NovaPointWPF.Pages.Solutions.Automation
 {
-    /// <summary>
-    /// Interaction logic for SetSiteCollectionAdminAutoForm.xaml
-    /// </summary>
     public partial class SetSiteCollectionAdminAutoForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
         public string TargetUserUPN { get; set; } = string.Empty;
 
         private bool _isSiteAdmin = false;
@@ -39,15 +29,17 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
             DataContext = this;
 
-            SolutionHeader.SolutionTitle = SetSiteCollectionAdminAuto.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(SetSiteCollectionAdminAuto);
-            SolutionHeader.SolutionDocs = SetSiteCollectionAdminAuto.s_SolutionDocs;
+            SolutionName = SetSiteCollectionAdminAuto.s_SolutionName;
+            SolutionCode = nameof(SetSiteCollectionAdminAuto);
+            SolutionDocs = SetSiteCollectionAdminAuto.s_SolutionDocs;
+
+            SolutionCreate = SetSiteCollectionAdminAuto.Create;
 
             this.TargetUserUPN = string.Empty;
             this.IsSiteAdmin = false;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
             var siteParam = SiteF.Parameters;
 
@@ -57,9 +49,8 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 IsSiteAdmin = this.IsSiteAdmin,
             };
 
-            //await new SetSiteCollectionAdminAuto(parameters, uiLog, cancelTokenSource).RunAsync();
-
-            await SetSiteCollectionAdminAuto.RunAsync(parameters, uiLog, cancelTokenSource);
+            return parameters;
         }
+
     }
 }

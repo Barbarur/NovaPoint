@@ -10,6 +10,8 @@ namespace NovaPointLibrary.Core.Authentication
 {
     public interface IAppClient
     {
+        Guid TenantId { get; }
+        Guid ClientId { get; }
         string AdminUrl { get; }
         string RootPersonalUrl { get; }
         string RootSharedUrl { get; }

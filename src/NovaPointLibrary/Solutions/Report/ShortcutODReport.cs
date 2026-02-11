@@ -1,10 +1,9 @@
 ﻿using Microsoft.SharePoint.Client;
 using Newtonsoft.Json;
-using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Report
@@ -14,43 +13,34 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionName = "OneDrive shortcut report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ShortcutODReport";
 
+        private ContextSolution _ctx;
         private ShortcutODReportParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly AppInfo _appInfo;
 
-        private ShortcutODReport(LoggerSolution logger, AppInfo appInfo, ShortcutODReportParameters parameters)
+
+        private ShortcutODReport(ContextSolution context, ShortcutODReportParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
+
+            Dictionary<Type, string> solutionReports = new()
+            {
+                { typeof(ShortcutODReportRecord), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        public static async Task RunAsync(ShortcutODReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "ShortcutODReport", parameters);
-
-            try
-            {
-                AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new ShortcutODReport(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new ShortcutODReport(context, (ShortcutODReportParameters)parameters);
         }
 
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
+            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_ctx.Logger, _ctx.AppClient, _param.TItemsParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (tenantItemRecord.Ex != null)
                 {
@@ -83,7 +73,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _ctx.Logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     ShortcutODReportRecord record = new(tenantItemRecord, ex.Message);
                     RecordCSV(record);
@@ -93,7 +83,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(ShortcutODReportRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
     }
 

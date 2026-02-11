@@ -2,19 +2,19 @@
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Site;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Report
 {
-    public class PrivacySiteReport
+    public class PrivacySiteReport : ISolution
     {
         public static readonly string s_SolutionName = "Public and Private Site Collections report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PrivacySiteReport";
 
+        private ContextSolution _ctx;
         private PrivacySiteReportParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
+
 
         private readonly Expression<Func<SiteProperties, object>>[] _sitePropertiesExpressions = new Expression<Func<SiteProperties, object>>[]
         {
@@ -39,39 +39,30 @@ namespace NovaPointLibrary.Solutions.Report
             w => w.WebTemplate,
         };
 
-        private PrivacySiteReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, PrivacySiteReportParameters parameters)
+        private PrivacySiteReport(ContextSolution context, PrivacySiteReportParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
+
+            Dictionary<Type, string> solutionReports = new()
+            {
+                { typeof(PrivacySiteReportRecord), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        public static async Task RunAsync(PrivacySiteReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "PrivacySiteReport", parameters);
-
-            try
-            {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new PrivacySiteReport(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new PrivacySiteReport(context, (PrivacySiteReportParameters)parameters);
         }
 
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            await foreach (var siteRecord in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param.SiteParam).GetAsync())
+            await foreach (var siteRecord in new SPOTenantSiteUrlsCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (siteRecord.Ex != null)
                 {
@@ -86,7 +77,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     PrivacySiteReportRecord siteReportRecord = new(siteRecord.SiteUrl, ex.Message);
                     RecordCSV(siteReportRecord);
                 }
@@ -95,7 +86,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task ProcessSite(SPOTenantSiteUrlsRecord siteRecord)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             if (siteRecord.SiteProperties != null)
             {
@@ -109,7 +100,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             else
             {
-                Web oWeb = await new SPOWebCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _webExpressions);
+                Web oWeb = await new SPOWebCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteRecord.SiteUrl, _webExpressions);
 
                 if (oWeb.IsSubSite())
                 {
@@ -131,16 +122,16 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task ProcessSiteCollection(string siteUrl)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            var oSiteProperties = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(siteUrl, _sitePropertiesExpressions);
+            var oSiteProperties = await new SPOSiteCollectionCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteUrl, _sitePropertiesExpressions);
 
             await ProcessSiteCollection(oSiteProperties);
         }
 
         private async Task ProcessSiteCollection(SiteProperties siteProperties)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
             PrivacySiteReportRecord siteRecord = new(siteProperties);
 
             string privacy;
@@ -148,12 +139,12 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 try
                 {
-                    var group = await new DirectoryGroup(_logger, _appInfo).GetAsync(siteProperties.GroupId.ToString(), "?$select=visibility");
+                    var group = await new DirectoryGroup(_ctx.Logger, _ctx.AppClient).GetAsync(siteProperties.GroupId.ToString(), "?$select=visibility");
                     privacy = group.Visibility;
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     privacy = ex.Message;
                 }
             }
@@ -169,7 +160,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(PrivacySiteReportRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
     }
 

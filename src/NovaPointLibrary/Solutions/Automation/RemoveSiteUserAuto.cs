@@ -1,22 +1,20 @@
 ﻿using Microsoft.SharePoint.Client;
-using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.User;
-using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Context;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Text;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
-    public class RemoveSiteUserAuto
+    public class RemoveSiteUserAuto : ISolution
     {
         public static readonly string s_SolutionName = "Remove user from Site";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSiteUserAuto";
 
+        private ContextSolution _ctx;
         private RemoveUserAutoParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly AppInfo _appInfo;
 
         private Expression<Func<User, object>>[] _userRetrievalExpressions = new Expression<Func<User, object>>[]
         {
@@ -26,39 +24,24 @@ namespace NovaPointLibrary.Solutions.Automation
             u => u.UserPrincipalName,
         };
 
-        private RemoveSiteUserAuto(LoggerSolution logger, AppInfo appInfo, RemoveUserAutoParameters parameters)
+        private RemoveSiteUserAuto(ContextSolution context, RemoveUserAutoParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
         }
 
-        public static async Task RunAsync(RemoveUserAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "RemoveSiteUserAuto", parameters);
-
-            try
-            {
-                AppInfo appInfo = await AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new RemoveSiteUserAuto(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new RemoveSiteUserAuto(context, (RemoveUserAutoParameters)parameters);
         }
 
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if ( siteResults.Ex != null )
                 {
@@ -72,7 +55,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
                     AddRecord(siteResults.SiteUrl, remarks: ex.Message);
                 }
             }
@@ -80,23 +63,23 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private async Task RemoveSiteUserAsync(string siteUrl, ProgressTracker parentProgress)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             StringBuilder sb = new();
 
-            await foreach (var oUser in new SPOSiteUserCSOM(_logger, _appInfo).GetAsync(siteUrl, _param.UserParam, _userRetrievalExpressions))
+            await foreach (var oUser in new SPOSiteUserCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteUrl, _param.UserParam, _userRetrievalExpressions))
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 try
                 {
-                    if (oUser.IsSiteAdmin) { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(siteUrl, oUser.UserPrincipalName); }
-                    await new SPOSiteUserCSOM(_logger, _appInfo).RemoveAsync(siteUrl, oUser);
+                    if (oUser.IsSiteAdmin) { await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteUrl, oUser.UserPrincipalName); }
+                    await new SPOSiteUserCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteUrl, oUser);
                     sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteUrl, ex);
                     AddRecord(siteUrl, $"Error while removing user {oUser.Email}: {ex.Message}");
                 }
 
@@ -114,7 +97,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             recordItem.Remarks = remarks;
 
-            _logger.DynamicCSV(recordItem);
+            _ctx.Logger.DynamicCSV(recordItem);
         }
     }
 

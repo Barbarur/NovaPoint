@@ -6,9 +6,6 @@ using System.Windows.Controls;
 
 namespace NovaPointWPF.Pages.Menus
 {
-    /// <summary>
-    /// Interaction logic for MenuReportPage.xaml
-    /// </summary>
     public partial class MenuReportPage : Page
     {
         public MenuReportPage()
@@ -18,11 +15,7 @@ namespace NovaPointWPF.Pages.Menus
 
         private void GoToSolutionForm(ISolutionForm solutionForm)
         {
-            //Frame? mainFrame = Application.Current.MainWindow.FindName("MainWindowMainFrame") as Frame;
-
-            //if (mainFrame is not null) { mainFrame.Content = new SolutionBasePage(solutionForm); }
-
-            Application.Current.MainWindow.Content = new SolutionBasePage(solutionForm);
+            Application.Current.MainWindow.Content = new SolutionPreparationPage(solutionForm);
         }
 
 

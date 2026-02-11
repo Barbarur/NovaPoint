@@ -4,7 +4,9 @@ using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
+using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Solutions.Directory;
 using System.Linq.Expressions;
 
 
@@ -15,9 +17,9 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionName = "Site Collections & Subsites report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-SiteReport";
 
+        private ContextSolution _ctx;
         private SiteReportParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
+
 
         private readonly Expression<Func<SiteProperties, object>>[] _sitePropertiesExpressions = new Expression<Func<SiteProperties, object>>[]
         {
@@ -53,39 +55,30 @@ namespace NovaPointLibrary.Solutions.Report
 
         };
 
-        private SiteReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, SiteReportParameters parameters)
+        private SiteReport(ContextSolution context, SiteReportParameters parameters)
         {
+            _ctx = context;
             _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
+
+            Dictionary<Type, string> solutionReports = new()
+            {
+                { typeof(SiteReportRecord), "Report" },
+            };
+            _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
-        public static async Task RunAsync(SiteReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            LoggerSolution logger = new(uiAddLog, "SiteReport", parameters);
-
-            try
-            {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new SiteReport(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            return new SiteReport(context, (SiteReportParameters)parameters);
         }
 
-        private async Task RunScriptAsync()
+        public async Task RunAsync()
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
-            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_logger, _appInfo, _param.SiteAccParam).GetAsync())
+            await foreach (var siteRecord in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (siteRecord.Ex != null)
                 {
@@ -100,7 +93,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
                     SiteReportRecord siteReportRecord = new(siteRecord.SiteUrl, ex.Message);
                     RecordCSV(siteReportRecord);
                 }
@@ -109,7 +102,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task ProcessSite(SPOTenantSiteUrlsRecord siteRecord)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
 
             if (siteRecord.SiteProperties != null)
             {
@@ -123,7 +116,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             else
             {
-                Web oWeb = await new SPOWebCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _webExpressions);
+                Web oWeb = await new SPOWebCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteRecord.SiteUrl, _webExpressions);
                 
                 if (oWeb.IsSubSite())
                 {
@@ -139,7 +132,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task ProcessSubsite(Web web)
         {
-            var storageMetricsResponse = await new SPOFolderCSOM(_logger, _appInfo).GetFolderStorageMetricAsync(web.Url, web.RootFolder);
+            var storageMetricsResponse = await new SPOFolderCSOM(_ctx.Logger, _ctx.AppClient).GetFolderStorageMetricAsync(web.Url, web.RootFolder);
 
             double storageUsedGb = Math.Round(storageMetricsResponse.StorageMetrics.TotalSize / Math.Pow(1024, 3), 2);
 
@@ -149,21 +142,21 @@ namespace NovaPointLibrary.Solutions.Report
 
         private async Task ProcessSiteCollection(string siteUrl)
         {
-            _appInfo.IsCancelled(); 
+            _ctx.AppClient.IsCancelled(); 
             
-            var oSiteProperties = await new SPOSiteCollectionCSOM(_logger, _appInfo).GetAsync(siteUrl, _sitePropertiesExpressions);
+            var oSiteProperties = await new SPOSiteCollectionCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteUrl, _sitePropertiesExpressions);
 
             await ProcessSiteCollection(oSiteProperties);
         }
 
         private async Task ProcessSiteCollection(SiteProperties siteProperties)
         {
-            _appInfo.IsCancelled();
+            _ctx.AppClient.IsCancelled();
             SiteReportRecord siteRecord = new(siteProperties);
 
             if (_param.SiteInfo.IncludeHubInfo || _param.SiteInfo.IncludeClassification)
             {
-                var site = await new SPOSiteCSOM(_logger, _appInfo).GetAsync(siteRecord.SiteUrl, _siteExpressions);
+                var site = await new SPOSiteCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(siteRecord.SiteUrl, _siteExpressions);
 
                 if (_param.SiteInfo.IncludeHubInfo) { await AddHubInfoAsync(siteRecord, site); }
 
@@ -183,7 +176,7 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 if (site.IsHubSite)
                 {
-                    Tenant tenantContext = new(await _appInfo.GetContext(_appInfo.AdminUrl));
+                    Tenant tenantContext = new(await _ctx.AppClient.GetContext(_ctx.AppClient.AdminUrl));
                     HubSiteProperties hubSiteProperties = tenantContext.GetHubSitePropertiesById(site.Id);
 
                     tenantContext.Context.Load(hubSiteProperties);
@@ -203,7 +196,7 @@ namespace NovaPointLibrary.Solutions.Report
                 siteRecord.IsHubSite = "Error";
                 siteRecord.HubSiteId = ex.Message;
                 siteRecord.Remarks = "Error while processing the site. Check the columns on this for the error message.";
-                _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
             }
         }
 
@@ -212,14 +205,14 @@ namespace NovaPointLibrary.Solutions.Report
             string countSharingLinks;
             try
             {
-                List<Group> collGroups = await new SPOSiteGroupCSOM(_logger, _appInfo).GetSharingLinksAsync(siteRecord.SiteUrl);
+                List<Group> collGroups = await new SPOSiteGroupCSOM(_ctx.Logger, _ctx.AppClient).GetSharingLinksAsync(siteRecord.SiteUrl);
                 countSharingLinks = collGroups.Count.ToString();
             }
             catch (Exception ex)
             {
                 countSharingLinks = ex.Message;
                 siteRecord.Remarks = "Error while processing the site. Check the columns on this for the error message.";
-                _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
             }
             siteRecord.AddSharingLinks(countSharingLinks);
         }
@@ -231,14 +224,14 @@ namespace NovaPointLibrary.Solutions.Report
             {
                 try
                 {
-                    var group = await new DirectoryGroup(_logger, _appInfo).GetAsync(groupId.ToString(), "?$select=visibility");
+                    var group = await new DirectoryGroup(_ctx.Logger, _ctx.AppClient).GetAsync(groupId.ToString(), "?$select=visibility");
                     privacy = group.Visibility;
                 }
                 catch (Exception ex)
                 {
                     privacy = ex.Message;
                     siteRecord.Remarks = "Error while processing the site. Check the columns on this for the error message.";
-                    _logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
+                    _ctx.Logger.Error(GetType().Name, "Site", siteRecord.SiteUrl, ex);
 
                 }
             }
@@ -252,7 +245,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(SiteReportRecord record)
         {
-            _logger.RecordCSV(record);
+            _ctx.Logger.WriteRecord(record);
         }
     }
 

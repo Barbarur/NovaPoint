@@ -4,7 +4,9 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.PreservationHoldLibrary;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Solutions.Directory;
 using System.Dynamic;
 using System.Linq.Expressions;
 
@@ -15,9 +17,8 @@ namespace NovaPointLibrary.Solutions.Report
         public static readonly string s_SolutionName = "Preservation Hold Library report";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PHLItemReport";
 
+        private ContextSolution _ctx;
         private PHLItemReportParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
         {
@@ -42,46 +43,30 @@ namespace NovaPointLibrary.Solutions.Report
 
         };
 
-        private PHLItemReport(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, PHLItemReportParameters parameters)
+        private PHLItemReport(ContextSolution context, PHLItemReportParameters parameters)
         {
-            _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
-        }
+            _ctx = context;
 
-        public static async Task RunAsync(PHLItemReportParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        {
-            //parameters.TListsParam.SiteAccParam.SiteParam.IncludeSubsites = false;
             parameters.ListsParam.AllLists = false;
             parameters.ListsParam.IncludeLists = false;
             parameters.ListsParam.IncludeLibraries = false;
             parameters.ListsParam.ListTitle = "Preservation Hold Library";
             parameters.ItemsParam.FileExpressions = _fileExpressions;
-
-            LoggerSolution logger = new(uiAddLog, "PHLItemReport", parameters);
-            try
-            {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new PHLItemReport(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            _param = parameters;
         }
 
-
-        private async Task RunScriptAsync()
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            _appInfo.IsCancelled();
+            return new PHLItemReport(context, (PHLItemReportParameters)parameters);
+        }
 
-            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
+        public async Task RunAsync()
+        {
+            _ctx.AppClient.IsCancelled();
+
+            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_ctx.Logger, _ctx.AppClient, _param.TItemsParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (tenantItemRecord.Ex != null)
                 {
@@ -103,7 +88,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _ctx.Logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     AddRecord(tenantItemRecord.ListRecord.SiteUrl, tenantItemRecord.ListRecord.List, tenantItemRecord.Item, remarks: ex.Message);
                 }
@@ -158,7 +143,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             recordItem.Remarks = remarks;
 
-            _logger.DynamicCSV(recordItem);
+            _ctx.Logger.DynamicCSV(recordItem);
         }
     }
 

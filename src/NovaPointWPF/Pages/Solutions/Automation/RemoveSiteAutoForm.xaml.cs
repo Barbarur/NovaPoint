@@ -1,33 +1,22 @@
 ﻿using Microsoft.Win32;
-using NovaPointLibrary.Commands.SharePoint.Item;
-using NovaPointLibrary.Commands.SharePoint.List;
-using NovaPointLibrary.Commands.SharePoint.Permission;
+using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
-using NovaPointLibrary.Solutions.Report;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace NovaPointWPF.Pages.Solutions.Automation
 {
-    /// <summary>
-    /// Interaction logic for RemoveSiteAutoForm.xaml
-    /// </summary>
     public partial class RemoveSiteAutoForm : Page, ISolutionForm
     {
+        public string SolutionName { get; init; }
+        public string SolutionCode { get; init; }
+        public string SolutionDocs { get; init; }
+
+        public Func<ContextSolution, ISolutionParameters, ISolution> SolutionCreate { get; init; }
+
         private string _listOfSitesPath = string.Empty;
         public string ListOfSitesPath
         {
@@ -43,11 +32,13 @@ namespace NovaPointWPF.Pages.Solutions.Automation
         {
             InitializeComponent();
 
-            DataContext = this;
+            SolutionName = RemoveSiteAuto.s_SolutionName;
+            SolutionCode = nameof(RemoveSiteAuto);
+            SolutionDocs = RemoveSiteAuto.s_SolutionDocs;
 
-            SolutionHeader.SolutionTitle = RemoveSiteAuto.s_SolutionName;
-            SolutionHeader.SolutionCode = nameof(RemoveSiteAuto);
-            SolutionHeader.SolutionDocs = RemoveSiteAuto.s_SolutionDocs;
+            SolutionCreate = RemoveSiteAuto.Create;
+
+            DataContext = this;
         }
 
         private void OpenFileClick(object sender, RoutedEventArgs e)
@@ -57,11 +48,10 @@ namespace NovaPointWPF.Pages.Solutions.Automation
                 ListOfSitesPath = openFileDialog.FileName;
         }
 
-        public async Task RunSolutionAsync(Action<LogInfo> uiLog, CancellationTokenSource cancelTokenSource)
+        public ISolutionParameters GetParameters()
         {
             RemoveSiteAutoParameters parameters = new(ListOfSitesPath);
-
-            await RemoveSiteAuto.RunAsync(parameters, uiLog, cancelTokenSource);
+            return parameters;
         }
     }
 }

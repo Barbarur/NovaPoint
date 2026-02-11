@@ -3,20 +3,20 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.PreservationHoldLibrary;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Core.Logging;
 using System.Dynamic;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
-    public class RemovePHLItemAuto
+    public class RemovePHLItemAuto : ISolution
     {
         public static readonly string s_SolutionName = "Remove Files from Preservation";
         public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemovePHLItemAuto";
 
+        private ContextSolution _ctx;
         private RemovePHLItemAutoParameters _param;
-        private readonly LoggerSolution _logger;
-        private readonly Commands.Authentication.AppInfo _appInfo;
 
         private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
         {
@@ -41,46 +41,30 @@ namespace NovaPointLibrary.Solutions.Automation
 
         };
 
-        private RemovePHLItemAuto(LoggerSolution logger, Commands.Authentication.AppInfo appInfo, RemovePHLItemAutoParameters parameters)
+        private RemovePHLItemAuto(ContextSolution context, RemovePHLItemAutoParameters parameters)
         {
-            _param = parameters;
-            _logger = logger;
-            _appInfo = appInfo;
-        }
+            _ctx = context;
 
-        public static async Task RunAsync(RemovePHLItemAutoParameters parameters, Action<LogInfo> uiAddLog, CancellationTokenSource cancelTokenSource)
-        {
-            //parameters.TListsParam.SiteAccParam.SiteParam.IncludeSubsites = false;
             parameters.ListsParam.AllLists = false;
             parameters.ListsParam.IncludeLists = false;
             parameters.ListsParam.IncludeLibraries = false;
             parameters.ListsParam.ListTitle = "Preservation Hold Library";
             parameters.ItemsParam.FileExpressions = _fileExpressions;
-
-            LoggerSolution logger = new(uiAddLog, "RemovePHLItemAuto", parameters);
-            try
-            {
-                Commands.Authentication.AppInfo appInfo = await Commands.Authentication.AppInfo.BuildAsync(logger, cancelTokenSource);
-
-                await new RemovePHLItemAuto(logger, appInfo, parameters).RunScriptAsync();
-
-                logger.SolutionFinish();
-
-            }
-            catch (Exception ex)
-            {
-                logger.SolutionFinish(ex);
-            }
+            _param = parameters;
         }
 
-
-        private async Task RunScriptAsync()
+        public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
         {
-            _appInfo.IsCancelled();
+            return new RemovePHLItemAuto(context, (RemovePHLItemAutoParameters)parameters);
+        }
 
-            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_logger, _appInfo, _param.TItemsParam).GetAsync())
+        public async Task RunAsync()
+        {
+            _ctx.AppClient.IsCancelled();
+
+            await foreach (var tenantItemRecord in new SPOTenantItemsCSOM(_ctx.Logger, _ctx.AppClient, _param.TItemsParam).GetAsync())
             {
-                _appInfo.IsCancelled();
+                _ctx.AppClient.IsCancelled();
 
                 if (tenantItemRecord.Ex != null)
                 {
@@ -96,13 +80,13 @@ namespace NovaPointLibrary.Solutions.Automation
 
                     if (_param.PHLParam.MatchParameters(tenantItemRecord.Item))
                     {
-                        await new SPOListItemCSOM(_logger, _appInfo).RemoveAsync(tenantItemRecord.ListRecord.SiteUrl, tenantItemRecord.ListRecord.List, tenantItemRecord.Item, _param.Recycle);
+                        await new SPOListItemCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(tenantItemRecord.ListRecord.SiteUrl, tenantItemRecord.ListRecord.List, tenantItemRecord.Item, _param.Recycle);
                         AddRecord(tenantItemRecord.ListRecord.SiteUrl, tenantItemRecord.ListRecord.List, tenantItemRecord.Item, "Deleted");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
+                    _ctx.Logger.Error(GetType().Name, "Item", (string)tenantItemRecord.Item["FileRef"], ex);
 
                     AddRecord(tenantItemRecord.ListRecord.SiteUrl, tenantItemRecord.ListRecord.List, tenantItemRecord.Item, remarks: ex.Message);
                 }
@@ -153,7 +137,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             recordItem.Remarks = remarks;
 
-            _logger.DynamicCSV(recordItem);
+            _ctx.Logger.DynamicCSV(recordItem);
         }
     }
 

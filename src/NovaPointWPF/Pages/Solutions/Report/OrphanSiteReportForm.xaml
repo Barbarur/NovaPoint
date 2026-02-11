@@ -13,9 +13,6 @@
 
         <StackPanel>
 
-            <designmaterial:FormHeader
-                x:Name="SolutionHeader"/>
-
             <designmaterial:SiteTenantForm
                 x:Name="SiteF"
                 OneDriveVisibility="False"

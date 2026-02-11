@@ -12,9 +12,6 @@
 
         <StackPanel>
 
-            <designmaterial:FormHeader
-                x:Name="SolutionHeader"/>
-
             <designmaterial:SharingLinksFilterForm
                 x:Name="LinkF"/>
 
