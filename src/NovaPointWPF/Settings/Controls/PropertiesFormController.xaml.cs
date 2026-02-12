@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.Graph.ExternalConnectors;
+using NovaPointLibrary.Core.Authentication;
+using NovaPointLibrary.Core.Settings;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -8,50 +11,61 @@ namespace NovaPointWPF.Settings.Controls
 
     public partial class PropertiesFormController : UserControl
     {
-        private readonly IPropertiesForm _properties;
+        private readonly IPropertiesForm _propertiesForm;
+        private readonly AppConfig _appConfig;
         private readonly EventHandler _removeElement;
 
-        private PropertiesFormController(IPropertiesForm properties, EventHandler removeElement)
+        public PropertiesFormController(IAppClientProperties properties, AppConfig appConfig, EventHandler removeElement)
         {
             InitializeComponent();
-            _properties = properties;
-            GridPropertiesForm.Children.Insert(0, (UIElement)properties);
 
+            IPropertiesForm propertiesForm;
+
+            if (properties is AppClientConfidentialProperties confidentialProperties)
+            {
+                propertiesForm = AppClientConfidentialPropertiesForm.GetExistingForm(confidentialProperties, appConfig);
+            }
+            else if (properties is AppClientPublicProperties publicProperties)
+            {
+                propertiesForm = AppClientPublicPropertiesForm.GetExistingForm(publicProperties, appConfig);
+            }
+            else
+            {
+                throw new Exception("App properties is neither public or confidential. Please check your settings.");
+            }
+            _propertiesForm = propertiesForm;
+            GridPropertiesForm.Children.Add((UIElement)propertiesForm);
+
+            _appConfig = appConfig;
             _removeElement = removeElement;
         }
 
-        public static PropertiesFormController GetNewForm(IPropertiesForm properties, EventHandler removeElement)
+        internal void EnableForm()
         {
-            PropertiesFormController form = new(properties, removeElement);
-            form.EnableForm();
-            return form;
-        }
+            ButtonEdit.Visibility = Visibility.Collapsed;
+            ButtonEdit.IsEnabled = false;
 
-        public static PropertiesFormController GetExistingForm(IPropertiesForm properties, EventHandler removeElement)
-        {
-            PropertiesFormController form = new(properties, removeElement);
-            form.DisableForm();
-            return form;
-        }
-
-        private void EnableForm()
-        {
-            _properties.EnableForm();
+            _propertiesForm.EnableForm();
 
             ButtonSave.Visibility = Visibility.Visible;
             ButtonSave.IsEnabled = true;
 
-            ButtonEdit.Visibility = Visibility.Collapsed;
-            ButtonEdit.IsEnabled = false;
+            ButtonDelete.Visibility = Visibility.Visible;
+            ButtonDelete.IsEnabled = true;
         }
 
-        private void DisableForm()
+        internal void DisableForm()
         {
+            ButtonEdit.Visibility = Visibility.Visible;
+            ButtonEdit.IsEnabled = true;
+
+            _propertiesForm.DisableForm();
+
             ButtonSave.Visibility = Visibility.Collapsed;
             ButtonSave.IsEnabled = false;
 
-            ButtonEdit.Visibility = Visibility.Visible;
-            ButtonEdit.IsEnabled = true;
+            ButtonDelete.Visibility = Visibility.Collapsed;
+            ButtonDelete.IsEnabled = false;
         }
 
         private void EditClick(object sender, RoutedEventArgs e)
@@ -63,7 +77,7 @@ namespace NovaPointWPF.Settings.Controls
         {
             try
             {
-                _properties.SaveForm();
+                _appConfig.SaveSettings(_propertiesForm.Properties);
                 DisableForm();
                 TextBlockErrorNotification.Visibility = Visibility.Collapsed;
             }
@@ -76,8 +90,8 @@ namespace NovaPointWPF.Settings.Controls
 
         private void DeleteClick(object sender, RoutedEventArgs e)
         {
-            _removeElement?.Invoke(this, EventArgs.Empty);
-            _properties.DeleteForm();
+            _removeElement.Invoke(this, EventArgs.Empty);
+            _appConfig.RemoveApp(_propertiesForm.Properties);
         }
     }
 }

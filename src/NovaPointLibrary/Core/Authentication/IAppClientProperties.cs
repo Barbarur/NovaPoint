@@ -12,5 +12,7 @@ namespace NovaPointLibrary.Core.Authentication
         string ClientTitle { get; set; }
         Guid TenantId { get; set; }
         Guid ClientId { get; set; }
+
+        void ValidateProperties();
     }
 }

@@ -12,51 +12,71 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="GridPropertiesForm" Grid.Row="0"/>
-        <StackPanel
-            Grid.Row="0"
-            Orientation="Horizontal" 
-            VerticalAlignment="Top" 
-            HorizontalAlignment="Right">
+        <Border Style="{DynamicResource BorderPrimaryBackgroud}" Margin="0,8,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <Button
-                x:Name="ButtonEdit"
-                Style="{DynamicResource ButtonSolutionMainAction}"
-                Content="Edit"
-                Height="40"
-                Width="80"
-                Click="EditClick"/>
+                <Button Grid.Row="0"
+                        x:Name="ButtonEdit"
+                        Style="{DynamicResource ButtonSolutionMainAction}"
+                        Content="Edit"
+                        Height="40"
+                        Width="80"
+                        Click="EditClick"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Right"/>
 
-            <Button
-                x:Name="ButtonSave"
-                Style="{DynamicResource ButtonSolutionMainAction}"
-                Content="Save"
-                Height="40"
-                Width="80"
-                Click="SaveClick"/>
+                <Grid x:Name="GridPropertiesForm" Grid.Row="0"/>
+                
+                
+                
+                <DockPanel Grid.Row="1"
+                           Margin="0, 8, 0, 0">
 
-            <Button
-                x:Name="ButtonDelete"
-                Style="{DynamicResource ButtonSolutionMainAction}"
-                Content="Delete"
-                Height="40"
-                Width="80"
-                Click="DeleteClick"/>
+                    <Button
+                        x:Name="ButtonSave"
+                        Style="{DynamicResource ButtonSolutionMainAction}"
+                        Content="Save"
+                        Height="40"
+                        Width="80"
+                        DockPanel.Dock="Right"
+                        Click="SaveClick"
+                        IsEnabled="False"
+                        Visibility="Collapsed"/>
 
-        </StackPanel>
+                    <Button
+                        x:Name="ButtonDelete"
+                        Style="{DynamicResource ButtonSolutionMainAction}"
+                        Content="Delete"
+                        Height="40"
+                        Width="80"
+                        Click="DeleteClick"
+                        HorizontalAlignment="Left"
+                        DockPanel.Dock="Left"
+                        IsEnabled="False"
+                        Visibility="Collapsed"/>
 
-        <TextBlock
-            x:Name="TextBlockErrorNotification"
-            Style="{DynamicResource TextBlockBody}"
-            Grid.Row="1"
-            HorizontalAlignment="Center"
-            Margin="0, 12, 0, 0"
-            Text="Error while saving this app"
-            FontWeight="Bold"
-            Foreground="OrangeRed"
-            Visibility="Collapsed"/>
-
+                </DockPanel>
+                
+                <TextBlock Grid.Row="2"
+                    x:Name="TextBlockErrorNotification"
+                    Style="{DynamicResource TextBlockBody}"
+                    HorizontalAlignment="Center"
+                    Margin="0, 8"
+                    Text="Error while saving this app"
+                    FontWeight="Bold"
+                    Foreground="OrangeRed"
+                    Visibility="Collapsed"/>
+            </Grid>
+        </Border>
+        
     </Grid>
 </UserControl>

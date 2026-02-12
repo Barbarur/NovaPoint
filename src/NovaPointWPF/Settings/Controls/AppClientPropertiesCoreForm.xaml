@@ -1,0 +1,67 @@
+﻿<UserControl x:Class="NovaPointWPF.Settings.Controls.AppClientPropertiesCoreForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NovaPointWPF.Settings.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="600">
+    <Grid>
+        <StackPanel>
+
+            <TextBox
+                x:Name="TextBoxAppTitle"
+                Style="{DynamicResource TextBoxSubtitle}"
+                Text="{Binding ClientTitle, Mode=TwoWay}"
+                Margin="8"
+                Width="350"
+                HorizontalAlignment="Left"
+                IsReadOnly="False"/>
+
+            <StackPanel>
+
+                <DockPanel>
+
+                    <TextBlock
+                        Style="{DynamicResource TextBlockBody}"
+                        Text="Tenant ID"
+                        DockPanel.Dock="Left"/>
+
+                            <TextBox
+                                x:Name="TextBoxAppTenantId"
+                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                                Text="{Binding TenantId, Mode=TwoWay}"
+                                Width="330"
+                                TextAlignment="Center"
+                                DockPanel.Dock="Right"
+                                IsReadOnly="False"/>
+
+                    <TextBlock DockPanel.Dock="Right"/>
+
+                </DockPanel>
+
+                <DockPanel Margin="0,16">
+
+                    <TextBlock
+                        Style="{DynamicResource TextBlockBody}"
+                        Text="Client ID"/>
+
+                    <TextBox
+                        x:Name="TextBoxAppClientId"
+                        Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                        Text="{Binding ClientId, Mode=TwoWay}"
+                        Width="330"
+                        TextAlignment="Center"
+                        DockPanel.Dock="Right"
+                        IsReadOnly="False"/>
+
+                    <TextBlock DockPanel.Dock="Right"/>
+
+                </DockPanel>
+
+            </StackPanel>
+
+        </StackPanel>
+
+    </Grid>
+</UserControl>

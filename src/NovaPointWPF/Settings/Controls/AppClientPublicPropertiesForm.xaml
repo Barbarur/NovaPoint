@@ -9,78 +9,26 @@
 
     <Grid>
 
-        <StackPanel>
+        <StackPanel x:Name="FormPanel">
 
-            <TextBox
-                x:Name="TextBoxAppTitle"
-                Style="{DynamicResource TextBoxSubtitle}"
-                Text="{Binding ClientTitle, Mode=TwoWay}"
-                Width="350"
-                HorizontalAlignment="Left"/>
+            <DockPanel>
 
-            <Border Style="{DynamicResource BorderPrimaryBackgroud}" Margin=" 0,8,0,0">
+                <TextBlock
+                        Style="{DynamicResource TextBlockBody}"
+                        Text="Should NovaPoint cache access token for this client?"
+                        DockPanel.Dock="Left"/>
 
-                <StackPanel>
+                <ToggleButton
+                    x:Name="ButtonAppCache"
+                    Style="{DynamicResource ToggleButtonSolutionFormYesNo}"
+                    IsChecked="{Binding CachingToken, Mode=TwoWay}"
+                    Margin="8,0,0,0"
+                    DockPanel.Dock="Right"
+                    IsEnabled="False"/>
 
-                    <DockPanel>
+                <TextBlock DockPanel.Dock="Right"/>
 
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}"
-                            Text="Tenant ID"/>
-
-                        <TextBox
-                            x:Name="TextBoxAppTenantId"
-                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                            Text="{Binding TenantId, Mode=TwoWay}"
-                            Margin="0,8,0,0"
-                            Width="330"
-                            TextAlignment="Center"
-                            DockPanel.Dock="Right"/>
-
-                        <TextBlock DockPanel.Dock="Right"/>
-
-                    </DockPanel>
-
-                    <DockPanel Margin="0,16,0,0">
-
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}"
-                            Text="Client ID"/>
-
-                        <TextBox
-                            x:Name="TextBoxAppClientId"
-                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                            Text="{Binding ClientId, Mode=TwoWay}"
-                            Width="330"
-                            TextAlignment="Center"
-                            DockPanel.Dock="Right"/>
-
-                        <TextBlock DockPanel.Dock="Right"/>
-
-                    </DockPanel>
-
-                    <DockPanel
-                        Margin="0,16,0,0">
-
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}"
-                            Text="Should NovaPoint cache access token for this client?"
-                            DockPanel.Dock="Left"/>
-
-                        <ToggleButton
-                            x:Name="ButtonAppCache"
-                            Style="{DynamicResource ToggleButtonSolutionFormYesNo}"
-                            IsChecked="{Binding CachingToken, Mode=TwoWay}"
-                            Margin="8,0,0,0"
-                            DockPanel.Dock="Right"/>
-
-                        <TextBlock DockPanel.Dock="Right"/>
-
-                    </DockPanel>
-
-                </StackPanel>
-
-            </Border>
+            </DockPanel>
 
         </StackPanel>
 

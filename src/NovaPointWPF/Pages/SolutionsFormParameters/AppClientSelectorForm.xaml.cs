@@ -21,7 +21,7 @@ namespace NovaPointWPF.Pages.SolutionsFormParameters
 
             _appConfig = AppConfig.GetSettings();
 
-            List<IAppClientProperties> appProperties = [.. _appConfig.ListPublicApps, .. _appConfig.ListConfidentialApps];
+            List<IAppClientProperties> appProperties = [.. _appConfig.ListAppClientPublicProperties, .. _appConfig.ListAppClientConfidentialProperties];
             appProperties = [.. appProperties.OrderBy(p => p.ClientTitle)];
 
             ComboBoxAppProperties.ItemsSource = appProperties;

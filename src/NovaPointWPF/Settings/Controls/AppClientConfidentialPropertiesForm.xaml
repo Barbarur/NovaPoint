@@ -9,87 +9,35 @@
     
     <Grid>
 
-        <StackPanel>
+        <StackPanel x:Name="FormPanel">
 
-            <TextBox
-                x:Name="TextBoxAppTitle"
-                Style="{DynamicResource TextBoxSubtitle}"
-                Text="{Binding ClientTitle, Mode=TwoWay}"
-                Width="350"
-                HorizontalAlignment="Left"/>
-            
-            <Border Style="{DynamicResource BorderPrimaryBackgroud}" Margin="0,8,0,0">
+            <DockPanel>
 
-                <StackPanel>
+                <TextBlock
+                    Style="{DynamicResource TextBlockBody}"
+                    Text="Certificate"/>
 
-                    <DockPanel>
+                <TextBlock
+                    Style="{DynamicResource TextBlockBody}"
+                    x:Name ="CertificatePathTextBlock"
+                    Margin="6, 0, 0, 0"
+                    MaxWidth="350"
+                    TextWrapping="Wrap"
+                    FontStyle="Italic"
+                    Foreground="{DynamicResource PrimaryTextColor}"
+                    Text="{Binding CertificatePath, Mode=TwoWay}"/>
 
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}"
-                            Text="Tenant ID"/>
+                <Button
+                    x:Name="ButtonAppCertificate"
+                    Style="{DynamicResource ButtonSolutionForm}"
+                    Content="Select"
+                    Width="90"
+                    Click="OpenCertificatePathClick"
+                    DockPanel.Dock="Right"/>
 
-                        <TextBox
-                            x:Name="TextBoxAppTenantId"
-                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                            Text="{Binding TenantId, Mode=TwoWay}"
-                            Margin="0,8,0,0"
-                            Width="330"
-                            TextAlignment="Center"
-                            DockPanel.Dock="Right"/>
+                <TextBlock DockPanel.Dock="Right"/>
 
-                        <TextBlock DockPanel.Dock="Right"/>
-
-                    </DockPanel>
-
-                    <DockPanel Margin="0,16,0,0">
-
-                        <TextBlock
-                        Style="{DynamicResource TextBlockBody}"
-                        Text="Client ID"/>
-
-                        <TextBox
-                            x:Name="TextBoxAppClientId"
-                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                            Text="{Binding ClientId, Mode=TwoWay}"
-                            Width="330"
-                            TextAlignment="Center"
-                            DockPanel.Dock="Right"/>
-
-                        <TextBlock DockPanel.Dock="Right"/>
-
-                    </DockPanel>
-
-                    <DockPanel Margin="0,16,0,0">
-
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}"
-                            Text="Certificate"/>
-
-                        <TextBlock
-                            Style="{DynamicResource TextBlockBody}"
-                            x:Name ="CertificatePathTextBlock"
-                            Margin="6, 0, 0, 0"
-                            MaxWidth="350"
-                            TextWrapping="Wrap"
-                            FontStyle="Italic"
-                            Foreground="{DynamicResource PrimaryTextColor}"
-                            Text="{Binding CertificatePath, Mode=TwoWay}"/>
-
-                        <Button
-                            x:Name="ButtonAppCertificate"
-                            Style="{DynamicResource ButtonSolutionForm}"
-                            Content="Select"
-                            Width="90"
-                            Click="OpenCertificatePathClick"
-                            DockPanel.Dock="Right"/>
-
-                        <TextBlock DockPanel.Dock="Right"/>
-
-                    </DockPanel>
-
-                </StackPanel>
-
-            </Border>
+            </DockPanel>
 
         </StackPanel>
 

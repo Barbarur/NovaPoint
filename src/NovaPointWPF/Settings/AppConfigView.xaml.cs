@@ -25,41 +25,32 @@ namespace NovaPointWPF.Settings
 
             _appConfig = AppConfig.GetSettings();
 
-            List<IAppClientProperties> appProperties = [.. _appConfig.ListPublicApps, .. _appConfig.ListConfidentialApps];
+            List<IAppClientProperties> appProperties = [.. _appConfig.ListAppClientPublicProperties, .. _appConfig.ListAppClientConfidentialProperties];
             appProperties = [.. appProperties.OrderBy(p => p.ClientTitle)];
 
             foreach (IAppClientProperties client in appProperties)
             {
-                if (client is AppClientConfidentialProperties confidentialProperties)
-                {
-                    AppClientConfidentialPropertiesForm confidentialPropertiesForm = AppClientConfidentialPropertiesForm.GetExistingForm(confidentialProperties, _appConfig);
-                    PropertiesFormController formController = PropertiesFormController.GetExistingForm(confidentialPropertiesForm, RemovePropertiesForm);
-                    SettingsPanel.Children.Add(formController);
-                }
-                else if (client is AppClientPublicProperties publicProperties)
-                {
-                    AppClientPublicPropertiesForm publicPropertiesForm = AppClientPublicPropertiesForm.GetExistingForm(publicProperties, _appConfig);
-                    PropertiesFormController formController = PropertiesFormController.GetExistingForm(publicPropertiesForm, RemovePropertiesForm);
-                    SettingsPanel.Children.Add(formController);
-                }
+                SettingsPanel.Children.Add(new PropertiesFormController(client, _appConfig, RemovePropertiesForm));
             }
         }
 
         private void AddAppClientPublicPropertiesFormClick(object sender, RoutedEventArgs e)
         {
-            AppClientPublicPropertiesForm publicProperties = AppClientPublicPropertiesForm.GetNewForm(_appConfig);
-            PropertiesFormController formController = PropertiesFormController.GetNewForm(publicProperties, RemovePropertiesForm);
-            SettingsPanel.Children.Add(formController);
-            SettingsScrollViewer.ScrollToEnd();
+            AddNewAppClientForm(new AppClientPublicProperties());
         }
 
         private void AddAppClientConfidentialPropertiesClick(object sender, RoutedEventArgs e)
         {
-            AppClientConfidentialPropertiesForm confidentialProperties = AppClientConfidentialPropertiesForm.GetNewForm(_appConfig);
-            PropertiesFormController formController = PropertiesFormController.GetNewForm(confidentialProperties, RemovePropertiesForm);
-            SettingsPanel.Children.Add(formController);
-            SettingsScrollViewer.ScrollToEnd();
+            AddNewAppClientForm(new AppClientConfidentialProperties());
         }
+
+        private void AddNewAppClientForm(IAppClientProperties properties)
+        {
+            PropertiesFormController formController = new PropertiesFormController(properties, _appConfig, RemovePropertiesForm);
+            formController.EnableForm();
+            SettingsPanel.Children.Insert(0, formController);
+        }
+
         private void RemovePropertiesForm(object? sender, EventArgs e)
         {
             if (sender is UserControl userControl)

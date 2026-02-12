@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:NovaPointWPF.Settings"
+      xmlns:localcontrols="clr-namespace:NovaPointWPF.Settings.Controls"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="600"
       Title="AppConfigView"
@@ -41,35 +42,28 @@
             
         </DockPanel>
 
-        <ScrollViewer
-            x:Name="SettingsScrollViewer"
-            Style="{DynamicResource LeftScrollViewer}"
-            ScrollViewer.VerticalScrollBarVisibility="Auto"
-            Margin="0,12,0,0"
-            Grid.Row="1">
+        <StackPanel Grid.Row="1">
 
-            <StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,16,0,0" HorizontalAlignment="Left" Grid.Row="2">
 
-                <StackPanel x:Name="SettingsPanel"/>
+                <Button
+                Style="{DynamicResource ButtonSolutionMainAction}"
+                Content="New delegated app"
+                Width="210"
+                Click="AddAppClientPublicPropertiesFormClick"/>
 
-                <StackPanel Orientation="Horizontal" Margin="0,28,0,0" HorizontalAlignment="Center" Grid.Row="2">
-
-                    <Button
-                    Style="{DynamicResource ButtonSolutionMainAction}"
-                    Content="New delegated app"
-                    Width="210"
-                    Click="AddAppClientPublicPropertiesFormClick"/>
-
-                    <Button
-                    Style="{DynamicResource ButtonSolutionMainAction}"
-                    Content="New App-only"
-                    Width="210"
-                    Click="AddAppClientConfidentialPropertiesClick"/>
-
-                </StackPanel>
+                <Button
+                Style="{DynamicResource ButtonSolutionMainAction}"
+                Content="New App-only"
+                Width="210"
+                Click="AddAppClientConfidentialPropertiesClick"/>
 
             </StackPanel>
-        </ScrollViewer>
+
+            <StackPanel x:Name="SettingsPanel"/>
+
+
+        </StackPanel>
 
         <StackPanel Grid.Row="2">
 

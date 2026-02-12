@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NovaPointLibrary.Core.Authentication;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,11 +10,8 @@ namespace NovaPointWPF.Settings.Controls
 {
     public interface IPropertiesForm
     {
+        IAppClientProperties Properties { get; }
         void EnableForm();
-
-        void SaveForm();
-
-        void DeleteForm();
-
+        void DisableForm();
     }
 }

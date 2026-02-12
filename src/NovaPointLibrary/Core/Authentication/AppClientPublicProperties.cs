@@ -11,7 +11,7 @@ namespace NovaPointLibrary.Core.Authentication
         public bool CachingToken { get; set; } = false;
 
         public AppClientPublicProperties() { }
-        
+
         public AppClientPublicProperties(Guid tenantId, Guid clientId, bool cachingToken)
         {
             TenantId = tenantId;
@@ -19,9 +19,9 @@ namespace NovaPointLibrary.Core.Authentication
             CachingToken = cachingToken;
         }
 
-        internal void ValidateProperties()
+        public void ValidateProperties()
         {
-            if (TenantId == Guid.Empty)
+            if (TenantId == Guid.Empty || !Guid.TryParse(TenantId.ToString(), out _))
             {
                 throw new Exception("Incorrect Tenant ID");
             }

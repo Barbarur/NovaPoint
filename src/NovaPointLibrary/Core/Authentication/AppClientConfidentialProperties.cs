@@ -27,7 +27,7 @@ namespace NovaPointLibrary.Core.Authentication
             CertificatePath = certificatePath;
         }
 
-        internal void ValidateProperties()
+        public void ValidateProperties()
         {
             if (TenantId == Guid.Empty)
             {

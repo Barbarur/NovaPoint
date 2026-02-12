@@ -1,7 +1,5 @@
 ﻿using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Settings;
-using System;
-using System.Windows;
 using System.Windows.Controls;
 
 
@@ -9,8 +7,8 @@ namespace NovaPointWPF.Settings.Controls
 {
     public partial class AppClientPublicPropertiesForm : UserControl, IPropertiesForm
     {
-        private readonly AppClientPublicProperties _properties;
-        private readonly AppConfig _appConfig;
+        public IAppClientProperties Properties { get; init; }
+        private AppClientPropertiesCoreForm _corePropertiesForm;
 
         private AppClientPublicPropertiesForm(AppClientPublicProperties properties, AppConfig appConfig)
         {
@@ -18,8 +16,10 @@ namespace NovaPointWPF.Settings.Controls
 
             DataContext = properties;
 
-            _properties = properties;
-            _appConfig = appConfig;
+            Properties = properties;
+
+            _corePropertiesForm = new(properties);
+            FormPanel.Children.Insert(0, _corePropertiesForm);
         }
 
         public static AppClientPublicPropertiesForm GetNewForm(AppConfig appConfig)
@@ -38,29 +38,15 @@ namespace NovaPointWPF.Settings.Controls
 
         public void EnableForm()
         {
-            TextBoxAppTitle.IsReadOnly = false;
-            TextBoxAppTenantId.IsReadOnly = false;
-            TextBoxAppClientId.IsReadOnly = false;
+            _corePropertiesForm.EnableForm();
             ButtonAppCache.IsEnabled = true;
         }
 
-        private void DisableForm()
+        public void DisableForm()
         {
-            TextBoxAppTitle.IsReadOnly = true;
-            TextBoxAppTenantId.IsReadOnly = true;
-            TextBoxAppClientId.IsReadOnly = true;
+            _corePropertiesForm.DisableForm();
             ButtonAppCache.IsEnabled = false;
         }
 
-        public void SaveForm()
-        {
-            _appConfig.SaveSettings(_properties);
-            DisableForm();
-        }
-
-        public void DeleteForm()
-        {
-            _appConfig.RemoveApp(_properties);
-        }
     }
 }

@@ -10,8 +10,8 @@ namespace NovaPointLibrary.Core.Settings
     {
         private static readonly string _npLocalAppFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NovaPoint");
 
-        public List<AppClientConfidentialProperties> ListConfidentialApps { get; set; } = new();
-        public List<AppClientPublicProperties> ListPublicApps { get; set; } = new();
+        public List<AppClientConfidentialProperties> ListAppClientConfidentialProperties { get; set; } = [];
+        public List<AppClientPublicProperties> ListAppClientPublicProperties { get; set; } = [];
 
         internal AppConfig() { }
 
@@ -61,21 +61,21 @@ namespace NovaPointLibrary.Core.Settings
         public AppClientPublicProperties GetNewPublicApp()
         {
             AppClientPublicProperties newPublicApp = new();
-            ListPublicApps.Add(newPublicApp);
+            ListAppClientPublicProperties.Add(newPublicApp);
             return newPublicApp;
         }
 
-        public void RemoveApp(AppClientPublicProperties app)
+        public void RemoveApp(IAppClientProperties clientProperties)
         {
-            // TEST WHAT HAPPEN IF TRY TO REMOVE AN APP THAT IS NOT ON THE LIST.
-            ListPublicApps.Remove(app);
-            SaveSettings();
+            if (clientProperties is AppClientConfidentialProperties confidentialProperties) { ListAppClientConfidentialProperties.Remove(confidentialProperties); }
+            else if (clientProperties is AppClientPublicProperties publicProperties) { ListAppClientPublicProperties.Remove(publicProperties); }
         }
 
-        public void RemoveApp(AppClientConfidentialProperties app)
+        public void SaveSettings(IAppClientProperties clientProperties)
         {
-            // TEST WHAT HAPPEN IF TRY TO REMOVE AN APP THAT IS NOT ON THE LIST.
-            ListConfidentialApps.Remove(app);
+            clientProperties.ValidateProperties();
+            if (clientProperties is AppClientConfidentialProperties confidentialProperties && !ListAppClientConfidentialProperties.Contains(confidentialProperties)) { ListAppClientConfidentialProperties.Add(confidentialProperties); }
+            else if (clientProperties is AppClientPublicProperties publicProperties && !ListAppClientPublicProperties.Contains(publicProperties)) { ListAppClientPublicProperties.Add(publicProperties); }
             SaveSettings();
         }
 
@@ -83,26 +83,6 @@ namespace NovaPointLibrary.Core.Settings
         {
             var json = JsonConvert.SerializeObject(this, Formatting.Indented);
             File.WriteAllText(GetSettingsPath(), json);
-        }
-
-        public void SaveSettings(AppClientPublicProperties app)
-        {
-            app.ValidateProperties();
-            if (!ListPublicApps.Contains(app))
-            {
-                ListPublicApps.Add(app);
-            }
-            SaveSettings();
-        }
-
-        public void SaveSettings(AppClientConfidentialProperties app)
-        {
-            app.ValidateProperties();
-            if (!ListConfidentialApps.Contains(app))
-            {
-                ListConfidentialApps.Add(app);
-            }
-            SaveSettings();
         }
 
         public static void RemoveTokenCache()
