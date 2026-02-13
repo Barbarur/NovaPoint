@@ -94,14 +94,9 @@ namespace NovaPointLibrary.Core.Logging
             _parentLogger.WriteLog(log);
         }
 
-        public void WriteRecord<T>(T record)
-        {
-            _parentLogger.WriteRecord(record);
-        }
-
         public void DynamicCSV(dynamic o)
         {
-            _parentLogger.WriteRecord(o);
+            _parentLogger.DynamicCSV(o);
         }
     }
 }
