@@ -293,21 +293,22 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void AddRecord(MembershipReportRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
     }
 
-    public class MembershipReportRecord : ISolutionRecord
+    internal class MembershipReportRecord : ISolutionRecord
     {
-        internal string SiteTitle { get; set; } = String.Empty;
-        internal string SiteUrl { get; set; } = String.Empty;
-        internal string SiteTemplate { get; set; } = String.Empty;
-        internal string IsSubsite { get; set; } = String.Empty;
-        internal string Membership { get; set; } = String.Empty;
-        internal string AccountType { get; set; } = String.Empty;
-        internal string Users { get; set; } = String.Empty;
-        internal string Remarks { get; set; } = String.Empty;
+        public string SiteTitle { get; set; } = String.Empty;
+        public string SiteUrl { get; set; } = String.Empty;
+        public string SiteTemplate { get; set; } = String.Empty;
+        public string IsSubsite { get; set; } = String.Empty;
+        public string Membership { get; set; } = String.Empty;
+        public string AccountType { get; set; } = String.Empty;
+        public string Users { get; set; } = String.Empty;
+        public string Remarks { get; set; } = String.Empty;
 
+        public MembershipReportRecord() { }
         internal MembershipReportRecord(string siteUrl, string errorMessage)
         {
             SiteUrl = siteUrl;

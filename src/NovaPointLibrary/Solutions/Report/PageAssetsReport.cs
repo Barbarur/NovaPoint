@@ -165,7 +165,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(ISolutionRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
 
     }

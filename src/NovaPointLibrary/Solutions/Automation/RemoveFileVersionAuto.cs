@@ -197,28 +197,30 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void RecordCSV(RemoveFileVersionAutoRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
 
     }
 
     public class RemoveFileVersionAutoRecord : ISolutionRecord
     {
-        internal string SiteUrl { get; set; } = String.Empty;
-        internal string ListTitle { get; set; } = String.Empty;
+        public string SiteUrl { get; set; } = String.Empty;
+        public string ListTitle { get; set; } = String.Empty;
 
-        internal string FileID { get; set; } = String.Empty;
-        internal string FileTitle { get; set; } = String.Empty;
-        internal string FilePath { get; set; } = String.Empty;
+        public string FileID { get; set; } = String.Empty;
+        public string FileTitle { get; set; } = String.Empty;
+        public string FilePath { get; set; } = String.Empty;
 
-        internal string FileVersionNo { get; set; } = String.Empty;
-        internal string FileVersionsCount { get; set; } = String.Empty;
-        internal string ItemSizeMb { get; set; } = String.Empty;
-        internal string ItemSizeTotalMB { get; set; } = String.Empty;
-        internal string DeletedVersionsCount { get; set; } = String.Empty;
-        internal string DeletedVersionsMB { get; set; } = String.Empty;
+        public string FileVersionNo { get; set; } = String.Empty;
+        public string FileVersionsCount { get; set; } = String.Empty;
+        public string ItemSizeMb { get; set; } = String.Empty;
+        public string ItemSizeTotalMB { get; set; } = String.Empty;
+        public string DeletedVersionsCount { get; set; } = String.Empty;
+        public string DeletedVersionsMB { get; set; } = String.Empty;
 
-        internal string Remarks { get; set; } = String.Empty;
+        public string Remarks { get; set; } = String.Empty;
+
+        public RemoveFileVersionAutoRecord() { }
 
         internal RemoveFileVersionAutoRecord(SPOTenantItemRecord tenantItemRecord,
                                              string remarks = "")

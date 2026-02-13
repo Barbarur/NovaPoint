@@ -83,23 +83,25 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(ShortcutODReportRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
     }
 
     internal class ShortcutODReportRecord : ISolutionRecord
     {
-        internal string SiteUrl { get; set; } = String.Empty;
-        internal string ListTitle { get; set; } = String.Empty;
-        internal string ListType { get; set; } = String.Empty;
+        public string SiteUrl { get; set; } = String.Empty;
+        public string ListTitle { get; set; } = String.Empty;
+        public string ListType { get; set; } = String.Empty;
 
-        internal string ItemID { get; set; } = String.Empty;
-        internal string ShortcutName { get; set; } = String.Empty;
-        internal string ShortcutPath { get; set; } = String.Empty;
+        public string ItemID { get; set; } = String.Empty;
+        public string ShortcutName { get; set; } = String.Empty;
+        public string ShortcutPath { get; set; } = String.Empty;
 
-        internal string TargetSite { get; set; } = String.Empty;
+        public string TargetSite { get; set; } = String.Empty;
 
-        internal string Remarks { get; set; } = String.Empty;
+        public string Remarks { get; set; } = String.Empty;
+
+        public ShortcutODReportRecord() { }
 
         internal ShortcutODReportRecord(SPOTenantItemRecord tenantItemRecord, string remarks = "")
         {

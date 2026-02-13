@@ -160,19 +160,21 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(PrivacySiteReportRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
     }
 
 
-    public class PrivacySiteReportRecord : ISolutionRecord
+    internal class PrivacySiteReportRecord : ISolutionRecord
     {
-        internal string SiteTitle { get; set; } = String.Empty;
-        internal string SiteUrl { get; set; }
-        internal string GroupId { get; set; } = String.Empty;
-        internal string Privacy { get; set; } = String.Empty;
+        public string SiteTitle { get; set; } = String.Empty;
+        public string SiteUrl { get; set; } = String.Empty;
+        public string GroupId { get; set; } = String.Empty;
+        public string Privacy { get; set; } = String.Empty;
 
-        internal string Remarks { get; set; } = String.Empty;
+        public string Remarks { get; set; } = String.Empty;
+
+        public PrivacySiteReportRecord() { }
 
         internal PrivacySiteReportRecord(SiteProperties oSiteCollection)
         {

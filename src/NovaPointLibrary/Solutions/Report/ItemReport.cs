@@ -124,37 +124,39 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(ItemReportRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
 
     }
 
-    public class ItemReportRecord : ISolutionRecord
+    internal class ItemReportRecord : ISolutionRecord
     {
-        internal string SiteUrl { get; set; } = String.Empty;
-        internal string ListTitle { get; set; } = String.Empty;
-        internal string ListType { get; set; } = String.Empty;
-        internal string ListServerRelativeUrl { get; set; } = String.Empty;
+        public string SiteUrl { get; set; } = String.Empty;
+        public string ListTitle { get; set; } = String.Empty;
+        public string ListType { get; set; } = String.Empty;
+        public string ListServerRelativeUrl { get; set; } = String.Empty;
 
-        internal string ItemID { get; set; } = String.Empty;
-        internal Guid ItemUniqueID { get; set; } = Guid.Empty;
-        internal string ItemTitle { get; set; } = String.Empty;
-        internal string ItemPath { get; set; } = String.Empty;
-        internal string ItemType { get; set; } = String.Empty;
+        public string ItemID { get; set; } = String.Empty;
+        public Guid ItemUniqueID { get; set; } = Guid.Empty;
+        public string ItemTitle { get; set; } = String.Empty;
+        public string ItemPath { get; set; } = String.Empty;
+        public string ItemType { get; set; } = String.Empty;
 
-        internal DateTime ItemCreated { get; set; } = DateTime.MinValue;
-        internal string ItemCreatedBy { get; set; } = String.Empty;
-        internal DateTime ItemModified { get; set; } = DateTime.MinValue;
-        internal string ItemModifiedBy { get; set; } = String.Empty;
+        public DateTime ItemCreated { get; set; } = DateTime.MinValue;
+        public string ItemCreatedBy { get; set; } = String.Empty;
+        public DateTime ItemModified { get; set; } = DateTime.MinValue;
+        public string ItemModifiedBy { get; set; } = String.Empty;
 
-        internal string ItemVersion { get; set; } = String.Empty;
-        internal string ItemVersionsCount { get; set; } = String.Empty;
-        internal string ItemSizeMb { get; set; } = String.Empty;
-        internal string ItemSizeTotalMB { get; set; } = String.Empty;
+        public string ItemVersion { get; set; } = String.Empty;
+        public string ItemVersionsCount { get; set; } = String.Empty;
+        public string ItemSizeMb { get; set; } = String.Empty;
+        public string ItemSizeTotalMB { get; set; } = String.Empty;
 
-        internal string FileCheckOut { get; set; } = String.Empty;
+        public string FileCheckOut { get; set; } = String.Empty;
 
-        internal string Remarks { get; set; } = String.Empty;
+        public string Remarks { get; set; } = String.Empty;
+
+        public ItemReportRecord() { }
 
         internal ItemReportRecord(SPOTenantItemRecord tenantItemRecord,
                                   string remarks = "")

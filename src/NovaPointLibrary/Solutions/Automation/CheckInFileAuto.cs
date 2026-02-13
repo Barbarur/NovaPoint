@@ -135,26 +135,28 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void RecordCSV(CheckInFileAutoRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
 
     }
 
-    public class CheckInFileAutoRecord : ISolutionRecord
+    internal class CheckInFileAutoRecord : ISolutionRecord
     {
-        internal string SiteUrl { get; set; } = String.Empty;
-        internal string ListTitle { get; set; } = String.Empty;
-        internal string ListType { get; set; } = String.Empty;
+        public string SiteUrl { get; set; } = String.Empty;
+        public string ListTitle { get; set; } = String.Empty;
+        public string ListType { get; set; } = String.Empty;
 
-        internal string ItemID { get; set; } = String.Empty;
-        internal string ItemTitle { get; set; } = String.Empty;
-        internal string ItemPath { get; set; } = String.Empty;
+        public string ItemID { get; set; } = String.Empty;
+        public string ItemTitle { get; set; } = String.Empty;
+        public string ItemPath { get; set; } = String.Empty;
 
-        internal string CheckedOutByUser { get; set; } = String.Empty;
-        internal string CheckinType { get; set; } = String.Empty;
-        internal string Comment { get; set; } = String.Empty;
+        public string CheckedOutByUser { get; set; } = String.Empty;
+        public string CheckinType { get; set; } = String.Empty;
+        public string Comment { get; set; } = String.Empty;
 
-        internal string Remarks { get; set; } = String.Empty;
+        public string Remarks { get; set; } = String.Empty;
+
+        public CheckInFileAutoRecord() { }
 
         internal CheckInFileAutoRecord(SPOTenantItemRecord tenantItemRecord, string remarks = "")
         {

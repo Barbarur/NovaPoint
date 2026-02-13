@@ -82,7 +82,7 @@ namespace NovaPointLibrary.Solutions.Directory
 
         private void AddRecord(GetDirectoryGroupRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
     }
 
@@ -108,7 +108,6 @@ namespace NovaPointLibrary.Solutions.Directory
         public string Remarks { get; set; } = string.Empty;
 
         public GetDirectoryGroupRecord() { }
-
 
         internal GetDirectoryGroupRecord(GraphGroup group)
         {

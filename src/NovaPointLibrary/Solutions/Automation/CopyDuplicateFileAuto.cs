@@ -346,24 +346,25 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void RecordCSV(CopyDuplicateFileAutoRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
 
     }
 
     internal class CopyDuplicateFileAutoRecord : ISolutionRecord
     {
-        internal int _depth;
-        internal string SourceSiteURL { get; set; }
-        internal string SourceListTitle { get; set; }
-        internal string SourceItemsServerRelativeUrl { get; set; }
+        public string SourceSiteURL { get; set; } = String.Empty;
+        public string SourceListTitle { get; set; } = String.Empty;
+        public string SourceItemsServerRelativeUrl { get; set; } = String.Empty;
 
-        internal string DestinationSiteURL { get; set; }
-        internal string DestinationListTitle { get; set; }
-        internal string DestinationItemsServerRelativeUrl { get; set; }
+        public string DestinationSiteURL { get; set; } = String.Empty;
+        public string DestinationListTitle { get; set; } = String.Empty;
+        public string DestinationItemsServerRelativeUrl { get; set; } = String.Empty;
 
-        internal string Status { get; set; }
-        internal string Remarks { get; set; }
+        public string Status { get; set; } = String.Empty;
+        public string Remarks { get; set; } = String.Empty;
+
+        public CopyDuplicateFileAutoRecord() { }
 
         internal CopyDuplicateFileAutoRecord(
             CopyDuplicateFileAutoParameters param,

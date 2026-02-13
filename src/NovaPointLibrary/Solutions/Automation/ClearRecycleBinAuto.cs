@@ -156,7 +156,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             recordItem.Remarks = remarks;
 
-            _ctx.Logger.WriteRecord(recordItem);
+            _ctx.Logger.DynamicCSV(recordItem);
         }
     }
 

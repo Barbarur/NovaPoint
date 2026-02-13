@@ -8,36 +8,36 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
 {
     internal class SpoSharingLinksRecord : ISolutionRecord
     {
-        internal string SiteTitle { get; set; } = String.Empty;
-        internal string SiteUrl { get; set; } = String.Empty;
+        public string SiteTitle { get; set; } = String.Empty;
+        public string SiteUrl { get; set; } = String.Empty;
 
-        internal string ListTitle { get; set; } = String.Empty;
-        internal Guid ListId { get; set; } = Guid.Empty;
+        public string ListTitle { get; set; } = String.Empty;
+        public Guid ListId { get; set; } = Guid.Empty;
 
-        internal int ItemId { get; set; } = -1;
-        internal Guid ItemUniqueId { get; set; } = Guid.Empty;
-        internal string ItemPath { get; set; } = String.Empty;
-
-
-        internal string SharingLink { get; set; } = String.Empty;
-        internal string SharingLinkRequiresPassword { get; set; } = String.Empty;
-        internal string SharingLinkExpiration { get; set; } = String.Empty;
+        public int ItemId { get; set; } = -1;
+        public Guid ItemUniqueId { get; set; } = Guid.Empty;
+        public string ItemPath { get; set; } = String.Empty;
 
 
-        internal string SharingLinkIsActive { get; set; } = String.Empty;
-        internal DateTime SharingLinkCreated { get; set; } = DateTime.MinValue;
-        internal string SharingLinkCreatedBy { get; set; } = String.Empty;
-        internal DateTime SharingLinkModified { get; set; } = DateTime.MinValue;
-        internal string SharingLinkModifiedBy { get; set; } = String.Empty;
-        internal string SharingLinkUrl { get; set; } = String.Empty;
+        public string SharingLink { get; set; } = String.Empty;
+        public string SharingLinkRequiresPassword { get; set; } = String.Empty;
+        public string SharingLinkExpiration { get; set; } = String.Empty;
 
 
-        internal string GroupId { get; set; } = String.Empty;
-        internal string GroupTitle { get; set; } = String.Empty;
-        internal string ShareId = String.Empty;
-        internal string Users { get; set; } = String.Empty;
+        public string SharingLinkIsActive { get; set; } = String.Empty;
+        public DateTime SharingLinkCreated { get; set; } = DateTime.MinValue;
+        public string SharingLinkCreatedBy { get; set; } = String.Empty;
+        public DateTime SharingLinkModified { get; set; } = DateTime.MinValue;
+        public string SharingLinkModifiedBy { get; set; } = String.Empty;
+        public string SharingLinkUrl { get; set; } = String.Empty;
 
-        internal string Remarks { get; set; } = String.Empty;
+
+        public string GroupId { get; set; } = String.Empty;
+        public string GroupTitle { get; set; } = String.Empty;
+        public string ShareId = String.Empty;
+        public string Users { get; set; } = String.Empty;
+
+        public string Remarks { get; set; } = String.Empty;
 
         public string GroupDescription { get; init; } = String.Empty;
         public bool LinkDetailsAnonymous { get; set; } = false;
@@ -46,8 +46,9 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
         public bool LinkDetailsCaReview { get; set; } = false;
         public bool LinkDetailsCanNotDownload { get; set; } = false;
 
-        public Link? Link { get; set; } = null;
+        internal Link? Link { get; set; } = null;
 
+        public SpoSharingLinksRecord() { }
 
         internal SpoSharingLinksRecord(string siteUrl, Exception ex)
         {

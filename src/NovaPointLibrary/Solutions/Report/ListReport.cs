@@ -129,40 +129,42 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void AddRecord(ListReportRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
 
     }
 
-    public class ListReportRecord : ISolutionRecord
+    internal class ListReportRecord : ISolutionRecord
     {
-        internal string SiteURL { get; set; }
+        public string SiteURL { get; set; }
 
-        internal string ListTitle { get; set; } = String.Empty;
-        internal string ListType { get; set; } = String.Empty;
-        internal string ListServerRelativeUrl { get; set; } = String.Empty;
-        internal string ListID { get; set; } = String.Empty;
+        public string ListTitle { get; set; } = String.Empty;
+        public string ListType { get; set; } = String.Empty;
+        public string ListServerRelativeUrl { get; set; } = String.Empty;
+        public string ListID { get; set; } = String.Empty;
 
-        internal string Created { get; set; } = String.Empty;
-        internal string LastModified { get; set; } = String.Empty;
-        internal string TotalFileCount { get; set; } = String.Empty;
-        internal string TotalSizeGb { get; set; } = String.Empty;
+        public string Created { get; set; } = String.Empty;
+        public string LastModified { get; set; } = String.Empty;
+        public string TotalFileCount { get; set; } = String.Empty;
+        public string TotalSizeGb { get; set; } = String.Empty;
 
-        internal string ContentApproval { get; set; } = String.Empty;
-        internal string EnableVersioning {  get; set; } = String.Empty;
-        internal string AutomaticExpiration {  get; set; } = "NA";
-        internal string MajorVersionLimit { get; set; } = String.Empty;
-        internal string ExpireAfter { get; set; } = "NA";
-        internal string MinorVersioning { get; set; } = String.Empty;
-        internal string MinorVersionLimit { get; set; } = String.Empty;
-        internal string RequireCheckOut { get; set; } = String.Empty;
+        public string ContentApproval { get; set; } = String.Empty;
+        public string EnableVersioning {  get; set; } = String.Empty;
+        public string AutomaticExpiration {  get; set; } = "NA";
+        public string MajorVersionLimit { get; set; } = String.Empty;
+        public string ExpireAfter { get; set; } = "NA";
+        public string MinorVersioning { get; set; } = String.Empty;
+        public string MinorVersionLimit { get; set; } = String.Empty;
+        public string RequireCheckOut { get; set; } = String.Empty;
 
-        internal string IRM_Emabled { get; set; } = String.Empty;
+        public string IRM_Emabled { get; set; } = String.Empty;
 
-        internal string Hidden { get; set; } = String.Empty;
-        internal string IsSystemList { get; set; } = String.Empty;
-        
-        internal string Remarks { get; set; }
+        public string Hidden { get; set; } = String.Empty;
+        public string IsSystemList { get; set; } = String.Empty;
+
+        public string Remarks { get; set; }
+
+        public ListReportRecord() { }
 
         internal ListReportRecord(string siteUrl, List? list = null, string remarks = "")
         {

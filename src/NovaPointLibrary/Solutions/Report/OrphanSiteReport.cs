@@ -134,23 +134,25 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void AddRecord(OrphanSiteReportRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
     }
 
-    public class OrphanSiteReportRecord : ISolutionRecord
+    internal class OrphanSiteReportRecord : ISolutionRecord
     {
-        internal string SiteTitle { get; set; } = String.Empty;
-        internal string SiteUrl { get; set; } = String.Empty;
-        internal string SiteTemplate { get; set; } = String.Empty;
-        internal string AdminName { get; set; } = String.Empty;
-        internal string AdminUpnOrId { get; set; } = String.Empty;
-        internal string AdminLoginName { get; set; } = String.Empty;
-        internal string AdminEmail { get; set; } = String.Empty;
-        internal string AdminInfo { get; set; } = String.Empty;
-        internal string AccountType {  get; set; } = String.Empty;
-        internal string Status {  get; set; } = String.Empty;
-        internal string Remarks { get; set; } = String.Empty;
+        public string SiteTitle { get; set; } = String.Empty;
+        public string SiteUrl { get; set; } = String.Empty;
+        public string SiteTemplate { get; set; } = String.Empty;
+        public string AdminName { get; set; } = String.Empty;
+        public string AdminUpnOrId { get; set; } = String.Empty;
+        public string AdminLoginName { get; set; } = String.Empty;
+        public string AdminEmail { get; set; } = String.Empty;
+        public string AdminInfo { get; set; } = String.Empty;
+        public string AccountType {  get; set; } = String.Empty;
+        public string Status {  get; set; } = String.Empty;
+        public string Remarks { get; set; } = String.Empty;
+
+        public OrphanSiteReportRecord() { }
 
         internal OrphanSiteReportRecord(string siteUrl, string errorMessage)
         {

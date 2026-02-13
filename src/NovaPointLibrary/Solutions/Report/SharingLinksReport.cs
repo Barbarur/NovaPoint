@@ -104,47 +104,49 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(SharingLinksReportRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
     }
 
-    public class SharingLinksReportRecord : ISolutionRecord
+    internal class SharingLinksReportRecord : ISolutionRecord
     {
-        internal string SiteTitle { get; set; } = String.Empty;
-        internal string SiteUrl { get; set; } = String.Empty;
+        public string SiteTitle { get; set; } = String.Empty;
+        public string SiteUrl { get; set; } = String.Empty;
 
-        internal string ListTitle { get; set; } = String.Empty;
-        internal Guid ListId { get; set; } = Guid.Empty;
+        public string ListTitle { get; set; } = String.Empty;
+        public Guid ListId { get; set; } = Guid.Empty;
 
-        internal int ItemId { get; set; } = -1;
-        internal Guid ItemUniqueId { get; set; } = Guid.Empty;
-        internal string ItemPath { get; set; } = String.Empty;
+        public int ItemId { get; set; } = -1;
+        public Guid ItemUniqueId { get; set; } = Guid.Empty;
+        public string ItemPath { get; set; } = String.Empty;
 
-        internal string SharingLink { get; set; } = String.Empty;
-        internal string SharingLinkRequiresPassword { get; set; } = String.Empty;
-        internal string SharingLinkExpiration { get; set; } = String.Empty;
+        public string SharingLink { get; set; } = String.Empty;
+        public string SharingLinkRequiresPassword { get; set; } = String.Empty;
+        public string SharingLinkExpiration { get; set; } = String.Empty;
 
-        internal string SharingLinkIsActive { get; set; } = String.Empty;
-        internal DateTime SharingLinkCreated { get; set; } = DateTime.MinValue;
-        internal string SharingLinkCreatedBy { get; set; } = String.Empty;
-        internal DateTime SharingLinkModified { get; set; } = DateTime.MinValue;
-        internal string SharingLinkModifiedBy { get; set; } = String.Empty;
-        internal string SharingLinkUrl { get; set; } = String.Empty;
-        internal string SharingLinkShareId { get; set; } = String.Empty;
+        public string SharingLinkIsActive { get; set; } = String.Empty;
+        public DateTime SharingLinkCreated { get; set; } = DateTime.MinValue;
+        public string SharingLinkCreatedBy { get; set; } = String.Empty;
+        public DateTime SharingLinkModified { get; set; } = DateTime.MinValue;
+        public string SharingLinkModifiedBy { get; set; } = String.Empty;
+        public string SharingLinkUrl { get; set; } = String.Empty;
+        public string SharingLinkShareId { get; set; } = String.Empty;
 
-        internal string InvitedBy { get; set; } = String.Empty;
-        internal string InvitedOn { get; set; } = String.Empty;
-        internal string InvitedTo { get; set; } = String.Empty;
+        public string InvitedBy { get; set; } = String.Empty;
+        public string InvitedOn { get; set; } = String.Empty;
+        public string InvitedTo { get; set; } = String.Empty;
 
-        internal string GroupId { get; set; } = String.Empty;
-        internal string GroupTitle { get; set; } = String.Empty;
-        internal string Users { get; set; } = String.Empty;
+        public string GroupId { get; set; } = String.Empty;
+        public string GroupTitle { get; set; } = String.Empty;
+        public string Users { get; set; } = String.Empty;
 
         //internal string GroupDescription { get; init; } = String.Empty;
 
-        internal string Remarks { get; set; } = String.Empty;
+        public string Remarks { get; set; } = String.Empty;
 
-        public Link? Link { get; set; } = null;
+        internal Link? Link { get; set; } = null;
+
+        public SharingLinksReportRecord() { }
 
         internal SharingLinksReportRecord(string siteUrl, Exception ex)
         {

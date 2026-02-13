@@ -253,17 +253,19 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void RecordCSV(SetVersioningLimitAutoRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
 
     }
 
     public class SetVersioningLimitAutoRecord : ISolutionRecord
     {
-        internal string SiteUrl { get; set; } = String.Empty;
-        internal string TargetList { get; set; } = String.Empty;
-        internal string Status { get; set; } = String.Empty;
-        internal string Remarks { get; set; } = String.Empty;
+        public string SiteUrl { get; set; } = String.Empty;
+        public string TargetList { get; set; } = String.Empty;
+        public string Status { get; set; } = String.Empty;
+        public string Remarks { get; set; } = String.Empty;
+
+        public SetVersioningLimitAutoRecord() { }
 
         internal SetVersioningLimitAutoRecord(string siteUrl, string target = "", string status = "", string remarks = "")
         {

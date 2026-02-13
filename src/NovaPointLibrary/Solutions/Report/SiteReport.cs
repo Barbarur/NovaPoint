@@ -245,40 +245,42 @@ namespace NovaPointLibrary.Solutions.Report
 
         private void RecordCSV(SiteReportRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
     }
 
 
     internal class SiteReportRecord : ISolutionRecord
     {
-        internal string SiteTitle { get; set; } = String.Empty;
-        internal string SiteUrl { get; set; }
-        internal string SiteId { get; set; } = String.Empty;
-        internal string GroupId { get; set; } = String.Empty;
-        internal string SiteTemplate { get; set; } = String.Empty;
-        internal string IsSubsite { get; set; } = String.Empty;
-        internal string ConnectedToTeams { get; set; } = String.Empty;
-        internal string TeamsChannel { get; set; } = String.Empty;
+        public string SiteTitle { get; set; } = String.Empty;
+        public string SiteUrl { get; set; }
+        public string SiteId { get; set; } = String.Empty;
+        public string GroupId { get; set; } = String.Empty;
+        public string SiteTemplate { get; set; } = String.Empty;
+        public string IsSubsite { get; set; } = String.Empty;
+        public string ConnectedToTeams { get; set; } = String.Empty;
+        public string TeamsChannel { get; set; } = String.Empty;
 
-        internal string StorageQuotaGB { get; set; } = String.Empty;
-        internal string StorageUsedGB { get; set; } = String.Empty;
-        internal string StorageWarningPercentageLevel { get; set; } = String.Empty;
+        public string StorageQuotaGB { get; set; } = String.Empty;
+        public string StorageUsedGB { get; set; } = String.Empty;
+        public string StorageWarningPercentageLevel { get; set; } = String.Empty;
 
-        internal string LastContentModifiedDate { get; set; } = String.Empty;
-        internal string LockState { get; set; } = String.Empty;
+        public string LastContentModifiedDate { get; set; } = String.Empty;
+        public string LockState { get; set; } = String.Empty;
 
-        internal string IsHubSite { get; set; } = String.Empty;
-        internal string HubSiteId { get; set; } = String.Empty;
-        internal string ParentHubSiteId { get; set; } = String.Empty;
+        public string IsHubSite { get; set; } = String.Empty;
+        public string HubSiteId { get; set; } = String.Empty;
+        public string ParentHubSiteId { get; set; } = String.Empty;
 
-        internal string Classification { get; set; } = String.Empty;
+        public string Classification { get; set; } = String.Empty;
 
-        internal string SharingLinks { get; set; }  = String.Empty;
+        public string SharingLinks { get; set; }  = String.Empty;
 
-        internal string Privacy { get; set; } = String.Empty;
+        public string Privacy { get; set; } = String.Empty;
 
-        internal string Remarks { get; set; } = String.Empty;
+        public string Remarks { get; set; } = String.Empty;
+
+        public SiteReportRecord() { }
 
         internal SiteReportRecord(SiteProperties oSiteCollection)
         {

@@ -98,7 +98,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         private void RecordCSV(SpoSharingLinksRecord record)
         {
-            _ctx.Logger.WriteRecord(record);
+            _ctx.DbHandler.WriteRecord(record);
         }
     }
 
