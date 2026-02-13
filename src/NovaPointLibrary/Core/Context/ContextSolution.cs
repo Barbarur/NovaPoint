@@ -22,8 +22,8 @@ namespace NovaPointLibrary.Core.Context
 
         internal void SolutionEnd(Exception? ex = null)
         {
-            DbHandler.End();
             Logger.End(ex);
+            DbHandler.End();
         }
     }
 }
