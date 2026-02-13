@@ -20,11 +20,10 @@ namespace NovaPointLibrary.Core.Authentication
         }
 
         public AppClientConfidentialProperties() { }
-        public AppClientConfidentialProperties(Guid tenantId, Guid clientId, string certificatePath)
+
+        public AppClientConfidentialProperties Clone()
         {
-            TenantId = tenantId;
-            ClientId = clientId;
-            CertificatePath = certificatePath;
+            return (AppClientConfidentialProperties)this.MemberwiseClone();
         }
 
         public void ValidateProperties()

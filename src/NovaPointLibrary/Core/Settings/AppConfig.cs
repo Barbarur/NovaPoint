@@ -58,24 +58,47 @@ namespace NovaPointLibrary.Core.Settings
             return appSettings;
         }
 
-        public AppClientPublicProperties GetNewPublicApp()
+        public IAppClientProperties GetOriginalSettings(IAppClientProperties clientProperties)
         {
-            AppClientPublicProperties newPublicApp = new();
-            ListAppClientPublicProperties.Add(newPublicApp);
-            return newPublicApp;
+            if (clientProperties is AppClientConfidentialProperties confidentialProperties)
+            {
+                int index = ListAppClientConfidentialProperties.FindIndex(p => p.Id == confidentialProperties.Id);
+                return ListAppClientConfidentialProperties[index];
+            }
+
+            else if (clientProperties is AppClientPublicProperties publicProperties)
+            {
+                int index = ListAppClientPublicProperties.FindIndex(p => p.Id == publicProperties.Id);
+                return ListAppClientPublicProperties[index];
+            }
+            return new AppClientPublicProperties();
         }
 
         public void RemoveApp(IAppClientProperties clientProperties)
         {
-            if (clientProperties is AppClientConfidentialProperties confidentialProperties) { ListAppClientConfidentialProperties.Remove(confidentialProperties); }
-            else if (clientProperties is AppClientPublicProperties publicProperties) { ListAppClientPublicProperties.Remove(publicProperties); }
+            if (clientProperties is AppClientConfidentialProperties confidentialProperties) { ListAppClientConfidentialProperties.RemoveAll(p => p.Id == confidentialProperties.Id); }
+            else if (clientProperties is AppClientPublicProperties publicProperties) { ListAppClientPublicProperties.RemoveAll(p => p.Id == publicProperties.Id); }
+            SaveSettings();
         }
 
         public void SaveSettings(IAppClientProperties clientProperties)
         {
             clientProperties.ValidateProperties();
-            if (clientProperties is AppClientConfidentialProperties confidentialProperties && !ListAppClientConfidentialProperties.Contains(confidentialProperties)) { ListAppClientConfidentialProperties.Add(confidentialProperties); }
-            else if (clientProperties is AppClientPublicProperties publicProperties && !ListAppClientPublicProperties.Contains(publicProperties)) { ListAppClientPublicProperties.Add(publicProperties); }
+            
+            if (clientProperties is AppClientConfidentialProperties confidentialProperties)
+            {
+                int index = ListAppClientConfidentialProperties.FindIndex(p => p.Id == confidentialProperties.Id);
+                if (index != -1) { ListAppClientConfidentialProperties[index] = confidentialProperties.Clone(); }
+                else { ListAppClientConfidentialProperties.Add(confidentialProperties); }
+            }
+
+            else if (clientProperties is AppClientPublicProperties publicProperties)
+            {
+                int index = ListAppClientPublicProperties.FindIndex(p => p.Id == publicProperties.Id);
+                if (index != -1) { ListAppClientPublicProperties[index] = publicProperties.Clone(); }
+                else { ListAppClientPublicProperties.Add(publicProperties); }
+            }
+
             SaveSettings();
         }
 

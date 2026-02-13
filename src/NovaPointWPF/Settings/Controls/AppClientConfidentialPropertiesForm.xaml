@@ -33,7 +33,8 @@
                     Content="Select"
                     Width="90"
                     Click="OpenCertificatePathClick"
-                    DockPanel.Dock="Right"/>
+                    DockPanel.Dock="Right"
+                    IsEnabled="False"/>
 
                 <TextBlock DockPanel.Dock="Right"/>
 

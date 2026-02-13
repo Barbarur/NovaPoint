@@ -12,7 +12,7 @@ namespace NovaPointWPF.Settings.Controls
         public IAppClientProperties Properties { get; init; }
         private AppClientPropertiesCoreForm _corePropertiesForm;
 
-        private AppClientConfidentialPropertiesForm(AppClientConfidentialProperties properties, AppConfig appConfig)
+        internal AppClientConfidentialPropertiesForm(AppClientConfidentialProperties properties)
         {
             InitializeComponent();
 
@@ -22,20 +22,6 @@ namespace NovaPointWPF.Settings.Controls
 
             _corePropertiesForm = new(properties);
             FormPanel.Children.Insert(0, _corePropertiesForm);
-        }
-
-        public static AppClientConfidentialPropertiesForm GetNewForm(AppConfig appConfig)
-        {
-            AppClientConfidentialPropertiesForm form = new(new(), appConfig);
-            form.EnableForm();
-            return form;
-        }
-
-        public static AppClientConfidentialPropertiesForm GetExistingForm(AppClientConfidentialProperties properties, AppConfig appConfig)
-        {
-            AppClientConfidentialPropertiesForm form = new(properties, appConfig);
-            form.DisableForm();
-            return form;
         }
 
         public void EnableForm()

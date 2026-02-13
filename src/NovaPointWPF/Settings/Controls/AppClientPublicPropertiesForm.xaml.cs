@@ -10,7 +10,7 @@ namespace NovaPointWPF.Settings.Controls
         public IAppClientProperties Properties { get; init; }
         private AppClientPropertiesCoreForm _corePropertiesForm;
 
-        private AppClientPublicPropertiesForm(AppClientPublicProperties properties, AppConfig appConfig)
+        internal AppClientPublicPropertiesForm(AppClientPublicProperties properties)
         {
             InitializeComponent();
 
@@ -20,20 +20,6 @@ namespace NovaPointWPF.Settings.Controls
 
             _corePropertiesForm = new(properties);
             FormPanel.Children.Insert(0, _corePropertiesForm);
-        }
-
-        public static AppClientPublicPropertiesForm GetNewForm(AppConfig appConfig)
-        {
-            AppClientPublicPropertiesForm form = new(new(), appConfig);
-            form.EnableForm();
-            return form;
-        }
-
-        public static AppClientPublicPropertiesForm GetExistingForm(AppClientPublicProperties properties, AppConfig appConfig)
-        {
-            AppClientPublicPropertiesForm form = new(properties, appConfig);
-            form.DisableForm();
-            return form;
         }
 
         public void EnableForm()

@@ -12,11 +12,9 @@ namespace NovaPointLibrary.Core.Authentication
 
         public AppClientPublicProperties() { }
 
-        public AppClientPublicProperties(Guid tenantId, Guid clientId, bool cachingToken)
+        public AppClientPublicProperties Clone()
         {
-            TenantId = tenantId;
-            ClientId = clientId;
-            CachingToken = cachingToken;
+            return (AppClientPublicProperties)this.MemberwiseClone();
         }
 
         public void ValidateProperties()

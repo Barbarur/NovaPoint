@@ -18,7 +18,7 @@
                 Margin="8"
                 Width="350"
                 HorizontalAlignment="Left"
-                IsReadOnly="False"/>
+                IsReadOnly="true"/>
 
             <StackPanel>
 
@@ -36,7 +36,7 @@
                             Width="330"
                             TextAlignment="Center"
                             DockPanel.Dock="Right"
-                            IsReadOnly="False"/>
+                            IsReadOnly="true"/>
 
                     <TextBlock DockPanel.Dock="Right"/>
 
@@ -55,7 +55,7 @@
                         Width="330"
                         TextAlignment="Center"
                         DockPanel.Dock="Right"
-                        IsReadOnly="False"/>
+                        IsReadOnly="true"/>
 
                     <TextBlock DockPanel.Dock="Right"/>
 

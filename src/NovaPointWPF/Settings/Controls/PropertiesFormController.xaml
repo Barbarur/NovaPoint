@@ -38,9 +38,22 @@
                 
                 
                 
-                <DockPanel Grid.Row="1"
-                           Margin="0, 8, 0, 0">
+                <DockPanel 
+                    x:Name="PanelActions"
+                    Grid.Row="1"
+                    Margin="0, 8, 0, 0"
+                    Visibility="Collapsed">
 
+                    <Button
+                        x:Name="ButtonCancel"
+                        Style="{DynamicResource ButtonSolutionMainAction}"
+                        Content="Cancel"
+                        Height="40"
+                        Width="80"
+                        DockPanel.Dock="Right"
+                        Click="CancelClick"
+                        IsEnabled="False"/>
+                    
                     <Button
                         x:Name="ButtonSave"
                         Style="{DynamicResource ButtonSolutionMainAction}"
@@ -49,8 +62,7 @@
                         Width="80"
                         DockPanel.Dock="Right"
                         Click="SaveClick"
-                        IsEnabled="False"
-                        Visibility="Collapsed"/>
+                        IsEnabled="False"/>
 
                     <Button
                         x:Name="ButtonDelete"
@@ -61,8 +73,7 @@
                         Click="DeleteClick"
                         HorizontalAlignment="Left"
                         DockPanel.Dock="Left"
-                        IsEnabled="False"
-                        Visibility="Collapsed"/>
+                        IsEnabled="False"/>
 
                 </DockPanel>
                 
