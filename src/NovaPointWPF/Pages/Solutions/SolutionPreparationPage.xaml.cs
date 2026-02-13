@@ -38,6 +38,7 @@ namespace NovaPointWPF.Pages.Solutions
         {
             BackButton.IsEnabled = false;
             RunButton.IsEnabled = false;
+            StackPanelForm.IsEnabled = false;
 
 
             try
@@ -57,6 +58,7 @@ namespace NovaPointWPF.Pages.Solutions
 
             BackButton.IsEnabled = true;
             RunButton.IsEnabled = true;
+            StackPanelForm.IsEnabled = true;
         }
 
     }
