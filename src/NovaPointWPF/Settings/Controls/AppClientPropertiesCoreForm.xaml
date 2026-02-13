@@ -11,7 +11,9 @@
 
             <TextBox
                 x:Name="TextBoxAppTitle"
-                Style="{DynamicResource TextBoxSubtitle}"
+                Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                FontSize="20"
+                FontWeight="Bold"
                 Text="{Binding ClientTitle, Mode=TwoWay}"
                 Margin="8"
                 Width="350"
@@ -27,14 +29,14 @@
                         Text="Tenant ID"
                         DockPanel.Dock="Left"/>
 
-                            <TextBox
-                                x:Name="TextBoxAppTenantId"
-                                Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                                Text="{Binding TenantId, Mode=TwoWay}"
-                                Width="330"
-                                TextAlignment="Center"
-                                DockPanel.Dock="Right"
-                                IsReadOnly="False"/>
+                        <TextBox
+                            x:Name="TextBoxAppTenantId"
+                            Style="{DynamicResource TextBoxSolutionFormTextInput}"
+                            Text="{Binding TenantId, Mode=TwoWay}"
+                            Width="330"
+                            TextAlignment="Center"
+                            DockPanel.Dock="Right"
+                            IsReadOnly="False"/>
 
                     <TextBlock DockPanel.Dock="Right"/>
 

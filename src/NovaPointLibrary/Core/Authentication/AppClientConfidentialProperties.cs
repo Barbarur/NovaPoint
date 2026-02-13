@@ -6,7 +6,7 @@ namespace NovaPointLibrary.Core.Authentication
     public class AppClientConfidentialProperties : IAppClientProperties
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        public string ClientTitle { get; set; } = "New App-Only";
+        public string ClientTitle { get; set; } = "Name of App-Only";
         public Guid TenantId { get; set; } = Guid.Empty;
         public Guid ClientId { get; set; } = Guid.Empty;
         public string CertificatePath { get; set; } = string.Empty;
