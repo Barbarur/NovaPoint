@@ -226,11 +226,11 @@ namespace NovaPointLibrary.Core.Logging
 
         private void LogProperty(string property)
         {
-            SolutionLog logEntry = new("Info", _threadCode, GetType().Name, property);
-            _cachedKeyValues.Add(logEntry);
+            //SolutionLog logEntry = new("Info", _threadCode, GetType().Name, property);
+            //_cachedKeyValues.Add(logEntry);
 
 
-            WriteLog(logEntry);
+            //WriteLog(logEntry);
 
             UI(GetType().Name, property);
         }
@@ -243,32 +243,32 @@ namespace NovaPointLibrary.Core.Logging
         //    UI(GetType().Name, $"COMPLETED: Solution has finished correctly!");
         //}
 
-        internal void SolutionFinish(Exception? ex = null)
-        {
-            Info(GetType().Name, "Finishing solution");
-            SolutionFinishNotice();
+        //internal void SolutionFinish(Exception? ex = null)
+        //{
+        //    Info(GetType().Name, "Finishing solution");
+        //    SolutionFinishNotice();
 
-            if (ex != null)
-            {
-                Error(_solutionName, "Solution", _solutionName, ex);
-                UiAddLog(LogInfo.ErrorNotification($"Exception: {ex.Message}"));
-                UiAddLog(LogInfo.ErrorNotification($"StackTrace: {ex.StackTrace}"));
-                UiAddLog(LogInfo.ErrorNotification($"COMPLETED: Solution has finished with errors!"));
-            }
-            else
-            {
-                UI(GetType().Name, $"COMPLETED: Solution has finished correctly!");
-            }
+        //    if (ex != null)
+        //    {
+        //        Error(_solutionName, "Solution", _solutionName, ex);
+        //        UiAddLog(LogInfo.ErrorNotification($"Exception: {ex.Message}"));
+        //        UiAddLog(LogInfo.ErrorNotification($"StackTrace: {ex.StackTrace}"));
+        //        UiAddLog(LogInfo.ErrorNotification($"COMPLETED: Solution has finished with errors!"));
+        //    }
+        //    else
+        //    {
+        //        UI(GetType().Name, $"COMPLETED: Solution has finished correctly!");
+        //    }
 
-            SW.Stop();
-        }
+        //    SW.Stop();
+        //}
 
-        private void SolutionFinishNotice()
-        {
-            ExportAllReports();
+        //private void SolutionFinishNotice()
+        //{
+        //    ExportAllReports();
 
-            ClearCache();
-        }
+        //    ClearCache();
+        //}
 
 
 
@@ -288,72 +288,72 @@ namespace NovaPointLibrary.Core.Logging
             _sql.InsertValue(this, record);
         }
 
-        private void ClearCache()
-        {
-            if (_solutionReports == null) { return; }
+        //private void ClearCache()
+        //{
+        //    if (_solutionReports == null) { return; }
 
-            foreach (var key in _solutionReports.Keys)
-            {
-                _sql.DropTable(this, key);
-            }
-        }
+        //    foreach (var key in _solutionReports.Keys)
+        //    {
+        //        _sql.DropTable(this, key);
+        //    }
+        //}
 
-        private void ExportAllReports()
-        {
-            if (_solutionReports == null) { return; }
+        //private void ExportAllReports()
+        //{
+        //    if (_solutionReports == null) { return; }
 
-            Info(GetType().Name, "Exporting all reports");
+        //    Info(GetType().Name, "Exporting all reports");
 
-            foreach (var entry in _solutionReports)
-            {
-                var type = entry.Key;
-                var reportName = entry.Value;
+        //    foreach (var entry in _solutionReports)
+        //    {
+        //        var type = entry.Key;
+        //        var reportName = entry.Value;
 
-                var method = typeof(LoggerSolution).GetMethod(nameof(ExportReportToCsv), BindingFlags.NonPublic | BindingFlags.Instance);
-                var genericMethod = method.MakeGenericMethod(type);
-                genericMethod.Invoke(this, new object[] { reportName });
-            }
-        }
+        //        var method = typeof(LoggerSolution).GetMethod(nameof(ExportReportToCsv), BindingFlags.NonPublic | BindingFlags.Instance);
+        //        var genericMethod = method.MakeGenericMethod(type);
+        //        genericMethod.Invoke(this, new object[] { reportName });
+        //    }
+        //}
 
-        private void ExportReportToCsv<ISolutionRecord>(string reportName)
-        {
-            Info(GetType().Name, $"Exporting report {reportName}");
+        //private void ExportReportToCsv<ISolutionRecord>(string reportName)
+        //{
+        //    Info(GetType().Name, $"Exporting report {reportName}");
 
-            string reportPath = Path.Combine(_solutionFolderPath, _solutionFileName + $"_{reportName}.csv");
+        //    string reportPath = Path.Combine(_solutionFolderPath, _solutionFileName + $"_{reportName}.csv");
 
-            foreach (var record in _sql.GetAllRecords<ISolutionRecord>(this))
-            {
-                Type solutionType = typeof(ISolutionRecord);
-                PropertyInfo[] properties = solutionType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        //    foreach (var record in _sql.GetAllRecords<ISolutionRecord>(this))
+        //    {
+        //        Type solutionType = typeof(ISolutionRecord);
+        //        PropertyInfo[] properties = solutionType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-                StringBuilder sb = new();
-                using StreamWriter csv = new(new FileStream(reportPath, FileMode.Append, FileAccess.Write));
-                {
-                    var csvFileLenth = new System.IO.FileInfo(reportPath).Length;
-                    if (csvFileLenth == 0)
-                    {
-                        foreach (var propertyInfo in properties)
-                        {
-                            sb.Append($"\"{propertyInfo.Name}\",");
-                        }
-                        if (sb.Length > 0) { sb.Length--; }
+        //        StringBuilder sb = new();
+        //        using StreamWriter csv = new(new FileStream(reportPath, FileMode.Append, FileAccess.Write));
+        //        {
+        //            var csvFileLenth = new System.IO.FileInfo(reportPath).Length;
+        //            if (csvFileLenth == 0)
+        //            {
+        //                foreach (var propertyInfo in properties)
+        //                {
+        //                    sb.Append($"\"{propertyInfo.Name}\",");
+        //                }
+        //                if (sb.Length > 0) { sb.Length--; }
 
-                        csv.WriteLine(sb.ToString());
-                        sb.Clear();
-                    }
+        //                csv.WriteLine(sb.ToString());
+        //                sb.Clear();
+        //            }
 
-                    foreach (var propertyInfo in properties)
-                    {
-                        string s = $"{propertyInfo.GetValue(record)}";
-                        sb.Append($"\"{s.Replace("\"", "'")}\",");
-                    }
-                    if (sb.Length > 0) { sb.Length--; }
-                    string output = Regex.Replace(sb.ToString(), @"\r\n?|\n", "");
+        //            foreach (var propertyInfo in properties)
+        //            {
+        //                string s = $"{propertyInfo.GetValue(record)}";
+        //                sb.Append($"\"{s.Replace("\"", "'")}\",");
+        //            }
+        //            if (sb.Length > 0) { sb.Length--; }
+        //            string output = Regex.Replace(sb.ToString(), @"\r\n?|\n", "");
 
-                    csv.WriteLine(sb.ToString());
-                }
-            }
-        }
+        //            csv.WriteLine(sb.ToString());
+        //        }
+        //    }
+        //}
 
 
         // TO RETIRE
@@ -397,50 +397,50 @@ namespace NovaPointLibrary.Core.Logging
             }
         }
 
-        internal void RecordCSV(ISolutionRecord record)
-        {
-            try
-            {
-                csvRWL.TryEnterWriteLock(3000);
-                try
-                {
-                    Type solutiontype = record.GetType();
-                    PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
+        //internal void RecordCSV(ISolutionRecord record)
+        //{
+        //    try
+        //    {
+        //        csvRWL.TryEnterWriteLock(3000);
+        //        try
+        //        {
+        //            Type solutiontype = record.GetType();
+        //            PropertyInfo[] properties = solutiontype.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
 
-                    StringBuilder sb = new();
-                    using StreamWriter csv = new(new FileStream(_csvPath, FileMode.Append, FileAccess.Write));
-                    {
-                        var csvFileLenth = new System.IO.FileInfo(_csvPath).Length;
-                        if (csvFileLenth == 0)
-                        {
-                            foreach (var propertyInfo in properties)
-                            {
-                                sb.Append($"\"{propertyInfo.Name}\",");
-                            }
-                            if (sb.Length > 0) { sb.Length--; }
+        //            StringBuilder sb = new();
+        //            using StreamWriter csv = new(new FileStream(_csvPath, FileMode.Append, FileAccess.Write));
+        //            {
+        //                var csvFileLenth = new System.IO.FileInfo(_csvPath).Length;
+        //                if (csvFileLenth == 0)
+        //                {
+        //                    foreach (var propertyInfo in properties)
+        //                    {
+        //                        sb.Append($"\"{propertyInfo.Name}\",");
+        //                    }
+        //                    if (sb.Length > 0) { sb.Length--; }
 
-                            csv.WriteLine(sb.ToString());
-                            sb.Clear();
-                        }
+        //                    csv.WriteLine(sb.ToString());
+        //                    sb.Clear();
+        //                }
 
-                        foreach (var propertyInfo in properties)
-                        {
-                            string s = $"{propertyInfo.GetValue(record)}";
-                            sb.Append($"\"{s.Replace("\"", "'")}\",");
-                        }
-                        if (sb.Length > 0) { sb.Length--; }
-                        string output = Regex.Replace(sb.ToString(), @"\r\n?|\n", "");
+        //                foreach (var propertyInfo in properties)
+        //                {
+        //                    string s = $"{propertyInfo.GetValue(record)}";
+        //                    sb.Append($"\"{s.Replace("\"", "'")}\",");
+        //                }
+        //                if (sb.Length > 0) { sb.Length--; }
+        //                string output = Regex.Replace(sb.ToString(), @"\r\n?|\n", "");
 
-                        csv.WriteLine(sb.ToString());
-                    }
-                }
-                finally { csvRWL.ExitWriteLock(); }
-            }
-            catch (Exception ex)
-            {
-                Error(GetType().Name, "Solution", _solutionName, ex);
-            }
-        }
+        //                csv.WriteLine(sb.ToString());
+        //            }
+        //        }
+        //        finally { csvRWL.ExitWriteLock(); }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Error(GetType().Name, "Solution", _solutionName, ex);
+        //    }
+        //}
 
     }
 
