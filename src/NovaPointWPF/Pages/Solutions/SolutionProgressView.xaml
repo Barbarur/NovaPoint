@@ -17,78 +17,85 @@
         <Border Style="{DynamicResource BorderSecondaryBackgroud}"
                 Grid.Row="0"/>
 
-        <StackPanel Grid.Row="0" Margin="8">
+            <Grid Style="{DynamicResource WindowGrid}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="65"/>
+                    <RowDefinition Height="21"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="160"/>
-                </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="160"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+
+                        <TextBlock
+                            Style="{DynamicResource TextBlockTitle}"
+                            Text="Solution Progress"/>
+
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Margin="0,8,0,0">
+
+                            <TextBlock
+                                x:Name="PercentageCompleted"
+                                Style="{DynamicResource TextBlockBody}"
+                                Margin="0,0,8,0"
+                                Text="{Binding PercentageCompleted, Mode=OneWay}"/>
+
+                            <TextBlock
+                                x:Name="PendingTime"
+                                Style="{DynamicResource TextBlockBody}"
+                                Margin="0,0,0,0"
+                                Text="{Binding PendingTime, Mode=OneWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
+
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Button
+                        x:Name="FolderButton"
+                        Grid.Column="1"
+                        Style="{DynamicResource ButtonSolutionMainAction}"
+                        Content="Solution folder"
+                        Click="FolderClick"
+                        IsEnabled="false"
+                        Margin="16,0,0,2"/>
+                </Grid>
+                
+                <ProgressBar
+                    Grid.Row="1"
+                    x:Name="Progress"
+                    Margin="0,16,0,0"
+                    Height="6"
+                    Orientation="Horizontal"
+                    Minimum="0"
+                    Maximum="100"
+                    Value="{Binding Progress, Mode=OneWay}"
+                    BorderThickness="0"
+                    Foreground="{DynamicResource LogoPinkColor}"
+                    Background="{DynamicResource PrimaryBorderColor}"/>
+                
+                
+                <ScrollViewer
+                Grid.Row="2"
+                VerticalAlignment="Top"
+                Style="{DynamicResource LeftScrollViewer}"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                Margin="0,28,0,8">
 
                     <TextBlock
-                        Style="{DynamicResource TextBlockTitle}"
-                        Text="Solution Progress"/>
+                    x:Name="BoxText"
+                    Style="{DynamicResource TextBlockBody}"
+                    Text="{Binding UiText, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                    TextWrapping="Wrap"/>
 
-                    <StackPanel
-                        Orientation="Horizontal"
-                        Margin="0,8,0,0">
+                </ScrollViewer>
 
-                        <TextBlock
-                            x:Name="PercentageCompleted"
-                            Style="{DynamicResource TextBlockBody}"
-                            Margin="0,0,8,0"
-                            Text="{Binding PercentageCompleted, Mode=OneWay}"/>
-
-                        <TextBlock
-                            x:Name="PendingTime"
-                            Style="{DynamicResource TextBlockBody}"
-                            Margin="0,0,0,0"
-                            Text="{Binding PendingTime, Mode=OneWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"/>
-
-                    </StackPanel>
-                </StackPanel>
-
-                <Button
-                    x:Name="FolderButton"
-                    Grid.Column="1"
-                    Style="{DynamicResource ButtonSolutionMainAction}"
-                    Content="Solution folder"
-                    Click="FolderClick"
-                    IsEnabled="false"
-                    Margin="16,0,0,2"/>
             </Grid>
-
-            <ProgressBar
-                Grid.Row="1"
-                x:Name="Progress"
-                Margin="0,16,0,0"
-                Height="6"
-                Orientation="Horizontal"
-                Minimum="0"
-                Maximum="100"
-                Value="{Binding Progress, Mode=OneWay}"
-                BorderThickness="0"
-                Foreground="{DynamicResource LogoPinkColor}"
-                Background="{DynamicResource PrimaryBorderColor}"/>
-
-            <ScrollViewer
-            Grid.Row="2"
-            VerticalAlignment="Top"
-            Style="{DynamicResource LeftScrollViewer}"
-            ScrollViewer.VerticalScrollBarVisibility="Auto"
-            Margin="0,28,0,8">
-
-                <TextBlock
-                x:Name="BoxText"
-                Style="{DynamicResource TextBlockBody}"
-                Text="{Binding Notification, Mode=OneWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
-                TextWrapping="Wrap"/>
-
-            </ScrollViewer>
-
-        </StackPanel>
 
         <Grid Grid.Row="2">
 
