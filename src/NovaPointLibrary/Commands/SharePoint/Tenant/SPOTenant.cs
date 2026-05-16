@@ -16,13 +16,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Admin
             _appInfo = appInfo;
         }
 
-        internal async Task<Tenant> GetAsync()
+        internal async Task<Microsoft.Online.SharePoint.TenantAdministration.Tenant> GetAsync()
         {
             _appInfo.IsCancelled();
             _logger.Info(GetType().Name, $"Getting Tenant information");
 
             var adminContext = await _appInfo.GetContext(_appInfo.AdminUrl);
-            var tenant = new Tenant(adminContext);
+            var tenant = new Microsoft.Online.SharePoint.TenantAdministration.Tenant(adminContext);
             adminContext.Load(tenant);
             adminContext.Load(tenant, t => t.HideDefaultThemes);
             adminContext.ExecuteQueryRetry();

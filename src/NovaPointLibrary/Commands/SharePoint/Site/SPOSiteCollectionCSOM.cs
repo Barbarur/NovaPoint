@@ -23,7 +23,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             _logger.Info(GetType().Name, $"Getting single site {siteUrl}");
 
             ClientContext clientContext = await _appInfo.GetContext(_appInfo.AdminUrl);
-            var tenant = new Tenant(clientContext);
+            var tenant = new Microsoft.Online.SharePoint.TenantAdministration.Tenant(clientContext);
 
             SiteProperties siteProperties = tenant.GetSitePropertiesByUrl(siteUrl, true);
 
@@ -50,7 +50,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             do
             {
                 ClientContext clientContext = await _appInfo.GetContext(_appInfo.AdminUrl);
-                var tenant = new Tenant(clientContext);
+                var tenant = new Microsoft.Online.SharePoint.TenantAdministration.Tenant(clientContext);
 
                 SPOSitePropertiesEnumerable subcollSiteCollections = tenant.GetSitePropertiesFromSharePointByFilters(filter);
                 clientContext.Load(subcollSiteCollections);
@@ -139,7 +139,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             do
             {
                 ClientContext clientContext = await _appInfo.GetContext(_appInfo.AdminUrl);
-                var tenant = new Tenant(clientContext);
+                var tenant = new Microsoft.Online.SharePoint.TenantAdministration.Tenant(clientContext);
 
                 SPOSitePropertiesEnumerable subcollSiteCollections = tenant.GetSitePropertiesFromSharePointByFilters(filter);
                 clientContext.Load(subcollSiteCollections);

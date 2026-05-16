@@ -61,7 +61,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
 
             try
             {
-                var tenantContext = new Tenant(await _appInfo.GetContext(_appInfo.AdminUrl));
+                var tenantContext = new Microsoft.Online.SharePoint.TenantAdministration.Tenant(await _appInfo.GetContext(_appInfo.AdminUrl));
                 tenantContext.SetSiteAdmin(siteUrl, userAdmin, isSiteAdmin);
                 tenantContext.Context.ExecuteQueryRetry();
             }
