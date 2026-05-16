@@ -137,7 +137,7 @@ namespace NovaPointLibrary.Solutions.Report
         public string ListServerRelativeUrl { get; set; } = String.Empty;
 
         public string ItemID { get; set; } = String.Empty;
-        public Guid ItemUniqueID { get; set; } = Guid.Empty;
+        public string ItemUniqueID { get; set; } = String.Empty;
         public string ItemTitle { get; set; } = String.Empty;
         public string ItemPath { get; set; } = String.Empty;
         public string ItemType { get; set; } = String.Empty;
@@ -175,7 +175,7 @@ namespace NovaPointLibrary.Solutions.Report
             if (tenantItemRecord.Item != null)
             {
                 ItemID = tenantItemRecord.Item.Id.ToString();
-                ItemUniqueID = (Guid)tenantItemRecord.Item["UniqueId"];
+                ItemUniqueID = ((Guid)tenantItemRecord.Item["UniqueId"]).ToString();
                 ItemPath = (string)tenantItemRecord.Item["FileRef"];
                 ItemType = tenantItemRecord.Item.FileSystemObjectType.ToString();
 

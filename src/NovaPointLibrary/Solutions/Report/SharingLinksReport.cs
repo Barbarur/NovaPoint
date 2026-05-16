@@ -114,10 +114,10 @@ namespace NovaPointLibrary.Solutions.Report
         public string SiteUrl { get; set; } = String.Empty;
 
         public string ListTitle { get; set; } = String.Empty;
-        public Guid ListId { get; set; } = Guid.Empty;
+        public string ListId { get; set; } = String.Empty;
 
         public int ItemId { get; set; } = -1;
-        public Guid ItemUniqueId { get; set; } = Guid.Empty;
+        public string ItemUniqueId { get; set; } = String.Empty;
         public string ItemPath { get; set; } = String.Empty;
 
         public string SharingLink { get; set; } = String.Empty;
@@ -159,10 +159,10 @@ namespace NovaPointLibrary.Solutions.Report
             SiteUrl = record.SiteUrl;
 
             ListTitle = record.ListTitle;
-            ListId = record.ListId;
+            ListId = record.ListId.ToString();
             
             ItemId = record.ItemId;
-            ItemUniqueId = record.ItemUniqueId;
+            ItemUniqueId = record.ItemUniqueId.ToString();
             ItemPath = record.ItemPath;
             
             SharingLink = record.SharingLink;
