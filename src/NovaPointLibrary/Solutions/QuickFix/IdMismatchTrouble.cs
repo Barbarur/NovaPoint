@@ -100,9 +100,10 @@ namespace NovaPointLibrary.Solutions.QuickFix
                 if (oUser == null) { return; }
 
                 string siteUserId = ((UserIdInfo)oUser.UserId).NameId;
-                _ctx.Logger.Info(GetType().Name, $"User found on site with ID '{siteUserId}', correct ID is {correctUserId}");
                 if (siteUserId != correctUserId)
                 {
+                    _ctx.Logger.Info(GetType().Name, $"User found on site with ID '{siteUserId}', correct ID is {correctUserId}");
+                    
                     if (oUser.IsSiteAdmin)
                     {
                         if (!_param.ReportMode) { await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).RemoveForceAsync(siteUrl, oUser.LoginName); }
@@ -111,14 +112,19 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
                     if (!_param.ReportMode) { await new SPOSiteUserCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteUrl, oUser); }
                     AddRecord(siteUrl, "User removed from site");
+                    
+                    string upnCoded = oUser.UserPrincipalName.Trim().Replace("@", "_").Replace(".", "_");
+                    if (siteUrl.Contains(upnCoded, StringComparison.OrdinalIgnoreCase) && siteUrl.Contains("-my.SharePoint.com", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!_param.ReportMode) { await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).AddPrimarySiteCollectionAdminAsync(siteUrl, oUser.UserPrincipalName); }
+                        AddRecord(siteUrl, "Added user as Primary Site Collection Admin");
+                    }
+                }
+                else
+                {
+                    _ctx.Logger.Info(GetType().Name, $"Not issue found on the site {siteUrl}");
                 }
 
-                string upnCoded = oUser.UserPrincipalName.Trim().Replace("@", "_").Replace(".", "_");
-                if (siteUrl.Contains(upnCoded, StringComparison.OrdinalIgnoreCase) && siteUrl.Contains("-my.sharepoint.com", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (!_param.ReportMode) { await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).AddPrimarySiteCollectionAdminAsync(siteUrl, oUser.UserPrincipalName); }
-                    AddRecord(siteUrl, "Added user as Primary Site Collection Admin");
-                }
             }
             catch (Exception ex)
             {
