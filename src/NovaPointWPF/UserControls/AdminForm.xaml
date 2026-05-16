@@ -19,84 +19,96 @@
                 Title="Site Collection Administrator is required to run the Solution"
                 LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-site-collection-admin"/>
 
+
             <Grid Style="{DynamicResource SolutionMenuGrid}">
 
                 <Border Style="{DynamicResource BorderPrimaryBackgroud}">
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="0.45*"/>
-                            <ColumnDefinition Width="0.55*"/>
-                        </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.45*"/>
+                                <ColumnDefinition Width="0.55*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <StackPanel>
-                            <TextBlock
-                                Style="{DynamicResource TextBlockBody}"
-                                HorizontalAlignment="Center">
-                                <TextBlock.Inlines>
-                                    <Run FontWeight="Bold" TextDecorations="Underline" Text="Add"/>
-                                    <Run Text="my account as Site Collection Admin."/>
-                                </TextBlock.Inlines>
-                            </TextBlock>
+                            <StackPanel>
+                                <TextBlock
+                                    Style="{DynamicResource TextBlockBody}"
+                                    HorizontalAlignment="Center">
+                                    <TextBlock.Inlines>
+                                        <Run FontWeight="Bold" TextDecorations="Underline" Text="Add"/>
+                                        <Run Text="my account as Site Collection Admin."/>
+                                    </TextBlock.Inlines>
+                                </TextBlock>
 
-                            <StackPanel
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Center"
-                                Margin="0,12,0,0">
-                                
-                                <RadioButton
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Yes"
-                                    Width="120"
-                                    IsChecked="{Binding AddAdmin, ElementName=root}"
-                                    Margin="0,0,8,0"/>
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,12,0,0">
 
-                                <RadioButton
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Width="120"
-                                    Content="No"/>
+                                    <RadioButton
+                                        Style="{DynamicResource ToggleButtonSolutionForm}"
+                                        Content="Yes"
+                                        Width="120"
+                                        IsChecked="{Binding AddAdmin, ElementName=root}"
+                                        Margin="0,0,8,0"/>
 
-                            </StackPanel>
-                        </StackPanel>
-                        
-                        <StackPanel Grid.Column="1">
+                                    <RadioButton
+                                        Style="{DynamicResource ToggleButtonSolutionForm}"
+                                        Width="120"
+                                        Content="No"/>
 
-                            <TextBlock
-                                Style="{DynamicResource TextBlockBody}"
-                                HorizontalAlignment="Center">
-                                <TextBlock.Inlines>
-                                    <Run FontWeight="Bold" TextDecorations="Underline" Text="Remove"/>
-                                    <Run Text="my account as Site Collection Admin at the end."/>
-                                </TextBlock.Inlines>
-                            
-                            </TextBlock>
-                        
-                            <StackPanel
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Center"
-                                Margin="0,12,0,0">
-
-                                <RadioButton
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Content="Yes"
-                                    Width="120"
-                                    IsChecked="{Binding RemoveAdmin, ElementName=root}"
-                                    Margin="0,0,8,0"/>
-
-                                <RadioButton
-                                    Style="{DynamicResource ToggleButtonSolutionForm}"
-                                    Width="120"
-                                    Content="No"/>
-
+                                </StackPanel>
                             </StackPanel>
 
-                        </StackPanel>
-                
-                    
-                    </Grid>
+                            <StackPanel Grid.Column="1">
+
+                                <TextBlock
+                                    Style="{DynamicResource TextBlockBody}"
+                                    HorizontalAlignment="Center">
+                                    <TextBlock.Inlines>
+                                        <Run FontWeight="Bold" TextDecorations="Underline" Text="Remove"/>
+                                        <Run Text="my account as Site Collection Admin at the end."/>
+                                    </TextBlock.Inlines>
+
+                                </TextBlock>
+
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,12,0,0">
+
+                                    <RadioButton
+                                        Style="{DynamicResource ToggleButtonSolutionForm}"
+                                        Content="Yes"
+                                        Width="120"
+                                        IsChecked="{Binding RemoveAdmin, ElementName=root}"
+                                        Margin="0,0,8,0"/>
+
+                                    <RadioButton
+                                        Style="{DynamicResource ToggleButtonSolutionForm}"
+                                        Width="120"
+                                        Content="No"/>
+
+                                </StackPanel>
+
+                            </StackPanel>
+
+
+                        </Grid>
+
+                        <TextBlock
+                            Style="{DynamicResource TextBlockBody}"
+                            Margin="0, 12, 0, 0">
+                            <TextBlock.Inlines>
+                                <Run FontWeight="Bold" Text="Important:"/>
+                                <Run Text="These parameters will only apply when using a"/>
+                                <Run TextDecorations="Underline" Text="delegated app."/>
+                            </TextBlock.Inlines>
+                        </TextBlock>
+
+                    </StackPanel>
                 </Border>
-
-
 
             </Grid>
 
