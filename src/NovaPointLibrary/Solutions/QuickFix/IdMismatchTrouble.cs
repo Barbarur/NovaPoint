@@ -15,10 +15,10 @@ namespace NovaPointLibrary.Solutions.QuickFix
         public readonly static string s_SolutionName = "Resolve user ID Mismatch";
         public readonly static string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-IdMismatchTrouble";
 
-        private ContextSolution _ctx;
-        private IdMismatchTroubleParameters _param;
+        private readonly ContextSolution _ctx;
+        private readonly IdMismatchTroubleParameters _param;
 
-        private static Expression<Func<User, object>>[] _userRetrievalExpressions = new Expression<Func<User, object>>[]
+        private readonly static Expression<Func<User, object>>[] _userRetrievalExpressions = new Expression<Func<User, object>>[]
         {
             u => u.Email,
             u => u.IsSiteAdmin,
@@ -43,28 +43,28 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
             var tenant = new Tenant(await _ctx.AppClient.GetContext(_ctx.AppClient.AdminUrl));
             var result = tenant.EncodeClaim(_param.UserUpn);
-            tenant.Context.ExecuteQueryRetry();
+            await tenant.Context.ExecuteQueryRetryAsync();
             var accountName = result.Value;
             _ctx.Logger.UI(GetType().Name, $"Affected user account name: {accountName}");
 
             var peopleManager = new PeopleManager(tenant.Context);
             var personProperties = peopleManager.GetPropertiesFor(accountName);
             tenant.Context.Load(personProperties);
-            tenant.Context.ExecuteQueryRetry();
+            await tenant.Context.ExecuteQueryRetryAsync();
 
-            string? userSID = null;
+            string? userSpoId = null;
             foreach (var property in personProperties.UserProfileProperties)
             {
-                if (property.Key == "SID") { userSID = property.Value; }
+                if (property.Key == "SID") { userSpoId = property.Value; }
             }
-            if (userSID == null)
+            if (userSpoId == null)
             {
                 throw new Exception("Unable to obtain users SID");
             }
-            _ctx.Logger.Info(GetType().Name, $"Affected user account SID: {userSID}");
-            userSID = userSID.Substring(userSID.IndexOf("i:0h.f|membership|") + 18);
-            userSID = userSID[..(userSID.IndexOf("@live.com"))];
-            _ctx.Logger.UI(GetType().Name, $"Affected user account SID: {userSID}");
+            _ctx.Logger.Info(GetType().Name, $"Affected user account SID: {userSpoId}");
+            userSpoId = userSpoId.Substring(userSpoId.IndexOf("i:0h.f|membership|", StringComparison.Ordinal) + 18);
+            userSpoId = userSpoId[..(userSpoId.IndexOf("@live.com", StringComparison.Ordinal))];
+            _ctx.Logger.UI(GetType().Name, $"Affected user account SID: {userSpoId}");
 
 
             await foreach (var siteResults in new SPOTenantSiteUrlsWithAccessCSOM(_ctx.Logger, _ctx.AppClient, _param.SiteAccParam).GetAsync())
@@ -79,7 +79,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
                 try
                 {
-                    await FixIDMismatchAsync(siteResults.SiteUrl, userSID);
+                    await FixIdMismatchAsync(siteResults.SiteUrl, userSpoId);
                 }
                 catch (Exception ex)
                 {
@@ -89,7 +89,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
             }
         }
 
-        private async Task FixIDMismatchAsync(string siteUrl, string correctUserID)
+        private async Task FixIdMismatchAsync(string siteUrl, string correctUserId)
         {
             _ctx.AppClient.IsCancelled();
 
@@ -99,9 +99,9 @@ namespace NovaPointLibrary.Solutions.QuickFix
 
                 if (oUser == null) { return; }
 
-                string siteUserID = ((UserIdInfo)oUser.UserId).NameId;
-                _ctx.Logger.Info(GetType().Name, $"User found on site with ID '{siteUserID}', correct ID is {correctUserID}");
-                if (siteUserID != correctUserID)
+                string siteUserId = ((UserIdInfo)oUser.UserId).NameId;
+                _ctx.Logger.Info(GetType().Name, $"User found on site with ID '{siteUserId}', correct ID is {correctUserId}");
+                if (siteUserId != correctUserId)
                 {
                     if (oUser.IsSiteAdmin)
                     {
