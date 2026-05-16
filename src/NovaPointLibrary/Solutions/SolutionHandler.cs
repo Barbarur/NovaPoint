@@ -74,7 +74,7 @@ namespace NovaPointLibrary.Solutions
 
             return Task.Run(async () =>
             {
-                ContextSolution ctx = await GetContext(logger);
+                ContextSolution ctx = GetContext(logger);
 
                 try
                 {
@@ -109,20 +109,11 @@ namespace NovaPointLibrary.Solutions
             }
         }
 
-        private async Task<ContextSolution> GetContext(LoggerSolution logger)
+        private ContextSolution GetContext(LoggerSolution logger)
         {
             try
             {
                 var appClient = GetAppClient(logger);
-
-                string url = $"/sites/root";
-                var graphSiteRoot = await new GraphAPIHandler(logger, appClient).GetObjectAsync<GraphSitesRoot>(url);
-                logger.Info("AppClient", $"Hostname: {graphSiteRoot.SiteCollection.Hostname}");
-
-                string domain = graphSiteRoot.SiteCollection.Hostname.Remove(graphSiteRoot.SiteCollection.Hostname.IndexOf(".sharepoint.com", StringComparison.OrdinalIgnoreCase));
-                logger.Info("AppClient", $"Domain: {domain}");
-
-                appClient.Domain = domain;
 
                 return new(logger, appClient, new(logger));
             }

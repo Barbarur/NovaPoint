@@ -1,6 +1,7 @@
 ﻿using Microsoft.Identity.Client;
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Authentication;
+using NovaPointLibrary.Commands.SharePoint.Tenant;
 using NovaPointLibrary.Core.Logging;
 
 
@@ -14,64 +15,44 @@ namespace NovaPointLibrary.Core.Authentication
         public Guid TenantId
         {
             get { return _tenantId; }
-            set
-            {
-                _tenantId = value;
-            }
+            set{ _tenantId = value; }
         }
 
         private Guid _clientId;
         public Guid ClientId
         {
             get { return _clientId; }
-            set
-            {
-                _clientId = value;
-            }
+            set {_clientId = value; }
         }
 
-        private string _adminUrl = string.Empty;
         public string AdminUrl
         {
-            get { return _adminUrl; }
-            set
-            {
-                _adminUrl = value;
-                _logger.Info(GetType().Name, $"SPO -admin URL '{value}'");
-            }
+            get { return "https://" + Domain + "-admin.SharePoint.com"; }
         }
 
-        private string _rootPersonalUrl = string.Empty;
         public string RootPersonalUrl
         {
-            get { return _rootPersonalUrl; }
-            set
-            {
-                _rootPersonalUrl = value;
-                _logger.Info(GetType().Name, $"SPO -my URL '{value}'");
-            }
+            get { return "https://" + Domain + "-my.SharePoint.com"; }
         }
-        private string _rootSharedUrl = string.Empty;
+
         public string RootSharedUrl
         {
-            get { return _rootSharedUrl; }
-            set
-            {
-                _rootSharedUrl = value;
-                _logger.Info(GetType().Name, $"SPO root URL '{value}'");
-            }
+            get { return "https://" + Domain + ".SharePoint.com"; }
         }
+
         private string _domain = string.Empty;
         public string Domain
         {
-            get { return _domain; }
-            set
+            get
             {
-                _domain = value;
-                AdminUrl = "https://" + value + "-admin.sharepoint.com";
-                RootPersonalUrl = "https://" + value + "-my.sharepoint.com";
-                RootSharedUrl = "https://" + value + ".sharepoint.com";
+                if (string.IsNullOrWhiteSpace(_domain))
+                {
+                    _domain = new SpoDomain(_logger, this).GetAsync().Result;
+                }
+                return _domain;
+
             }
+            set { _domain = value; }
         }
 
         private readonly bool _cachingToken;
