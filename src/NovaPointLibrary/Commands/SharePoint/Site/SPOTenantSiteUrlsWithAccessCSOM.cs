@@ -25,8 +25,12 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         {
             _appInfo.IsCancelled();
 
-            GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetSignedInUserAsync();
-            string adminUPN = signedInUser.UserPrincipalName;
+            string adminUPN = string.Empty;
+            if (_appInfo is AppClientPublic)
+            {
+                GraphUser signedInUser = await new GetAADUser(_logger, _appInfo).GetSignedInUserAsync();
+                adminUPN = signedInUser.UserPrincipalName;
+            }
 
             await foreach (var recordSite in new SPOTenantSiteUrlsCSOM(_logger, _appInfo, _param.SiteParam).GetAsync())
             {
@@ -38,7 +42,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
         {
             _appInfo.IsCancelled();
 
-            if (_param.AdminAccess.AddAdmin)
+            if (_param.AdminAccess.AddAdmin &&  _appInfo is AppClientPublic)
             {
                 try { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).AddAsync(record.SiteUrl, adminUPN); }
                 catch (Exception ex)
@@ -60,7 +64,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 }
             }
 
-            if (_param.AdminAccess.RemoveAdmin)
+            if (_param.AdminAccess.RemoveAdmin && _appInfo is AppClientPublic)
             {
                 try { await new SPOSiteCollectionAdminCSOM(_logger, _appInfo).RemoveAsync(record.SiteUrl, adminUPN); }
                 catch (Exception ex)
