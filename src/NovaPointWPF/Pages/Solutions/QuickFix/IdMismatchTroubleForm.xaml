@@ -13,6 +13,15 @@
 
         <StackPanel>
 
+            <TextBlock
+                Margin="0, 0, 0, 12"
+                Style="{DynamicResource TextBlockBodyStrong}"
+                Foreground="OrangeRed"
+                Text="This solution is limited to Delegated permissions."
+                FontStyle="Italic"
+                FontSize="16"
+                HorizontalAlignment="Center"/>
+            
             <designmaterial:ReportModeForm
                 x:Name="Mode"/>
 
