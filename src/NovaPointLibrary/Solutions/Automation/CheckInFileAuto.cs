@@ -53,7 +53,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             Dictionary<Type, string> solutionReports = new()
             {
-                { typeof(CheckInFileAuto), "Report" },
+                { typeof(CheckInFileAutoRecord), "Report" },
             };
             _ctx.DbHandler.AddSolutionReports(solutionReports);
         }
