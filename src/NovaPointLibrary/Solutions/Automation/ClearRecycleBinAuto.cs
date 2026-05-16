@@ -20,11 +20,11 @@ namespace NovaPointLibrary.Solutions.Automation
             _ctx = context;
             _param = parameters;
 
-            Dictionary<Type, string> solutionReports = new()
-            {
-                { typeof(ClearRecycleBinAuto), "Report" },
-            };
-            _ctx.DbHandler.AddSolutionReports(solutionReports);
+            //Dictionary<Type, string> solutionReports = new()
+            //{
+            //    { typeof(ClearRecycleBinAuto), "Report" },
+            //};
+            //_ctx.DbHandler.AddSolutionReports(solutionReports);
         }
 
         public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
