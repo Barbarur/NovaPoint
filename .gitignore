@@ -353,3 +353,4 @@ MigrationBackup/
 # Specific for NovaPoint Project
 */NovaPointConsoleTester/SolutionsTester.cs
 */NovaPointLibrary/Tester.cs
+*/.idea
