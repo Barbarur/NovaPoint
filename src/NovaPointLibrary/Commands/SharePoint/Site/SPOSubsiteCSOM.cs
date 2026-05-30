@@ -29,6 +29,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                 w => w.Url,
                 w => w.RootFolder,
                 w => w.RootFolder.ServerRelativeUrl,
+                w => w.WebTemplate,
             };
             if (retrievalExpressions != null) { defaultExpressions = retrievalExpressions.Union(defaultExpressions).ToArray(); }
 
