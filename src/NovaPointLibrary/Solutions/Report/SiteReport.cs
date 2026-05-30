@@ -25,6 +25,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             p => p.Title,
             p => p.Url,
+            p => p.SiteId,
             p => p.GroupId,
             p => p.Template,
             p => p.IsTeamsConnected,
@@ -59,6 +60,8 @@ namespace NovaPointLibrary.Solutions.Report
         {
             _ctx = context;
             _param = parameters;
+            _param.SiteParam.SitePropertiesExpressions = _sitePropertiesExpressions;
+            _param.SiteParam.WebExpressions = _webExpressions;
 
             Dictionary<Type, string> solutionReports = new()
             {
