@@ -49,9 +49,9 @@ namespace NovaPointWPF.UserControls
                     if (ListsFilterVisibility)
                     {
                         AllFilterStack.Visibility = Visibility.Visible;
-                        IncludeLists = true;
-                        IncludeLibraries = true;
                     }
+                    IncludeLists = true;
+                    IncludeLibraries = true;
                 }
                 else
                 {
