@@ -9,7 +9,7 @@ public class GraphPasswordCredential
     [JsonProperty("displayName")]
     public string DisplayName { get; set; } = string.Empty;
     [JsonProperty("endDateTime")]
-    public DateTime EndDateTime { get; set; } = DateTime.MinValue;
+    public DateTime? EndDateTime { get; set; }
     [JsonProperty("hint")]
     public string Hint { get; set; } = string.Empty;
     [JsonProperty("keyId")]

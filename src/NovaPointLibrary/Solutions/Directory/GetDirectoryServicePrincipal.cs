@@ -53,7 +53,7 @@ public class GetDirectoryServicePrincipal : ISolution
                                      appRoleAssignmentRequired,
                                      """;
         
-        var cmd = new MgServicePrincipal(_ctx.Logger, _ctx.AppClient);
+        var cmd = new MgServicePrincipal(_ctx);
         var collSps = (await cmd.GetAllAsync(selectedProperties)).ToList();
 
         ProgressTracker progress = new(_ctx.Logger, collSps.Count);
@@ -116,7 +116,7 @@ public class GetDirectoryServicePrincipal : ISolution
             _resourceSpCache[resourceId] = resourceSp;
         }
         var role = resourceSp.AppRoles.FirstOrDefault(r => r.Id.Equals(appRoleId, StringComparison.OrdinalIgnoreCase));
-        return role?.Value?.ToString() ?? appRoleId;
+        return role?.Value ?? appRoleId;
     }
 
     private void AddRecord(GetDirectoryServicePrincipalRecord record)
@@ -181,7 +181,7 @@ internal class GetDirectoryServicePrincipalRecord : ISolutionRecord
             _ => "Third Party"
         };
 
-        PublisherName = sp.VerifiedPublisher.DisplayName?.ToString() ?? string.Empty;
+        PublisherName = sp.VerifiedPublisher.DisplayName ?? string.Empty;
 
         ApplicationAudience = sp.SignInAudience switch
         {
@@ -206,7 +206,7 @@ internal class GetDirectoryServicePrincipalRecord : ISolutionRecord
         {
             CertificateStatus = "None";
         }
-        else if (sp.KeyCredentials.Any(k => k.EndDateTime > DateTime.UtcNow))
+        else if (sp.KeyCredentials.Any(k => k.EndDateTime == null || k.EndDateTime > DateTime.UtcNow))
         {
             CertificateStatus = "Valid";
         }
@@ -219,7 +219,7 @@ internal class GetDirectoryServicePrincipalRecord : ISolutionRecord
         {
             SecretStatus = "None";
         }
-        else if (sp.PasswordCredentials.Any(p => p.EndDateTime > DateTime.UtcNow))
+        else if (sp.PasswordCredentials.Any(p => p.EndDateTime == null || p.EndDateTime > DateTime.UtcNow))
         {
             SecretStatus = "Valid";
         }

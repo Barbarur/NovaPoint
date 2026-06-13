@@ -5,7 +5,7 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel;
 public class GraphVerifiedPublisher
 {
     [JsonProperty("displayName")]
-    public object? DisplayName { get; set; }
+    public string? DisplayName { get; set; }
     [JsonProperty("verifiedPublisherId")]
     public object? VerifiedPublisherId { get; set; }
     [JsonProperty("addedDateTime")]

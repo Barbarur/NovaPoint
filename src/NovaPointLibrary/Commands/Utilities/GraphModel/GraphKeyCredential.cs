@@ -11,7 +11,7 @@ public class GraphKeyCredential
         [JsonProperty("displayName")]
         public string DisplayName { get; set; } = string.Empty;
         [JsonProperty("endDateTime")]
-        public DateTime EndDateTime { get; set; } = DateTime.MinValue;
+        public DateTime? EndDateTime { get; set; }
         [JsonProperty("key")]
         public object? Key { get; set; }
         [JsonProperty("keyId")]

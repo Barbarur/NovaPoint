@@ -17,5 +17,5 @@ public class GraphAppRole
     [JsonProperty("origin")]
     public string Origin { get; set; } = string.Empty;
     [JsonProperty("value")]
-    public object? Value { get; set; }
+    public string? Value { get; set; }
 }
