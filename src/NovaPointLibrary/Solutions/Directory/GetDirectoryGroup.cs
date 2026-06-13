@@ -115,7 +115,7 @@ namespace NovaPointLibrary.Solutions.Directory
             DisplayName = group.DisplayName;
 
             group.DefineTypeGroup();
-            if (group.IsMS365Group)
+            if (group.IsMs365Group)
             {
                 Type = "Microsoft 365 Group";
             }

@@ -40,6 +40,6 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
     public class SiteCollection
     {
         [JsonProperty("hostname")]
-        public string Hostname { get; set; }
+        public string Hostname { get; set; } = string.Empty;
     }
 }

@@ -5,6 +5,7 @@ using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
+using Web = Microsoft.SharePoint.Client.Web;
 
 namespace NovaPointLibrary.Commands.SharePoint.Site
 {

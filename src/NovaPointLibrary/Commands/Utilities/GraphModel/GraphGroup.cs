@@ -8,16 +8,16 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
         public string? Context { get; set; }
 
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [JsonProperty("displayName")]
-        public string DisplayName { get; set; }
+        public string DisplayName { get; set; }  = string.Empty;
 
         [JsonProperty("createdDateTime")]
         public DateTime CreatedDateTime { get; set; }
 
         [JsonProperty("mail")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [JsonProperty("groupTypes")]
         public List<string> GroupTypes { get; set; }
@@ -29,19 +29,19 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
         public bool SecurityEnabled { get; set; }
 
         [JsonProperty("visibility")]
-        public string Visibility { get; set; }
+        public string Visibility { get; set; } = string.Empty;
 
         [JsonProperty("description")]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
-        public bool IsMS365Group { get; set; } = false;
+        public bool IsMs365Group { get; set; } = false;
         public bool IsEmailEnabledSecurityGroup { get; set; } = false;
         public bool IsSecurityGroup { get; set; } = false;
         public bool IsDistributionList { get; set; } = false;
 
         internal void DefineTypeGroup()
         {
-            if (this.GroupTypes != null && this.GroupTypes.Contains("Unified")) { this.IsMS365Group = true; }
+            if (this.GroupTypes != null && this.GroupTypes.Contains("Unified")) { this.IsMs365Group = true; }
             else if (this.SecurityEnabled)
             {
                 if (this.MailEnabled)

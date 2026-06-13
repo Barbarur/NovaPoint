@@ -32,7 +32,7 @@ namespace NovaPointLibrary.Commands.Directory
 
             if (this.CreatedBefore < group.CreatedDateTime) { return false; }
 
-            if (group.IsMS365Group)
+            if (group.IsMs365Group)
             { 
                 if (this.IncludeMS365) { return true; } 
             }

@@ -136,39 +136,39 @@ namespace NovaPointLibrary.Solutions.Report
 
     internal class ListReportRecord : ISolutionRecord
     {
-        public string SiteURL { get; set; }
+        public string SiteUrl { get; set; } = string.Empty;
 
-        public string ListTitle { get; set; } = String.Empty;
-        public string ListType { get; set; } = String.Empty;
-        public string ListServerRelativeUrl { get; set; } = String.Empty;
-        public string ListID { get; set; } = String.Empty;
+        public string ListTitle { get; set; } = string.Empty;
+        public string ListType { get; set; } = string.Empty;
+        public string ListServerRelativeUrl { get; set; } = string.Empty;
+        public string ListId { get; set; } = string.Empty;
 
-        public string Created { get; set; } = String.Empty;
-        public string LastModified { get; set; } = String.Empty;
-        public string TotalFileCount { get; set; } = String.Empty;
-        public string TotalSizeGb { get; set; } = String.Empty;
+        public string Created { get; set; } = string.Empty;
+        public string LastModified { get; set; } = string.Empty;
+        public string TotalFileCount { get; set; } = string.Empty;
+        public string TotalSizeGb { get; set; } = string.Empty;
 
-        public string ContentApproval { get; set; } = String.Empty;
-        public string EnableVersioning {  get; set; } = String.Empty;
+        public string ContentApproval { get; set; } = string.Empty;
+        public string EnableVersioning {  get; set; } = string.Empty;
         public string AutomaticExpiration {  get; set; } = "NA";
-        public string MajorVersionLimit { get; set; } = String.Empty;
+        public string MajorVersionLimit { get; set; } = string.Empty;
         public string ExpireAfter { get; set; } = "NA";
-        public string MinorVersioning { get; set; } = String.Empty;
-        public string MinorVersionLimit { get; set; } = String.Empty;
-        public string RequireCheckOut { get; set; } = String.Empty;
+        public string MinorVersioning { get; set; } = string.Empty;
+        public string MinorVersionLimit { get; set; } = string.Empty;
+        public string RequireCheckOut { get; set; } = string.Empty;
 
-        public string IRM_Emabled { get; set; } = String.Empty;
+        public string IrmEmabled { get; set; } = string.Empty;
 
-        public string Hidden { get; set; } = String.Empty;
-        public string IsSystemList { get; set; } = String.Empty;
+        public string Hidden { get; set; } = string.Empty;
+        public string IsSystemList { get; set; } = string.Empty;
 
-        public string Remarks { get; set; }
+        public string Remarks { get; set; } = string.Empty;
 
         public ListReportRecord() { }
 
         internal ListReportRecord(string siteUrl, List? list = null, string remarks = "")
         {
-            SiteURL = siteUrl;
+            SiteUrl = siteUrl;
             Remarks = remarks;
 
             if (list != null)
@@ -176,7 +176,7 @@ namespace NovaPointLibrary.Solutions.Report
                 ListTitle = list.Title;
                 ListType = list.BaseType.ToString();
                 ListServerRelativeUrl = list.RootFolder.ServerRelativeUrl;
-                ListID = list.Id.ToString();
+                ListId = list.Id.ToString();
 
                 Created = list.Created.ToString();
                 LastModified = list.LastItemUserModifiedDate.ToString();
@@ -189,7 +189,7 @@ namespace NovaPointLibrary.Solutions.Report
                 MinorVersionLimit = list.MajorWithMinorVersionsLimit.ToString();
                 RequireCheckOut = list.ForceCheckout.ToString();
 
-                IRM_Emabled = list.IrmEnabled.ToString();
+                IrmEmabled = list.IrmEnabled.ToString();
 
                 Hidden = list.Hidden.ToString();
                 IsSystemList = list.IsSystemList.ToString();

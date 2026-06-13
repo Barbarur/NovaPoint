@@ -39,9 +39,9 @@ namespace NovaPointLibrary.Core.SQLite
             Type type = obj.GetType();
 
             StringBuilder sbColumns = new StringBuilder();
-            sbColumns.Append("(");
+            sbColumns.Append('(');
             StringBuilder sbValues = new StringBuilder();
-            sbValues.Append("(");
+            sbValues.Append('(');
 
             foreach (var propertyInfo in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
@@ -53,9 +53,9 @@ namespace NovaPointLibrary.Core.SQLite
                 sbValues.Append($"'{sanitizedValue}',");
             }
             sbColumns.Length--;
-            sbColumns.Append(")");
+            sbColumns.Append(')');
             sbValues.Length--;
-            sbValues.Append(")");
+            sbValues.Append(')');
 
             string insertQuery = $"INSERT INTO {tableName} {sbColumns} VALUES {sbValues}";
 

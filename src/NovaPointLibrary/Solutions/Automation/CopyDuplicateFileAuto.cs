@@ -6,19 +6,20 @@ using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Core.SQLite;
 using System.Linq.Expressions;
+using Web = Microsoft.SharePoint.Client.Web;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
     public class CopyDuplicateFileAuto : ISolution
     {
-        public readonly static String s_SolutionName = "Copy or Duplicate Files across Sites";
-        public readonly static String s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-CopyDuplicateFileAuto";
+        public readonly static string s_SolutionName = "Copy or Duplicate Files across Sites";
+        public readonly static string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-CopyDuplicateFileAuto";
 
         private ContextSolution _ctx;
         private readonly CopyDuplicateFileAutoParameters _param;
 
-        private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] _listExpressions = new Expression<Func<Microsoft.SharePoint.Client.List, object>>[]
-        {
+        private static readonly Expression<Func<Microsoft.SharePoint.Client.List, object>>[] ListExpressions =
+        [
             l => l.Hidden,
             l => l.IsSystemList,
             l => l.ParentWeb.Url,
@@ -33,10 +34,10 @@ namespace NovaPointLibrary.Solutions.Automation
             l => l.RootFolder,
             l => l.RootFolder.ServerRelativeUrl,
 
-        };
+        ];
 
-        private static readonly Expression<Func<ListItem, object>>[] _fileExpressions = new Expression<Func<ListItem, object>>[]
-        {
+        private static readonly Expression<Func<ListItem, object>>[] FileExpressions =
+        [
             i => i.FileSystemObjectType,
             f => f["File_x0020_Size"],
             i => i["SMTotalSize"],
@@ -49,7 +50,7 @@ namespace NovaPointLibrary.Solutions.Automation
             i => i.File.Length,
 
             i => i.ParentList.RootFolder.ServerRelativeUrl,
-        };
+        ];
 
         private double _averageWaitingTimeMillisecondsPerByte = 0.000001;
 
@@ -59,7 +60,7 @@ namespace NovaPointLibrary.Solutions.Automation
         {
             _ctx = context;
 
-            parameters.SourceItemsParam.FileExpressions = _fileExpressions;
+            parameters.SourceItemsParam.FileExpressions = FileExpressions;
             _param = parameters;
 
             Dictionary<Type, string> solutionReports = new()
@@ -79,20 +80,20 @@ namespace NovaPointLibrary.Solutions.Automation
             _ctx.AppClient.IsCancelled();
 
             GraphUser signedInUser = await new GetAADUser(_ctx.Logger, _ctx.AppClient).GetSignedInUserAsync();
-            string adminUPN = signedInUser.UserPrincipalName;
+            string adminUpn = signedInUser.UserPrincipalName;
 
             if (_param.AdminAccess.AddAdmin)
             {
                 _ctx.Logger.UI(GetType().Name, "Adding Site Collection Admin to source site.");
-                await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).AddAsync(_param.SourceSiteURL, adminUPN);
+                await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).AddAsync(_param.SourceSiteUrl, adminUpn);
                 _ctx.Logger.UI(GetType().Name, "Adding Site Collection Admin to destination site.");
-                await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).AddAsync(_param.DestinationSiteURL, adminUPN);
+                await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).AddAsync(_param.DestinationSiteUrl, adminUpn);
             }
 
             _ctx.Logger.UI(GetType().Name, "Getting source site.");
-            var oSourceWeb = await new SPOWebCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(_param.SourceSiteURL);
+            var oSourceWeb = await new SPOWebCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(_param.SourceSiteUrl);
             _ctx.Logger.UI(GetType().Name, "Getting destination site.");
-            var oDestinationWeb = await new SPOWebCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(_param.DestinationSiteURL);
+            var oDestinationWeb = await new SPOWebCSOM(_ctx.Logger, _ctx.AppClient).GetAsync(_param.DestinationSiteUrl);
 
             if (oSourceWeb.Url == oDestinationWeb.Url)
             {
@@ -100,7 +101,7 @@ namespace NovaPointLibrary.Solutions.Automation
             }
 
             _ctx.Logger.UI(GetType().Name, "Getting source library.");
-            var oSourceList = oSourceWeb.GetListByTitle(_param.SourceListTitle, _listExpressions);
+            var oSourceList = oSourceWeb.GetListByTitle(_param.SourceListTitle, ListExpressions);
             if (oSourceList == null)
             {
                 throw new($"Source library '{_param.SourceListTitle}' does not exist.");
@@ -111,7 +112,7 @@ namespace NovaPointLibrary.Solutions.Automation
             }
 
             _ctx.Logger.UI(GetType().Name, "Getting destination library.");
-            var oDestinationList = oDestinationWeb.GetListByTitle(_param.DestinationListTitle, _listExpressions);
+            var oDestinationList = oDestinationWeb.GetListByTitle(_param.DestinationListTitle, ListExpressions);
             if (oDestinationList == null)
             {
                 throw new($"Destination library '{_param.DestinationListTitle}' does not exist.");
@@ -124,7 +125,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             string destinationServerRelativeUrl = oDestinationList.RootFolder.ServerRelativeUrl;
 
-            if (!String.IsNullOrWhiteSpace(_param.DestinationLibraryRelativeUrl))
+            if (!string.IsNullOrWhiteSpace(_param.DestinationLibraryRelativeUrl))
             {
                 string folderServerRelativeUrl = oDestinationList.RootFolder.ServerRelativeUrl + _param.DestinationLibraryRelativeUrl;
                 var oDestinationFolder = await new SPOFolderCSOM(_ctx.Logger, _ctx.AppClient).GetFolderAsync(oDestinationWeb.Url, folderServerRelativeUrl);
@@ -153,27 +154,27 @@ namespace NovaPointLibrary.Solutions.Automation
                 try
                 {
                     _ctx.Logger.UI(GetType().Name, "Removing Site Collection Admin from source site.");
-                    await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(oSourceWeb.Url, adminUPN);
+                    await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(oSourceWeb.Url, adminUpn);
                 }
                 catch (Exception ex)
                 {
                     _ctx.Logger.Error(GetType().Name, "Site", oSourceWeb.Url, ex);
                     string errorMessage = $"Error removing Site Collection Admin from site {oSourceWeb.Url}. {ex.Message}";
 
-                    RecordCSV(new(_param, "Failed", remarks: errorMessage));
+                    RecordCsv(new(_param, "Failed", remarks: errorMessage));
                 }
 
                 try
                 {
                     _ctx.Logger.UI(GetType().Name, "Removing Site Collection Admin from destination site.");
-                    await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(oDestinationWeb.Url, adminUPN);
+                    await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(oDestinationWeb.Url, adminUpn);
                 }
                 catch (Exception ex)
                 {
                     _ctx.Logger.Error(GetType().Name, "Site", oDestinationWeb.Url, ex);
                     string errorMessage = $"Error removing Site Collection Admin from site {oDestinationWeb.Url}. {ex.Message}";
 
-                    RecordCSV(new(_param, "Failed", remarks: errorMessage));
+                    RecordCsv(new(_param, "Failed", remarks: errorMessage));
                 }
             }
             
@@ -189,7 +190,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 string listItemServerRelativeUrl = (string)oListItem["FileRef"];
                 string listItemFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, oListItem.ParentList.RootFolder.ServerRelativeUrl.Length);
 
-                if (!String.IsNullOrWhiteSpace(_param.SourceItemsParam.FolderSiteRelativeUrl))
+                if (!string.IsNullOrWhiteSpace(_param.SourceItemsParam.FolderSiteRelativeUrl))
                 {
                     string folderServerRelativeUrl = _param.SourceItemsParam.GetFolderServerRelativeURL(oSourceWeb.Url);
 
@@ -257,13 +258,13 @@ namespace NovaPointLibrary.Solutions.Automation
                         await copyMoveItem.CopyMoveAsync(loggerThread, _ctx.AppClient, _param.IsMove, _param.SameWebCopyMoveOptimization);
                     }
 
-                    RecordCSV(new(_param, copyMoveItem, "Success"));
+                    RecordCsv(new(_param, copyMoveItem, "Success"));
                 }
                 catch (Exception ex)
                 {
                     loggerThread.Error(GetType().Name, "Item", copyMoveItem.SourceServerRelativeUrl, ex);
 
-                    RecordCSV(new(_param, copyMoveItem, "Failed", ex.Message));
+                    RecordCsv(new(_param, copyMoveItem, "Failed", ex.Message));
                 }
                 progress.ProgressUpdateReport();
 
@@ -272,19 +273,7 @@ namespace NovaPointLibrary.Solutions.Automation
             });
 
         }
-
-        //private string GetItemDestinationServerRelativeUrl(ListItem oListItem, string destinationServerRelativeUrl)
-        //{
-        //    string listItemServerRelativeUrl = (string)oListItem["FileRef"];
-        //    string sourceFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, oListItem.ParentList.RootFolder.ServerRelativeUrl.Length);
-
-        //    if (!String.IsNullOrWhiteSpace(_param.SourceItemsParam.FolderSiteRelativeUrl))
-        //    {
-        //        sourceFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, _param.SourceItemsParam.FolderSiteRelativeUrl.Length);
-        //    }
-        //    return string.Concat(destinationServerRelativeUrl, sourceFolderRelativeUrl);
-        //}
-
+        
         private IEnumerable<RESTCopyMoveFileFolder> GetBatch(SqliteHandler sql, int depth, int batchCount)
         {
             int batchSize = 5000;
@@ -298,53 +287,7 @@ namespace NovaPointLibrary.Solutions.Automation
             return sql.GetRecords<RESTCopyMoveFileFolder>(_ctx.Logger, query);
         }
 
-        //private void CalculateAverageWaitingTime(double timeElapsedMilliseconds, RESTCopyMoveFileFolder itemCopied)
-        //{
-        //    if (itemCopied.FileSizeBytes < 0) { return; }
-
-        //    double waitingTimeMillisecondsPerByte;
-        //    timeElapsedMilliseconds -= 1000;
-        //    if (_param.IsMove)
-        //    {
-        //        _ctx.Logger.Debug(GetType().Name, $"Calculating average waiting time after process {itemCopied.FileTotalSizeBytes} bytes in {timeElapsedMilliseconds} milliseconds");
-        //        waitingTimeMillisecondsPerByte = timeElapsedMilliseconds / itemCopied.FileTotalSizeBytes;
-        //    }
-        //    else
-        //    {
-        //        _ctx.Logger.Debug(GetType().Name, $"Calculating average waiting time after process {itemCopied.FileSizeBytes} bytes in {timeElapsedMilliseconds} milliseconds");
-        //        waitingTimeMillisecondsPerByte = timeElapsedMilliseconds / itemCopied.FileSizeBytes;
-        //    }
-
-
-        //    double newAverage = (_averageWaitingTimeMillisecondsPerByte * _count + waitingTimeMillisecondsPerByte) / (_count + 1);
-        //    if (newAverage < 0)
-        //    {
-        //        newAverage = 0.000001;
-        //    }
-        //    _averageWaitingTimeMillisecondsPerByte = newAverage;
-        //    _ctx.Logger.Debug(GetType().Name, $"Average waiting time {_averageWaitingTimeMillisecondsPerByte} milliseconds per byte");
-        //    _count++;
-        //}
-
-        //private double GetWaitingTimeInMilliseconds(RESTCopyMoveFileFolder itemCopied)
-        //{
-        //    double waitingTime;
-        //    if (_param.IsMove)
-        //    {
-        //        waitingTime =  _averageWaitingTimeMillisecondsPerByte * itemCopied.FileTotalSizeBytes;
-        //    }
-        //    else
-        //    {
-        //        waitingTime =  _averageWaitingTimeMillisecondsPerByte * itemCopied.FileSizeBytes;
-        //    }
-        //    if (waitingTime < 1000)
-        //    {
-        //        waitingTime = 1000;
-        //    }
-        //    return waitingTime;
-        //}
-
-        private void RecordCSV(CopyDuplicateFileAutoRecord record)
+        private void RecordCsv(CopyDuplicateFileAutoRecord record)
         {
             _ctx.DbHandler.WriteRecord(record);
         }
@@ -353,16 +296,16 @@ namespace NovaPointLibrary.Solutions.Automation
 
     internal class CopyDuplicateFileAutoRecord : ISolutionRecord
     {
-        public string SourceSiteURL { get; set; } = String.Empty;
-        public string SourceListTitle { get; set; } = String.Empty;
-        public string SourceItemsServerRelativeUrl { get; set; } = String.Empty;
+        public string SourceSiteUrl { get; set; } = string.Empty;
+        public string SourceListTitle { get; set; } = string.Empty;
+        public string SourceItemsServerRelativeUrl { get; set; } = string.Empty;
 
-        public string DestinationSiteURL { get; set; } = String.Empty;
-        public string DestinationListTitle { get; set; } = String.Empty;
-        public string DestinationItemsServerRelativeUrl { get; set; } = String.Empty;
+        public string DestinationSiteUrl { get; set; } = string.Empty;
+        public string DestinationListTitle { get; set; } = string.Empty;
+        public string DestinationItemsServerRelativeUrl { get; set; } = string.Empty;
 
-        public string Status { get; set; } = String.Empty;
-        public string Remarks { get; set; } = String.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string Remarks { get; set; } = string.Empty;
 
         public CopyDuplicateFileAutoRecord() { }
 
@@ -372,11 +315,11 @@ namespace NovaPointLibrary.Solutions.Automation
             string remarks
             )
         {
-            SourceSiteURL = param.SourceSiteURL;
+            SourceSiteUrl = param.SourceSiteUrl;
             SourceListTitle = param.SourceListTitle;
             SourceItemsServerRelativeUrl = string.Empty;
 
-            DestinationSiteURL = param.DestinationSiteURL;
+            DestinationSiteUrl = param.DestinationSiteUrl;
             DestinationListTitle = param.DestinationListTitle;
             DestinationItemsServerRelativeUrl = string.Empty;
 
@@ -391,11 +334,11 @@ namespace NovaPointLibrary.Solutions.Automation
             string remarks = ""
             )
         {
-            SourceSiteURL = param.SourceSiteURL;
+            SourceSiteUrl = param.SourceSiteUrl;
             SourceListTitle = param.SourceListTitle;
             SourceItemsServerRelativeUrl = restObject.SourceServerRelativeUrl;
 
-            DestinationSiteURL = param.DestinationSiteURL;
+            DestinationSiteUrl = param.DestinationSiteUrl;
             DestinationListTitle = param.DestinationListTitle;
             DestinationItemsServerRelativeUrl = restObject.DestinationServerRelativeUrl;
 
@@ -414,16 +357,17 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public SPOAdminAccessParameters AdminAccess { get; set; }
 
-        private string _sourceSiteURL = string.Empty;
-        public string SourceSiteURL
+        private string _sourceSiteUrl = string.Empty;
+        public string SourceSiteUrl
         {
-            get { return _sourceSiteURL; }
+            get { return _sourceSiteUrl; }
             set
             {
-                _sourceSiteURL = value.Trim();
+                _sourceSiteUrl = value.Trim();
                 if (_destinationLibraryRelativeUrl.EndsWith("/"))
                 {
-                    _destinationLibraryRelativeUrl = _destinationLibraryRelativeUrl.Remove(_destinationLibraryRelativeUrl.LastIndexOf("/"));
+                    _destinationLibraryRelativeUrl =
+                        _destinationLibraryRelativeUrl.Remove(_destinationLibraryRelativeUrl.LastIndexOf('/'));
                 }
             }
         }
@@ -435,16 +379,16 @@ namespace NovaPointLibrary.Solutions.Automation
         }
         public SPOItemsParameters SourceItemsParam { get; set; }
 
-        private string _destinationSiteURL = string.Empty;
-        public string DestinationSiteURL
+        private string _destinationSiteUrl = string.Empty;
+        public string DestinationSiteUrl
         {
-            get { return _destinationSiteURL; }
+            get { return _destinationSiteUrl; }
             set
             {
-                _destinationSiteURL = value.Trim();
-                if (_destinationLibraryRelativeUrl.EndsWith("/"))
+                _destinationSiteUrl = value.Trim();
+                if (_destinationLibraryRelativeUrl.EndsWith('/'))
                 {
-                    _destinationLibraryRelativeUrl = _destinationLibraryRelativeUrl.Remove(_destinationLibraryRelativeUrl.LastIndexOf("/"));
+                    _destinationLibraryRelativeUrl = _destinationLibraryRelativeUrl.Remove(_destinationLibraryRelativeUrl.LastIndexOf('/'));
                 }
             }
         }
@@ -454,7 +398,7 @@ namespace NovaPointLibrary.Solutions.Automation
             get { return _destinationListTitle; }
             set { _destinationListTitle = value.Trim(); }
         }
-        private string _destinationLibraryRelativeUrl = String.Empty;
+        private string _destinationLibraryRelativeUrl = string.Empty;
         public string DestinationLibraryRelativeUrl
         {
             get { return _destinationLibraryRelativeUrl; }
@@ -463,11 +407,11 @@ namespace NovaPointLibrary.Solutions.Automation
                 _destinationLibraryRelativeUrl = value.Trim();
                 if (!_destinationLibraryRelativeUrl.StartsWith("/"))
                 {
-                    _destinationLibraryRelativeUrl = "/" + _destinationLibraryRelativeUrl;
+                    _destinationLibraryRelativeUrl = '/' + _destinationLibraryRelativeUrl;
                 }
-                if (_destinationLibraryRelativeUrl.EndsWith("/"))
+                if (_destinationLibraryRelativeUrl.EndsWith('/'))
                 {
-                    _destinationLibraryRelativeUrl = _destinationLibraryRelativeUrl.Remove(_destinationLibraryRelativeUrl.LastIndexOf("/"));
+                    _destinationLibraryRelativeUrl = _destinationLibraryRelativeUrl.Remove(_destinationLibraryRelativeUrl.LastIndexOf('/'));
                 }
             }
         }
@@ -480,7 +424,7 @@ namespace NovaPointLibrary.Solutions.Automation
             string sourceSiteUrl,
             string sourceListTitle,
             SPOItemsParameters sourceItemsParam,
-            string destinationSiteURL,
+            string destinationSiteUrl,
             string destinationListTitle,
             string destinationLibraryRelativeUrl)
         {
@@ -489,11 +433,11 @@ namespace NovaPointLibrary.Solutions.Automation
 
             AdminAccess = adminAccess;
 
-            SourceSiteURL = sourceSiteUrl;
+            SourceSiteUrl = sourceSiteUrl;
             SourceListTitle = sourceListTitle;
             SourceItemsParam = sourceItemsParam;
             
-            DestinationSiteURL = destinationSiteURL;
+            DestinationSiteUrl = destinationSiteUrl;
             DestinationListTitle = destinationListTitle;
             DestinationLibraryRelativeUrl = destinationLibraryRelativeUrl;
         }
