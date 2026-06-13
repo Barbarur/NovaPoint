@@ -78,8 +78,8 @@ public class GraphApplication
     public List<GraphPasswordCredential> PasswordCredentials { get; set; } = [];
     [JsonProperty("publicClient")]
     public PublicClient PublicClient { get; set; } = new();
-    // [JsonProperty("requiredResourceAccess")]
-    // public List<object> RequiredResourceAccess { get; set; } = [];
+    [JsonProperty("requiredResourceAccess")]
+    public List<GraphRequiredResourceAccess> RequiredResourceAccess { get; set; } = [];
     [JsonProperty("verifiedPublisher")]
     public GraphVerifiedPublisher VerifiedPublisher { get; set; } = new();
     [JsonProperty("web")]
@@ -136,7 +136,7 @@ public class ParentalControlSettings
 public class PublicClient
 {
     [JsonProperty("redirectUris")]
-    public List<object> RedirectUris { get; set; } = [];
+    public List<string> RedirectUris { get; set; } = [];
 }
 
 public class RedirectUriSetting
@@ -151,6 +151,22 @@ public class Spa
 {
     [JsonProperty("redirectUris")]
     public List<string> RedirectUris { get; set; } = [];
+}
+
+public class GraphRequiredResourceAccess
+{
+    [JsonProperty("resourceAppId")]
+    public string ResourceAppId { get; set; } = string.Empty;
+    [JsonProperty("resourceAccess")]
+    public List<GraphResourceAccess> ResourceAccess { get; set; } = [];
+}
+
+public class GraphResourceAccess
+{
+    [JsonProperty("id")]
+    public string Id { get; set; } = string.Empty;
+    [JsonProperty("type")]
+    public string Type { get; set; } = string.Empty;
 }
 
 
