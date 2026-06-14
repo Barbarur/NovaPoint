@@ -99,10 +99,20 @@ public class GetDirectoryAppAudit : ISolution
             var record = new GetDirectoryAppAuditRecord(sp, tenantId);
             var spId = sp.Id;
 
+            bool fetchOwners = sp.AppOwnerOrganizationId switch
+            {
+                var id when id == tenantId                         => _param.IncludeSpOwnersInternalApps,
+                var id when id == GraphConstants.MicrosoftTenantId => _param.IncludeSpOwnersMicrosoftApps,
+                _                                                  => _param.IncludeSpOwnersThirdPartyApps
+            };
+
             try
             {
-                var owners = await cmd.GetOwnersAsync(spId);
-                record.AddServPrincipalOwners(owners);
+                if (fetchOwners)
+                {
+                    var owners = await cmd.GetOwnersAsync(spId);
+                    record.AddServPrincipalOwners(owners);
+                }
 
                 appByAppId.TryGetValue(sp.AppId, out GraphApplication? regApp);
                 if (regApp != null)
@@ -168,6 +178,7 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
 {
     private readonly Guid? _ownerOrgId;
     private readonly Guid _tenantId;
+    private bool _spOwnersFetched;
 
     // Application Properties
     public string Id { get; set; } = string.Empty;
@@ -305,6 +316,7 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
 
     internal void AddServPrincipalOwners(IEnumerable<GraphUser> collOwners)
     {
+        _spOwnersFetched = true;
         var ownersList = collOwners.ToList();
         ServPrincipalOwnersCount = ownersList.Count;
         ServPrincipalOwners = string.Join("; ", ownersList.Select(o =>
@@ -409,14 +421,18 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
     internal void SetAssessment()
     {
         var flags = new List<string>();
-        if (_spSecretExpired > 0) flags.Add("Expired secret");
-        if (_spCertExpired > 0) flags.Add("Expired certificate");
-        if (_spSecretExpiresIn30Days > 0) flags.Add("Secret expiring soon");
-        if (_spCertExpiresIn30Days > 0) flags.Add("Certificate expiring soon");
-        if (_appRegSecretExpired > 0) flags.Add("Expired app reg secret");
-        if (_appRegCertExpired > 0) flags.Add("Expired app reg certificate");
-        if (_appRegSecretExpiresIn30Days > 0) flags.Add("App reg secret expiring soon");
-        if (_appRegCertExpiresIn30Days > 0) flags.Add("App reg certificate expiring soon");
+        if (_spSecretExpired > 0 && _spSecretValid == 0) flags.Add("Service principal: Expired secret");
+        else if (_spSecretExpired > 0) flags.Add("Service principal: Need clean up old secret");
+        if (_spCertExpired > 0 && _spCertValid == 0) flags.Add("Service principal: Expired certificate");
+        else if (_spCertExpired > 0) flags.Add("Service principal: Need clean up old certificate");
+        if (_spSecretExpiresIn30Days > 0) flags.Add("Service principal: Secret expiring soon");
+        if (_spCertExpiresIn30Days > 0) flags.Add("Service principal: Certificate expiring soon");
+        if (_appRegSecretExpired > 0 && _appRegSecretValid == 0) flags.Add("App registration: Expired secret");
+        else if (_appRegSecretExpired > 0) flags.Add("App registration: Need clean up old secret");
+        if (_appRegCertExpired > 0 && _appRegCertValid == 0) flags.Add("App registration: Expired certificate");
+        else if (_appRegCertExpired > 0) flags.Add("App registration: Need clean up old certificate");
+        if (_appRegSecretExpiresIn30Days > 0) flags.Add("App registration: Secret expiring soon");
+        if (_appRegCertExpiresIn30Days > 0) flags.Add("App registration: Certificate expiring soon");
         if (HasWildcardReplyUrl) flags.Add("Wildcard reply URL");
         if (ImplicitFlowEnabled) flags.Add("Implicit flow enabled");
         if (AccessTokenFlowEnabled) flags.Add("Access token flow enabled");
@@ -426,9 +442,12 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
         if (HasOrphanedApplicationPermissions) flags.Add("Orphaned application permissions");
         if (_ownerOrgId == _tenantId && ExposesApi) flags.Add("Exposes API");
         if (_ownerOrgId == _tenantId && AllowPublicClient) flags.Add("Public client flows enabled");
-        bool expectsOwner = _ownerOrgId == _tenantId || AssignmentRequired;
-        if (expectsOwner && ServPrincipalOwnersCount == 0) flags.Add("Service principal: no owners");
-        if (_ownerOrgId == _tenantId && AppRegOwnersCount == 0) flags.Add("App registration: no owners");
+        if (_spOwnersFetched)
+        {
+            bool expectsOwner = _ownerOrgId == _tenantId || AssignmentRequired;
+            if (expectsOwner && ServPrincipalOwnersCount == 0) flags.Add("Service principal: No owners");
+        }
+        if (_ownerOrgId == _tenantId && AppRegOwnersCount == 0) flags.Add("App registration: No owners");
         NeedsReview = string.Join(" | ", flags);
     }
 }
@@ -437,4 +456,8 @@ public class GetDirectoryAppAuditParameters : ISolutionParameters
 {
     public bool IncludeThirdPartyApps { get; set; } = false;
     public bool IncludeMicrosoftApps { get; set; } = false;
+
+    public bool IncludeSpOwnersInternalApps { get; set; } = true;
+    public bool IncludeSpOwnersMicrosoftApps { get; set; } = false;
+    public bool IncludeSpOwnersThirdPartyApps { get; set; } = false;
 }
