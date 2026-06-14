@@ -4,32 +4,32 @@ using NovaPointLibrary.Core.Context;
 
 namespace NovaPointLibrary.Solutions.Directory;
 
-public class GetDirectoryApp : ISolution
+public class GetDirectoryRegApplication : ISolution
 {
     public static readonly string s_SolutionName = "Directory Applications report";
-    public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-{nameof(GetDirectoryApp)}";
+    public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-{nameof(GetDirectoryRegApplication)}";
 
     private ContextSolution Ctx;
-    private readonly GetDirectoryAppParameters _param;
+    private readonly GetDirectoryRegApplicationParameters _param;
 
     private Dictionary<string, Guid> _spObjectIdByAppId = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, GraphServicePrincipal> _resourceSpCache = new(StringComparer.OrdinalIgnoreCase);
 
-    private GetDirectoryApp(ContextSolution context, GetDirectoryAppParameters parameters)
+    private GetDirectoryRegApplication(ContextSolution context, GetDirectoryRegApplicationParameters parameters)
     {
         Ctx = context;
         _param = parameters;
         //
         Dictionary<Type, string> solutionReports = new()
         {
-            { typeof(GetDirectoryAppRecord), "Report" },
+            { typeof(GetDirectoryRegApplicationRecord), "Report" },
         };
         Ctx.DbHandler.AddSolutionReports(solutionReports);
     }
     
     public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
     {
-        return new GetDirectoryApp(context, (GetDirectoryAppParameters)parameters);
+        return new GetDirectoryRegApplication(context, (GetDirectoryRegApplicationParameters)parameters);
     }
     
     public async Task RunAsync()
@@ -64,7 +64,7 @@ public class GetDirectoryApp : ISolution
         foreach (var app in collApps)
         {
             Ctx.AppClient.IsCancelled();
-            var record = new GetDirectoryAppRecord(app);
+            var record = new GetDirectoryRegApplicationRecord(app);
             try
             {
                 var owners = await appCmd.GetOwnersAsync(app.Id);
@@ -82,12 +82,12 @@ public class GetDirectoryApp : ISolution
         }
     }
     
-    private void AddRecord(GetDirectoryAppRecord record)
+    private void AddRecord(GetDirectoryRegApplicationRecord record)
     {
         Ctx.DbHandler.WriteRecord(record);
     }
 
-    private async Task BuildPermissionsAsync(GetDirectoryAppRecord record, GraphApplication app, MgServicePrincipal spCmd)
+    private async Task BuildPermissionsAsync(GetDirectoryRegApplicationRecord record, GraphApplication app, MgServicePrincipal spCmd)
     {
         List<GraphOAuth2PermissionGrant> grants;
         List<GraphAppRoleAssignment> roleAssignments;
@@ -165,7 +165,7 @@ public class GetDirectoryApp : ISolution
     }
 }
 
-internal class GetDirectoryAppRecord : ISolutionRecord
+internal class GetDirectoryRegApplicationRecord : ISolutionRecord
 {
     public string Id { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
@@ -198,9 +198,9 @@ internal class GetDirectoryAppRecord : ISolutionRecord
     public string NeedsReview { get; set; } = string.Empty;
     public string Remarks { get; set; } = string.Empty;
 
-    public GetDirectoryAppRecord() { }
+    public GetDirectoryRegApplicationRecord() { }
     
-    internal GetDirectoryAppRecord(GraphApplication app)
+    internal GetDirectoryRegApplicationRecord(GraphApplication app)
     {
         this.Id = app.Id;
         this.DisplayName = app.DisplayName;
@@ -306,7 +306,7 @@ internal class GetDirectoryAppRecord : ISolutionRecord
     }
 }
 
-public class GetDirectoryAppParameters : ISolutionParameters
+public class GetDirectoryRegApplicationParameters : ISolutionParameters
 {
     
 
