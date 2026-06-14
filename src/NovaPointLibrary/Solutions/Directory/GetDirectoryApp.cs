@@ -12,7 +12,7 @@ public class GetDirectoryApp : ISolution
     private ContextSolution Ctx;
     private readonly GetDirectoryAppParameters _param;
 
-    private Dictionary<string, string> _spObjectIdByAppId = new(StringComparer.OrdinalIgnoreCase);
+    private Dictionary<string, Guid> _spObjectIdByAppId = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, GraphServicePrincipal> _resourceSpCache = new(StringComparer.OrdinalIgnoreCase);
 
     private GetDirectoryApp(ContextSolution context, GetDirectoryAppParameters parameters)
@@ -94,7 +94,7 @@ public class GetDirectoryApp : ISolution
 
         if (_spObjectIdByAppId.TryGetValue(app.AppId, out var spObjectId))
         {
-            var spId = Guid.Parse(spObjectId);
+            var spId = spObjectId;
             grants = (await spCmd.GetOAuth2PermissionGrantsAsync(spId)).ToList();
             roleAssignments = (await spCmd.GetAppRoleAssignmentsAsync(spId)).ToList();
         }
@@ -140,8 +140,8 @@ public class GetDirectoryApp : ISolution
         var parts = new List<string>();
         foreach (var entry in entries)
         {
-            var scope = resourceSp.Oauth2PermissionScopes.FirstOrDefault(s => s.Id.Equals(entry.Id, StringComparison.OrdinalIgnoreCase));
-            var permValue = scope?.Value ?? entry.Id;
+            var scope = resourceSp.Oauth2PermissionScopes.FirstOrDefault(s => s.Id == entry.Id);
+            var permValue = scope?.Value ?? entry.Id.ToString();
             var grant = grants.FirstOrDefault(g =>
                 g.Scope.Split(' ').Contains(permValue, StringComparer.OrdinalIgnoreCase));
             var consentLabel = grant == null ? "Not Consented" : (grant.ConsentType == "AllPrincipals" ? "Admin" : "User");
@@ -155,9 +155,9 @@ public class GetDirectoryApp : ISolution
         var parts = new List<string>();
         foreach (var entry in entries)
         {
-            var role = resourceSp.AppRoles.FirstOrDefault(r => r.Id.Equals(entry.Id, StringComparison.OrdinalIgnoreCase));
-            var permValue = role?.Value ?? entry.Id;
-            var consentLabel = roleAssignments.Any(a => a.AppRoleId.Equals(entry.Id, StringComparison.OrdinalIgnoreCase))
+            var role = resourceSp.AppRoles.FirstOrDefault(r => r.Id == entry.Id);
+            var permValue = role?.Value ?? entry.Id.ToString();
+            var consentLabel = roleAssignments.Any(a => a.AppRoleId == entry.Id)
                 ? "Consented" : "Not Consented";
             parts.Add($"{permValue} [{consentLabel}]");
         }
@@ -244,7 +244,7 @@ internal class GetDirectoryAppRecord : ISolutionRecord
         LogoutUrl = string.IsNullOrWhiteSpace(app.Web.LogoutUrl) ? string.Empty : app.Web.LogoutUrl;
         ImplicitFlowEnabled = app.Web.ImplicitGrantSettings.EnableIdTokenIssuance;
         AccessTokenFlowEnabled = app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance;
-        AllowPublicClient = app.IsFallbackPublicClient;
+        AllowPublicClient = app.IsFallbackPublicClient ?? false;
 
         SecretCount = app.PasswordCredentials.Count;
         foreach (var secret in app.PasswordCredentials)
@@ -287,9 +287,8 @@ internal class GetDirectoryAppRecord : ISolutionRecord
     {
         DelegatedPermissions = delegated;
         ApplicationPermissions = application;
-        var excessiveKeywords = new[] { "write", "edit", "manage", "fullcontrol" };
-        HasExcessiveAccess = excessiveKeywords.Any(k => application.Contains(k, StringComparison.OrdinalIgnoreCase));
-        PotentialExcessiveAccess = excessiveKeywords.Any(k => delegated.Contains(k, StringComparison.OrdinalIgnoreCase));
+        HasExcessiveAccess = PermissionAssessment.ExcessiveKeywords.Any(k => application.Contains(k, StringComparison.OrdinalIgnoreCase));
+        PotentialExcessiveAccess = PermissionAssessment.ExcessiveKeywords.Any(k => delegated.Contains(k, StringComparison.OrdinalIgnoreCase));
     }
 
     internal void SetAssessment()

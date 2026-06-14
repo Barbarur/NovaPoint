@@ -11,7 +11,7 @@ public class GraphAppRole
     [JsonProperty("displayName")]
     public string DisplayName { get; set; } = string.Empty;
     [JsonProperty("id")]
-    public string Id { get; set; } = string.Empty;
+    public Guid Id { get; set; }
     [JsonProperty("isEnabled")]
     public bool IsEnabled { get; set; } = false;
     [JsonProperty("origin")]

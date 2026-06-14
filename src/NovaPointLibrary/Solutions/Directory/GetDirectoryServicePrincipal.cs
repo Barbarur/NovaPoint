@@ -1,4 +1,5 @@
 using NovaPointLibrary.Commands.Directory.Applications;
+using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Context;
 
@@ -12,7 +13,7 @@ public class GetDirectoryServicePrincipal : ISolution
     private readonly ContextSolution _ctx;
     private readonly GetDirectoryServicePrincipalParameters _param;
 
-    private readonly Dictionary<string, GraphServicePrincipal> _resourceSpCache = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<Guid, GraphServicePrincipal> _resourceSpCache = new();
 
     private GetDirectoryServicePrincipal(ContextSolution context, GetDirectoryServicePrincipalParameters parameters)
     {
@@ -35,7 +36,7 @@ public class GetDirectoryServicePrincipal : ISolution
     {
         _ctx.AppClient.IsCancelled();
 
-        string selectedProperties = $"""
+        string selectedProperties = """
                                      ?$select=
                                      id,
                                      displayName,
@@ -65,10 +66,10 @@ public class GetDirectoryServicePrincipal : ISolution
 
             try
             {
-                var owners = await cmd.GetOwnersAsync(Guid.Parse(sp.Id));
+                var owners = await cmd.GetOwnersAsync(sp.Id);
                 record.AddOwners(owners);
 
-                var oauthGrants = await cmd.GetOAuth2PermissionGrantsAsync(Guid.Parse(sp.Id));
+                var oauthGrants = await cmd.GetOAuth2PermissionGrantsAsync(sp.Id);
                 var delegatedPerms = new List<string>();
                 foreach (var grant in oauthGrants)
                 {
@@ -78,7 +79,7 @@ public class GetDirectoryServicePrincipal : ISolution
                 }
                 record.GrantedDelegatedPermissions = string.Join("; ", delegatedPerms);
 
-                var appRoleAssignments = await cmd.GetAppRoleAssignmentsAsync(Guid.Parse(sp.Id));
+                var appRoleAssignments = await cmd.GetAppRoleAssignmentsAsync(sp.Id);
                 var appPerms = new List<string>();
                 foreach (var assignment in appRoleAssignments)
                 {
@@ -89,7 +90,7 @@ public class GetDirectoryServicePrincipal : ISolution
             }
             catch (Exception ex)
             {
-                _ctx.Logger.Error(GetType().Name, "ServicePrincipal", sp.Id, ex);
+                _ctx.Logger.Error(GetType().Name, "ServicePrincipal", sp.Id.ToString(), ex);
                 record.Remarks = ex.Message;
             }
 
@@ -98,25 +99,25 @@ public class GetDirectoryServicePrincipal : ISolution
         }
     }
 
-    private async Task<string> GetOrFetchResourceNameAsync(MgServicePrincipal cmd, string resourceId)
+    private async Task<string> GetOrFetchResourceNameAsync(MgServicePrincipal cmd, Guid resourceId)
     {
         if (!_resourceSpCache.TryGetValue(resourceId, out var resourceSp))
         {
-            resourceSp = await cmd.GetByIdAsync(Guid.Parse(resourceId), "?$select=id,displayName,appRoles");
+            resourceSp = await cmd.GetByIdAsync(resourceId, "?$select=id,displayName,appRoles");
             _resourceSpCache[resourceId] = resourceSp;
         }
         return resourceSp.DisplayName;
     }
 
-    private async Task<string> GetOrFetchAppRoleValueAsync(MgServicePrincipal cmd, string resourceId, string appRoleId)
+    private async Task<string> GetOrFetchAppRoleValueAsync(MgServicePrincipal cmd, Guid resourceId, Guid appRoleId)
     {
         if (!_resourceSpCache.TryGetValue(resourceId, out var resourceSp))
         {
-            resourceSp = await cmd.GetByIdAsync(Guid.Parse(resourceId), "?$select=id,displayName,appRoles");
+            resourceSp = await cmd.GetByIdAsync(resourceId, "?$select=id,displayName,appRoles");
             _resourceSpCache[resourceId] = resourceSp;
         }
-        var role = resourceSp.AppRoles.FirstOrDefault(r => r.Id.Equals(appRoleId, StringComparison.OrdinalIgnoreCase));
-        return role?.Value ?? appRoleId;
+        var role = resourceSp.AppRoles.FirstOrDefault(r => r.Id == appRoleId);
+        return role?.Value ?? appRoleId.ToString();
     }
 
     private void AddRecord(GetDirectoryServicePrincipalRecord record)
@@ -164,21 +165,19 @@ internal class GetDirectoryServicePrincipalRecord : ISolutionRecord
 
     public GetDirectoryServicePrincipalRecord() { }
 
-    private const string MicrosoftTenantId = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
-
     internal GetDirectoryServicePrincipalRecord(GraphServicePrincipal sp, Guid tenantId)
     {
-        Id = sp.Id;
+        Id = sp.Id.ToString();
         DisplayName = sp.DisplayName;
         AppId = sp.AppId;
         ServicePrincipalType = sp.ServicePrincipalType;
-        AppOwnerOrganizationId = sp.AppOwnerOrganizationId;
+        AppOwnerOrganizationId = sp.AppOwnerOrganizationId?.ToString() ?? string.Empty;
         AppOwnerOrganization = sp.AppOwnerOrganizationId switch
         {
-            var id when string.IsNullOrEmpty(id) => string.Empty,
-            var id when id.Equals(tenantId.ToString(), StringComparison.OrdinalIgnoreCase) => "Internal",
-            var id when id.Equals(MicrosoftTenantId, StringComparison.OrdinalIgnoreCase) => "Microsoft",
-            _ => "Third Party"
+            null                                               => string.Empty,
+            var id when id == tenantId                         => "Internal",
+            var id when id == GraphConstants.MicrosoftTenantId => "Microsoft",
+            _                                                  => "Third Party"
         };
 
         PublisherName = sp.VerifiedPublisher.DisplayName ?? string.Empty;

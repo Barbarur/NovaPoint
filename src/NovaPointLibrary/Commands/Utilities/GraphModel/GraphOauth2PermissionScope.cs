@@ -5,7 +5,7 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel;
 public class GraphOauth2PermissionScope
 {
     [JsonProperty("id")]
-    public string Id { get; set; } = string.Empty;
+    public Guid Id { get; set; }
     [JsonProperty("adminConsentDisplayName")]
     public string AdminConsentDisplayName { get; set; } = string.Empty;
     [JsonProperty("adminConsentDescription")]

@@ -14,7 +14,7 @@ public class GraphOAuth2PermissionGrant
     public string ConsentType { get; set; } = string.Empty;
 
     [JsonProperty("resourceId")]
-    public string ResourceId { get; set; } = string.Empty;
+    public Guid ResourceId { get; set; }
 
     [JsonProperty("scope")]
     public string Scope { get; set; } = string.Empty;

@@ -8,10 +8,10 @@ public class GraphAppRoleAssignment
     public string Id { get; set; } = string.Empty;
 
     [JsonProperty("appRoleId")]
-    public string AppRoleId { get; set; } = string.Empty;
+    public Guid AppRoleId { get; set; }
 
     [JsonProperty("resourceId")]
-    public string ResourceId { get; set; } = string.Empty;
+    public Guid ResourceId { get; set; }
 
     [JsonProperty("resourceDisplayName")]
     public string ResourceDisplayName { get; set; } = string.Empty;

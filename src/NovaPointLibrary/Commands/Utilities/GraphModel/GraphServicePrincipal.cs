@@ -5,7 +5,7 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel;
 public class GraphServicePrincipal
 {
     [JsonProperty("id")]
-    public string Id { get; set; } = string.Empty;
+    public Guid Id { get; set; }
 
     [JsonProperty("appId")]
     public string AppId { get; set; } = string.Empty;
@@ -17,7 +17,7 @@ public class GraphServicePrincipal
     public string DisplayName { get; set; } = string.Empty;
 
     [JsonProperty("appOwnerOrganizationId")]
-    public string AppOwnerOrganizationId { get; set; } = string.Empty;
+    public Guid? AppOwnerOrganizationId { get; set; }
 
     [JsonProperty("createdDateTime")]
     public DateTime? CreatedDateTime { get; set; }
@@ -27,6 +27,9 @@ public class GraphServicePrincipal
 
     [JsonProperty("signInAudience")]
     public string SignInAudience { get; set; } = string.Empty;
+
+    [JsonProperty("notes")]
+    public string Notes { get; set; } = string.Empty;
 
     [JsonProperty("appRoleAssignmentRequired")]
     public bool AppRoleAssignmentRequired { get; set; }

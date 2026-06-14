@@ -33,7 +33,7 @@ public class GraphApplication
     // [JsonProperty("isDisabled")]
     // public object? IsDisabled { get; set; }
     [JsonProperty("isFallbackPublicClient")]
-    public bool IsFallbackPublicClient { get; set; } = false;
+    public bool? IsFallbackPublicClient { get; set; }
     // [JsonProperty("nativeAuthenticationApisEnabled")]
     // public object? NativeAuthenticationApisEnabled { get; set; }
     [JsonProperty("notes")]
@@ -164,7 +164,7 @@ public class GraphRequiredResourceAccess
 public class GraphResourceAccess
 {
     [JsonProperty("id")]
-    public string Id { get; set; } = string.Empty;
+    public Guid Id { get; set; }
     [JsonProperty("type")]
     public string Type { get; set; } = string.Empty;
 }
