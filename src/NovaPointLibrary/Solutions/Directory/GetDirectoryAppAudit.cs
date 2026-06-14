@@ -106,52 +106,101 @@ public class GetDirectoryAppAudit : ISolution
                 _                                                  => _param.IncludeSpOwnersThirdPartyApps
             };
 
-            try
+            // Synchronous enrichment before any async work
+            appByAppId.TryGetValue(sp.AppId, out GraphApplication? regApp);
+            if (regApp != null)
+                record.EnrichWithRegisteredApp(regApp);
+
+            // Launch all independent Graph API calls concurrently
+            Task<IEnumerable<GraphUser>>? spOwnersTask =
+                fetchOwners ? cmd.GetOwnersAsync(spId) : null;
+
+            Task<IEnumerable<GraphUser>>? appRegOwnersTask =
+                regApp != null ? appCmd.GetOwnersAsync(regApp.Id) : null;
+
+            var oauthGrantsTask        = cmd.GetOAuth2PermissionGrantsAsync(spId);
+            var appRoleAssignmentsTask = cmd.GetAppRoleAssignmentsAsync(spId);
+
+            if (spOwnersTask != null)
             {
-                if (fetchOwners)
+                try { record.AddServPrincipalOwners(await spOwnersTask); }
+                catch (Exception ex)
                 {
-                    var owners = await cmd.GetOwnersAsync(spId);
-                    record.AddServPrincipalOwners(owners);
+                    _ctx.Logger.Error(GetType().Name, "GetOwnersAsync(SP)", spId.ToString(), ex);
+                    record.AppendRemark($"SP owners error: {ex.Message}");
                 }
-
-                appByAppId.TryGetValue(sp.AppId, out GraphApplication? regApp);
-                if (regApp != null)
-                {
-                    record.EnrichWithRegisteredApp(regApp);
-                    var appRegOwners = await appCmd.GetOwnersAsync(regApp.Id);
-                    record.AddAppRegOwners(appRegOwners);
-                }
-
-                var oauthGrants = await cmd.GetOAuth2PermissionGrantsAsync(spId);
-                var delegatedPerms = new List<string>();
-                foreach (var grant in oauthGrants)
-                {
-                    var resourceSp = await GetOrFetchResourceSpAsync(cmd, grant.ResourceId);
-                    string consentLabel = grant.ConsentType == "AllPrincipals" ? "Admin" : "User";
-                    delegatedPerms.Add($"[{consentLabel}] {resourceSp.DisplayName} ({grant.Scope})");
-                }
-                var appRoleAssignments = (await cmd.GetAppRoleAssignmentsAsync(spId)).ToList();
-                var appPerms = new List<string>();
-                foreach (var assignment in appRoleAssignments)
-                {
-                    var resourceSp = await GetOrFetchResourceSpAsync(cmd, assignment.ResourceId);
-                    var role = resourceSp.AppRoles.FirstOrDefault(r => r.Id == assignment.AppRoleId);
-                    appPerms.Add($"{assignment.ResourceDisplayName} ({role?.Value ?? assignment.AppRoleId.ToString()})");
-                }
-                record.AddPermissions(string.Join("; ", delegatedPerms), string.Join("; ", appPerms));
-
-                if (regApp != null)
-                    record.CompareApplicationPermissions(regApp, appRoleAssignments, spAppIdByObjectId);
             }
+
+            if (appRegOwnersTask != null)
+            {
+                try { record.AddAppRegOwners(await appRegOwnersTask); }
+                catch (Exception ex)
+                {
+                    _ctx.Logger.Error(GetType().Name, "GetOwnersAsync(AppReg)", regApp!.Id.ToString(), ex);
+                    record.AppendRemark($"App reg owners error: {ex.Message}");
+                }
+            }
+
+            IEnumerable<GraphOAuth2PermissionGrant>? oauthGrants = null;
+            try { oauthGrants = await oauthGrantsTask; }
             catch (Exception ex)
             {
-                _ctx.Logger.Error(GetType().Name, "ServicePrincipal", sp.Id.ToString(), ex);
-                record.Remarks = ex.Message;
+                _ctx.Logger.Error(GetType().Name, "GetOAuth2PermissionGrantsAsync", spId.ToString(), ex);
+                record.AppendRemark($"Delegated permissions error: {ex.Message}");
             }
-            finally
+
+            IList<GraphAppRoleAssignment>? appRoleAssignments = null;
+            try { appRoleAssignments = (await appRoleAssignmentsTask).ToList(); }
+            catch (Exception ex)
             {
-                record.SetAssessment();
+                _ctx.Logger.Error(GetType().Name, "GetAppRoleAssignmentsAsync", spId.ToString(), ex);
+                record.AppendRemark($"Application permissions error: {ex.Message}");
             }
+
+            var delegatedPerms = new List<string>();
+            if (oauthGrants != null)
+            {
+                foreach (var grant in oauthGrants)
+                {
+                    try
+                    {
+                        var resourceSp = await GetOrFetchResourceSpAsync(cmd, grant.ResourceId);
+                        string consentLabel = grant.ConsentType == "AllPrincipals" ? "Admin" : "User";
+                        delegatedPerms.Add($"[{consentLabel}] {resourceSp.DisplayName} ({grant.Scope})");
+                    }
+                    catch (Exception ex)
+                    {
+                        _ctx.Logger.Error(GetType().Name, "ResourceSP(delegated)", grant.ResourceId.ToString(), ex);
+                        record.AppendRemark($"Resource SP lookup error ({grant.ResourceId}): {ex.Message}");
+                    }
+                }
+            }
+
+            var appPerms = new List<string>();
+            if (appRoleAssignments != null)
+            {
+                foreach (var assignment in appRoleAssignments)
+                {
+                    try
+                    {
+                        var resourceSp = await GetOrFetchResourceSpAsync(cmd, assignment.ResourceId);
+                        var role = resourceSp.AppRoles.FirstOrDefault(r => r.Id == assignment.AppRoleId);
+                        appPerms.Add($"{assignment.ResourceDisplayName} ({role?.Value ?? assignment.AppRoleId.ToString()})");
+                    }
+                    catch (Exception ex)
+                    {
+                        _ctx.Logger.Error(GetType().Name, "ResourceSP(appRole)", assignment.ResourceId.ToString(), ex);
+                        record.AppendRemark($"Resource SP lookup error ({assignment.ResourceId}): {ex.Message}");
+                    }
+                }
+            }
+
+            record.AddPermissions(string.Join("; ", delegatedPerms), string.Join("; ", appPerms));
+
+            if (regApp != null && appRoleAssignments != null)
+                record.CompareApplicationPermissions(regApp, appRoleAssignments, spAppIdByObjectId);
+
+            record.SetAssessment();
 
             AddRecord(record);
             progress.ProgressUpdateReport();
@@ -162,7 +211,8 @@ public class GetDirectoryAppAudit : ISolution
     {
         if (!_resourceSpCache.TryGetValue(resourceId, out var resourceSp))
         {
-            resourceSp = await cmd.GetByIdAsync(resourceId, "?$select=id,displayName,appRoles");
+            var fetched = await cmd.GetByIdAsync(resourceId, "?$select=id,displayName,appRoles");
+            resourceSp = fetched ?? new GraphServicePrincipal { Id = resourceId, DisplayName = resourceId.ToString() };
             _resourceSpCache[resourceId] = resourceSp;
         }
         return resourceSp;
@@ -244,6 +294,11 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
 
     // Remarks
     public string Remarks { get; set; } = string.Empty;
+
+    internal void AppendRemark(string msg)
+    {
+        Remarks = string.IsNullOrEmpty(Remarks) ? msg : Remarks + " | " + msg;
+    }
 
     public GetDirectoryAppAuditRecord() { }
 
