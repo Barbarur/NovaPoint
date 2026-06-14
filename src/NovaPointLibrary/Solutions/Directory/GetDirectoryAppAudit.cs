@@ -78,6 +78,13 @@ public class GetDirectoryAppAudit : ISolution
 
         var tenantId = _ctx.AppClient.TenantId;
 
+        Dictionary<string, GraphServicePrincipalSignInActivity>? signInActivities = null;
+        if (_param.IncludeSignInActivity)
+        {
+            var signInCmd = new MgServicePrincipalSignInActivity(_ctx);
+            signInActivities = await signInCmd.GetAllAsync();
+        }
+
         ProgressTracker progress = new(_ctx.Logger, collSps.Count);
         foreach (var sp in collSps)
         {
@@ -200,6 +207,12 @@ public class GetDirectoryAppAudit : ISolution
             if (regApp != null && appRoleAssignments != null)
                 record.CompareApplicationPermissions(regApp, appRoleAssignments, spAppIdByObjectId);
 
+            if (signInActivities != null)
+            {
+                signInActivities.TryGetValue(sp.AppId, out GraphServicePrincipalSignInActivity? signInActivity);
+                record.EnrichWithSignInActivity(signInActivity);
+            }
+
             record.SetAssessment();
 
             AddRecord(record);
@@ -229,6 +242,7 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
     private readonly Guid? _ownerOrgId;
     private readonly Guid _tenantId;
     private bool _spOwnersFetched;
+    private bool _signInActivityFetched;
 
     // Application Properties
     public string Id { get; set; } = string.Empty;
@@ -278,6 +292,11 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
     public string AppRegSecretStatus { get; set; } = "None";
     public string AppRegCertStatus { get; set; } = "None";
     public string AppRegSecretCertDetails { get; set; } = string.Empty;
+
+    // Sign-In Activity
+    public bool HasSignInLast30Days { get; set; }
+    public bool HasDelegatedSignInLast30Days { get; set; }
+    public bool HasApplicationSignInLast30Days { get; set; }
 
     // Users & Groups
     public bool AssignmentRequired { get; set; }
@@ -385,6 +404,23 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
         AppRegOwners = string.Join("; ", ownersList.Select(o =>
             string.IsNullOrEmpty(o.UserPrincipalName) ? o.DisplayName : $"{o.DisplayName} ({o.UserPrincipalName})"));
     }
+
+    internal void EnrichWithSignInActivity(GraphServicePrincipalSignInActivity? activity)
+    {
+        _signInActivityFetched = true;
+
+        if (activity == null) return;
+
+        var cutoff = DateTime.UtcNow.AddDays(-30);
+
+        HasSignInLast30Days = MostRecent(activity.LastSignInActivity) > cutoff;
+        HasDelegatedSignInLast30Days = MostRecent(activity.DelegatedClientSignInActivity) > cutoff;
+        HasApplicationSignInLast30Days = MostRecent(activity.ApplicationAuthenticationClientSignInActivity) > cutoff;
+    }
+
+    private static DateTime? MostRecent(GraphSignInActivity? a) =>
+        a == null ? null : new[] { a.LastSignInDateTime, a.LastNonInteractiveSignInDateTime, a.LastSuccessfulSignInDateTime }
+            .Where(d => d.HasValue).Max();
 
     internal void AddPermissions(string delegated, string application)
     {
@@ -503,6 +539,7 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
             if (expectsOwner && ServPrincipalOwnersCount == 0) flags.Add("Service principal: No owners");
         }
         if (_ownerOrgId == _tenantId && AppRegOwnersCount == 0) flags.Add("App registration: No owners");
+        if (_signInActivityFetched && !HasSignInLast30Days) flags.Add("No recent sign-in (30 days)");
         NeedsReview = string.Join(" | ", flags);
     }
 }
@@ -515,4 +552,6 @@ public class GetDirectoryAppAuditParameters : ISolutionParameters
     public bool IncludeSpOwnersInternalApps { get; set; } = true;
     public bool IncludeSpOwnersMicrosoftApps { get; set; } = false;
     public bool IncludeSpOwnersThirdPartyApps { get; set; } = false;
+
+    public bool IncludeSignInActivity { get; set; } = false;
 }
