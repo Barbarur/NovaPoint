@@ -149,9 +149,14 @@ internal class GetDirectoryServicePrincipalRecord : ISolutionRecord
     public string ReplyUrls { get; set; } = string.Empty;
     public bool HasWildcardReplyUrl { get; set; }
     
-    // TO REVIEW!!
-    public string CertificateStatus { get; set; } = "None";
-    public string SecretStatus { get; set; } = "None";
+    public int SecretCount { get; set; }
+    public int SecretsValid { get; set; }
+    public int SecretExpired { get; set; }
+    public int SecretExpiresIn30Days { get; set; }
+    public int CertCount { get; set; }
+    public int CertsValid { get; set; }
+    public int CertExpired { get; set; }
+    public int CertExpiresIn30Days { get; set; }
 
     // Users & Groups
     public bool AssignmentRequired { get; set; }
@@ -200,31 +205,30 @@ internal class GetDirectoryServicePrincipalRecord : ISolutionRecord
         ReplyUrls = string.Join("; ", sp.ReplyUrls);
         HasWildcardReplyUrl = sp.ReplyUrls.Any(u => u.Contains('*'));
         
-        // TO REVIEW
-        if (!sp.KeyCredentials.Any())
+        SecretCount = sp.PasswordCredentials.Count;
+        foreach (var secret in sp.PasswordCredentials)
         {
-            CertificateStatus = "None";
-        }
-        else if (sp.KeyCredentials.Any(k => k.EndDateTime == null || k.EndDateTime > DateTime.UtcNow))
-        {
-            CertificateStatus = "Valid";
-        }
-        else
-        {
-            CertificateStatus = "Expired";
+            if (secret.EndDateTime.HasValue && secret.EndDateTime < DateTime.UtcNow)
+                SecretExpired++;
+            else
+            {
+                SecretsValid++;
+                if (secret.EndDateTime.HasValue && secret.EndDateTime < DateTime.UtcNow.AddDays(30))
+                    SecretExpiresIn30Days++;
+            }
         }
 
-        if (!sp.PasswordCredentials.Any())
+        CertCount = sp.KeyCredentials.Count;
+        foreach (var cert in sp.KeyCredentials)
         {
-            SecretStatus = "None";
-        }
-        else if (sp.PasswordCredentials.Any(p => p.EndDateTime == null || p.EndDateTime > DateTime.UtcNow))
-        {
-            SecretStatus = "Valid";
-        }
-        else
-        {
-            SecretStatus = "Expired";
+            if (cert.EndDateTime.HasValue && cert.EndDateTime < DateTime.UtcNow)
+                CertExpired++;
+            else
+            {
+                CertsValid++;
+                if (cert.EndDateTime.HasValue && cert.EndDateTime < DateTime.UtcNow.AddDays(30))
+                    CertExpiresIn30Days++;
+            }
         }
         
         
