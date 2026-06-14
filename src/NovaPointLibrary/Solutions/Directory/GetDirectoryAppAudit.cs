@@ -198,25 +198,36 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
     public bool AccessTokenFlowEnabled { get; set; }
     public bool AllowPublicClient { get; set; }
 
-    public int SecretCount { get; set; }
-    public int SecretsValid { get; set; }
-    public int SecretExpired { get; set; }
-    public int SecretExpiresIn30Days { get; set; }
-    public int CertCount { get; set; }
-    public int CertsValid { get; set; }
-    public int CertExpired { get; set; }
-    public int CertExpiresIn30Days { get; set; }
+    private int _spSecretValid;
+    private int _spSecretExpired;
+    private int _spSecretExpiresIn30Days;
+    private int _spCertValid;
+    private int _spCertExpired;
+    private int _spCertExpiresIn30Days;
+    private int _appRegSecretValid;
+    private int _appRegSecretExpired;
+    private int _appRegSecretExpiresIn30Days;
+    private int _appRegCertValid;
+    private int _appRegCertExpired;
+    private int _appRegCertExpiresIn30Days;
+
+    public string SpSecretStatus { get; set; } = "None";
+    public string SpCertStatus { get; set; } = "None";
+    public string SpSecretCertDetails { get; set; } = string.Empty;
+    public string AppRegSecretStatus { get; set; } = "None";
+    public string AppRegCertStatus { get; set; } = "None";
+    public string AppRegSecretCertDetails { get; set; } = string.Empty;
 
     // Users & Groups
     public bool AssignmentRequired { get; set; }
 
     // Permissions
+    public string GrantedDelegatedPermissions { get; set; } = string.Empty;
+    public string GrantedApplicationPermissions { get; set; } = string.Empty;
     public bool HasExcessiveApplicationPermissions { get; set; }
     public bool PotentialExcessiveDelegatedPermissions { get; set; }
     public bool HasUnconsentedApplicationPermissions { get; set; }
     public bool HasOrphanedApplicationPermissions { get; set; }
-    public string GrantedDelegatedPermissions { get; set; } = string.Empty;
-    public string GrantedApplicationPermissions { get; set; } = string.Empty;
 
     public string NeedsReview { get; set; } = string.Empty;
 
@@ -262,31 +273,32 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
         ReplyUrls = string.Join("; ", sp.ReplyUrls);
         HasWildcardReplyUrl = sp.ReplyUrls.Any(u => u.Contains('*'));
 
-        SecretCount = sp.PasswordCredentials.Count;
         foreach (var secret in sp.PasswordCredentials)
         {
             if (secret.EndDateTime.HasValue && secret.EndDateTime < DateTime.UtcNow)
-                SecretExpired++;
+                _spSecretExpired++;
             else
             {
-                SecretsValid++;
+                _spSecretValid++;
                 if (secret.EndDateTime.HasValue && secret.EndDateTime < DateTime.UtcNow.AddDays(30))
-                    SecretExpiresIn30Days++;
+                    _spSecretExpiresIn30Days++;
             }
         }
+        SpSecretStatus = BuildCredentialStatus(_spSecretValid, _spSecretExpiresIn30Days, _spSecretExpired);
 
-        CertCount = sp.KeyCredentials.Count;
         foreach (var cert in sp.KeyCredentials)
         {
             if (cert.EndDateTime.HasValue && cert.EndDateTime < DateTime.UtcNow)
-                CertExpired++;
+                _spCertExpired++;
             else
             {
-                CertsValid++;
+                _spCertValid++;
                 if (cert.EndDateTime.HasValue && cert.EndDateTime < DateTime.UtcNow.AddDays(30))
-                    CertExpiresIn30Days++;
+                    _spCertExpiresIn30Days++;
             }
         }
+        SpCertStatus = BuildCredentialStatus(_spCertValid, _spCertExpiresIn30Days, _spCertExpired);
+        SpSecretCertDetails = BuildDetailedCredentialSummary(_spSecretValid, _spSecretExpired, _spCertValid, _spCertExpired);
 
         AssignmentRequired = sp.AppRoleAssignmentRequired;
     }
@@ -339,15 +351,72 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
         ImplicitFlowEnabled = app.Web.ImplicitGrantSettings.EnableIdTokenIssuance;
         AccessTokenFlowEnabled = app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance;
         AllowPublicClient = app.IsFallbackPublicClient ?? false;
+
+        foreach (var secret in app.PasswordCredentials)
+        {
+            if (secret.EndDateTime.HasValue && secret.EndDateTime < DateTime.UtcNow)
+                _appRegSecretExpired++;
+            else
+            {
+                _appRegSecretValid++;
+                if (secret.EndDateTime.HasValue && secret.EndDateTime < DateTime.UtcNow.AddDays(30))
+                    _appRegSecretExpiresIn30Days++;
+            }
+        }
+        AppRegSecretStatus = BuildCredentialStatus(_appRegSecretValid, _appRegSecretExpiresIn30Days, _appRegSecretExpired);
+
+        foreach (var cert in app.KeyCredentials)
+        {
+            if (cert.EndDateTime.HasValue && cert.EndDateTime < DateTime.UtcNow)
+                _appRegCertExpired++;
+            else
+            {
+                _appRegCertValid++;
+                if (cert.EndDateTime.HasValue && cert.EndDateTime < DateTime.UtcNow.AddDays(30))
+                    _appRegCertExpiresIn30Days++;
+            }
+        }
+        AppRegCertStatus = BuildCredentialStatus(_appRegCertValid, _appRegCertExpiresIn30Days, _appRegCertExpired);
+        AppRegSecretCertDetails = BuildDetailedCredentialSummary(_appRegSecretValid, _appRegSecretExpired, _appRegCertValid, _appRegCertExpired);
+    }
+
+    private static string BuildCredentialStatus(int valid, int expiresIn30Days, int expired)
+    {
+        if (valid == 0 && expired == 0) return "None";
+        return valid == 0 ? "Expired" : "Valid";
+    }
+
+    private static string BuildDetailedCredentialSummary(int secretValid, int secretExpired, int certValid, int certExpired)
+    {
+        var parts = new List<string>();
+        if (secretValid > 0 || secretExpired > 0)
+        {
+            var s = new List<string>();
+            if (secretValid > 0) s.Add($"{secretValid} valid");
+            if (secretExpired > 0) s.Add($"{secretExpired} expired");
+            parts.Add($"Secret: {string.Join(", ", s)}");
+        }
+        if (certValid > 0 || certExpired > 0)
+        {
+            var c = new List<string>();
+            if (certValid > 0) c.Add($"{certValid} valid");
+            if (certExpired > 0) c.Add($"{certExpired} expired");
+            parts.Add($"Certificate: {string.Join(", ", c)}");
+        }
+        return string.Join(" | ", parts);
     }
 
     internal void SetAssessment()
     {
         var flags = new List<string>();
-        if (SecretExpired > 0) flags.Add("Expired secret");
-        if (CertExpired > 0) flags.Add("Expired certificate");
-        if (SecretExpiresIn30Days > 0) flags.Add("Secret expiring soon");
-        if (CertExpiresIn30Days > 0) flags.Add("Certificate expiring soon");
+        if (_spSecretExpired > 0) flags.Add("Expired secret");
+        if (_spCertExpired > 0) flags.Add("Expired certificate");
+        if (_spSecretExpiresIn30Days > 0) flags.Add("Secret expiring soon");
+        if (_spCertExpiresIn30Days > 0) flags.Add("Certificate expiring soon");
+        if (_appRegSecretExpired > 0) flags.Add("Expired app reg secret");
+        if (_appRegCertExpired > 0) flags.Add("Expired app reg certificate");
+        if (_appRegSecretExpiresIn30Days > 0) flags.Add("App reg secret expiring soon");
+        if (_appRegCertExpiresIn30Days > 0) flags.Add("App reg certificate expiring soon");
         if (HasWildcardReplyUrl) flags.Add("Wildcard reply URL");
         if (ImplicitFlowEnabled) flags.Add("Implicit flow enabled");
         if (AccessTokenFlowEnabled) flags.Add("Access token flow enabled");
