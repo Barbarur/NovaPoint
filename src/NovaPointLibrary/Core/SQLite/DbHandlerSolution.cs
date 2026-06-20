@@ -43,6 +43,40 @@ namespace NovaPointLibrary.Core.SQLite
             _sql.InsertValue(_logger, record);
         }
 
+        internal void WriteToCsv<ISolutionRecord>(IEnumerable<ISolutionRecord> records, string reportName)
+        {
+            _logger.Info(GetType().Name, $"Exporting {reportName}");
+            
+            string reportPath = Path.Combine(_logger._solutionFolderPath, _logger._solutionFileName + $"_{reportName}.csv");
+            PropertyInfo[] properties = typeof(ISolutionRecord).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            using StreamWriter csv = new(new FileStream(reportPath, FileMode.Append, FileAccess.Write));
+            WriteCsvHeader(csv, properties);
+            foreach (var record in records)
+                WriteCsvRow(csv, properties, record);
+        }
+
+        private static void WriteCsvHeader(StreamWriter csv, PropertyInfo[] properties)
+        {
+            var sb = new StringBuilder();
+            foreach (var p in properties)
+                sb.Append($"\"{p.Name}\",");
+            if (sb.Length > 0) sb.Length--;
+            csv.WriteLine(sb.ToString());
+        }
+
+        private static void WriteCsvRow(StreamWriter csv, PropertyInfo[] properties, object? record)
+        {
+            var sb = new StringBuilder();
+            foreach (var p in properties)
+            {
+                string s = $"{p.GetValue(record)}";
+                sb.Append($"\"{s.Replace("\"", "\"\"")}\",");
+            }
+            if (sb.Length > 0) sb.Length--;
+            csv.WriteLine(Regex.Replace(sb.ToString(), @"\r\n?|\n", ""));
+        }
+
         private void ClearCache()
         {
             foreach (var key in _solutionReports.Keys)
@@ -74,42 +108,15 @@ namespace NovaPointLibrary.Core.SQLite
 
         private void ExportReportToCsv<ISolutionRecord>(string reportName)
         {
-            _logger.Info(GetType().Name, $"Exporting report {reportName}");
+            _logger.Info(GetType().Name, $"Exporting {reportName}");
 
             string reportPath = Path.Combine(_logger._solutionFolderPath, _logger._solutionFileName + $"_{reportName}.csv");
+            PropertyInfo[] properties = typeof(ISolutionRecord).GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
+            using StreamWriter csv = new(new FileStream(reportPath, FileMode.Append, FileAccess.Write));
+            WriteCsvHeader(csv, properties);
             foreach (var record in _sql.GetAllRecords<ISolutionRecord>(_logger))
-            {
-                Type solutionType = typeof(ISolutionRecord);
-                PropertyInfo[] properties = solutionType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-                StringBuilder sb = new();
-                using StreamWriter csv = new(new FileStream(reportPath, FileMode.Append, FileAccess.Write));
-                {
-                    var csvFileLenth = new System.IO.FileInfo(reportPath).Length;
-                    if (csvFileLenth == 0)
-                    {
-                        foreach (var propertyInfo in properties)
-                        {
-                            sb.Append($"\"{propertyInfo.Name}\",");
-                        }
-                        if (sb.Length > 0) { sb.Length--; }
-
-                        csv.WriteLine(sb.ToString());
-                        sb.Clear();
-                    }
-
-                    foreach (var propertyInfo in properties)
-                    {
-                        string s = $"{propertyInfo.GetValue(record)}";
-                        sb.Append($"\"{s.Replace("\"", "\"\"")}\",");
-                    }
-                    if (sb.Length > 0) { sb.Length--; }
-                    string output = Regex.Replace(sb.ToString(), @"\r\n?|\n", "");
-
-                    csv.WriteLine(sb.ToString());
-                }
-            }
+                WriteCsvRow(csv, properties, record);
         }
     }
 }
