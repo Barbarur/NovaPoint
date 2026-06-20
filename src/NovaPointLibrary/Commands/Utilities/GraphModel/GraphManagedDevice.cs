@@ -33,13 +33,13 @@ public class GraphManagedDevice
     [JsonProperty("osVersion")]
     public string OsVersion { get; set; } = string.Empty;
     [JsonProperty("easActivated")]
-    public bool EasActivated { get; set; } = false;
+    public bool? EasActivated { get; set; } = null;
     [JsonProperty("easDeviceId")]
     public string EasDeviceId { get; set; } = string.Empty;
     [JsonProperty("easActivationDateTime")]
     public DateTime EasActivationDateTime { get; set; } = DateTime.MinValue;
     [JsonProperty("azureADRegistered")]
-    public bool AzureADRegistered { get; set; } = false;
+    public bool? AzureADRegistered { get; set; } = null;
     [JsonProperty("deviceEnrollmentType")]
     public string DeviceEnrollmentType { get; set; } = string.Empty;
     [JsonProperty("activationLockBypassCode")]
@@ -53,7 +53,7 @@ public class GraphManagedDevice
     [JsonProperty("deviceCategoryDisplayName")]
     public string DeviceCategoryDisplayName { get; set; } = string.Empty;
     [JsonProperty("isSupervised")]
-    public bool IsSupervised { get; set; } = false;
+    public bool? IsSupervised { get; set; } = null;
     [JsonProperty("exchangeLastSuccessfulSyncDateTime")]
     public DateTime ExchangeLastSuccessfulSyncDateTime { get; set; } = DateTime.MinValue;
     [JsonProperty("exchangeAccessState")]
@@ -65,7 +65,7 @@ public class GraphManagedDevice
     [JsonProperty("remoteAssistanceSessionErrorDetails")]
     public string RemoteAssistanceSessionErrorDetails { get; set; } = string.Empty;
     [JsonProperty("isEncrypted")]
-    public bool IsEncrypted { get; set; } = false;
+    public bool? IsEncrypted { get; set; } = null;
     [JsonProperty("userPrincipalName")]
     public string UserPrincipalName { get; set; } = string.Empty;
     [JsonProperty("model")]
@@ -95,15 +95,15 @@ public class GraphManagedDevice
     [JsonProperty("meid")]
     public string Meid { get; set; } = string.Empty;
     [JsonProperty("totalStorageSpaceInBytes")]
-    public int TotalStorageSpaceInBytes { get; set; } = -1;
+    public long TotalStorageSpaceInBytes { get; set; } = -1L;
     [JsonProperty("freeStorageSpaceInBytes")]
-    public int FreeStorageSpaceInBytes { get; set; } = -1;
+    public long FreeStorageSpaceInBytes { get; set; } = -1L;
     [JsonProperty("managedDeviceName")]
     public string ManagedDeviceName { get; set; } = string.Empty;
     [JsonProperty("partnerReportedThreatState")]
     public string PartnerReportedThreatState { get; set; } = string.Empty;
     [JsonProperty("requireUserEnrollmentApproval")]
-    public bool RequireUserEnrollmentApproval { get; set; } = false;
+    public bool? RequireUserEnrollmentApproval { get; set; } = null;
     [JsonProperty("managementCertificateExpirationDate")]
     public DateTime ManagementCertificateExpirationDate { get; set; } = DateTime.MinValue;
     [JsonProperty("iccid")]
@@ -115,7 +115,7 @@ public class GraphManagedDevice
     [JsonProperty("ethernetMacAddress")]
     public string EthernetMacAddress { get; set; } = string.Empty;
     [JsonProperty("physicalMemoryInBytes")]
-    public int PhysicalMemoryInBytes { get; set; } = -1;
+    public long PhysicalMemoryInBytes { get; set; } = -1L;
     [JsonProperty("enrollmentProfileName")]
     public string EnrollmentProfileName { get; set; } = string.Empty;
 }
