@@ -14,6 +14,14 @@ internal class MgManagedDevice(IContextManager ctx)
         return await new GraphAPIHandler(Ctx.Logger, Ctx.AppClient).GetCollectionAsync<GraphManagedDevice>(endpointPath);
     }
 
+    internal async Task<int> GetCompliancePolicyCountAsync(string deviceId)
+    {
+        string endpointPath = $"/deviceManagement/managedDevices/{deviceId}/deviceCompliancePolicyStates";
+        var policies = await new GraphAPIHandler(Ctx.Logger, Ctx.AppClient)
+            .GetCollectionAsync<GraphDeviceCompliancePolicyState>(endpointPath);
+        return policies.Count();
+    }
+
     internal async Task<IEnumerable<GraphDeviceCompliancePolicyState>> GetCompliancePolicyStatesAsync(string deviceId)
     {
         string endpointPath = $"/deviceManagement/managedDevices/{deviceId}/deviceCompliancePolicyStates";

@@ -1,3 +1,4 @@
+using System.Globalization;
 using NovaPointLibrary.Commands.DeviceManagement;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Context;
@@ -11,6 +12,22 @@ public class GetManagedDevices : ISolution
 
     private readonly ContextSolution _ctx;
     private readonly GetManagedDevicesParameters _param;
+
+    private readonly Dictionary<string, PlatformStats> _platformStats = new()
+    {
+        { "Windows", new() }, { "macOS", new() }, { "Linux", new() },
+        { "Android", new() }, { "iOS",   new() }, { "Other",  new() },
+    };
+
+    private sealed class PlatformStats
+    {
+        public int Total;
+        public int Compliant;
+        public int Retired;
+        public int FalsePositive;
+        public int MissingPolicy;
+        public int NotCompliant;
+    }
 
     private GetManagedDevices(ContextSolution context, GetManagedDevicesParameters parameters)
     {
@@ -27,24 +44,6 @@ public class GetManagedDevices : ISolution
     public static ISolution Create(ContextSolution context, ISolutionParameters parameters)
     {
         return new GetManagedDevices(context, (GetManagedDevicesParameters)parameters);
-    }
-
-    private readonly Dictionary<string, PlatformStats> _platformStats = new()
-    {
-        ["Windows"] = new(),
-        ["macOS"]   = new(),
-        ["Linux"]   = new(),
-        ["Android"] = new(),
-        ["iOS"]     = new(),
-        ["Other"]   = new(),
-    };
-
-    private sealed class PlatformStats
-    {
-        public int Total;
-        public int Compliant;
-        public int NonCompliantNoPrimaryUser;
-        public int NonCompliantOthers;
     }
 
     public async Task RunAsync()
@@ -97,7 +96,7 @@ public class GetManagedDevices : ISolution
             """;
 
         var cmd = new MgManagedDevice(_ctx);
-        var collDevices = await cmd.GetAllAsync(selectedProperties);
+        IEnumerable<GraphManagedDevice> collDevices = await cmd.GetAllAsync(selectedProperties);
 
         ProgressTracker progress = new(_ctx.Logger, collDevices.Count());
         foreach (var device in collDevices)
@@ -106,10 +105,10 @@ public class GetManagedDevices : ISolution
 
             try
             {
-                if (_param.IncludeComplianceReasons && device.ComplianceState != "compliant")
+                if (device.OperatingSystem == "Windows" && device.ComplianceState != "compliant")
                 {
                     var collPolicyState = await cmd.GetCompliancePolicyStatesAsync(device.Id);
-                    record.NoncomplianceReasons = FormatNoncomplianceReasons(collPolicyState);
+                    record.SetAssessment(collPolicyState);
                 }
             }
             catch (Exception ex)
@@ -119,50 +118,38 @@ public class GetManagedDevices : ISolution
             }
 
             AddRecord(record);
-            UpdatePlatformStats(record);
             progress.ProgressUpdateReport();
         }
 
         string[] platformOrder = ["Windows", "macOS", "Linux", "Android", "iOS", "Other"];
         var summaryRows = platformOrder
             .Where(p => _platformStats[p].Total > 0)
-            .Select(p => { var s = _platformStats[p]; return new GetManagedDevicesSummaryRecord(p, s.Total, s.Compliant, s.NonCompliantNoPrimaryUser, s.NonCompliantOthers); });
+            .Select(p =>
+            {
+                var s = _platformStats[p];
+                return new GetManagedDevicesSummaryRecord
+                {
+                    Platform      = p,
+                    Total         = s.Total,
+                    Compliant     = s.Compliant,
+                    Retired       = s.Retired,
+                    FalsePositive = s.FalsePositive,
+                    MissingPolicy = s.MissingPolicy,
+                    NotCompliant  = s.NotCompliant,
+                };
+            });
         _ctx.DbHandler.WriteToCsv(summaryRows, "Summary");
     }
-
-    private static string FormatNoncomplianceReasons(IEnumerable<GraphDeviceCompliancePolicyState> collPolicyState)
-    {
-        var reasons = new List<string>();
-        foreach (var policyState in collPolicyState)
-        {
-            if (policyState.State is "compliant" or "unknown" or "notApplicable")
-                continue;
-            
-            foreach (var setting in policyState.SettingStates)
-            {
-                if (setting.State is "compliant" or "unknown" or "notApplicable")
-                    continue;
-
-                // string reason = string.IsNullOrWhiteSpace(setting.ErrorDescription)
-                //     ? $"{policyState.DisplayName} › {setting.SettingName}"
-                //     : $"{policyState.DisplayName} › {setting.SettingName}: {setting.ErrorDescription}";
-                string reason = $"{policyState.DisplayName} > {setting.Setting.Split('.').Last()}: {setting.ErrorDescription}";
-                reasons.Add(reason);
-            }
-        }
-        return string.Join(" | ", reasons);
-    }
+    
 
     private void AddRecord(GetManagedDevicesRecord record)
     {
         _ctx.DbHandler.WriteRecord(record);
+        UpdatePlatformStats(record);
     }
 
     private void UpdatePlatformStats(GetManagedDevicesRecord record)
     {
-        if (_param.IgnoreDevicesWithNoPrimaryUser && string.IsNullOrEmpty(record.PrimaryUser) && record.ComplianceState != "Compliant")
-            return;
-
         string platform = record.OperatingSystem switch
         {
             "Windows" => "Windows",
@@ -173,14 +160,19 @@ public class GetManagedDevices : ISolution
             _         => "Other",
         };
 
-        var stats = _platformStats[platform];
-        stats.Total++;
+        var s = _platformStats[platform];
+        s.Total++;
+
         if (record.ComplianceState == "Compliant")
-            stats.Compliant++;
-        else if (string.IsNullOrEmpty(record.PrimaryUser))
-            stats.NonCompliantNoPrimaryUser++;
+            s.Compliant++;
+        else if (record.NonComplianceAssessment.StartsWith("Retired"))
+            s.Retired++;
+        else if (record.NonComplianceAssessment == "False Positive")
+            s.FalsePositive++;
+        else if (record.NonComplianceAssessment == "No Compliance policy assigned")
+            s.MissingPolicy++;
         else
-            stats.NonCompliantOthers++;
+            s.NotCompliant++;
     }
 
 }
@@ -191,7 +183,7 @@ internal class GetManagedDevicesRecord : ISolutionRecord
     // Device identity
     public string DeviceName { get; set; } = string.Empty;
     public string SerialNumber { get; set; } = string.Empty;
-    public string AzureADDeviceId { get; set; } = string.Empty;
+    public string AzureAdDeviceId { get; set; } = string.Empty;
     public string IntuneDeviceId { get; set; } = string.Empty;
     public string DeviceCategory { get; set; } = string.Empty;
 
@@ -200,10 +192,10 @@ internal class GetManagedDevicesRecord : ISolutionRecord
     public string Model { get; set; } = string.Empty;
     public string OperatingSystem { get; set; } = string.Empty;
     public string OsVersion { get; set; } = string.Empty;
-    public string TotalStorageGB { get; set; } = string.Empty;
-    public string FreeStorageGB { get; set; } = string.Empty;
+    public string TotalStorageGb { get; set; } = string.Empty;
+    public string FreeStorageGb { get; set; } = string.Empty;
     public string StorageUsedPct { get; set; } = string.Empty;
-    public string PhysicalMemoryGB { get; set; } = string.Empty;
+    public string PhysicalMemoryGb { get; set; } = string.Empty;
 
     // Primary user
     public string PrimaryUser { get; set; } = string.Empty;
@@ -222,19 +214,19 @@ internal class GetManagedDevicesRecord : ISolutionRecord
     // Compliance
     public string ComplianceState { get; set; } = string.Empty;
     public string ComplianceGracePeriodExpiration { get; set; } = string.Empty;
-    public string NoncomplianceReasons { get; set; } = string.Empty;
 
     // Security
     public string IsEncrypted { get; set; } = string.Empty;
     public string JailBroken { get; set; } = string.Empty;
     public string IsSupervised { get; set; } = string.Empty;
-    public string AzureADRegistered { get; set; } = string.Empty;
+    public string AzureAdRegistered { get; set; } = string.Empty;
     public string PartnerReportedThreatState { get; set; } = string.Empty;
 
     // Additional
     public string AndroidSecurityPatchLevel { get; set; } = string.Empty;
-    public string Notes { get; set; } = string.Empty;
+    public string DeviceNotes { get; set; } = string.Empty;
 
+    public string NonComplianceAssessment { get; set; } = string.Empty;
     public string Remarks { get; set; } = string.Empty;
 
     public GetManagedDevicesRecord() { }
@@ -243,7 +235,7 @@ internal class GetManagedDevicesRecord : ISolutionRecord
     {
         DeviceName = device.DeviceName;
         SerialNumber = device.SerialNumber;
-        AzureADDeviceId = device.AzureADDeviceId;
+        AzureAdDeviceId = device.AzureADDeviceId;
         IntuneDeviceId = device.Id;
         DeviceCategory = device.DeviceCategoryDisplayName;
 
@@ -251,16 +243,16 @@ internal class GetManagedDevicesRecord : ISolutionRecord
         Model = device.Model;
         OperatingSystem = device.OperatingSystem;
         OsVersion = device.OsVersion;
-        TotalStorageGB = device.TotalStorageSpaceInBytes >= 0
+        TotalStorageGb = device.TotalStorageSpaceInBytes >= 0
             ? Math.Round((double)device.TotalStorageSpaceInBytes / 1_073_741_824, 2).ToString()
             : string.Empty;
-        FreeStorageGB = device.FreeStorageSpaceInBytes >= 0
+        FreeStorageGb = device.FreeStorageSpaceInBytes >= 0
             ? Math.Round((double)device.FreeStorageSpaceInBytes / 1_073_741_824, 2).ToString()
             : string.Empty;
         StorageUsedPct = device.TotalStorageSpaceInBytes > 0
             ? $"{Math.Round((double)(device.TotalStorageSpaceInBytes - device.FreeStorageSpaceInBytes) / device.TotalStorageSpaceInBytes * 100, 0)}%"
             : string.Empty;
-        PhysicalMemoryGB = device.PhysicalMemoryInBytes >= 0
+        PhysicalMemoryGb = device.PhysicalMemoryInBytes >= 0
             ? Math.Round((double)device.PhysicalMemoryInBytes / 1_073_741_824, 2).ToString()
             : string.Empty;
 
@@ -300,11 +292,11 @@ internal class GetManagedDevicesRecord : ISolutionRecord
         IsEncrypted = device.IsEncrypted?.ToString() ?? string.Empty;
         JailBroken = NormalizeJailBroken(device.JailBroken);
         IsSupervised = device.IsSupervised?.ToString() ?? string.Empty;
-        AzureADRegistered = device.AzureADRegistered?.ToString() ?? string.Empty;
+        AzureAdRegistered = device.AzureADRegistered?.ToString() ?? string.Empty;
         PartnerReportedThreatState = NormalizeThreatState(device.PartnerReportedThreatState);
 
         AndroidSecurityPatchLevel = device.AndroidSecurityPatchLevel;
-        Notes = device.Notes;
+        DeviceNotes = device.Notes;
     }
 
     private static string NormalizeComplianceState(string s) => s switch
@@ -395,41 +387,87 @@ internal class GetManagedDevicesRecord : ISolutionRecord
         "windowsAzureADJoinUsingDeviceTenant" => "Windows Azure AD Join (Device Tenant)",
         _                                     => s,
     };
+
+    internal void SetAssessment(IEnumerable<GraphDeviceCompliancePolicyState> collPolicyState)
+    {
+        if (OperatingSystem != "Windows") {return;}
+        
+        if (string.IsNullOrEmpty(PrimaryUser))
+        {
+            NonComplianceAssessment = "Retired - No user";
+            return;    
+        }
+        
+        DateTime parsedDate = DateTime.Parse(LastSyncDate, CultureInfo.InvariantCulture);
+        if (parsedDate < DateTime.Now.AddDays(-30))
+        {
+            NonComplianceAssessment = "Retired - Inactive";
+            return; 
+        }
+
+        var policyStateList = collPolicyState.ToList();
+        var nonDefaultCompliancePolicies = policyStateList
+            .Where(p => p.Id != "c0f4911a-7ce6-4804-8563-677a2665d379")
+            .ToList();
+
+        if (!nonDefaultCompliancePolicies.Any())
+        {
+            NonComplianceAssessment = "No Compliance policy assigned";
+            return;
+        }
+        
+        var nonDefaultCompliancePoliciesNoCompliance = nonDefaultCompliancePolicies
+            .Where(p => p.State is not "compliant")
+            .ToList();
+        if (!nonDefaultCompliancePoliciesNoCompliance.Any())
+        {
+            NonComplianceAssessment = "False Positive";
+            return;
+        }
+
+        NonComplianceAssessment = FormatNoncomplianceReasons(policyStateList);
+
+    }
+    
+    private static string FormatNoncomplianceReasons(IEnumerable<GraphDeviceCompliancePolicyState> collPolicyState)
+    {
+        var policyStateList = collPolicyState.ToList();
+        var nonDefaultCompliancePolicies = policyStateList
+            .Where(p => p.Id != "c0f4911a-7ce6-4804-8563-677a2665d379")
+            .ToList();
+        var reasons = new List<string>();
+        foreach (var policyState in nonDefaultCompliancePolicies)
+        {
+            if (policyState.State is "compliant" or "unknown" or "notApplicable")
+                continue;
+            
+            foreach (var setting in policyState.SettingStates)
+            {
+                if (setting.State is "compliant" or "unknown" or "notApplicable")
+                    continue;
+
+                string reason = $"{policyState.DisplayName} > {setting.Setting.Split('.').Last()}: {setting.ErrorDescription}";
+                reasons.Add(reason);
+            }
+        }
+        return string.Join(" | ", reasons);
+    }
 }
 
 
 public class GetManagedDevicesParameters : ISolutionParameters
 {
-    public bool IncludeComplianceReasons { get; set; } = true;
-    public bool IgnoreDevicesWithNoPrimaryUser { get; set; } = false;
 }
 
 
-internal class GetManagedDevicesSummaryRecord : ISolutionRecord
+internal sealed class GetManagedDevicesSummaryRecord : ISolutionRecord
 {
-    public string Platform { get; set; } = string.Empty;
-    public int Total { get; set; }
-    public int Compliant { get; set; }
-    public string CompliantPct { get; set; } = string.Empty;
-    public int NonCompliantWithNoPrimaryUser { get; set; }
-    public string NonCompliantWithNoPrimaryUserPct { get; set; } = string.Empty;
-    public int NonCompliantOthers { get; set; }
-    public string NonCompliantOthersPct { get; set; } = string.Empty;
-
-    public GetManagedDevicesSummaryRecord() { }
-
-    internal GetManagedDevicesSummaryRecord(string platform, int total, int compliant, int noPrimaryUser, int others)
-    {
-        Platform = platform;
-        Total = total;
-        Compliant = compliant;
-        CompliantPct = Pct(compliant, total);
-        NonCompliantWithNoPrimaryUser = noPrimaryUser;
-        NonCompliantWithNoPrimaryUserPct = Pct(noPrimaryUser, total);
-        NonCompliantOthers = others;
-        NonCompliantOthersPct = Pct(others, total);
-    }
-
-    private static string Pct(int count, int total) =>
-        total > 0 ? $"{Math.Round((double)count / total * 100, 1)}%" : "0%";
+    public string Platform      { get; set; } = string.Empty;
+    public int    Total         { get; set; }
+    public int    Compliant     { get; set; }
+    public int    Retired       { get; set; }
+    public int    FalsePositive { get; set; }
+    public int    MissingPolicy { get; set; }
+    public int    NotCompliant  { get; set; }
 }
+
