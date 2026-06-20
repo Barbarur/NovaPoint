@@ -29,6 +29,24 @@ public class GetManagedDevices : ISolution
         return new GetManagedDevices(context, (GetManagedDevicesParameters)parameters);
     }
 
+    private readonly Dictionary<string, PlatformStats> _platformStats = new()
+    {
+        ["Windows"] = new(),
+        ["macOS"]   = new(),
+        ["Linux"]   = new(),
+        ["Android"] = new(),
+        ["iOS"]     = new(),
+        ["Other"]   = new(),
+    };
+
+    private sealed class PlatformStats
+    {
+        public int Total;
+        public int Compliant;
+        public int NonCompliantNoPrimaryUser;
+        public int NonCompliantOthers;
+    }
+
     public async Task RunAsync()
     {
         _ctx.AppClient.IsCancelled();
@@ -101,8 +119,15 @@ public class GetManagedDevices : ISolution
             }
 
             AddRecord(record);
+            UpdatePlatformStats(record);
             progress.ProgressUpdateReport();
         }
+
+        string[] platformOrder = ["Windows", "macOS", "Linux", "Android", "iOS", "Other"];
+        var summaryRows = platformOrder
+            .Where(p => _platformStats[p].Total > 0)
+            .Select(p => { var s = _platformStats[p]; return new GetManagedDevicesSummaryRecord(p, s.Total, s.Compliant, s.NonCompliantNoPrimaryUser, s.NonCompliantOthers); });
+        _ctx.DbHandler.WriteToCsv(summaryRows, "Summary");
     }
 
     private static string FormatNoncomplianceReasons(IEnumerable<GraphDeviceCompliancePolicyState> collPolicyState)
@@ -132,6 +157,32 @@ public class GetManagedDevices : ISolution
     {
         _ctx.DbHandler.WriteRecord(record);
     }
+
+    private void UpdatePlatformStats(GetManagedDevicesRecord record)
+    {
+        if (_param.IgnoreDevicesWithNoPrimaryUser && string.IsNullOrEmpty(record.PrimaryUser) && record.ComplianceState != "Compliant")
+            return;
+
+        string platform = record.OperatingSystem switch
+        {
+            "Windows" => "Windows",
+            "macOS"   => "macOS",
+            "Linux"   => "Linux",
+            "Android" => "Android",
+            "iOS"     => "iOS",
+            _         => "Other",
+        };
+
+        var stats = _platformStats[platform];
+        stats.Total++;
+        if (record.ComplianceState == "Compliant")
+            stats.Compliant++;
+        else if (string.IsNullOrEmpty(record.PrimaryUser))
+            stats.NonCompliantNoPrimaryUser++;
+        else
+            stats.NonCompliantOthers++;
+    }
+
 }
 
 
@@ -350,4 +401,35 @@ internal class GetManagedDevicesRecord : ISolutionRecord
 public class GetManagedDevicesParameters : ISolutionParameters
 {
     public bool IncludeComplianceReasons { get; set; } = true;
+    public bool IgnoreDevicesWithNoPrimaryUser { get; set; } = false;
+}
+
+
+internal class GetManagedDevicesSummaryRecord : ISolutionRecord
+{
+    public string Platform { get; set; } = string.Empty;
+    public int Total { get; set; }
+    public int Compliant { get; set; }
+    public string CompliantPct { get; set; } = string.Empty;
+    public int NonCompliantWithNoPrimaryUser { get; set; }
+    public string NonCompliantWithNoPrimaryUserPct { get; set; } = string.Empty;
+    public int NonCompliantOthers { get; set; }
+    public string NonCompliantOthersPct { get; set; } = string.Empty;
+
+    public GetManagedDevicesSummaryRecord() { }
+
+    internal GetManagedDevicesSummaryRecord(string platform, int total, int compliant, int noPrimaryUser, int others)
+    {
+        Platform = platform;
+        Total = total;
+        Compliant = compliant;
+        CompliantPct = Pct(compliant, total);
+        NonCompliantWithNoPrimaryUser = noPrimaryUser;
+        NonCompliantWithNoPrimaryUserPct = Pct(noPrimaryUser, total);
+        NonCompliantOthers = others;
+        NonCompliantOthersPct = Pct(others, total);
+    }
+
+    private static string Pct(int count, int total) =>
+        total > 0 ? $"{Math.Round((double)count / total * 100, 1)}%" : "0%";
 }
