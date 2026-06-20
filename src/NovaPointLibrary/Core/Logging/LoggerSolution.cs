@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Commands.Utilities;
+using NovaPointLibrary.Core.Settings;
 using NovaPointLibrary.Core.SQLite;
 using NovaPointLibrary.Solutions;
 using System.Diagnostics;
@@ -43,8 +44,7 @@ namespace NovaPointLibrary.Core.Logging
             UiAddLog = uiAddLog;
             _solutionName = solutionName;
 
-            string userDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            _solutionFolderPath = Path.Combine(userDocumentsFolder, "NovaPoint", _solutionName, DateTime.UtcNow.ToString("yyMMddHHmmss"));
+            _solutionFolderPath = Path.Combine(AppFolders.GetOutputFolder(), _solutionName, DateTime.UtcNow.ToString("yyMMddHHmmss"));
             Directory.CreateDirectory(_solutionFolderPath);
 
             _solutionFileName = _solutionName + "_" + DateTime.UtcNow.ToString("yyMMddHHmmss");

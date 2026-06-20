@@ -1,15 +1,11 @@
 ﻿using Microsoft.Identity.Client.Extensions.Msal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NovaPointLibrary.Core.Settings;
 
 namespace NovaPointLibrary.Commands.Authentication
 {
     internal class TokenCacheHelper
     {
-        private static readonly string s_cacheFilePath = Path.Combine(AppSettings.GetLocalAppPath(), "msal.cache");
+        private static readonly string s_cacheFilePath = Path.Combine(AppConfig.GetLocalAppPath(), "msal.cache");
 
         private static readonly string CacheFileName = Path.GetFileName(s_cacheFilePath);
         private static readonly string CacheDir = Path.GetDirectoryName(s_cacheFilePath);

@@ -1,6 +1,6 @@
 ﻿using Dapper;
-using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Core.Logging;
+using NovaPointLibrary.Core.Settings;
 
 
 namespace NovaPointLibrary.Core.SQLite
@@ -14,7 +14,7 @@ namespace NovaPointLibrary.Core.SQLite
         {
             get
             {
-                string bdPath = Path.Combine(AppSettings.GetLocalAppPath(), "solutioncache.db");
+                string bdPath = Path.Combine(AppConfig.GetLocalAppPath(), "solutioncache.db");
                 return $"Data Source={bdPath};";
             }
         }

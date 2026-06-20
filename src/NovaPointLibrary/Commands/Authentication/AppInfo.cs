@@ -86,38 +86,38 @@ namespace NovaPointLibrary.Commands.Authentication
         private AuthenticationResult? _rootPersonalAuthenticationResult = null;
         private AuthenticationResult? _rootSharedAuthenticationResult = null;
 
-        internal AppInfo(LoggerSolution logger, CancellationTokenSource cancelTokenSource)
-        {
-            _logger = logger;
-
-            Settings = AppSettings.GetSettings();
-            Settings.ValidateSettings();
-
-            this.CancelToken = cancelTokenSource.Token;
-
-            Uri authority = new($"https://login.microsoftonline.com/{Settings.TenantID}");
-            _app = PublicClientApplicationBuilder.Create(Settings.ClientId)
-                                                 .WithAuthority(authority)
-                                                 .WithDefaultRedirectUri()
-                                                 .Build();
-        }
-
-        internal static async Task<AppInfo> BuildAsync(LoggerSolution logger, CancellationTokenSource cancelTokenSource)
-        {
-            AppInfo appInfo = new(logger, cancelTokenSource);
-            appInfo.IsCancelled();
-
-            string url = $"/sites/root";
-            var graphSiteRoot = await new GraphAPIHandler(logger, appInfo).GetObjectAsync<GraphSitesRoot>(url);
-            logger.Info("Appinfo", $"Hostname: {graphSiteRoot.SiteCollection.Hostname}");
-
-            string domain = graphSiteRoot.SiteCollection.Hostname.Remove(graphSiteRoot.SiteCollection.Hostname.IndexOf(".sharepoint.com", StringComparison.OrdinalIgnoreCase));
-            logger.Info("Appinfo", $"Domain: {domain}");
-
-            appInfo.Domain = domain;
-
-            return appInfo;
-        }
+        // internal AppInfo(LoggerSolution logger, CancellationTokenSource cancelTokenSource)
+        // {
+        //     _logger = logger;
+        //
+        //     Settings = AppSettings.GetSettings();
+        //     Settings.ValidateSettings();
+        //
+        //     this.CancelToken = cancelTokenSource.Token;
+        //
+        //     Uri authority = new($"https://login.microsoftonline.com/{Settings.TenantID}");
+        //     _app = PublicClientApplicationBuilder.Create(Settings.ClientId)
+        //                                          .WithAuthority(authority)
+        //                                          .WithDefaultRedirectUri()
+        //                                          .Build();
+        // }
+        //
+        // internal static async Task<AppInfo> BuildAsync(LoggerSolution logger, CancellationTokenSource cancelTokenSource)
+        // {
+        //     AppInfo appInfo = new(logger, cancelTokenSource);
+        //     appInfo.IsCancelled();
+        //
+        //     string url = $"/sites/root";
+        //     var graphSiteRoot = await new GraphAPIHandler(logger, appInfo).GetObjectAsync<GraphSitesRoot>(url);
+        //     logger.Info("Appinfo", $"Hostname: {graphSiteRoot.SiteCollection.Hostname}");
+        //
+        //     string domain = graphSiteRoot.SiteCollection.Hostname.Remove(graphSiteRoot.SiteCollection.Hostname.IndexOf(".sharepoint.com", StringComparison.OrdinalIgnoreCase));
+        //     logger.Info("Appinfo", $"Domain: {domain}");
+        //
+        //     appInfo.Domain = domain;
+        //
+        //     return appInfo;
+        // }
 
 
         public void IsCancelled()

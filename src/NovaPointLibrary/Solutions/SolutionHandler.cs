@@ -16,7 +16,7 @@ namespace NovaPointLibrary.Solutions
         
         public CancellationTokenSource CancelTokenSource { get; set; } = new();
         
-        public string SolutionFolder { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        public string SolutionFolder { get; set; } = NovaPointLibrary.Core.Settings.AppFolders.GetOutputFolder();
 
         private static readonly ReaderWriterLock rwl = new();
 

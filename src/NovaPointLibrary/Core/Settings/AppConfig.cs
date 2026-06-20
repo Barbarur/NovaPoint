@@ -8,7 +8,7 @@ namespace NovaPointLibrary.Core.Settings
 {
     public class AppConfig
     {
-        private static readonly string _npLocalAppFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NovaPoint");
+        private static readonly string _NpLocalAppFolder = AppFolders.GetConfigFolder();
 
         public List<AppClientConfidentialProperties> ListAppClientConfidentialProperties { get; set; } = [];
         public List<AppClientPublicProperties> ListAppClientPublicProperties { get; set; } = [];
@@ -17,7 +17,7 @@ namespace NovaPointLibrary.Core.Settings
 
         internal static string GetLocalAppPath()
         {
-            string localAppPath = Path.Combine(_npLocalAppFolder, VersionControl.GetVersion());
+            string localAppPath = Path.Combine(_NpLocalAppFolder, VersionControl.GetVersion());
             System.IO.Directory.CreateDirectory(localAppPath);
 
             return localAppPath;
@@ -117,7 +117,7 @@ namespace NovaPointLibrary.Core.Settings
         {
             string localAppPathFolderData = GetLocalAppPath();
 
-            string[] localAppPathFolders = System.IO.Directory.GetDirectories(_npLocalAppFolder);
+            string[] localAppPathFolders = System.IO.Directory.GetDirectories(_NpLocalAppFolder);
             foreach (var folderPath in localAppPathFolders)
             {
                 if (!String.Equals(localAppPathFolderData, folderPath) && System.IO.Directory.Exists(folderPath))
