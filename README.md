@@ -13,7 +13,7 @@ Follow **NovaPoint** on
 [Twitter](https://x.com/NovaPoint22)
 
 
-[![NovaPoint 0.7.0](https://img.youtube.com/vi/-0__y4mBYto/hqdefault.jpg)](https://youtu.be/-0__y4mBYto)
+[![NovaPoint 0.15.0](https://img.youtube.com/vi/-0__y4mBYto/hqdefault.jpg)](https://youtu.be/-0__y4mBYto)
 
 </div>
 
@@ -21,7 +21,7 @@ Follow **NovaPoint** on
 
 ## Getting started ##
 
-All Documentation related with this project can be found in our [Wiki](https://github.com/Barbarur/NovaPoint/wiki),. As first step; [Learn how to setup NovaPoint](https://github.com/Barbarur/NovaPoint/wiki/Setup).
+All Documentation related with this project can be found in our [Wiki](https://github.com/Barbarur/NovaPoint/wiki). As first step, [Learn how to setup NovaPoint](https://github.com/Barbarur/NovaPoint/wiki/Start-Setup).
 
 <br>
 
@@ -31,9 +31,11 @@ All Documentation related with this project can be found in our [Wiki](https://g
 - [Microsoft.Identity.Client.Extensions.Msal](https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet)
 - [Newtonsoft.Json](https://www.newtonsoft.com/json)
 - [PnP.Core](https://github.com/pnp/pnpcore)
-- [PnP.Framwork](https://github.com/pnp/pnpframework)
+- [PnP.Framework](https://github.com/pnp/pnpframework)
+- [Dapper](https://github.com/DapperLib/Dapper)
+- [Microsoft.Data.Sqlite](https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/)
 - [WPF](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
-- [.Net 6](https://learn.microsoft.com/en-us/dotnet)
+- [.Net 8](https://learn.microsoft.com/en-us/dotnet)
 
 <br>
  
