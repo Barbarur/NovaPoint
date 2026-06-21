@@ -9,7 +9,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class RemoveSharingLinksAuto : ISolution
     {
         public static readonly string s_SolutionName = "Remove Sharing Links";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSharingLinksAuto";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(RemoveSharingLinksAuto)}";
 
         private ContextSolution _ctx;
         private RemoveSharingLinksAutoParameters _param;

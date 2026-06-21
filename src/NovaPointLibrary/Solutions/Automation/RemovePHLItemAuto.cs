@@ -13,7 +13,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class RemovePHLItemAuto : ISolution
     {
         public static readonly string s_SolutionName = "Remove Files from Preservation";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemovePHLItemAuto";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(RemovePHLItemAuto)}";
 
         private ContextSolution _ctx;
         private RemovePHLItemAutoParameters _param;

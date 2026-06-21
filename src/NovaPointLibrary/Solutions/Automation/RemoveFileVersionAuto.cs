@@ -10,7 +10,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class RemoveFileVersionAuto : ISolution
     {
         public readonly static String s_SolutionName =  "Remove file versions";
-        public readonly static String s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveFileVersionAuto";
+        public readonly static String s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(RemoveFileVersionAuto)}";
 
         private ContextSolution _ctx;
         private RemoveFileVersionAutoParameters _param;

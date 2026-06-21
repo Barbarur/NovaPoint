@@ -12,7 +12,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class ListReport : ISolution
     {
         public static readonly string s_SolutionName = "Libraries and Lists report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ListReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(ListReport)}";
 
         private ContextSolution _ctx;
         private ListReportParameters _param;

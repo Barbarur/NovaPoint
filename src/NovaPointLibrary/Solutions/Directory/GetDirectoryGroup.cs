@@ -8,7 +8,7 @@ namespace NovaPointLibrary.Solutions.Directory
     public class GetDirectoryGroup : ISolution
     {
         public static readonly string s_SolutionName = "Directory Groups report";
-        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-{typeof(GetDirectoryGroup).Name}";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-{nameof(GetDirectoryGroup)}";
 
         private ContextSolution _ctx;
         private readonly GetDirectoryGroupParameters _param;

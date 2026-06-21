@@ -10,7 +10,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class PrivacySiteReport : ISolution
     {
         public static readonly string s_SolutionName = "Public and Private Site Collections report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PrivacySiteReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(PrivacySiteReport)}";
 
         private ContextSolution _ctx;
         private PrivacySiteReportParameters _param;

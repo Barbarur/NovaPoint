@@ -13,7 +13,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class CopyDuplicateFileAuto : ISolution
     {
         public readonly static string s_SolutionName = "Copy or Duplicate Files across Sites";
-        public readonly static string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-CopyDuplicateFileAuto";
+        public readonly static string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(CopyDuplicateFileAuto)}";
 
         private ContextSolution _ctx;
         private readonly CopyDuplicateFileAutoParameters _param;

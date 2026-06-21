@@ -11,7 +11,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class ShortcutODReport : ISolution
     {
         public static readonly string s_SolutionName = "OneDrive shortcut report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ShortcutODReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(ShortcutODReport)}";
 
         private ContextSolution _ctx;
         private ShortcutODReportParameters _param;

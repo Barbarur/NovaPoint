@@ -11,7 +11,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class PageAssetsReport : ISolution
     {
         public static readonly string s_SolutionName = "Page assets report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PageAssetsReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(PageAssetsReport)}";
 
         private ContextSolution _ctx;
         private PageAssetsReportParameters _param;

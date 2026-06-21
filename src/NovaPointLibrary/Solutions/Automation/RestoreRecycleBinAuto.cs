@@ -14,7 +14,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class RestoreRecycleBinAuto : ISolution
     {
         public static readonly string s_SolutionName = "Restore items from recycle bin";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RestoreRecycleBinAuto";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(RestoreRecycleBinAuto)}";
 
         private ContextSolution _ctx;
         private RestoreRecycleBinAutoParameters _param;

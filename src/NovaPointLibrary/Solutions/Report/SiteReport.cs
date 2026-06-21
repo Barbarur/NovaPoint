@@ -15,7 +15,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class SiteReport : ISolution
     {
         public static readonly string s_SolutionName = "Site Collections & Subsites report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-SiteReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(SiteReport)}";
 
         private ContextSolution _ctx;
         private SiteReportParameters _param;

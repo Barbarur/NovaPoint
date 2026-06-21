@@ -12,7 +12,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class RemoveSiteAuto : ISolution
     {
         public static readonly string s_SolutionName = "Delete Site Collections and Subsites";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSiteAuto";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(RemoveSiteAuto)}";
 
         private ContextSolution _ctx;
         private RemoveSiteAutoParameters _param;

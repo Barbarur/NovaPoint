@@ -18,7 +18,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class PermissionsReport : ISolution
     {
         public static readonly string s_SolutionName = "Permissions report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PermissionsReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(PermissionsReport)}";
 
         private ContextSolution _ctx;
         private PermissionsReportParameters _param;

@@ -9,7 +9,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class ClearRecycleBinAuto : ISolution
     {
         public static readonly string s_SolutionName = "Delete items from recycle bin";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-ClearRecycleBinAuto";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(ClearRecycleBinAuto)}";
 
         private ContextSolution _ctx;
         private ClearRecycleBinAutoParameters _param;

@@ -11,7 +11,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class SharingLinksReport : ISolution
     {
         public static readonly string s_SolutionName = "Sharing Links report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-SharingLinksReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(SharingLinksReport)}";
 
         private ContextSolution _ctx;
         private SharingLinksReportParameters _param;

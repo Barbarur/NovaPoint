@@ -14,7 +14,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class ItemReport : ISolution
     {
         public static readonly string s_SolutionName = "Files and Items report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-ItemReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(ItemReport)}";
 
         private ContextSolution _ctx;
         private ItemReportParameters _param;

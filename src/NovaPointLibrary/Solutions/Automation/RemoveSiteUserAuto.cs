@@ -11,7 +11,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class RemoveSiteUserAuto : ISolution
     {
         public static readonly string s_SolutionName = "Remove user from Site";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RemoveSiteUserAuto";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(RemoveSiteUserAuto)}";
 
         private ContextSolution _ctx;
         private RemoveUserAutoParameters _param;

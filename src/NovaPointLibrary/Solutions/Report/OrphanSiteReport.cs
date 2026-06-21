@@ -11,7 +11,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class OrphanSiteReport : ISolution
     {
         public static readonly string s_SolutionName = "Orphan sites report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-OrphanSiteReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(OrphanSiteReport)}";
 
         private ContextSolution _ctx;
         private OrphanSiteReportParameters _param;

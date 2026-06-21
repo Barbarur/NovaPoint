@@ -10,7 +10,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class SetVersioningLimitAuto : ISolution
     {
         public static readonly string s_SolutionName = "Set versioning limit";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-SetVersioningLimitAuto";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(SetVersioningLimitAuto)}";
 
         private ContextSolution _ctx;
         private SetVersioningLimitAutoParameters _param;

@@ -9,7 +9,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class SetSiteCollectionAdminAuto : ISolution
     {
         public static readonly string s_SolutionName = "Add or Remove user as Admin";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-SetSiteCollectionAdminAuto";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(SetSiteCollectionAdminAuto)}";
 
         private ContextSolution _ctx;
         private SetSiteCollectionAdminAutoParameters _param;

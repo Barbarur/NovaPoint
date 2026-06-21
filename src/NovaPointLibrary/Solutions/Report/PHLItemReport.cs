@@ -15,7 +15,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class PHLItemReport : ISolution
     {
         public static readonly string s_SolutionName = "Preservation Hold Library report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-PHLItemReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(PHLItemReport)}";
 
         private ContextSolution _ctx;
         private PHLItemReportParameters _param;

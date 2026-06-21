@@ -9,7 +9,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class RecycleBinReport : ISolution
     {
         public static readonly string s_SolutionName = "Recycle bin report";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-RecycleBinReport";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(RecycleBinReport)}";
 
         private ContextSolution _ctx;
         private RecycleBinReportParameters _param;

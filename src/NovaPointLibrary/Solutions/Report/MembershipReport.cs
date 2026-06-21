@@ -12,7 +12,7 @@ namespace NovaPointLibrary.Solutions.Report
     public class MembershipReport : ISolution
     {
         public static readonly string s_SolutionName = "Site Membership report";
-        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{typeof(MembershipReport).Name}";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Report-{nameof(MembershipReport)}";
 
         private ContextSolution _ctx;
         private MembershipReportParameters _param;

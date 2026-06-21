@@ -12,7 +12,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class RestorePHLItemAuto : ISolution
     {
         public static readonly string s_SolutionName = "Restore Files from Preservation";
-        public static readonly string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-RestorePHLItemAuto";
+        public static readonly string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(RestorePHLItemAuto)}";
 
         private ContextSolution _ctx;
         private RestorePHLItemAutoParameters _param;

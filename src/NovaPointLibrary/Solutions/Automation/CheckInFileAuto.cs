@@ -10,7 +10,7 @@ namespace NovaPointLibrary.Solutions.Automation
     public class CheckInFileAuto : ISolution
     {
         public readonly static String s_SolutionName = "Check-In files";
-        public readonly static String s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-CheckInFileAuto";
+        public readonly static String s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-Automation-{nameof(CheckInFileAuto)}";
 
         private ContextSolution _ctx;
         private CheckInFileAutoParameters _param;

@@ -13,7 +13,7 @@ namespace NovaPointLibrary.Solutions.QuickFix
     public class IdMismatchTrouble : ISolution
     {
         public readonly static string s_SolutionName = "Resolve user ID Mismatch";
-        public readonly static string s_SolutionDocs = "https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-IdMismatchTrouble";
+        public readonly static string s_SolutionDocs = $"https://github.com/Barbarur/NovaPoint/wiki/Solution-QuickFix-{nameof(IdMismatchTrouble)}";
 
         private readonly ContextSolution _ctx;
         private readonly IdMismatchTroubleParameters _param;
