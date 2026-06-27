@@ -1,53 +1,37 @@
 ﻿using NovaPointLibrary.Commands.SharePoint.Site;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace NovaPointWPF.UserControls
 {
-    /// <summary>
-    /// Interaction logic for AdminForm.xaml
-    /// </summary>
-    public partial class AdminForm : UserControl
+
+    public partial class AdminForm : UserControl, INotifyPropertyChanged
     {
+        public SPOAdminAccessParameters Parameters { get; set; } = new();
+        public bool AddAdmin
+        {
+            get { return Parameters.AddAdmin; }
+            set { Parameters.AddAdmin = value; }
+        }
+
+        public bool RemoveAdmin
+        {
+            get { return Parameters.RemoveAdmin; }
+            set { Parameters.RemoveAdmin = value; }
+        }
+
         public AdminForm()
         {
             InitializeComponent();
         }
 
-        public SPOAdminAccessParameters Parameters { get; set; } = new();
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        private bool _addAdmin = true;
-        public bool AddAdmin
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            get { return _addAdmin; }
-            set
-            {
-                _addAdmin = value;
-                Parameters.AddAdmin = value;
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private bool _removeAdmin = true;
-        public bool RemoveAdmin
-        {
-            get { return _removeAdmin; }
-            set
-            {
-                _removeAdmin = value;
-                Parameters.RemoveAdmin = value;
-            }
-        }
     }
 }

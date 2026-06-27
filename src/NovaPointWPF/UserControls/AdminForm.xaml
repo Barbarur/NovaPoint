@@ -17,7 +17,7 @@
             <npusercontrols:FilterTitle
                 x:Name="FilterTitleLabel"
                 Title="Site Collection Administrator is required to run the Solution"
-                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-site-collection-admin"/>
+                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Parameters-SPOAdminAccessParameters"/>
 
 
             <Grid Style="{DynamicResource SolutionMenuGrid}">
@@ -50,13 +50,14 @@
                                         Style="{DynamicResource ToggleButtonSolutionForm}"
                                         Content="Yes"
                                         Width="120"
-                                        IsChecked="{Binding AddAdmin, ElementName=root}"
+                                        IsChecked="{Binding AddAdmin, Mode=TwoWay, ElementName=root}"
                                         Margin="0,0,8,0"/>
 
                                     <RadioButton
                                         Style="{DynamicResource ToggleButtonSolutionForm}"
                                         Width="120"
-                                        Content="No"/>
+                                        Content="No"
+                                        IsChecked="True"/>
 
                                 </StackPanel>
                             </StackPanel>
@@ -82,13 +83,14 @@
                                         Style="{DynamicResource ToggleButtonSolutionForm}"
                                         Content="Yes"
                                         Width="120"
-                                        IsChecked="{Binding RemoveAdmin, ElementName=root}"
+                                        IsChecked="{Binding RemoveAdmin, Mode=TwoWay, ElementName=root}"
                                         Margin="0,0,8,0"/>
 
                                     <RadioButton
                                         Style="{DynamicResource ToggleButtonSolutionForm}"
                                         Width="120"
-                                        Content="No"/>
+                                        Content="No"
+                                        IsChecked="True"/>
 
                                 </StackPanel>
 
