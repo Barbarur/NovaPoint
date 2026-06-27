@@ -18,7 +18,7 @@
             <npusercontrols:FilterTitle
                 x:Name="FilterTitleLabel"
                 Title="Library and List filter"
-                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-library-and-list-filter"/>
+                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Parameters-SPOListsParameters"/>
 
             <Grid Style="{DynamicResource SolutionMenuGrid}">
 

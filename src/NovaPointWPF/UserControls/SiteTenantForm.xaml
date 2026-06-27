@@ -23,7 +23,7 @@
             <npusercontrols:FilterTitle
                 x:Name="FilterTitleLabel"
                 Title="Sites filter"
-                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-site-filter"/>
+                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Parameters-SPOTenantSiteUrlsParameters"/>
 
             <Grid Style="{DynamicResource SolutionMenuGrid}">
 

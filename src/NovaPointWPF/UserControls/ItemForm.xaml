@@ -16,7 +16,7 @@
             <npusercontrols:FilterTitle
                 x:Name="FilterTitleLabel"
                 Title="Files and Items filter"
-                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-files-and-items-filter"/>
+                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Parameters-SPOItemsParameters"/>
 
             <Grid Style="{DynamicResource SolutionMenuGrid}">
 

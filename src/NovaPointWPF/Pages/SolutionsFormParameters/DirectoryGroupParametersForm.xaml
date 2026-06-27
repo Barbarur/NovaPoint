@@ -16,7 +16,7 @@
 
             <npusercontrols:FilterTitle
                 Title="Directory Group Filter"
-                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Definitions-Directory-Groups"/>
+                LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Parameters-DirectoryGroupParameters"/>
 
             <Grid Style="{DynamicResource SolutionMenuGrid}">
 
