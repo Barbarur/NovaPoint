@@ -38,10 +38,10 @@ namespace NovaPointWPF.Pages.Menus
 
             DataContext = this;
 
-            AppSettings = AppSettings.GetSettings();
-            TenantId = AppSettings.TenantID;
-            ClientId = AppSettings.ClientId;
-            CachingToken = AppSettings.CachingToken;
+            //AppSettings = AppSettings.GetSettings();
+            //TenantId = AppSettings.TenantID;
+            //ClientId = AppSettings.ClientId;
+            //CachingToken = AppSettings.CachingToken;
 
         }
 
@@ -61,29 +61,29 @@ namespace NovaPointWPF.Pages.Menus
 
         private void SaveClick(object sender, RoutedEventArgs e)
         {
-            AppSettings.TenantID = TenantId;
-            AppSettings.ClientId = ClientId;
-            AppSettings.CachingToken = CachingToken;
+            //    AppSettings.TenantID = TenantId;
+            //    AppSettings.ClientId = ClientId;
+            //    AppSettings.CachingToken = CachingToken;
 
-            try
-            {
-                AppSettings.SaveSettings();
+            //    try
+            //    {
+            //        AppSettings.SaveSettings();
 
-                if (!CachingToken) { AppSettings.RemoveTokenCache(); }
+            //        if (!CachingToken) { AppSettings.RemoveTokenCache(); }
 
-                TriggerNotification("Settings saved");
-            }
-            catch
-            {
-                TriggerNotification("Error while saving setting, please try again.");
-            }
+            //        TriggerNotification("Settings saved");
+            //    }
+            //    catch
+            //    {
+            //        TriggerNotification("Error while saving setting, please try again.");
+            //    }
         }
 
         private void DeleteClick(object sender, RoutedEventArgs e)
         {
-            AppSettings.RemoveTokenCache();
+            //AppSettings.RemoveTokenCache();
 
-            TriggerNotification("Cache deleted");
+            //TriggerNotification("Cache deleted");
         }
 
         private void AboutClick(object sender, RoutedEventArgs e)
