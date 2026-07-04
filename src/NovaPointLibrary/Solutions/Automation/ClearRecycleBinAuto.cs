@@ -99,7 +99,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
                     try
                     {
-                        // await new SPORecycleBinItemREST(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteUrl, oRecycleBinItem);
+                        await new SPORecycleBinItemREST(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteUrl, oRecycleBinItem);
                         remarks = "Item removed from Recycle bin";
                     }
                     catch (Exception ex)
