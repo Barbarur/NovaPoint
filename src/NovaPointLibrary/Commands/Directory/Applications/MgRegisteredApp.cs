@@ -8,9 +8,9 @@ internal class MgRegisteredApp(IContextManager ctx)
 {
     private IContextManager Ctx { get; init; } = ctx;
 
-    internal async Task<IEnumerable<GraphApplication>> GetAllAsync(string optionalQuery = "")
+    internal async Task<IEnumerable<GraphApplication>> GetAllAsync(string optionalQuery = "", bool beta = false)
     {
-        string endpointPath = $"/applications" + optionalQuery;
+        string endpointPath = (beta ? "https://graph.microsoft.com/beta/applications" : "/applications") + optionalQuery;
         return await new GraphAPIHandler(Ctx.Logger, Ctx.AppClient).GetCollectionAsync<GraphApplication>(endpointPath);
     }
 

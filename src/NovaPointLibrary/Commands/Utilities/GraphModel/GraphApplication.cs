@@ -30,8 +30,8 @@ public class GraphApplication
     public List<object> IdentifierUris { get; set; } = [];
     // [JsonProperty("isDeviceOnlyAuthSupported")]
     // public object? IsDeviceOnlyAuthSupported { get; set; }
-    // [JsonProperty("isDisabled")]
-    // public object? IsDisabled { get; set; }
+    [JsonProperty("isDisabled")]
+    public bool? IsDisabled { get; set; }
     [JsonProperty("isFallbackPublicClient")]
     public bool? IsFallbackPublicClient { get; set; }
     // [JsonProperty("nativeAuthenticationApisEnabled")]

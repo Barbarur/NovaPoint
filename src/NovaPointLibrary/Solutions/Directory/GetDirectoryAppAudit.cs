@@ -44,13 +44,14 @@ public class GetDirectoryAppAudit : ISolution
             notes,
             web,
             isFallbackPublicClient,
+            isDisabled,
             keyCredentials,
             passwordCredentials,
             requiredResourceAccess
             """;
 
         var appCmd = new MgRegisteredApp(_ctx);
-        var allApps = await appCmd.GetAllAsync(raSelectedProperties);
+        var allApps = await appCmd.GetAllAsync(raSelectedProperties, beta: true);
         var appByAppId = allApps.ToDictionary(a => a.AppId, StringComparer.OrdinalIgnoreCase);
 
         string spSelectedProperties = """
@@ -59,6 +60,7 @@ public class GetDirectoryAppAudit : ISolution
             displayName,
             appId,
             servicePrincipalType,
+            accountEnabled,
             appOwnerOrganizationId,
             VerifiedPublisher,
             signInAudience,
@@ -248,6 +250,8 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
     public string Id { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
     public string AppId { get; set; } = string.Empty;
+    public string AppActivationStatus { get; set; } = string.Empty;
+    public bool SignInEnabled { get; set; }
     public string ServicePrincipalType { get; set; } = string.Empty;
     public string AppOwnerOrganizationId { get; set; } = string.Empty;
     public string AppOwnerOrganization { get; set; } = string.Empty;
@@ -330,6 +334,7 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
         DisplayName = sp.DisplayName;
         AppId = sp.AppId;
         ServicePrincipalType = sp.ServicePrincipalType;
+        SignInEnabled = sp.AccountEnabled;
         AppOwnerOrganizationId = sp.AppOwnerOrganizationId?.ToString() ?? string.Empty;
         AppOwnerOrganization = sp.AppOwnerOrganizationId switch
         {
@@ -450,6 +455,7 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
     internal void EnrichWithRegisteredApp(GraphApplication app)
     {
         PublisherDomain = app.PublisherDomain;
+        AppActivationStatus = (app.IsDisabled ?? false) ? "Deactivated" : "Active";
         RegisteredAppNotes = string.IsNullOrWhiteSpace(app.Notes) ? string.Empty : app.Notes;
         ImplicitFlowEnabled = app.Web.ImplicitGrantSettings.EnableIdTokenIssuance;
         AccessTokenFlowEnabled = app.Web.ImplicitGrantSettings.EnableAccessTokenIssuance;
@@ -512,6 +518,8 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
     internal void SetAssessment()
     {
         var flags = new List<string>();
+        if (!SignInEnabled) flags.Add("Application disabled");
+        if (AppActivationStatus == "Deactivated") flags.Add("Application deactivated");
         if (_spSecretExpired > 0 && _spSecretValid == 0) flags.Add("Service principal: Expired secret");
         else if (_spSecretExpired > 0) flags.Add("Service principal: Need clean up old secret");
         if (_spCertExpired > 0 && _spCertValid == 0) flags.Add("Service principal: Expired certificate");

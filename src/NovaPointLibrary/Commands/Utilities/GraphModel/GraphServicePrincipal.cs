@@ -19,6 +19,9 @@ public class GraphServicePrincipal
     [JsonProperty("appOwnerOrganizationId")]
     public Guid? AppOwnerOrganizationId { get; set; }
 
+    [JsonProperty("accountEnabled")]
+    public bool AccountEnabled { get; set; }
+
     [JsonProperty("createdDateTime")]
     public DateTime? CreatedDateTime { get; set; }
 
