@@ -117,11 +117,14 @@ namespace NovaPointLibrary.Core.Settings
         {
             string localAppPathFolderData = GetLocalAppPath();
 
+            var msalcache = Path.Combine(AppFolders.GetConfigFolder(), $"msal1");
+
             string[] localAppPathFolders = System.IO.Directory.GetDirectories(_NpLocalAppFolder);
             foreach (var folderPath in localAppPathFolders)
             {
                 if (!String.Equals(localAppPathFolderData, folderPath) && System.IO.Directory.Exists(folderPath))
                 {
+                    if (String.Equals(msalcache, folderPath)) { continue; }
                     System.IO.Directory.Delete(folderPath, recursive: true);
                 }
             }
