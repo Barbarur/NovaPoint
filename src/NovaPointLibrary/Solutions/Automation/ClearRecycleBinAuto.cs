@@ -69,15 +69,11 @@ namespace NovaPointLibrary.Solutions.Automation
                 clientContext.ExecuteQueryRetry();
                 AddRecord(siteUrl, remarks: "All recycle bin items have been deleted");
             }
-            catch (Exception ex) when (ex.Message.Contains("The attempted operation is prohibited because it exceeds the list view threshold"))
-            {
-                _ctx.Logger.UI(GetType().Name, "Recycle bin cannot be cleared in bulk due view threshold limitation. Recycle bin items will be deleted individually.");
-                await ProcessRecycleBinItemsAsync(siteUrl, parentProgress);
-            }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                _ctx.Logger.Error(GetType().Name, "Site", siteUrl, ex);
-                AddRecord(siteUrl, remarks: ex.Message);
+                string serverErrorType = (ex as ServerException)?.ServerErrorTypeName ?? string.Empty;
+                _ctx.Logger.UI(GetType().Name, $"Recycle bin could not be cleared in bulk (ServerErrorTypeName: '{serverErrorType}', Error: '{ex.Message}'). Recycle bin items will be deleted individually.");
+                await ProcessRecycleBinItemsAsync(siteUrl, parentProgress);
             }
         }
 
