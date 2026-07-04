@@ -49,87 +49,83 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 if (_param.RecycleBinParam.AllItems)
                 {
-                    try
-                    {
-                        await DeleteAllRecycleBinItemsAsync(siteResults.SiteUrl);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ex.Message.Contains("The attempted operation is prohibited because it exceeds the list view threshold"))
-                        {
-                            _param.RecycleBinParam.AllItems = false;
-                            _ctx.Logger.UI(GetType().Name, "Recycle bin cannot be cleared in bulk due view threshold limitation. Recycle bin items will be deleted individually.");
-                        }
-                        else
-                        {
-                            _ctx.Logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
-                            AddRecord(siteResults.SiteUrl, remarks: ex.Message);
-                        }
-                    }
+                    await DeleteAllRecycleBinItemsAsync(siteResults.SiteUrl, siteResults.Progress);
                 }
-
-                if (!_param.RecycleBinParam.AllItems)
+                else
                 {
-                    try
-                    {
-                        await ProcessRecycleBinItemsAsync(siteResults.SiteUrl, siteResults.Progress);
-                    }
-                    catch (Exception ex)
-                    {
-                        _ctx.Logger.Error(GetType().Name, "Site", siteResults.SiteUrl, ex);
-                        AddRecord(siteResults.SiteUrl, remarks: ex.Message);
-                    }
+                    await ProcessRecycleBinItemsAsync(siteResults.SiteUrl, siteResults.Progress);
                 }
             }
         }
 
-        private async Task DeleteAllRecycleBinItemsAsync(string siteUrl)
+        private async Task DeleteAllRecycleBinItemsAsync(string siteUrl, ProgressTracker parentProgress)
         {
             _ctx.AppClient.IsCancelled();
 
-            ClientContext clientContext = await _ctx.AppClient.GetContext(siteUrl);
-            clientContext.Web.RecycleBin.DeleteAll();
-            clientContext.ExecuteQueryRetry();
-            AddRecord(siteUrl, remarks: "All recycle bin items have been deleted") ;
+            try
+            {
+                ClientContext clientContext = await _ctx.AppClient.GetContext(siteUrl);
+                clientContext.Web.RecycleBin.DeleteAll();
+                clientContext.ExecuteQueryRetry();
+                AddRecord(siteUrl, remarks: "All recycle bin items have been deleted");
+            }
+            catch (Exception ex) when (ex.Message.Contains("The attempted operation is prohibited because it exceeds the list view threshold"))
+            {
+                _ctx.Logger.UI(GetType().Name, "Recycle bin cannot be cleared in bulk due view threshold limitation. Recycle bin items will be deleted individually.");
+                await ProcessRecycleBinItemsAsync(siteUrl, parentProgress);
+            }
+            catch (Exception ex)
+            {
+                _ctx.Logger.Error(GetType().Name, "Site", siteUrl, ex);
+                AddRecord(siteUrl, remarks: ex.Message);
+            }
         }
 
         private async Task ProcessRecycleBinItemsAsync(string siteUrl, ProgressTracker parentProgress)
         {
             _ctx.AppClient.IsCancelled();
 
-            ProgressTracker progress = new(parentProgress, 5000);
-            int itemCounter = 0;
-            int itemExpectedCount = 5000;
-            var spoRecycleBinItem = new SPORecycleBinItemCSOM(_ctx.Logger, _ctx.AppClient);
-            await foreach (RecycleBinItem oRecycleBinItem in spoRecycleBinItem.GetAsync(siteUrl, _param.RecycleBinParam))
+            try
             {
-                _ctx.AppClient.IsCancelled();
-
-                string remarks = string.Empty;
-
-                try
+                ProgressTracker progress = new(parentProgress, 5000);
+                int itemCounter = 0;
+                int itemExpectedCount = 5000;
+                var spoRecycleBinItem = new SPORecycleBinItemCSOM(_ctx.Logger, _ctx.AppClient);
+                await foreach (RecycleBinItem oRecycleBinItem in spoRecycleBinItem.GetAsync(siteUrl, _param.RecycleBinParam))
                 {
-                    await new SPORecycleBinItemREST(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteUrl, oRecycleBinItem);
-                    remarks = "Item removed from Recycle bin";
-                }
-                catch (Exception ex)
-                {
-                    _ctx.Logger.Error(GetType().Name, "Recycle bin item", oRecycleBinItem.Title, ex);
-                    remarks = ex.Message;
+                    _ctx.AppClient.IsCancelled();
+
+                    string remarks = string.Empty;
+
+                    try
+                    {
+                        // await new SPORecycleBinItemREST(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteUrl, oRecycleBinItem);
+                        remarks = "Item removed from Recycle bin";
+                    }
+                    catch (Exception ex)
+                    {
+                        _ctx.Logger.Error(GetType().Name, "Recycle bin item", oRecycleBinItem.Title, ex);
+                        remarks = ex.Message;
+                    }
+
+                    AddRecord(siteUrl, oRecycleBinItem, remarks);
+
+                    progress.ProgressUpdateReport();
+                    itemCounter++;
+                    if (itemCounter == itemExpectedCount)
+                    {
+                        progress.IncreaseTotalCount(6000);
+                        itemExpectedCount += 5000;
+                    }
                 }
 
-                AddRecord(siteUrl, oRecycleBinItem, remarks);
-
-                progress.ProgressUpdateReport();
-                itemCounter++;
-                if (itemCounter == itemExpectedCount)
-                {
-                    progress.IncreaseTotalCount(6000);
-                    itemExpectedCount += 5000;
-                }
+                _ctx.Logger.Info(GetType().Name, $"Finish processing recycle bin items for '{siteUrl}'");
             }
-
-            _ctx.Logger.Info(GetType().Name, $"Finish processing recycle bin items for '{siteUrl}'");
+            catch (Exception ex)
+            {
+                _ctx.Logger.Error(GetType().Name, "Site", siteUrl, ex);
+                AddRecord(siteUrl, remarks: ex.Message);
+            }
         }
 
         private void AddRecord(string siteUrl,
