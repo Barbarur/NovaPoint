@@ -92,6 +92,12 @@ public class GetDirectoryAppAudit : ISolution
         {
             _ctx.AppClient.IsCancelled();
 
+            if (!_param.IncludeNonApplicationServicePrincipals
+                && !string.Equals(sp.ServicePrincipalType, "Application", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             if (!_param.IncludeMicrosoftApps && sp.AppOwnerOrganizationId == GraphConstants.MicrosoftTenantId)
             {
                 continue;
@@ -562,4 +568,6 @@ public class GetDirectoryAppAuditParameters : ISolutionParameters
     public bool IncludeSpOwnersThirdPartyApps { get; set; } = false;
 
     public bool IncludeSignInActivity { get; set; } = false;
+
+    public bool IncludeNonApplicationServicePrincipals { get; set; } = false;
 }
