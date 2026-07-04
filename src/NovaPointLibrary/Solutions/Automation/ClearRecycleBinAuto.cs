@@ -74,7 +74,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 _ctx.Logger.UI(GetType().Name, "Recycle bin cannot be cleared in bulk due view threshold limitation. Recycle bin items will be deleted individually.");
                 await ProcessRecycleBinItemsAsync(siteUrl, parentProgress);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 _ctx.Logger.Error(GetType().Name, "Site", siteUrl, ex);
                 AddRecord(siteUrl, remarks: ex.Message);
@@ -121,7 +121,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
                 _ctx.Logger.Info(GetType().Name, $"Finish processing recycle bin items for '{siteUrl}'");
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 _ctx.Logger.Error(GetType().Name, "Site", siteUrl, ex);
                 AddRecord(siteUrl, remarks: ex.Message);
