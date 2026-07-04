@@ -192,24 +192,14 @@ namespace NovaPointLibrary.Core.Authentication
             await _semaphore.WaitAsync();
             try
             {
-                // POSSIBLE TO CACHE FOR CONFIDENTIAL APP??
-                //if (Settings.CachingToken)
-                //{
-                //    var cacheHelper = await TokenCacheHelper.GetCache();
-                //    cacheHelper.RegisterCache(_app.UserTokenCache);
-                //}
-                try
-                {
-                    var account = await _app.GetAccountAsync(_appProperties.ClientId.ToString());
-                    result = await _app.AcquireTokenSilent(scopes, account)
-                                .ExecuteAsync(CancelToken);
-                }
-                catch
-                {
-                    result = await _app.AcquireTokenForClient(scopes)
-                        .ExecuteAsync(CancelToken);
-                }
-
+                var account = await _app.GetAccountAsync(_appProperties.ClientId.ToString());
+                result = await _app.AcquireTokenSilent(scopes, account)
+                    .ExecuteAsync(CancelToken);
+            }
+            catch
+            {
+                result = await _app.AcquireTokenForClient(scopes)
+                    .ExecuteAsync(CancelToken);
             }
             finally
             {

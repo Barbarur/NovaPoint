@@ -195,8 +195,8 @@ namespace NovaPointLibrary.Core.Authentication
 
                 if (_cachingToken)
                 {
-                    var cacheHelper = await TokenCacheHelper.GetCache();
-                    cacheHelper.RegisterCache(_app.UserTokenCache);
+                    var cacheHelper = await TokenCacheHelper.GetCache(_logger);
+                    cacheHelper?.RegisterCache(_app.UserTokenCache);
                 }
 
                 try

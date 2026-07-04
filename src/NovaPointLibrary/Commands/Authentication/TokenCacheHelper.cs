@@ -1,43 +1,57 @@
 ﻿using Microsoft.Identity.Client.Extensions.Msal;
+using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Core.Settings;
 
 namespace NovaPointLibrary.Commands.Authentication
 {
     internal class TokenCacheHelper
     {
-        private static readonly string s_cacheFilePath = Path.Combine(AppConfig.GetLocalAppPath(), "msal.cache");
+        private static readonly int s_version = 1;
 
-        private static readonly string CacheFileName = Path.GetFileName(s_cacheFilePath);
-        private static readonly string CacheDir = Path.GetDirectoryName(s_cacheFilePath);
+        private static readonly string s_cacheFilePath = Path.Combine(AppFolders.GetConfigFolder(),$"msal{s_version}", "msal.cache");
+
+        private static readonly string s_cacheFileName = Path.GetFileName(s_cacheFilePath);
+        private static readonly string? s_cacheDir = Path.GetDirectoryName(s_cacheFilePath);
 
 
-        private static readonly string KeyChainServiceName = "Contoso.MyProduct";
-        private static readonly string KeyChainAccountName = "MSALCache";
+        private static readonly string s_keyChainServiceName = "NovaPoint";
+        private static readonly string s_keyChainAccountName = "MSALCache";
 
-        private static readonly string LinuxKeyRingSchema = "com.contoso.devtools.tokencache";
-        private static readonly string LinuxKeyRingCollection = MsalCacheHelper.LinuxKeyRingDefaultCollection;
-        private static readonly string LinuxKeyRingLabel = "MSAL token cache for all Contoso dev tool apps.";
-        private static readonly KeyValuePair<string, string> LinuxKeyRingAttr1 = new KeyValuePair<string, string>("Version", "1");
-        private static readonly KeyValuePair<string, string> LinuxKeyRingAttr2 = new KeyValuePair<string, string>("ProductGroup", "MyApps");
+        private static readonly string s_linuxKeyRingSchema = "com.github.barbarur.novapoint.tokencache";
+        private static readonly string s_linuxKeyRingCollection = MsalCacheHelper.LinuxKeyRingDefaultCollection;
+        private static readonly string s_linuxKeyRingLabel = "MSAL token cache for NovaPoint.";
+        private static readonly KeyValuePair<string, string> s_linuxKeyRingAttr1 = new KeyValuePair<string, string>("Version", $"{s_version}");
+        private static readonly KeyValuePair<string, string> s_linuxKeyRingAttr2 = new KeyValuePair<string, string>("ProductGroup", "NovaPoint");
 
-        internal static async Task<MsalCacheHelper> GetCache()
+        internal static async Task<MsalCacheHelper?> GetCache(ILogger? logger = null)
         {
             var storageProperties =
 
-                new StorageCreationPropertiesBuilder(CacheFileName, CacheDir)
+                new StorageCreationPropertiesBuilder(s_cacheFileName, s_cacheDir)
                 .WithLinuxKeyring(
-                    LinuxKeyRingSchema,
-                    LinuxKeyRingCollection,
-                    LinuxKeyRingLabel,
-                    LinuxKeyRingAttr1,
-                    LinuxKeyRingAttr2)
+                    s_linuxKeyRingSchema,
+                    s_linuxKeyRingCollection,
+                    s_linuxKeyRingLabel,
+                    s_linuxKeyRingAttr1,
+                    s_linuxKeyRingAttr2)
                 .WithMacKeyChain(
-                    KeyChainServiceName,
-                    KeyChainAccountName)
+                    s_keyChainServiceName,
+                    s_keyChainAccountName)
                 .Build();
 
-            // This hooks up the cross-platform cache into MSAL
             var cacheHelper = await MsalCacheHelper.CreateAsync(storageProperties);
+
+            try
+            {
+                cacheHelper.VerifyPersistence();
+            }
+            catch (MsalCachePersistenceException ex)
+            {
+                logger?.Info(nameof(TokenCacheHelper),
+                    $"WARNING: OS secret store unavailable; tokens will NOT be persisted this session. {ex.Message}");
+                return null;
+            }
+
             return cacheHelper;
         }
 
