@@ -550,9 +550,9 @@ internal class GetDirectoryAppAuditRecord : ISolutionRecord
         if (_spOwnersFetched)
         {
             bool expectsOwner = _ownerOrgId == _tenantId || AssignmentRequired;
-            if (expectsOwner && ServPrincipalOwnersCount == 0) flags.Add("Service principal: No owners");
+            if (expectsOwner && ServPrincipalOwnersCount == 0 && AppRegOwnersCount == 0)
+                flags.Add("No owners");
         }
-        if (_ownerOrgId == _tenantId && AppRegOwnersCount == 0) flags.Add("App registration: No owners");
         if (_signInActivityFetched && !HasSignInLast30Days) flags.Add("No recent sign-in (30 days)");
         NeedsReview = string.Join(" | ", flags);
     }
