@@ -1,12 +1,12 @@
 namespace NovaPointLibrary.Core.Settings
 {
-    internal static class AppFolders
+    public static class AppFolders
     {
         private const string AppName = "NovaPoint";
 
         // Windows: %LOCALAPPDATA%\NovaPoint
         // macOS/Linux: ~/.local/share/NovaPoint
-        internal static string GetConfigFolder()
+        public static string GetConfigFolder()
         {
             return Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -15,7 +15,7 @@ namespace NovaPointLibrary.Core.Settings
 
         // Windows: %LOCALAPPDATA%\NovaPoint
         // macOS/Linux: $XDG_CACHE_HOME/NovaPoint  (falls back to ~/.cache/NovaPoint)
-        internal static string GetCacheFolder()
+        public static string GetCacheFolder()
         {
             string baseCache;
             if (OperatingSystem.IsWindows())
@@ -32,7 +32,7 @@ namespace NovaPointLibrary.Core.Settings
 
         // Windows/macOS: ~/Documents/NovaPoint
         // Linux: ~/Documents/NovaPoint  (MyDocuments returns $HOME on Unix — we append Documents manually)
-        internal static string GetOutputFolder()
+        public static string GetOutputFolder()
         {
             var docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             if (string.IsNullOrEmpty(docs) ||
