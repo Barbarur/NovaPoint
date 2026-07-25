@@ -40,7 +40,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             _appInfo.IsCancelled();
             _logger.Info(GetType().Name, $"Start getting Items by batch");
 
-            CamlQuery camlQuery = GetCamlQuery(siteUrl, parameters);
+            CamlQuery camlQuery = GetCamlQuery(list, parameters);
 
             Expression<Func<Microsoft.SharePoint.Client.ListItem, object>>[] expressions;
             if (list.BaseType == BaseType.DocumentLibrary)
@@ -123,14 +123,30 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                                                            SPOItemsParameters parameters)
         {
             _logger.Info(GetType().Name, $"Getting items from site '{siteUrl}' list '{oList.Title}'");
+            
+            string? folderServerRelativeUrl = null;
+            if (!string.IsNullOrWhiteSpace(parameters.FolderRelativeUrl))
+            {
+                string requestedFolderUrl = parameters.GetFolderServerRelativeURL(oList);
+                _logger.Info(GetType().Name, $"Folder '{parameters.FolderRelativeUrl}' resolved to '{requestedFolderUrl}'");
 
-            string folderServerRelativeUrl = parameters.GetFolderServerRelativeURL(siteUrl);
+                var oFolder = await new SPOFolderCSOM(_logger, _appInfo).GetFolderAsync(siteUrl, requestedFolderUrl);
+
+                if (oFolder == null || !oFolder.Exists)
+                {
+                    _logger.UI(GetType().Name, $"Folder '{requestedFolderUrl}' was not found on '{oList.BaseType}' '{oList.Title}' and no items will be collected. Check the folder path is written as it appears on the address bar and not with the display names.");
+
+                    yield break;
+                }
+
+                folderServerRelativeUrl = oFolder.ServerRelativeUrl;
+            }
 
             await foreach (var listItemCollection in GetBatchAsync(siteUrl, oList, parameters))
             {
                 foreach (var oItem in listItemCollection)
                 {
-                    if (parameters.MatchParameters(oItem))
+                    if (parameters.MatchParameters(oItem, folderServerRelativeUrl))
                     {
                         yield return oItem;
                     }
@@ -138,7 +154,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             }
         }
 
-        internal CamlQuery GetCamlQuery(string siteUrl, SPOItemsParameters parameters)
+        internal CamlQuery GetCamlQuery(Microsoft.SharePoint.Client.List oList, SPOItemsParameters parameters)
         {
             StringBuilder sbQuery = new();
             if (parameters.CreatedAfter > DateTime.MinValue)
@@ -169,7 +185,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 viewXml = "";
             }
 
-            return GetCamlQuery(viewXml, parameters.GetFolderServerRelativeURL(siteUrl));
+            string folderServerRelativeUrl = string.IsNullOrWhiteSpace(parameters.FolderRelativeUrl)
+                ? string.Empty
+                : parameters.GetFolderServerRelativeURL(oList);
+
+            return GetCamlQuery(viewXml, folderServerRelativeUrl);
         }
 
         internal CamlQuery GetCamlQuery(string viewXml, string folderServerRelativeUrl)

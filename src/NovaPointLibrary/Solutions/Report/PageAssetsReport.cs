@@ -42,7 +42,7 @@ namespace NovaPointLibrary.Solutions.Report
         {
             FileExpressions = _assetsExpressions,
             AllItems = false,
-            FolderSiteRelativeUrl = "SiteAssets/SitePages/"
+            FolderRelativeUrl = "/SitePages"
         };
 
         private static readonly Expression<Func<ListItem, object>>[] _pageExpressions = new Expression<Func<ListItem, object>>[]

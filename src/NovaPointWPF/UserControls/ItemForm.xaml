@@ -127,29 +127,37 @@
 
                                 <TextBlock
                                     Style="{DynamicResource TextBlockBody}"
-                                    Text="Site relative path of the folder"/>
+                                    Text="Library relative path of the folder"/>
 
-                                <TextBlock Style="{DynamicResource TextBlockBody}" Margin="16,2,0,0">
+                                <TextBlock Style="{DynamicResource TextBlockBody}" Margin="16,2,0,0" TextWrapping="Wrap">
                                     <TextBlock.Inlines>
-                                        <Run Text="If the folder path is"/>
-                                        <Run FontStyle="Italic" Text="https://domain.sharepoint.com/sites/SiteName"/>
-                                        <Run FontWeight="Bold" FontStyle="Italic" Text="/Library Name/FolderName/Subfolder"/>
+                                        <Run Text="If the folder address is"/>
+                                        <Run FontStyle="Italic" Text="https://domain.sharepoint.com/sites/SiteName/Shared Documents"/>
+                                        <Run FontWeight="Bold" FontStyle="Italic" Text="/FolderName/Subfolder"/>
                                     </TextBlock.Inlines>
 
                                 </TextBlock>
 
-                                <TextBlock Style="{DynamicResource TextBlockBody}" Margin="16,2,0,8">
+                                <TextBlock Style="{DynamicResource TextBlockBody}" Margin="16,2,0,0" TextWrapping="Wrap">
                                     <TextBlock.Inlines>
                                         <Run Text="You should write"/>
-                                        <Run FontWeight="Bold" FontStyle="Italic" Text="/Library Name/Folder/Subfolder"/>
+                                        <Run FontWeight="Bold" FontStyle="Italic" Text="/FolderName/Subfolder"/>
+                                    </TextBlock.Inlines>
+
+                                </TextBlock>
+
+                                <TextBlock Style="{DynamicResource TextBlockBody}" Margin="16,2,0,8" TextWrapping="Wrap">
+                                    <TextBlock.Inlines>
+                                        <Run FontWeight="Bold" Text="Important:"/>
+                                        <Run Text="the name of the Library or List is not part of the path, it is taken from the filter above. Write spaces as spaces, not %20."/>
                                     </TextBlock.Inlines>
 
                                 </TextBlock>
 
                                 <TextBox
-                                    x:Name="SiteUrlTextBox"
+                                    x:Name="FolderPathTextBox"
                                     Style="{DynamicResource TextBoxSolutionFormTextInput}"
-                                    Text="{Binding FolderSiteRelativeUrl, ElementName=root}"/>
+                                    Text="{Binding FolderRelativeUrl, ElementName=root}"/>
 
                             </StackPanel>
                         </StackPanel>

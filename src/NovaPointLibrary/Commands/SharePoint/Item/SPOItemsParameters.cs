@@ -63,22 +63,24 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             set { _modifiedByEmail = value.Trim(); }
         }
 
-        private string _folderSiteRelativeUrl = String.Empty;
-        public string FolderSiteRelativeUrl
+        private string _folderRelativeUrl = String.Empty;
+        // Path of the folder relative to the root of the List or Library, so the
+        // name of the List or Library is not part of it. i.e. '/FolderName/Subfolder'
+        public string FolderRelativeUrl
         {
-            get { return _folderSiteRelativeUrl; }
+            get { return _folderRelativeUrl; }
             set
             {
-                _folderSiteRelativeUrl = value.Trim();
-                if (!string.IsNullOrWhiteSpace(_folderSiteRelativeUrl))
+                _folderRelativeUrl = value.Trim();
+                if (!string.IsNullOrWhiteSpace(_folderRelativeUrl))
                 {
-                    if (!_folderSiteRelativeUrl.StartsWith('/'))
+                    if (!_folderRelativeUrl.StartsWith('/'))
                     {
-                        _folderSiteRelativeUrl = "/" + _folderSiteRelativeUrl;
+                        _folderRelativeUrl = "/" + _folderRelativeUrl;
                     }
-                    if (_folderSiteRelativeUrl.EndsWith('/'))
+                    if (_folderRelativeUrl.EndsWith('/'))
                     {
-                        _folderSiteRelativeUrl = _folderSiteRelativeUrl.Remove(_folderSiteRelativeUrl.LastIndexOf("/"));
+                        _folderRelativeUrl = _folderRelativeUrl.Remove(_folderRelativeUrl.LastIndexOf("/"));
                     }
                 }
             }
@@ -86,21 +88,35 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
 
 
-        internal string GetFolderServerRelativeURL(string siteUrl)
+        internal string GetFolderServerRelativeURL(Microsoft.SharePoint.Client.List oList)
         {
-            string siteUrlClean = siteUrl.Trim();
-            if (siteUrlClean.EndsWith('/'))
+            string listRootUrl = oList.RootFolder.ServerRelativeUrl;
+            if (listRootUrl.EndsWith('/'))
             {
-                siteUrlClean = siteUrlClean.Remove(siteUrlClean.LastIndexOf('/'));
+                listRootUrl = listRootUrl.Remove(listRootUrl.LastIndexOf('/'));
             }
 
-            string folderUrl = siteUrlClean + FolderSiteRelativeUrl;
-            string folderServerRelativeUrl = folderUrl[(folderUrl.IndexOf(".com") + 4)..];
+            string folderRelativeUrl = FolderRelativeUrl;
 
-            return folderServerRelativeUrl;
+            // The path used to be relative to the site, including the name of the List or
+            // Library. Such paths are still accepted to not break existing users, removing
+            // the longest start of the path already covered by the root of the List.
+            string[] segments = folderRelativeUrl.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            for (int count = segments.Length; count > 0; count--)
+            {
+                string pathStart = "/" + string.Join('/', segments.Take(count));
+
+                if (listRootUrl.EndsWith(pathStart, StringComparison.OrdinalIgnoreCase))
+                {
+                    folderRelativeUrl = folderRelativeUrl.Remove(0, pathStart.Length);
+                    break;
+                }
+            }
+
+            return listRootUrl + folderRelativeUrl;
         }
 
-        internal bool MatchParameters(ListItem oItem)
+        internal bool MatchParameters(ListItem oItem, string? folderServerRelativeUrl)
         {
             if (AllItems)
             {
@@ -145,11 +161,13 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 else { matchEditor = true; }
 
                 bool matchFolder;
-                if (!String.IsNullOrWhiteSpace(FolderSiteRelativeUrl))
+                if (!String.IsNullOrWhiteSpace(folderServerRelativeUrl))
                 {
                     string itemPath = (string)oItem["FileRef"];
-                    if (itemPath.Contains(FolderSiteRelativeUrl, StringComparison.OrdinalIgnoreCase)) { matchFolder = true; }
-                    else { matchFolder = false; }
+                    if (!itemPath.StartsWith('/')) { itemPath = itemPath.Insert(0, "/"); }
+
+                    matchFolder = itemPath.StartsWith(folderServerRelativeUrl + "/", StringComparison.OrdinalIgnoreCase)
+                        || itemPath.Equals(folderServerRelativeUrl, StringComparison.OrdinalIgnoreCase);
                 }
                 else { matchFolder = true; }
 

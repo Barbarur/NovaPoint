@@ -48,7 +48,7 @@ namespace NovaPointWPF.UserControls
                     Parameters.ModifiedBefore = DateTime.MaxValue;
                     ModifiedByEmail = string.Empty;
 
-                    FolderSiteRelativeUrl = string.Empty;
+                    FolderRelativeUrl = string.Empty;
                 }
             }
         }
@@ -99,12 +99,12 @@ namespace NovaPointWPF.UserControls
         }
 
 
-        public string FolderSiteRelativeUrl
+        public string FolderRelativeUrl
         {
-            get { return Parameters.FolderSiteRelativeUrl; }
+            get { return Parameters.FolderRelativeUrl; }
             set
             {
-                Parameters.FolderSiteRelativeUrl = value;
+                Parameters.FolderRelativeUrl = value;
                 OnPropertyChanged();
             }
         }

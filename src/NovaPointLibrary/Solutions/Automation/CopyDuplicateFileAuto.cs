@@ -215,9 +215,9 @@ namespace NovaPointLibrary.Solutions.Automation
                 string listItemServerRelativeUrl = (string)oListItem["FileRef"];
                 string listItemFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, oListItem.ParentList.RootFolder.ServerRelativeUrl.Length);
 
-                if (!string.IsNullOrWhiteSpace(_param.SourceItemsParam.FolderSiteRelativeUrl))
+                if (!string.IsNullOrWhiteSpace(_param.SourceItemsParam.FolderRelativeUrl))
                 {
-                    string folderServerRelativeUrl = _param.SourceItemsParam.GetFolderServerRelativeURL(oSourceWeb.Url);
+                    string folderServerRelativeUrl = _param.SourceItemsParam.GetFolderServerRelativeURL(oSourceList);
 
                     listItemFolderRelativeUrl = listItemServerRelativeUrl.Remove(0, folderServerRelativeUrl.Length);
                 }
