@@ -1,5 +1,6 @@
 using System.Globalization;
 using NovaPointLibrary.Commands.DeviceManagement;
+using NovaPointLibrary.Commands.Directory.User;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Context;
 
@@ -12,6 +13,8 @@ public class GetManagedDevices : ISolution
 
     private readonly ContextSolution _ctx;
     private readonly GetManagedDevicesParameters _param;
+
+    private readonly Dictionary<string, bool> _existingPrimaryUsers = [];
 
     private readonly Dictionary<string, PlatformStats> _platformStats = new()
     {
@@ -109,6 +112,15 @@ public class GetManagedDevices : ISolution
                 {
                     var collPolicyState = await cmd.GetCompliancePolicyStatesAsync(device.Id);
                     record.SetAssessment(collPolicyState);
+
+                    // A missing policy and a genuine policy failure are both only worth acting
+                    // on while the primary user still exists; if it doesn't, the device is a
+                    // leftover of a deleted account and is retired instead.
+                    if (record.GetAssessmentBucket() is AssessmentBucket.MissingPolicy or AssessmentBucket.NotCompliant
+                        && !await PrimaryUserExistsAsync(device))
+                    {
+                        record.NonComplianceAssessment = GetManagedDevicesRecord.s_AssessmentNoUser;
+                    }
                 }
             }
             catch (Exception ex)
@@ -142,6 +154,20 @@ public class GetManagedDevices : ISolution
     }
     
 
+    // Devices share primary users, so each user is only looked up once.
+    private async Task<bool> PrimaryUserExistsAsync(GraphManagedDevice device)
+    {
+        string userKey = !string.IsNullOrEmpty(device.UserId) ? device.UserId : device.UserPrincipalName;
+        if (string.IsNullOrEmpty(userKey)) { return false; }
+
+        if (_existingPrimaryUsers.TryGetValue(userKey, out bool exists)) { return exists; }
+
+        exists = await new DirectoryUser(_ctx).ExistsAsync(userKey);
+        _existingPrimaryUsers.Add(userKey, exists);
+
+        return exists;
+    }
+
     private void AddRecord(GetManagedDevicesRecord record)
     {
         _ctx.DbHandler.WriteRecord(record);
@@ -163,23 +189,36 @@ public class GetManagedDevices : ISolution
         var s = _platformStats[platform];
         s.Total++;
 
-        if (record.ComplianceState == "Compliant")
-            s.Compliant++;
-        else if (record.NonComplianceAssessment.StartsWith("Retired"))
-            s.Retired++;
-        else if (record.NonComplianceAssessment == "False Positive")
-            s.FalsePositive++;
-        else if (record.NonComplianceAssessment == "No Compliance policy assigned")
-            s.MissingPolicy++;
-        else
-            s.NotCompliant++;
+        switch (record.GetAssessmentBucket())
+        {
+            case AssessmentBucket.Compliant:     s.Compliant++;     break;
+            case AssessmentBucket.Retired:       s.Retired++;       break;
+            case AssessmentBucket.FalsePositive: s.FalsePositive++; break;
+            case AssessmentBucket.MissingPolicy: s.MissingPolicy++; break;
+            default:                             s.NotCompliant++;  break;
+        }
     }
 
 }
 
 
+internal enum AssessmentBucket
+{
+    Compliant,
+    Retired,
+    FalsePositive,
+    MissingPolicy,
+    NotCompliant,
+}
+
+
 internal class GetManagedDevicesRecord : ISolutionRecord
 {
+    internal const string s_AssessmentNoUser = "Retired - No user";
+    internal const string s_AssessmentInactive = "Retired - Inactive";
+    internal const string s_AssessmentNoPolicy = "No Compliance policy assigned";
+    internal const string s_AssessmentFalsePositive = "False Positive";
+
     // Device identity
     public string DeviceName { get; set; } = string.Empty;
     public string SerialNumber { get; set; } = string.Empty;
@@ -388,20 +427,35 @@ internal class GetManagedDevicesRecord : ISolutionRecord
         _                                     => s,
     };
 
+    // Which Summary column this device is counted in. Anything that is not one of the
+    // fixed assessments above is a 'Policy > Setting: reason' list, i.e. a real failure.
+    internal AssessmentBucket GetAssessmentBucket()
+    {
+        if (ComplianceState == "Compliant") { return AssessmentBucket.Compliant; }
+
+        return NonComplianceAssessment switch
+        {
+            s_AssessmentNoUser or s_AssessmentInactive => AssessmentBucket.Retired,
+            s_AssessmentFalsePositive                  => AssessmentBucket.FalsePositive,
+            s_AssessmentNoPolicy                       => AssessmentBucket.MissingPolicy,
+            _                                          => AssessmentBucket.NotCompliant,
+        };
+    }
+
     internal void SetAssessment(IEnumerable<GraphDeviceCompliancePolicyState> collPolicyState)
     {
         if (OperatingSystem != "Windows") {return;}
         
         if (string.IsNullOrEmpty(PrimaryUser))
         {
-            NonComplianceAssessment = "Retired - No user";
+            NonComplianceAssessment = s_AssessmentNoUser;
             return;    
         }
         
         DateTime parsedDate = DateTime.Parse(LastSyncDate, CultureInfo.InvariantCulture);
         if (parsedDate < DateTime.Now.AddDays(-30))
         {
-            NonComplianceAssessment = "Retired - Inactive";
+            NonComplianceAssessment = s_AssessmentInactive;
             return; 
         }
 
@@ -412,7 +466,7 @@ internal class GetManagedDevicesRecord : ISolutionRecord
 
         if (!nonDefaultCompliancePolicies.Any())
         {
-            NonComplianceAssessment = "No Compliance policy assigned";
+            NonComplianceAssessment = s_AssessmentNoPolicy;
             return;
         }
         
@@ -421,7 +475,7 @@ internal class GetManagedDevicesRecord : ISolutionRecord
             .ToList();
         if (!nonDefaultCompliancePoliciesNoCompliance.Any())
         {
-            NonComplianceAssessment = "False Positive";
+            NonComplianceAssessment = s_AssessmentFalsePositive;
             return;
         }
 
