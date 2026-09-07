@@ -97,7 +97,7 @@ namespace NovaPointLibrary.Core.HttpService
                         exceptionMessage += $" Request ID: {values.First()}.";
                     }
 
-                    throw new Exception(exceptionMessage);
+                    throw new HttpRequestFailedException(response.StatusCode, exceptionMessage);
                 }
             }
 
