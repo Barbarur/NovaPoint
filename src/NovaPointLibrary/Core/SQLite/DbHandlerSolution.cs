@@ -1,5 +1,6 @@
 ﻿using NovaPointLibrary.Core.Logging;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -102,7 +103,14 @@ namespace NovaPointLibrary.Core.SQLite
                     throw new InvalidOperationException($"Method to export to CSV not found on {this.GetType().Name}.");
                 }
                 var genericMethod = method.MakeGenericMethod(type);
-                genericMethod.Invoke(this, new object[] { reportName });
+                try
+                {
+                    genericMethod.Invoke(this, new object[] { reportName });
+                }
+                catch (TargetInvocationException ex) when (ex.InnerException != null)
+                {
+                    ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                }
             }
         }
 

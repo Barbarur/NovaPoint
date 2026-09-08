@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Globalization;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NovaPointLibrary.Core.SQLite
 {
@@ -48,9 +45,7 @@ namespace NovaPointLibrary.Core.SQLite
                 sbColumns.Append($"{propertyInfo.Name},");
 
                 object? propertyValue = propertyInfo.GetValue(obj);
-                string stringValue = propertyValue?.ToString() ?? string.Empty;
-                string sanitizedValue = stringValue.Replace("'", "''");
-                sbValues.Append($"'{sanitizedValue}',");
+                sbValues.Append($"'{GetLiteralValue(propertyValue)}',");
             }
             sbColumns.Length--;
             sbColumns.Append(')');
@@ -60,6 +55,20 @@ namespace NovaPointLibrary.Core.SQLite
             string insertQuery = $"INSERT INTO {tableName} {sbColumns} VALUES {sbValues}";
 
             return insertQuery;
+        }
+
+        private static string GetLiteralValue(object? value)
+        {
+            string stringValue = value switch
+            {
+                null => string.Empty,
+                DateTime dateTime => dateTime.ToString("yyyy-MM-dd HH:mm:ss.FFFFFFF", CultureInfo.InvariantCulture),
+                DateTimeOffset dateTimeOffset => dateTimeOffset.ToString("yyyy-MM-dd HH:mm:ss.FFFFFFFzzz", CultureInfo.InvariantCulture),
+                IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+                _ => value.ToString() ?? string.Empty,
+            };
+
+            return stringValue.Replace("'", "''");
         }
 
         static string GetSqlType(Type type)
