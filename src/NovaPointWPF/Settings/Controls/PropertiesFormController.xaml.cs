@@ -98,6 +98,9 @@ namespace NovaPointWPF.Settings.Controls
             EnableForm();
         }
 
+        // Async void, deliberately: a Command binding here would fail silently at runtime if the
+        // property name were ever wrong, for no real gain - this handler isn't reused across
+        // frameworks, and every exception path below is already caught internally.
         private async void SaveClick(object sender, RoutedEventArgs e)
         {
             ButtonSave.IsEnabled = false;
@@ -141,6 +144,7 @@ namespace NovaPointWPF.Settings.Controls
 
         }
 
+        // Async void, deliberately - see SaveClick above.
         private async void DeleteClick(object sender, RoutedEventArgs e)
         {
             ButtonDelete.IsEnabled = false;

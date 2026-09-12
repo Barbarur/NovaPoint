@@ -22,6 +22,9 @@ namespace NovaPointWPF.Pages
             _navigationService = new WpfNavigationService(SolutionListFrame);
         }
 
+        // Loaded has no Command surface in WPF without a behaviors library, so this stays an
+        // async event handler - the one case Microsoft's own guidance excepts - and every
+        // exception path is already caught internally.
         private async void CheckForUpdatesAsync(object sender, RoutedEventArgs e)
         {
             try

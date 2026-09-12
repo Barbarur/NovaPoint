@@ -62,6 +62,9 @@ namespace NovaPointWPF.Settings
             }
         }
 
+        // Loaded has no Command surface in WPF without a behaviors library, so this stays an
+        // async event handler - the one case Microsoft's own guidance excepts - and every
+        // exception path is already caught internally.
         private async void CheckForUpdatesAsync(object sender, RoutedEventArgs e)
         {
             try
@@ -76,6 +79,9 @@ namespace NovaPointWPF.Settings
             }
         }
 
+        // Async void, deliberately: a Command binding here would fail silently at runtime if the
+        // property name were ever wrong, for no real gain - this handler isn't reused across
+        // frameworks, and the finally below already guarantees the button re-enables.
         private async void DeleteCacheClick(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
