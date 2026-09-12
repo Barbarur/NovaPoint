@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NovaPointLibrary\NovaPointLibrary.csproj" />
+    <ProjectReference Include="..\NovaPointViewModels\NovaPointViewModels.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NovaPointLibrary", "NovaPoi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaPointConsoleTester", "NovaPointConsoleTester\NovaPointConsoleTester.csproj", "{1F3BBB23-9D86-4B62-81B6-D14D319269A2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaPointViewModels", "NovaPointViewModels\NovaPointViewModels.csproj", "{875E1F34-1465-4B19-9415-FDF60DA08640}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{1F3BBB23-9D86-4B62-81B6-D14D319269A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F3BBB23-9D86-4B62-81B6-D14D319269A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F3BBB23-9D86-4B62-81B6-D14D319269A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{875E1F34-1465-4B19-9415-FDF60DA08640}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{875E1F34-1465-4B19-9415-FDF60DA08640}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{875E1F34-1465-4B19-9415-FDF60DA08640}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{875E1F34-1465-4B19-9415-FDF60DA08640}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
