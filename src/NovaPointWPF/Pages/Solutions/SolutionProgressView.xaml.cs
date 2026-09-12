@@ -1,6 +1,7 @@
-﻿using NovaPointLibrary.Solutions;
+﻿using NovaPointLibrary.Core.Platform;
+using NovaPointLibrary.Solutions;
+using NovaPointWPF.Platform;
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +14,7 @@ namespace NovaPointWPF.Pages.Solutions
     public partial class SolutionProgressView : UserControl
     {
         public SolutionHandler Handler;
+        private readonly IFolderRevealer _folderRevealer = new OsFolderRevealer();
 
         public SolutionProgressView(SolutionHandler handler)
         {
@@ -68,7 +70,7 @@ namespace NovaPointWPF.Pages.Solutions
         {
             if (System.IO.Directory.Exists(Handler.SolutionFolder))
             {
-                try { Process.Start("explorer.exe", Handler.SolutionFolder); }
+                try { _folderRevealer.Reveal(Handler.SolutionFolder); }
                 catch (Exception ex)
                 {
                     Handler.UILog(LogInfo.ErrorNotification(ex.Message));
