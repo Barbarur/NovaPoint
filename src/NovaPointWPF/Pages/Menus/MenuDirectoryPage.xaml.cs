@@ -1,4 +1,5 @@
-﻿using NovaPointWPF.Pages.Solutions;
+﻿using NovaPointViewModels;
+using NovaPointWPF.Pages.Solutions;
 using NovaPointWPF.Pages.Solutions.Directory;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,7 +13,7 @@ namespace NovaPointWPF.Pages.Menus
             InitializeComponent();
         }
 
-        private void GoToSolutionForm(ISolutionForm solutionForm)
+        private void GoToSolutionForm(ISolutionViewModel solutionForm)
         {
             Application.Current.MainWindow.Content = new SolutionPreparationPage(solutionForm);
         }

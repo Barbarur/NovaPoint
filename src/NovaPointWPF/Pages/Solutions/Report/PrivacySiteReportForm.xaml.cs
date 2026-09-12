@@ -1,13 +1,14 @@
 ﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Report;
+using NovaPointViewModels;
 using System;
 using System.Windows.Controls;
 
 
 namespace NovaPointWPF.Pages.Solutions.Report
 {
-    public partial class PrivacySiteReportForm : Page, ISolutionForm
+    public partial class PrivacySiteReportForm : Page, ISolutionViewModel
     {
         public string SolutionName { get; init; }
         public string SolutionCode { get; init; }

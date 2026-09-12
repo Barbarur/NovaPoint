@@ -2,6 +2,7 @@
 using NovaPointLibrary.Core.Platform;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
+using NovaPointViewModels;
 using NovaPointWPF.Platform;
 using System;
 using System.Windows;
@@ -10,7 +11,7 @@ using System.Windows.Controls;
 
 namespace NovaPointWPF.Pages.Solutions.Automation
 {
-    public partial class RemoveSiteAutoForm : Page, ISolutionForm
+    public partial class RemoveSiteAutoForm : Page, ISolutionViewModel
     {
         private readonly IFilePicker _filePicker = new WpfFilePicker();
 

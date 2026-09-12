@@ -1,13 +1,14 @@
 ﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.QuickFix;
+using NovaPointViewModels;
 using System;
 using System.Windows.Controls;
 
 
 namespace NovaPointWPF.Pages.Solutions.QuickFix
 {
-    public partial class IdMismatchTroubleForm : Page, ISolutionForm
+    public partial class IdMismatchTroubleForm : Page, ISolutionViewModel
     {
         public string SolutionName { get; init; }
         public string SolutionCode { get; init; }

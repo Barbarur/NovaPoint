@@ -1,13 +1,14 @@
 ﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
+using NovaPointViewModels;
 using System;
 using System.Windows.Controls;
 
 
 namespace NovaPointWPF.Pages.Solutions.Automation
 {
-    public partial class CopyDuplicateFileAutoForm : Page, ISolutionForm
+    public partial class CopyDuplicateFileAutoForm : Page, ISolutionViewModel
     {
         public string SolutionName { get; init; }
         public string SolutionCode { get; init; }

@@ -1,6 +1,7 @@
 ﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Report;
+using NovaPointViewModels;
 using NovaPointWPF.UserControls;
 using System;
 using System.Windows.Controls;
@@ -8,7 +9,7 @@ using System.Windows.Controls;
 
 namespace NovaPointWPF.Pages.Solutions.Report
 {
-    public partial class ShortcutODReportForm : Page, ISolutionForm
+    public partial class ShortcutODReportForm : Page, ISolutionViewModel
     {
         public string SolutionName { get; init; }
         public string SolutionCode { get; init; }

@@ -1,13 +1,14 @@
 ﻿using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Directory;
+using NovaPointViewModels;
 using System;
 using System.Windows.Controls;
 
 
 namespace NovaPointWPF.Pages.Solutions.Directory
 {
-    public partial class GetDirectoryGroupForm : Page, ISolutionForm
+    public partial class GetDirectoryGroupForm : Page, ISolutionViewModel
     {
         public string SolutionName { get; init; }
         public string SolutionCode { get; init; }

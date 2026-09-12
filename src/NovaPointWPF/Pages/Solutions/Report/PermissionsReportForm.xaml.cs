@@ -3,6 +3,7 @@ using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Directory;
 using NovaPointLibrary.Solutions.Report;
+using NovaPointViewModels;
 using NovaPointWPF.UserControls;
 using System;
 using System.Windows;
@@ -10,7 +11,7 @@ using System.Windows.Controls;
 
 namespace NovaPointWPF.Pages.Solutions.Report
 {
-    public partial class PermissionsReportForm : Page, ISolutionForm
+    public partial class PermissionsReportForm : Page, ISolutionViewModel
     {
         public string SolutionName { get; init; }
         public string SolutionCode { get; init; }

@@ -5,6 +5,7 @@ using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
 using NovaPointLibrary.Solutions.Directory;
 using NovaPointLibrary.Solutions.Report;
+using NovaPointViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
     /// <summary>
     /// Interaction logic for RemovePHLItemAutoForm.xaml
     /// </summary>
-    public partial class RemovePHLItemAutoForm : Page, ISolutionForm
+    public partial class RemovePHLItemAutoForm : Page, ISolutionViewModel
     {
         public string SolutionName { get; init; }
         public string SolutionCode { get; init; }

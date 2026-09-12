@@ -2,6 +2,7 @@
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
 using NovaPointLibrary.Solutions.Directory;
+using NovaPointViewModels;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ using System.Windows.Controls;
 
 namespace NovaPointWPF.Pages.Solutions.Automation
 {
-    public partial class CheckInFileAutoForm : Page, ISolutionForm
+    public partial class CheckInFileAutoForm : Page, ISolutionViewModel
     {
         public string SolutionName { get; init; }
         public string SolutionCode { get; init; }

@@ -4,6 +4,7 @@ using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
 using NovaPointLibrary.Solutions.Directory;
 using NovaPointLibrary.Solutions.Report;
+using NovaPointViewModels;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace NovaPointWPF.Pages.Solutions.Automation
     /// <summary>
     /// Interaction logic for RemoveSharingLinksAutoForm.xaml
     /// </summary>
-    public partial class RemoveSharingLinksAutoForm : Page, ISolutionForm
+    public partial class RemoveSharingLinksAutoForm : Page, ISolutionViewModel
     {
         public string SolutionName { get; init; }
         public string SolutionCode { get; init; }

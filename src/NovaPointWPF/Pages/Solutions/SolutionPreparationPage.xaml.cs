@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Solutions;
+using NovaPointViewModels;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,9 +9,9 @@ namespace NovaPointWPF.Pages.Solutions
 {
     public partial class SolutionPreparationPage : Page
     {
-        private readonly ISolutionForm _solutionForm;
+        private readonly ISolutionViewModel _solutionForm;
 
-        public SolutionPreparationPage(ISolutionForm solutionForm)
+        public SolutionPreparationPage(ISolutionViewModel solutionForm)
         {
             InitializeComponent();
 
