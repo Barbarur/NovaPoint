@@ -1,6 +1,5 @@
 ﻿using NovaPointLibrary.Solutions;
 using System;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -9,7 +8,6 @@ namespace NovaPointWPF.Pages.Solutions
 {
     public partial class SolutionPreparationPage : Page
     {
-        static ReaderWriterLock rwl = new ReaderWriterLock();
         private readonly ISolutionForm _solutionForm;
 
         public SolutionPreparationPage(ISolutionForm solutionForm)

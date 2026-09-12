@@ -14,11 +14,23 @@ namespace NovaPointLibrary.Solutions
 
         private readonly string _solutionName = solutionCreate.Method.DeclaringType != null ? solutionCreate.Method.DeclaringType.Name : "unknown";
         
-        public CancellationTokenSource CancelTokenSource { get; set; } = new();
+        private readonly CancellationTokenSource _cancelTokenSource = new();
         
         public string SolutionFolder { get; set; } = NovaPointLibrary.Core.Settings.AppFolders.GetOutputFolder();
 
-        private static readonly ReaderWriterLock rwl = new();
+        // Guards the UI fields against concurrent UILog calls from parallel workers.
+        // Notify with Post, never Send: a synchronous marshal from in here deadlocks.
+        private readonly object _uiLogLock = new();
+
+        // The context that constructed this handler; UI hosts require notifications on it.
+        private readonly SynchronizationContext _uiContext = SynchronizationContext.Current ?? new SynchronizationContext();
+
+        // This handler runs one solution, once. Construct a new one for every run, so
+        // parallel runs are independent instances sharing no state.
+        private const int NotStarted = 0, Running = 1, Finished = 2;
+        private int _runState = NotStarted;
+
+        public bool IsRunning => Volatile.Read(ref _runState) == Running;
 
         private string _percentageCompleted = "0%";
         public string PercentageCompleted
@@ -69,39 +81,56 @@ namespace NovaPointLibrary.Solutions
 
         public Task RunSolution()
         {
+            if (Interlocked.CompareExchange(ref _runState, Running, NotStarted) != NotStarted)
+            {
+                throw new InvalidOperationException($"{_solutionName} has already been run by this handler. Create a new SolutionHandler for every run.");
+            }
+            OnPropertyChanged(nameof(IsRunning));
+
             LoggerSolution logger = new(UILog, _solutionName, param);
             SolutionFolder = logger._solutionFolderPath;
 
             return Task.Run(async () =>
             {
-                ContextSolution ctx = GetContext(logger);
-
                 try
                 {
-                    var oSolution = solutionCreate(ctx, param);
+                    ContextSolution ctx = GetContext(logger);
 
-                    await oSolution.RunAsync();
+                    try
+                    {
+                        var oSolution = solutionCreate(ctx, param);
 
-                    ctx.SolutionEnd();
+                        await oSolution.RunAsync();
+
+                        ctx.SolutionEnd();
+                    }
+                    catch (Exception ex)
+                    {
+                        ctx.SolutionEnd(ex);
+                    }
                 }
-                catch (Exception ex)
+                finally
                 {
-                    ctx.SolutionEnd(ex);
+                    Volatile.Write(ref _runState, Finished);
+                    OnPropertyChanged(nameof(IsRunning));
                 }
             });
         }
 
+        public void Cancel()
+        {
+            _cancelTokenSource.Cancel();
+        }
+
         internal IAppClient GetAppClient(LoggerSolution logger)
         {
-            CancelTokenSource = new();
-
             if (appProperties is AppClientConfidentialProperties confidentialProperties)
             {
-                return new AppClientConfidential(confidentialProperties, logger, CancelTokenSource);
+                return new AppClientConfidential(confidentialProperties, logger, _cancelTokenSource);
             }
             else if (appProperties is AppClientPublicProperties publicProperties)
             {
-                return new AppClientPublic(publicProperties, logger, CancelTokenSource);
+                return new AppClientPublic(publicProperties, logger, _cancelTokenSource);
             }
             else
             {
@@ -127,9 +156,7 @@ namespace NovaPointLibrary.Solutions
 
         public void UILog(LogInfo logInfo)
         {
-            // Reference: https://stackoverflow.com/questions/2382663/ensuring-that-things-run-on-the-ui-thread-in-wpf
-            rwl.AcquireWriterLock(3000);
-            try
+            lock (_uiLogLock)
             {
                 if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { UiText += $"{logInfo.TextBase} \n"; }
 
@@ -140,10 +167,6 @@ namespace NovaPointLibrary.Solutions
                     SetPendingTime(logInfo.PendingTime);
                     Progress = logInfo.PercentageProgress;
                 }
-            }
-            finally
-            {
-                rwl.ReleaseLock();
             }
         }
 
@@ -166,7 +189,13 @@ namespace NovaPointLibrary.Solutions
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            OnUiContext(() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName)));
+        }
+
+        private void OnUiContext(Action action)
+        {
+            if (SynchronizationContext.Current == _uiContext) { action(); }
+            else { _uiContext.Post(_ => action(), null); }
         }
     }
 

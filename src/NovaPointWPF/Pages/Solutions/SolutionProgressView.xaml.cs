@@ -41,8 +41,7 @@ namespace NovaPointWPF.Pages.Solutions
         private void CancelButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             Handler.UILog(LogInfo.ErrorNotification("Canceling solution. Please wait while we stop all the processes."));
-            Handler.CancelTokenSource.Cancel();
-            Handler.CancelTokenSource.Dispose();
+            Handler.Cancel();
             CancelButton.IsEnabled = false;
         }
 
