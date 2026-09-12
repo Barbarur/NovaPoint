@@ -90,7 +90,6 @@
                     <TextBlock
                     x:Name="BoxText"
                     Style="{DynamicResource TextBlockBody}"
-                    Text="{Binding UiText, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                     TextWrapping="Wrap"/>
 
                 </ScrollViewer>

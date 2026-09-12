@@ -1,4 +1,4 @@
-using NovaPointLibrary.Core.Authentication;
+﻿using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions;
@@ -22,6 +22,7 @@ namespace NovaPointConsoleTester
             SynchronizationContext.SetSynchronizationContext(pump);
 
             int mainThreadId = Environment.CurrentManagedThreadId;
+            // Both PropertyChanged and LogLineAdded marshal through the same helper, so one bag covers both.
             ConcurrentBag<int> notificationThreadIds = [];
 
             AppClientPublicProperties properties = new()
@@ -33,6 +34,7 @@ namespace NovaPointConsoleTester
 
             SolutionHandler handler = new(FakeSolution.Create, new FakeSolutionParameters(), properties);
             handler.PropertyChanged += (_, _) => notificationThreadIds.Add(Environment.CurrentManagedThreadId);
+            handler.LogLineAdded += _ => notificationThreadIds.Add(Environment.CurrentManagedThreadId);
 
             Task run = handler.RunSolution();
             pump.RunUntil(run);

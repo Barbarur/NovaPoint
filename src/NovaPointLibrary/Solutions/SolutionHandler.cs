@@ -18,7 +18,7 @@ namespace NovaPointLibrary.Solutions
         
         public string SolutionFolder { get; set; } = NovaPointLibrary.Core.Settings.AppFolders.GetOutputFolder();
 
-        // Guards the UI fields against concurrent UILog calls from parallel workers.
+        // Guards the progress fields, which UILog writes non-atomically from parallel workers.
         // Notify with Post, never Send: a synchronous marshal from in here deadlocks.
         private readonly object _uiLogLock = new();
 
@@ -66,18 +66,8 @@ namespace NovaPointLibrary.Solutions
             }
         }
 
-        private string _uiText = string.Empty;
-        public string UiText
-        {
-            get { return _uiText; }
-            set
-            {
-                _uiText = value;
-                OnPropertyChanged();
-            }
-        }
-
-
+        /// <summary>Raised once per log line, on the thread that constructed this handler.</summary>
+        public event Action<LogInfo>? LogLineAdded;
 
         public Task RunSolution()
         {
@@ -156,19 +146,17 @@ namespace NovaPointLibrary.Solutions
 
         public void UILog(LogInfo logInfo)
         {
-            lock (_uiLogLock)
+            if (logInfo.Type == LogInfoType.Progress)
             {
-                if (logInfo.Type == LogInfoType.Progress)
+                lock (_uiLogLock)
                 {
                     SetPendingTime(logInfo.PendingTime);
                     Progress = logInfo.PercentageProgress;
                 }
-                else if (!string.IsNullOrWhiteSpace(logInfo.Text))
-                {
-                    UiText += logInfo.Type == LogInfoType.Error
-                        ? $"ERROR: {logInfo.Text} \n"
-                        : $"{logInfo.Text} \n";
-                }
+            }
+            else if (!string.IsNullOrWhiteSpace(logInfo.Text))
+            {
+                OnUiContext(() => LogLineAdded?.Invoke(logInfo));
             }
         }
 

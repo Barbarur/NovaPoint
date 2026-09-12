@@ -2,7 +2,10 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
 
 
 namespace NovaPointWPF.Pages.Solutions
@@ -17,6 +20,22 @@ namespace NovaPointWPF.Pages.Solutions
             Handler = handler;
 
             InitializeComponent();
+
+            Handler.LogLineAdded += AppendLogLine;
+        }
+
+        // The handler raises this on the UI thread, one call per line.
+        private void AppendLogLine(LogInfo logInfo)
+        {
+            Run line = new($"{logInfo.Text} \n");
+
+            if (logInfo.Type == LogInfoType.Error)
+            {
+                line.Foreground = Brushes.IndianRed;
+                line.FontWeight = FontWeights.Medium;
+            }
+
+            BoxText.Inlines.Add(line);
         }
 
         internal async Task RunSolutionAsync()
