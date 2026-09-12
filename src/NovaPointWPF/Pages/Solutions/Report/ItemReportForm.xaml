@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Report"
-      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
+      xmlns:usercontrols="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
       d:DesignHeight="800" d:DesignWidth="600"
       Title="ItemReportForm">
@@ -13,16 +13,16 @@
                 
         <StackPanel>
 
-            <designmaterial:AdminForm
+            <usercontrols:AdminForm
                 x:Name="AdminF"/>
 
-            <designmaterial:SiteTenantForm
+            <usercontrols:SiteTenantForm
                 x:Name="SiteF"/>
 
-            <designmaterial:ListForm
+            <usercontrols:ListForm
                 x:Name="ListForm"/>
 
-            <designmaterial:ItemForm
+            <usercontrols:ItemForm
                 x:Name="ItemForm"/>
 
         </StackPanel>

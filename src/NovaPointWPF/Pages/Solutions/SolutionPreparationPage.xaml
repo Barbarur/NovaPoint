@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions"
-      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
+      xmlns:usercontrols="clr-namespace:NovaPointWPF.UserControls"
       xmlns:solutionformparameters="clr-namespace:NovaPointWPF.Pages.SolutionsFormParameters"
       mc:Ignorable="d" 
       d:DesignHeight="900" d:DesignWidth="1600"
@@ -36,7 +36,7 @@
                 Grid.Column="0">
 
                 <StackPanel x:Name="StackPanelForm">
-                    <designmaterial:FormHeader x:Name="SolutionHeader" Margin="0,0,0,8"/>
+                    <usercontrols:FormHeader x:Name="SolutionHeader" Margin="0,0,0,8"/>
 
                     <solutionformparameters:AppClientSelectorForm x:Name="AppSelector"/>
                     

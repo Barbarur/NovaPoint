@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Automation"
-      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
+      xmlns:usercontrols="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="600"
       Title="SetSiteCollectionAdminAutoForm">
@@ -55,7 +55,7 @@
             </Grid>
 
 
-            <designmaterial:SiteTenantForm
+            <usercontrols:SiteTenantForm
                 x:Name="SiteF"
                 SubsitesVisibility="False"/>
 

@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 
 
-namespace NovaPointWPF.Controls.UserControls
+namespace NovaPointWPF.UserControls
 {
     public partial class DateTimeSelector : UserControl
     {

@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:NovaPointWPF.Pages.Solutions.Automation"
-      xmlns:designmaterial="clr-namespace:NovaPointWPF.UserControls"
+      xmlns:usercontrols="clr-namespace:NovaPointWPF.UserControls"
       mc:Ignorable="d" 
       d:DesignHeight="900" d:DesignWidth="600"
       Title="RestorePHLItemAutoForm">
@@ -62,13 +62,13 @@
                 </Border>
             </Grid>
 
-            <designmaterial:PHLForm
+            <usercontrols:PHLForm
                 x:Name="PHLForm"/>
 
-            <designmaterial:AdminForm
+            <usercontrols:AdminForm
                 x:Name="AdminF"/>
 
-            <designmaterial:SiteTenantForm
+            <usercontrols:SiteTenantForm
                 x:Name="SiteF"/>
 
         </StackPanel>

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NovaPointWPF.Pages.SolutionsFormParameters"
-             xmlns:npusercontrols="clr-namespace:NovaPointWPF.Controls.UserControls"
+             xmlns:usercontrols="clr-namespace:NovaPointWPF.UserControls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              x:Name="root">
@@ -14,7 +14,7 @@
 
         <StackPanel>
 
-            <npusercontrols:FilterTitle
+            <usercontrols:FilterTitle
                 Title="Directory Group Filter"
                 LearnMoreLink="https://github.com/Barbarur/NovaPoint/wiki/Parameters-DirectoryGroupParameters"/>
 
@@ -35,7 +35,7 @@
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Style="{DynamicResource TextBlockBody}" Text="Created after"/>
 
-                                    <npusercontrols:DateTimeSelector
+                                    <usercontrols:DateTimeSelector
                                         x:Name="ComboBoxCreatedAfter"
                                         IsAfter="true"
                                         Margin="0,8,0,0"
@@ -46,7 +46,7 @@
                                 <StackPanel Grid.Column="1">
                                     <TextBlock Style="{DynamicResource TextBlockBody}" Text="Created before"/>
 
-                                    <npusercontrols:DateTimeSelector
+                                    <usercontrols:DateTimeSelector
                                         x:Name="ComboBoxCreatedBefore"
                                         IsAfter="false"
                                         Margin="0,8,0,0"
