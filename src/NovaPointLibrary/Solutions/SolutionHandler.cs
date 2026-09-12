@@ -158,14 +158,16 @@ namespace NovaPointLibrary.Solutions
         {
             lock (_uiLogLock)
             {
-                if (!string.IsNullOrWhiteSpace(logInfo.TextBase)) { UiText += $"{logInfo.TextBase} \n"; }
-
-                if (!string.IsNullOrWhiteSpace(logInfo.TextError)) { UiText += $"ERROR: {logInfo.TextError} \n"; }
-
-                if (logInfo.PercentageProgress != -1)
+                if (logInfo.Type == LogInfoType.Progress)
                 {
                     SetPendingTime(logInfo.PendingTime);
                     Progress = logInfo.PercentageProgress;
+                }
+                else if (!string.IsNullOrWhiteSpace(logInfo.Text))
+                {
+                    UiText += logInfo.Type == LogInfoType.Error
+                        ? $"ERROR: {logInfo.Text} \n"
+                        : $"{logInfo.Text} \n";
                 }
             }
         }
