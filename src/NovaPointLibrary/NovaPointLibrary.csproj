@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.66" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.20" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.69.1" />
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.69.1" />
