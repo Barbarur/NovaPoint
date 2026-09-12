@@ -1,6 +1,7 @@
-﻿using System;
+﻿using NovaPointLibrary.Core.Platform;
+using NovaPointWPF.Platform;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace NovaPointWPF.UserControls
     /// </summary>
     public partial class FormHeader : UserControl
     {
+        private readonly IUrlLauncher _urlLauncher = new ShellUrlLauncher();
+
         public string SolutionTitle
         {
             get { return (string)GetValue(SolutionTitleProperty); }
@@ -46,13 +49,12 @@ namespace NovaPointWPF.UserControls
 
         private void GoToDocumentation(object sender, RoutedEventArgs e)
         {
-            var url = SolutionDocs.Replace("&", "^&");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            _urlLauncher.Open(SolutionDocs);
         }
 
         private void ReadTheDocsClick(object sender, RoutedEventArgs e)
         {
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {SolutionDocs}") { CreateNoWindow = true });
+            _urlLauncher.Open(SolutionDocs);
         }
 
 

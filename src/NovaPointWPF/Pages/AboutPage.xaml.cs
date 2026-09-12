@@ -1,8 +1,9 @@
 ﻿using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Commands.Utilities;
+using NovaPointLibrary.Core.Platform;
+using NovaPointWPF.Platform;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,8 @@ namespace NovaPointWPF.Pages
     /// </summary>
     public partial class AboutPage : Page
     {
+        private readonly IUrlLauncher _urlLauncher = new ShellUrlLauncher();
+
         public AboutPage()
         {
             InitializeComponent();
@@ -83,8 +86,7 @@ namespace NovaPointWPF.Pages
 
         private void OpenBrowser(string navigateUri)
         {
-            var url = navigateUri.Replace("&", "^&");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            _urlLauncher.Open(navigateUri);
         }
 
     }

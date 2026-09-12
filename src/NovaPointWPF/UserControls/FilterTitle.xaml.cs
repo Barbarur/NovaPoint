@@ -1,5 +1,6 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
+﻿using NovaPointLibrary.Core.Platform;
+using NovaPointWPF.Platform;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,6 +10,7 @@ namespace NovaPointWPF.UserControls
 {
     public partial class FilterTitle : UserControl, INotifyPropertyChanged
     {
+        private readonly IUrlLauncher _urlLauncher = new ShellUrlLauncher();
 
         public string Title
         {
@@ -41,7 +43,7 @@ namespace NovaPointWPF.UserControls
 
         private void ReadTheDocsClick(object sender, RoutedEventArgs e)
         {
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {LearnMoreLink}") { CreateNoWindow = true });
+            _urlLauncher.Open(LearnMoreLink);
         }
     }
 }

@@ -3,11 +3,12 @@ using Microsoft.Identity.Client;
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Core.Authentication;
+using NovaPointLibrary.Core.Platform;
 using NovaPointLibrary.Core.Settings;
+using NovaPointWPF.Platform;
 using NovaPointWPF.Settings.Controls;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,6 +21,7 @@ namespace NovaPointWPF.Settings
     public partial class AppConfigView : Page
     {
         private readonly AppConfig _appConfig;
+        private readonly IUrlLauncher _urlLauncher = new ShellUrlLauncher();
         public AppConfigView()
         {
             InitializeComponent();
@@ -92,8 +94,7 @@ namespace NovaPointWPF.Settings
 
         private void UpdateClick(object sender, RoutedEventArgs e)
         {
-            string NavigateUri = "https://github.com/Barbarur/NovaPoint/releases/latest";
-            System.Diagnostics.Process.Start(new ProcessStartInfo("cmd", $"/c start {NavigateUri}") { CreateNoWindow = true });
+            _urlLauncher.Open("https://github.com/Barbarur/NovaPoint/releases/latest");
         }
 
         private void TriggerNotification(string notification)
