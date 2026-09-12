@@ -1,6 +1,7 @@
 ﻿using NovaPointViewModels;
 using NovaPointWPF.Pages.Solutions;
 using NovaPointWPF.Pages.Solutions.Automation;
+using NovaPointWPF.Platform;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -12,6 +13,8 @@ namespace NovaPointWPF.Pages.Menus
     /// </summary>
     public partial class MenuAutomationPage : Page
     {
+        private readonly INavigationService _navigationService = new WpfNavigationService();
+
         public MenuAutomationPage()
         {
             InitializeComponent();
@@ -19,7 +22,7 @@ namespace NovaPointWPF.Pages.Menus
 
         private void GoToSolutionForm(ISolutionViewModel solutionForm)
         {
-            Application.Current.MainWindow.Content = new SolutionPreparationPage(solutionForm);
+            _navigationService.NavigateTo(new SolutionPreparationPage(solutionForm));
         }
 
 

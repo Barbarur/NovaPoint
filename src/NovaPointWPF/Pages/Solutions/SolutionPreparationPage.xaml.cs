@@ -1,5 +1,6 @@
 ﻿using NovaPointLibrary.Solutions;
 using NovaPointViewModels;
+using NovaPointWPF.Platform;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,6 +10,7 @@ namespace NovaPointWPF.Pages.Solutions
 {
     public partial class SolutionPreparationPage : Page
     {
+        private readonly INavigationService _navigationService = new WpfNavigationService();
         private readonly ISolutionViewModel _solutionForm;
 
         public SolutionPreparationPage(ISolutionViewModel solutionForm)
@@ -28,9 +30,7 @@ namespace NovaPointWPF.Pages.Solutions
 
         private void Back_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow? mainWindow = Application.Current.MainWindow as MainWindow;
-
-            if (mainWindow is not null) { Application.Current.MainWindow.Content = mainWindow.MainPage; }
+            _navigationService.GoBack();
         }
 
         private async void RunButton_ClickAsync(object sender, RoutedEventArgs e)

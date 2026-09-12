@@ -1,4 +1,6 @@
 ﻿using NovaPointLibrary.Commands.Utilities;
+using NovaPointViewModels;
+using NovaPointWPF.Platform;
 using NovaPointWPF.Settings;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,10 +13,13 @@ namespace NovaPointWPF.Pages
     /// </summary>
     public partial class MainPage : Page
     {
+        private readonly INavigationService _navigationService;
+
         public MainPage()
         {
             InitializeComponent();
 
+            _navigationService = new WpfNavigationService(SolutionListFrame);
         }
 
         private async void CheckForUpdatesAsync(object sender, RoutedEventArgs e)
@@ -33,32 +38,32 @@ namespace NovaPointWPF.Pages
 
         private void Directory_Click(object sender, RoutedEventArgs e)
         {
-            SolutionListFrame.Content = new Pages.Menus.MenuDirectoryPage();
+            _navigationService.NavigateTo(new Pages.Menus.MenuDirectoryPage());
         }
 
         private void Reports_Click(object sender, RoutedEventArgs e)
         {
-            SolutionListFrame.Content = new Pages.Menus.MenuReportPage();
+            _navigationService.NavigateTo(new Pages.Menus.MenuReportPage());
         }
 
         private void QuickFix_Click(object sender, RoutedEventArgs e)
         {
-            SolutionListFrame.Content = new Pages.Menus.MenuQuickFixPage();
+            _navigationService.NavigateTo(new Pages.Menus.MenuQuickFixPage());
         }
 
         private void Automation_Click(object sender, RoutedEventArgs e)
         {
-            SolutionListFrame.Content = new Pages.Menus.MenuAutomationPage();
+            _navigationService.NavigateTo(new Pages.Menus.MenuAutomationPage());
         }
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
-            SolutionListFrame.Content = new AppConfigView();
+            _navigationService.NavigateTo(new AppConfigView());
         }
 
         private void AboutClick(object sender, RoutedEventArgs e)
         {
-            SolutionListFrame.Content = new AboutPage();
+            _navigationService.NavigateTo(new AboutPage());
         }
     }
 }
