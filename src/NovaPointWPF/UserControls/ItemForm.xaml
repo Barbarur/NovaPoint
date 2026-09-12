@@ -146,10 +146,25 @@
 
                                 </TextBlock>
 
-                                <TextBlock Style="{DynamicResource TextBlockBody}" Margin="16,2,0,8" TextWrapping="Wrap">
+                                <TextBlock Style="{DynamicResource TextBlockBody}" Margin="16,2,0,0" TextWrapping="Wrap">
                                     <TextBlock.Inlines>
                                         <Run FontWeight="Bold" Text="Important:"/>
                                         <Run Text="the name of the Library or List is not part of the path, it is taken from the filter above. Write spaces as spaces, not %20."/>
+                                    </TextBlock.Inlines>
+
+                                </TextBlock>
+
+                                <TextBlock Style="{DynamicResource TextBlockBody}" Margin="16,2,0,8" TextWrapping="Wrap">
+                                    <TextBlock.Inlines>
+                                        <Run Text="The wildcard"/>
+                                        <Run FontWeight="Bold" FontStyle="Italic" Text="*"/>
+                                        <Run Text="can be used on any part of the path to target several folders at once, i.e."/>
+                                        <Run FontWeight="Bold" FontStyle="Italic" Text="/Project*"/>
+                                        <Run Text="targets both"/>
+                                        <Run FontStyle="Italic" Text="Project"/>
+                                        <Run Text="and"/>
+                                        <Run FontStyle="Italic" Text="ProjectArch"/>
+                                        <Run Text=". See the wiki for the full wildcard rules."/>
                                     </TextBlock.Inlines>
 
                                 </TextBlock>

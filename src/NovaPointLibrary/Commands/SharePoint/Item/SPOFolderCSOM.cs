@@ -63,6 +63,34 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             }
         }
 
+        internal async Task<List<Folder>> GetSubFoldersAsync(string siteUrl, string folderServerRelativeUrl)
+        {
+            _appInfo.IsCancelled();
+            _logger.Info(GetType().Name, $"Getting subfolders of '{folderServerRelativeUrl}' from '{siteUrl}'");
+
+            if (!folderServerRelativeUrl.StartsWith('/'))
+            {
+                folderServerRelativeUrl = folderServerRelativeUrl.Insert(0, "/");
+            }
+
+            ClientContext clientContext = await _appInfo.GetContext(siteUrl);
+
+            Folder oFolder = clientContext.Web.GetFolderByServerRelativeUrl(folderServerRelativeUrl);
+            clientContext.Load(oFolder.Folders, fs => fs.Include(f => f.Name, f => f.ServerRelativeUrl, f => f.Exists));
+
+            try
+            {
+                clientContext.ExecuteQueryRetry();
+            }
+            catch
+            {
+                _logger.Info(GetType().Name, $"Folder '{folderServerRelativeUrl}' doesn't exists.");
+                return new List<Folder>();
+            }
+
+            return oFolder.Folders.ToList();
+        }
+
         internal async Task RenameFolderAsync(string siteUrl, string fileServerRelativeUrl, string newName)
         {
             _appInfo.IsCancelled();

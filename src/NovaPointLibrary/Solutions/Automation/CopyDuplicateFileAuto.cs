@@ -471,5 +471,13 @@ namespace NovaPointLibrary.Solutions.Automation
             CreateDestinationFolder = createDestinationFolder;
         }
 
+        public void ParametersCheck()
+        {
+            if (SourceItemsParam.FolderPathHasWildcard)
+            {
+                throw new Exception("The wildcard '*' is not supported on the source folder path for this Solution, as the destination path of every file is built by replacing the source folder and needs a single one.");
+            }
+        }
+
     }
 }

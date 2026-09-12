@@ -1,6 +1,7 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Solutions;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace NovaPointLibrary.Commands.SharePoint.Item
 {
@@ -96,24 +97,20 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                 listRootUrl = listRootUrl.Remove(listRootUrl.LastIndexOf('/'));
             }
 
-            string folderRelativeUrl = FolderRelativeUrl;
+            return listRootUrl + FolderRelativeUrl;
+        }
 
-            // The path used to be relative to the site, including the name of the List or
-            // Library. Such paths are still accepted to not break existing users, removing
-            // the longest start of the path already covered by the root of the List.
-            string[] segments = folderRelativeUrl.Split('/', StringSplitOptions.RemoveEmptyEntries);
-            for (int count = segments.Length; count > 0; count--)
-            {
-                string pathStart = "/" + string.Join('/', segments.Take(count));
+        internal bool FolderPathHasWildcard => FolderRelativeUrl.Contains('*');
 
-                if (listRootUrl.EndsWith(pathStart, StringComparison.OrdinalIgnoreCase))
-                {
-                    folderRelativeUrl = folderRelativeUrl.Remove(0, pathStart.Length);
-                    break;
-                }
-            }
+        internal string[] GetFolderPathSegments()
+        {
+            return FolderRelativeUrl.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        }
 
-            return listRootUrl + folderRelativeUrl;
+        internal static Regex SegmentPatternToRegex(string segment)
+        {
+            string pattern = "^" + Regex.Escape(segment).Replace("\\*", ".*") + "$";
+            return new Regex(pattern, RegexOptions.IgnoreCase);
         }
 
         internal bool MatchParameters(ListItem oItem, string? folderServerRelativeUrl)
@@ -122,63 +119,111 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             {
                 return true;
             }
-            else
+
+            if (!MatchNonFolderParameters(oItem))
             {
-                bool matchCreated = false;
-                if ((DateTime)oItem["Created"] > CreatedAfter && (DateTime)oItem["Created"] < CreatedBefore)
-                {
-                    matchCreated = true;
-                }
-
-                bool matchAuthor;
-                if (!string.IsNullOrWhiteSpace(CreatedByEmail))
-                {
-                    FieldUserValue author = (FieldUserValue)oItem["Author"];
-                    if (CreatedByEmail.Equals(author.Email, StringComparison.OrdinalIgnoreCase))
-                    {
-                        matchAuthor = true;
-                    }
-                    else { matchAuthor = false; }
-                }
-                else { matchAuthor = true; }
-
-                bool matchModified = false;
-                if ((DateTime)oItem["Modified"] > ModifiedAfter && (DateTime)oItem["Modified"] < ModifiedBefore)
-                {
-                    matchModified = true;
-                }
-
-                bool matchEditor;
-                if (!string.IsNullOrWhiteSpace(ModifiedByEmail))
-                {
-                    FieldUserValue editor = (FieldUserValue)oItem["Editor"];
-                    if (ModifiedByEmail.Equals(editor.Email, StringComparison.OrdinalIgnoreCase))
-                    {
-                        matchEditor = true;
-                    }
-                    else { matchEditor = false; }
-                }
-                else { matchEditor = true; }
-
-                bool matchFolder;
-                if (!String.IsNullOrWhiteSpace(folderServerRelativeUrl))
-                {
-                    string itemPath = (string)oItem["FileRef"];
-                    if (!itemPath.StartsWith('/')) { itemPath = itemPath.Insert(0, "/"); }
-
-                    matchFolder = itemPath.StartsWith(folderServerRelativeUrl + "/", StringComparison.OrdinalIgnoreCase)
-                        || itemPath.Equals(folderServerRelativeUrl, StringComparison.OrdinalIgnoreCase);
-                }
-                else { matchFolder = true; }
-
-
-                if (matchCreated && matchModified && matchAuthor && matchEditor && matchFolder)
-                {
-                    return true;
-                }
-                else { return false; }
+                return false;
             }
 
+            bool matchFolder;
+            if (!String.IsNullOrWhiteSpace(folderServerRelativeUrl))
+            {
+                string itemPath = (string)oItem["FileRef"];
+                if (!itemPath.StartsWith('/')) { itemPath = itemPath.Insert(0, "/"); }
+
+                matchFolder = itemPath.StartsWith(folderServerRelativeUrl + "/", StringComparison.OrdinalIgnoreCase)
+                    || itemPath.Equals(folderServerRelativeUrl, StringComparison.OrdinalIgnoreCase);
+            }
+            else { matchFolder = true; }
+
+            return matchFolder;
+        }
+
+        // Used when a wildcard folder path matched too many folders to query each one
+        // individually: every item of the list is collected instead, and filtered here
+        // by testing its path segments against the folder path pattern directly.
+        internal bool MatchParametersWithFolderPattern(ListItem oItem, string listRootServerRelativeUrl)
+        {
+            if (AllItems)
+            {
+                return true;
+            }
+
+            if (!MatchNonFolderParameters(oItem))
+            {
+                return false;
+            }
+
+            return MatchesFolderPattern(oItem, listRootServerRelativeUrl);
+        }
+
+        private bool MatchesFolderPattern(ListItem oItem, string listRootServerRelativeUrl)
+        {
+            string[] patternSegments = GetFolderPathSegments();
+
+            string itemPath = (string)oItem["FileRef"];
+            if (!itemPath.StartsWith('/')) { itemPath = itemPath.Insert(0, "/"); }
+
+            string relativePath = itemPath.StartsWith(listRootServerRelativeUrl, StringComparison.OrdinalIgnoreCase)
+                ? itemPath.Remove(0, listRootServerRelativeUrl.Length)
+                : itemPath;
+
+            string[] itemSegments = relativePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (itemSegments.Length < patternSegments.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < patternSegments.Length; i++)
+            {
+                if (!SegmentPatternToRegex(patternSegments[i]).IsMatch(itemSegments[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool MatchNonFolderParameters(ListItem oItem)
+        {
+            bool matchCreated = false;
+            if ((DateTime)oItem["Created"] > CreatedAfter && (DateTime)oItem["Created"] < CreatedBefore)
+            {
+                matchCreated = true;
+            }
+
+            bool matchAuthor;
+            if (!string.IsNullOrWhiteSpace(CreatedByEmail))
+            {
+                FieldUserValue author = (FieldUserValue)oItem["Author"];
+                if (CreatedByEmail.Equals(author.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    matchAuthor = true;
+                }
+                else { matchAuthor = false; }
+            }
+            else { matchAuthor = true; }
+
+            bool matchModified = false;
+            if ((DateTime)oItem["Modified"] > ModifiedAfter && (DateTime)oItem["Modified"] < ModifiedBefore)
+            {
+                matchModified = true;
+            }
+
+            bool matchEditor;
+            if (!string.IsNullOrWhiteSpace(ModifiedByEmail))
+            {
+                FieldUserValue editor = (FieldUserValue)oItem["Editor"];
+                if (ModifiedByEmail.Equals(editor.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    matchEditor = true;
+                }
+                else { matchEditor = false; }
+            }
+            else { matchEditor = true; }
+
+            return matchCreated && matchModified && matchAuthor && matchEditor;
         }
 
     }
