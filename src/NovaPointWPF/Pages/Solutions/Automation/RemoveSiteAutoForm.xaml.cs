@@ -1,7 +1,8 @@
-﻿using Microsoft.Win32;
-using NovaPointLibrary.Core.Context;
+﻿using NovaPointLibrary.Core.Context;
+using NovaPointLibrary.Core.Platform;
 using NovaPointLibrary.Solutions;
 using NovaPointLibrary.Solutions.Automation;
+using NovaPointWPF.Platform;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +12,8 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 {
     public partial class RemoveSiteAutoForm : Page, ISolutionForm
     {
+        private readonly IFilePicker _filePicker = new WpfFilePicker();
+
         public string SolutionName { get; init; }
         public string SolutionCode { get; init; }
         public string SolutionDocs { get; init; }
@@ -43,9 +46,11 @@ namespace NovaPointWPF.Pages.Solutions.Automation
 
         private void OpenFileClick(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new();
-            if (openFileDialog.ShowDialog() == true)
-                ListOfSitesPath = openFileDialog.FileName;
+            // WpfFilePicker's Task completes synchronously (the dialog itself blocks), so this
+            // never actually waits on anything - safe without an async handler.
+            string? path = _filePicker.PickFileAsync(title: "", filter: "").GetAwaiter().GetResult();
+            if (path is not null)
+                ListOfSitesPath = path;
         }
 
         public ISolutionParameters GetParameters()

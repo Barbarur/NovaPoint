@@ -1,6 +1,7 @@
-﻿using Microsoft.Win32;
-using NovaPointLibrary.Core.Authentication;
+﻿using NovaPointLibrary.Core.Authentication;
+using NovaPointLibrary.Core.Platform;
 using NovaPointLibrary.Core.Settings;
+using NovaPointWPF.Platform;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -9,6 +10,8 @@ namespace NovaPointWPF.Settings.Controls
 {
     public partial class AppClientConfidentialPropertiesForm : UserControl, IPropertiesForm
     {
+        private readonly IFilePicker _filePicker = new WpfFilePicker();
+
         public IAppClientProperties Properties { get; init; }
         private AppClientPropertiesCoreForm _corePropertiesForm;
 
@@ -38,9 +41,11 @@ namespace NovaPointWPF.Settings.Controls
 
         private void OpenCertificatePathClick(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            if (openFileDialog.ShowDialog() == true)
-                CertificatePathTextBlock.Text = openFileDialog.FileName;
+            // WpfFilePicker's Task completes synchronously (the dialog itself blocks), so this
+            // never actually waits on anything - safe without an async handler.
+            string? path = _filePicker.PickFileAsync(title: "", filter: "").GetAwaiter().GetResult();
+            if (path is not null)
+                CertificatePathTextBlock.Text = path;
         }
 
     }

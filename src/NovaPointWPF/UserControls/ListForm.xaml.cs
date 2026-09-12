@@ -1,5 +1,6 @@
-﻿using Microsoft.Win32;
-using NovaPointLibrary.Commands.SharePoint.List;
+﻿using NovaPointLibrary.Commands.SharePoint.List;
+using NovaPointLibrary.Core.Platform;
+using NovaPointWPF.Platform;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -11,6 +12,8 @@ namespace NovaPointWPF.UserControls
 
     public partial class ListForm : UserControl, INotifyPropertyChanged
     {
+        private readonly IFilePicker _filePicker = new WpfFilePicker();
+
         public SPOListsParameters Parameters { get; set; } = new();
 
         private string _filterTarget = "Both";
@@ -198,9 +201,11 @@ namespace NovaPointWPF.UserControls
 
         private void OpenFileClick(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            if (openFileDialog.ShowDialog() == true)
-                CollectionListsPath = openFileDialog.FileName;
+            // WpfFilePicker's Task completes synchronously (the dialog itself blocks), so this
+            // never actually waits on anything - safe without an async handler.
+            string? path = _filePicker.PickFileAsync(title: "", filter: "").GetAwaiter().GetResult();
+            if (path is not null)
+                CollectionListsPath = path;
         }
 
     }

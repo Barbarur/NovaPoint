@@ -1,7 +1,8 @@
 ﻿using Microsoft.Graph;
-using Microsoft.Win32;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
+using NovaPointLibrary.Core.Platform;
+using NovaPointWPF.Platform;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,6 +28,8 @@ namespace NovaPointWPF.UserControls
     /// </summary>
     public partial class SiteTenantForm : UserControl, INotifyPropertyChanged
     {
+        private readonly IFilePicker _filePicker = new WpfFilePicker();
+
         public SPOTenantSiteUrlsParameters Parameters { get; set; } = new();
 
         private bool _activeSites;
@@ -322,9 +325,11 @@ namespace NovaPointWPF.UserControls
 
         private void OpenFileClick(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            if (openFileDialog.ShowDialog() == true)
-                ListOfSitesPath = openFileDialog.FileName;
+            // WpfFilePicker's Task completes synchronously (the dialog itself blocks), so this
+            // never actually waits on anything - safe without an async handler.
+            string? path = _filePicker.PickFileAsync(title: "", filter: "").GetAwaiter().GetResult();
+            if (path is not null)
+                ListOfSitesPath = path;
         }
 
         private void CheckControlAllSites()
