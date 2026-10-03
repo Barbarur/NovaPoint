@@ -202,7 +202,8 @@ namespace NovaPointWPF.UserControls
 
             for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
             {
-                listDates.Add(date.ToString("MMM dd, yyyy"));
+                // Must match the culture the SelectionChanged handlers parse with.
+                listDates.Add(date.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.InvariantCulture));
             }
 
             List<string> hours = new() { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" };
