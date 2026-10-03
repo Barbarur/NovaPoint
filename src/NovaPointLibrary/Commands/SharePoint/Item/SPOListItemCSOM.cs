@@ -2,6 +2,7 @@
 using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -270,28 +271,28 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
         internal CamlQuery GetCamlQuery(SPOItemsParameters parameters, string? folderServerRelativeUrl)
         {
-            StringBuilder sbQuery = new();
+            List<string> conditions = [];
             if (parameters.CreatedAfter > DateTime.MinValue)
             {
-                sbQuery.Append($"<Gt><FieldRef Name='Created'/><Value IncludeTimeValue='TRUE' Type='DateTime'>{parameters.CreatedAfter}</Value></Gt>");
+                conditions.Add(GetDateCondition("Gt", "Created", parameters.CreatedAfter));
             }
             if (parameters.CreatedBefore < DateTime.MaxValue)
             {
-                sbQuery.Append($"<Lt><FieldRef Name='Created'/><Value IncludeTimeValue='TRUE' Type='DateTime'>{parameters.CreatedBefore}</Value></Lt>");
+                conditions.Add(GetDateCondition("Lt", "Created", parameters.CreatedBefore));
             }
             if (parameters.ModifiedAfter > DateTime.MinValue)
             {
-                sbQuery.Append($"<Gt><FieldRef Name='Modified'/><Value IncludeTimeValue='TRUE' Type='DateTime'>{parameters.ModifiedAfter}</Value></Gt>");
+                conditions.Add(GetDateCondition("Gt", "Modified", parameters.ModifiedAfter));
             }
             if (parameters.ModifiedBefore < DateTime.MaxValue)
             {
-                sbQuery.Append($"<Lt><FieldRef Name='Modified'/><Value IncludeTimeValue='TRUE' Type='DateTime'>{parameters.ModifiedBefore}</Value></Lt>");
+                conditions.Add(GetDateCondition("Lt", "Modified", parameters.ModifiedBefore));
             }
 
             string viewXml;
-            if (sbQuery.Length > 0)
+            if (conditions.Count > 0)
             {
-                viewXml = $"<View Scope='RecursiveAll'><Query><Where>{sbQuery}</Where></Query></View>";
+                viewXml = $"<View Scope='RecursiveAll'><Query><Where>{CombineWithAnd(conditions)}</Where></Query></View>";
                 _logger.Debug(GetType().Name, $"ViewXml = {viewXml}");
             }
             else
@@ -300,6 +301,21 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             }
 
             return GetCamlQuery(viewXml, folderServerRelativeUrl ?? string.Empty);
+        }
+
+        // Filter dates are UTC (as the wiki documents); StorageTZ stops SharePoint reading them in the site's time zone.
+        private static string GetDateCondition(string comparison, string fieldName, DateTime value)
+        {
+            string isoValue = value.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture);
+            return $"<{comparison}><FieldRef Name='{fieldName}'/><Value IncludeTimeValue='TRUE' StorageTZ='TRUE' Type='DateTime'>{isoValue}</Value></{comparison}>";
+        }
+
+        // CAML's <And> takes exactly two conditions, so three or more must be nested.
+        private static string CombineWithAnd(IReadOnlyList<string> conditions)
+        {
+            return conditions.Count == 1
+                ? conditions[0]
+                : $"<And>{conditions[0]}{CombineWithAnd(conditions.Skip(1).ToList())}</And>";
         }
 
         internal CamlQuery GetCamlQuery(string viewXml, string folderServerRelativeUrl)
