@@ -55,9 +55,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
             set
             { 
                 _siteUrl = value.Trim();
-                if (_siteUrl.EndsWith("/"))
+                if (_siteUrl.EndsWith('/'))
                 {
-                    _siteUrl = _siteUrl.Remove(_siteUrl.LastIndexOf("/"));
+                    _siteUrl = _siteUrl.Remove(_siteUrl.LastIndexOf('/'));
                 }
             }
         }

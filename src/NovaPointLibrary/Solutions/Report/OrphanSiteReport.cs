@@ -80,7 +80,7 @@ namespace NovaPointLibrary.Solutions.Report
                     {
                         AddRecord(record.ReportUsers("Unknown", "Unknown", "No Primary Admin"));
                     }
-                    else if (Guid.TryParse(siteProperties.Owner, out Guid guid) || (siteProperties.Owner.Contains("_o") && Guid.TryParse(siteProperties.Owner[..siteProperties.Owner.IndexOf("_o")], out guid)))
+                    else if (Guid.TryParse(siteProperties.Owner, out Guid guid) || (siteProperties.Owner.Contains("_o") && Guid.TryParse(siteProperties.Owner[..siteProperties.Owner.IndexOf("_o", StringComparison.Ordinal)], out guid)))
                     {
                         try
                         {

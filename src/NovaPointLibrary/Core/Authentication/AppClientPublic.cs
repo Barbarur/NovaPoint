@@ -124,7 +124,7 @@ namespace NovaPointLibrary.Core.Authentication
         {
             this.IsCancelled();
 
-            string rootUrl = siteUrl[..(siteUrl.IndexOf(".com") + 4)];
+            string rootUrl = siteUrl[..(siteUrl.IndexOf(".com", StringComparison.Ordinal) + 4)];
             string defaultPermissions = rootUrl + "/.default";
             string[] scopes = new string[] { defaultPermissions };
 

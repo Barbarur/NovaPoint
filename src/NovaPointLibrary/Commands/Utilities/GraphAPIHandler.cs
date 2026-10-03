@@ -107,7 +107,7 @@ namespace NovaPointLibrary.Commands.Utilities
 
         public static string GetUriString(string apiEndpoint)
         {
-            if (apiEndpoint.StartsWith("/"))
+            if (apiEndpoint.StartsWith('/'))
             {
                 apiEndpoint = apiEndpoint.Substring(1);
             }

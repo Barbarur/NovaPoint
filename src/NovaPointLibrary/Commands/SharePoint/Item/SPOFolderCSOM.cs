@@ -34,7 +34,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
 
-            if (!folderServerRelativeUrl.StartsWith("/"))
+            if (!folderServerRelativeUrl.StartsWith('/'))
             {
                 folderServerRelativeUrl = folderServerRelativeUrl.Insert(0, "/");
             }
@@ -117,7 +117,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
 
-            if (!folderServerRelativeUrl.StartsWith("/"))
+            if (!folderServerRelativeUrl.StartsWith('/'))
             {
                 folderServerRelativeUrl = folderServerRelativeUrl.Insert(0, "/");
             }
@@ -139,7 +139,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
 
             if (folder == null)
             {
-                string parentPath = folderServerRelativeUrl.Remove(folderServerRelativeUrl.LastIndexOf("/"));
+                string parentPath = folderServerRelativeUrl.Remove(folderServerRelativeUrl.LastIndexOf('/'));
                 await EnsureFolderPathExistAsync(siteUrl, parentPath);
 
                 await new SPOFolderCSOM(_logger, _appInfo).CreateAsync(siteUrl, folderServerRelativeUrl);
@@ -150,11 +150,11 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
 
-            if (!folderServerRelativeUrl.StartsWith("/"))
+            if (!folderServerRelativeUrl.StartsWith('/'))
             {
                 folderServerRelativeUrl = folderServerRelativeUrl.Insert(0, "/");
             }
-            if (!rootServerRelativeUrl.StartsWith("/"))
+            if (!rootServerRelativeUrl.StartsWith('/'))
             {
                 rootServerRelativeUrl = rootServerRelativeUrl.Insert(0, "/");
             }

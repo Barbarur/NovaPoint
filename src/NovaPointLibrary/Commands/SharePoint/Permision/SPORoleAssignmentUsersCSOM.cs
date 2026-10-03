@@ -59,7 +59,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 }
                 else if (role.Member.PrincipalType.ToString() == "User")
                 {
-                    string userUPN = role.Member.LoginName.Substring(role.Member.LoginName.IndexOf("i:0#.f|membership|") + 18);
+                    string userUPN = role.Member.LoginName.Substring(role.Member.LoginName.IndexOf("i:0#.f|membership|", StringComparison.Ordinal) + 18);
 
                     yield return SPORoleAssignmentUserRecord.GetRecordUserDirectPermissions(userUPN, permissionLevels);
                 }

@@ -21,7 +21,7 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
             }
             set
             {
-                _type = value.Substring(value.IndexOf("graph.") + 6);
+                _type = value.Substring(value.IndexOf("graph.", StringComparison.Ordinal) + 6);
                 if ( value.Contains("group") ) { UserType = "Group"; }
             }
         }

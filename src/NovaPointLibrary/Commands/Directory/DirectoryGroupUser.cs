@@ -58,12 +58,12 @@ namespace NovaPointLibrary.Commands.Directory
         private static bool TryGetGroupId(string secGroupId, out Guid groupId, out bool isOwners)
         {
             isOwners = false;
-            if (secGroupId.Contains("c:0t.c|tenant|", StringComparison.OrdinalIgnoreCase)) { secGroupId = secGroupId.Substring(secGroupId.IndexOf("c:0t.c|tenant|") + 14); }
-            if (secGroupId.Contains("c:0u.c|tenant|", StringComparison.OrdinalIgnoreCase)) { secGroupId = secGroupId[(secGroupId.IndexOf("c:0u.c|tenant|") + 14)..]; }
-            if (secGroupId.Contains("c:0o.c|federateddirectoryclaimprovider|", StringComparison.OrdinalIgnoreCase)) { secGroupId = secGroupId.Substring(secGroupId.IndexOf("c:0o.c|federateddirectoryclaimprovider|") + 39); }
+            if (secGroupId.Contains("c:0t.c|tenant|", StringComparison.OrdinalIgnoreCase)) { secGroupId = secGroupId.Substring(secGroupId.IndexOf("c:0t.c|tenant|", StringComparison.OrdinalIgnoreCase) + 14); }
+            if (secGroupId.Contains("c:0u.c|tenant|", StringComparison.OrdinalIgnoreCase)) { secGroupId = secGroupId[(secGroupId.IndexOf("c:0u.c|tenant|", StringComparison.OrdinalIgnoreCase) + 14)..]; }
+            if (secGroupId.Contains("c:0o.c|federateddirectoryclaimprovider|", StringComparison.OrdinalIgnoreCase)) { secGroupId = secGroupId.Substring(secGroupId.IndexOf("c:0o.c|federateddirectoryclaimprovider|", StringComparison.OrdinalIgnoreCase) + 39); }
             if (secGroupId.Contains("_o"))
             {
-                secGroupId = secGroupId.Substring(0, secGroupId.IndexOf("_o"));
+                secGroupId = secGroupId.Substring(0, secGroupId.IndexOf("_o", StringComparison.Ordinal));
                 isOwners = true;
             }
 

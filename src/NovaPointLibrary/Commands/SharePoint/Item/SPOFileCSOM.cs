@@ -35,7 +35,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
         {
             _appInfo.IsCancelled();
 
-            if (!fileServerRelativeUrl.StartsWith("/"))
+            if (!fileServerRelativeUrl.StartsWith('/'))
             {
                 fileServerRelativeUrl = fileServerRelativeUrl.Insert(0, "/");
             }
@@ -86,9 +86,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             _logger.Info(GetType().Name, $"Finding available name");
 
 
-            string parentFolderPath = fileServerRelativeUrl.Remove(fileServerRelativeUrl.LastIndexOf("/") + 1);
+            string parentFolderPath = fileServerRelativeUrl.Remove(fileServerRelativeUrl.LastIndexOf('/') + 1);
 
-            string potentialName = fileServerRelativeUrl.Substring(fileServerRelativeUrl.LastIndexOf("/") + 1);
+            string potentialName = fileServerRelativeUrl.Substring(fileServerRelativeUrl.LastIndexOf('/') + 1);
             string availableName = string.Empty;
 
             while (string.IsNullOrWhiteSpace(availableName))

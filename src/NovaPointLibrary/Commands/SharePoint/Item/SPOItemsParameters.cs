@@ -81,7 +81,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
                     }
                     if (_folderRelativeUrl.EndsWith('/'))
                     {
-                        _folderRelativeUrl = _folderRelativeUrl.Remove(_folderRelativeUrl.LastIndexOf("/"));
+                        _folderRelativeUrl = _folderRelativeUrl.Remove(_folderRelativeUrl.LastIndexOf('/'));
                     }
                 }
             }

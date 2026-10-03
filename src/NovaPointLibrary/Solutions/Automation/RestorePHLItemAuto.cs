@@ -112,7 +112,7 @@ namespace NovaPointLibrary.Solutions.Automation
                         }
 
                         string originalPath = (string)result.Item["PreservationOriginalURL"];
-                        string targetFolderPath = originalPath.Remove(originalPath.LastIndexOf("/"));
+                        string targetFolderPath = originalPath.Remove(originalPath.LastIndexOf('/'));
                         await EnsureFolderPathExist(result.ListRecord.SiteUrl, targetFolderPath);
 
                         string itemNameOnly = Path.GetFileNameWithoutExtension((string)result.Item["PreservationOriginalDocumentName"]);
@@ -157,7 +157,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             if (folder == null)
             {
-                string parentPath = folderPath.Remove(folderPath.LastIndexOf("/"));
+                string parentPath = folderPath.Remove(folderPath.LastIndexOf('/'));
                 await EnsureFolderPathExist(siteUrl, parentPath);
 
                 await new SPOFolderCSOM(_ctx.Logger, _ctx.AppClient).CreateAsync(siteUrl, folderPath);

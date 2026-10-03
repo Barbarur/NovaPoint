@@ -1,6 +1,7 @@
 ﻿using Microsoft.SharePoint.Client;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Solutions;
+using System.Globalization;
 using System.Text;
 
 
@@ -142,9 +143,9 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
 
             SharingLinkIsActive = oLink.linkDetails.IsActive.ToString();
 
-            SharingLinkCreated = DateTime.Parse(oLink.linkDetails.Created);
+            SharingLinkCreated = DateTime.Parse(oLink.linkDetails.Created, CultureInfo.InvariantCulture);
             SharingLinkCreatedBy = oLink.linkDetails.CreatedBy.email;
-            SharingLinkModified = DateTime.Parse(oLink.linkDetails.LastModified);
+            SharingLinkModified = DateTime.Parse(oLink.linkDetails.LastModified, CultureInfo.InvariantCulture);
             SharingLinkModifiedBy = oLink.linkDetails.LastModifiedBy.email;
             SharingLinkUrl = oLink.linkDetails.Url;
         }

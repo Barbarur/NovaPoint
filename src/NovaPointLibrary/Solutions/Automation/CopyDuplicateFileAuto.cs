@@ -391,7 +391,7 @@ namespace NovaPointLibrary.Solutions.Automation
             set
             {
                 _sourceSiteUrl = value.Trim();
-                if (_destinationLibraryRelativeUrl.EndsWith("/"))
+                if (_destinationLibraryRelativeUrl.EndsWith('/'))
                 {
                     _destinationLibraryRelativeUrl =
                         _destinationLibraryRelativeUrl.Remove(_destinationLibraryRelativeUrl.LastIndexOf('/'));
@@ -432,7 +432,7 @@ namespace NovaPointLibrary.Solutions.Automation
             set
             {
                 _destinationLibraryRelativeUrl = value.Trim();
-                if (!_destinationLibraryRelativeUrl.StartsWith("/"))
+                if (!_destinationLibraryRelativeUrl.StartsWith('/'))
                 {
                     _destinationLibraryRelativeUrl = '/' + _destinationLibraryRelativeUrl;
                 }

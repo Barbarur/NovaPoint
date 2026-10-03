@@ -31,7 +31,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Item
             set
             {
                 _destinationServerRelativeUrl = value;
-                _folderDestinationServerRelativeUrl = value.Remove(value.LastIndexOf("/"));
+                _folderDestinationServerRelativeUrl = value.Remove(value.LastIndexOf('/'));
             }
         }
         private string _folderDestinationServerRelativeUrl = string.Empty;

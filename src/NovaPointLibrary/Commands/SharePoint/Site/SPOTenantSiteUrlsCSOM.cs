@@ -69,9 +69,9 @@ namespace NovaPointLibrary.Commands.SharePoint.Site
                         if (string.IsNullOrEmpty(line)) { continue; }
 
                         string siteUrl = line.Trim();
-                        if (siteUrl.EndsWith("/"))
+                        if (siteUrl.EndsWith('/'))
                         {
-                            siteUrl = siteUrl.Remove(siteUrl.LastIndexOf("/"));
+                            siteUrl = siteUrl.Remove(siteUrl.LastIndexOf('/'));
                         }
 
                         _logger.Info(GetType().Name, $"Processing Site '{siteUrl}'");

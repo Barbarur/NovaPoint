@@ -12,7 +12,7 @@ namespace NovaPointLibrary.Commands.Utilities.GraphModel
         public string Type
         {
             get { return _type; }
-            set { _type = value[(value.IndexOf("graph.") + 6)..]; }
+            set { _type = value[(value.IndexOf("graph.", StringComparison.Ordinal) + 6)..]; }
         }
         //[JsonProperty("@odata.type")]
         //public string Type { get; set; }
