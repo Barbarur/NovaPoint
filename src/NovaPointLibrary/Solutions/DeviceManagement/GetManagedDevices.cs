@@ -315,7 +315,7 @@ internal class GetManagedDevicesRecord : ISolutionRecord
             ? device.LastSyncDateTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
             : string.Empty;
         DaysSinceLastSync = device.LastSyncDateTime != DateTime.MinValue
-            ? ((int)(DateTime.UtcNow - device.LastSyncDateTime).TotalDays).ToString()
+            ? ((int)(DateTime.UtcNow - device.LastSyncDateTime).TotalDays).ToString(CultureInfo.InvariantCulture)
             : string.Empty;
         if (device.ManagementCertificateExpirationDate == DateTime.MinValue)
             ManagementCertExpiration = "None";

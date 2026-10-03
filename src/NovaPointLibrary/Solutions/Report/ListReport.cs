@@ -181,13 +181,13 @@ namespace NovaPointLibrary.Solutions.Report
 
                 Created = list.Created.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
                 LastModified = list.LastItemUserModifiedDate.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-                TotalFileCount = list.ItemCount.ToString();
+                TotalFileCount = list.ItemCount.ToString(CultureInfo.InvariantCulture);
 
                 ContentApproval = list.EnableModeration.ToString();
                 EnableVersioning = list.EnableVersioning.ToString();
-                MajorVersionLimit = list.MajorVersionLimit.ToString();
+                MajorVersionLimit = list.MajorVersionLimit.ToString(CultureInfo.InvariantCulture);
                 MinorVersioning = list.EnableMinorVersions.ToString();
-                MinorVersionLimit = list.MajorWithMinorVersionsLimit.ToString();
+                MinorVersionLimit = list.MajorWithMinorVersionsLimit.ToString(CultureInfo.InvariantCulture);
                 RequireCheckOut = list.ForceCheckout.ToString();
 
                 IrmEmabled = list.IrmEnabled.ToString();
@@ -207,7 +207,7 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 else if (list.VersionPolicies.DefaultTrimMode == VersionPolicyTrimMode.ExpireAfter)
                 {
-                    ExpireAfter = list.VersionPolicies.DefaultExpireAfterDays.ToString();
+                    ExpireAfter = list.VersionPolicies.DefaultExpireAfterDays.ToString(CultureInfo.InvariantCulture);
                     AutomaticExpiration = "False";
                 }
                 else

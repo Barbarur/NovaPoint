@@ -3,6 +3,7 @@ using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.User;
 using NovaPointLibrary.Core.Context;
 using System.Dynamic;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -75,7 +76,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 {
                     if (oUser.IsSiteAdmin) { await new SPOSiteCollectionAdminCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteUrl, oUser.UserPrincipalName); }
                     await new SPOSiteUserCSOM(_ctx.Logger, _ctx.AppClient).RemoveAsync(siteUrl, oUser);
-                    sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
+                    sb.Append(CultureInfo.InvariantCulture, $"{oUser.Title}: {oUser.UserPrincipalName} ");
                 }
                 catch (Exception ex)
                 {

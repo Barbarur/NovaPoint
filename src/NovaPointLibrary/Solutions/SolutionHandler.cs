@@ -4,6 +4,7 @@ using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Core.Logging;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 
@@ -50,7 +51,7 @@ namespace NovaPointLibrary.Solutions
             set
             {
                 _progress = value;
-                PercentageCompleted = value.ToString();
+                PercentageCompleted = value.ToString(CultureInfo.CurrentCulture);
                 OnPropertyChanged();
             }
         }

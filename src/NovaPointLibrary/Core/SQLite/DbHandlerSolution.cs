@@ -1,4 +1,5 @@
 ﻿using NovaPointLibrary.Core.Logging;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Text;
@@ -61,7 +62,7 @@ namespace NovaPointLibrary.Core.SQLite
         {
             var sb = new StringBuilder();
             foreach (var p in properties)
-                sb.Append($"\"{p.Name}\",");
+                sb.Append(CultureInfo.InvariantCulture, $"\"{p.Name}\",");
             if (sb.Length > 0) sb.Length--;
             csv.WriteLine(sb.ToString());
         }
@@ -72,7 +73,7 @@ namespace NovaPointLibrary.Core.SQLite
             foreach (var p in properties)
             {
                 string s = $"{p.GetValue(record)}";
-                sb.Append($"\"{s.Replace("\"", "\"\"")}\",");
+                sb.Append(CultureInfo.InvariantCulture, $"\"{s.Replace("\"", "\"\"")}\",");
             }
             if (sb.Length > 0) sb.Length--;
             csv.WriteLine(Regex.Replace(sb.ToString(), @"\r\n?|\n", ""));

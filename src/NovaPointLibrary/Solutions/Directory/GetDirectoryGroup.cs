@@ -155,7 +155,7 @@ namespace NovaPointLibrary.Solutions.Directory
 
         internal void AddOwners(IEnumerable<GraphUser> collOwners)
         {
-            OwnersTotal = collOwners.Count().ToString();
+            OwnersTotal = collOwners.Count().ToString(CultureInfo.InvariantCulture);
 
             OwnersEmail = string.Join(" ", collOwners.Select(owner => owner.Email).ToList());
         }

@@ -122,7 +122,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     }
 
                     RemoveFileVersionAutoRecord record = new(resultItem);
-                    record.AddFileDetails(resultItem.Item, fileVersionCollection.Count.ToString(), versionsDeletedMB.ToString(CultureInfo.InvariantCulture));
+                    record.AddFileDetails(resultItem.Item, fileVersionCollection.Count.ToString(CultureInfo.InvariantCulture), versionsDeletedMB.ToString(CultureInfo.InvariantCulture));
                     RecordCSV(record);
                 }
             }
@@ -186,7 +186,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 else if ((versionsDeletedCount + errorsCount) < 1) { remarks = $"No versions to delete"; }
 
                 RemoveFileVersionAutoRecord record = new(resultItem, remarks);
-                record.AddFileDetails(resultItem.Item, versionsDeletedCount.ToString(), versionsDeletedMB.ToString(CultureInfo.InvariantCulture));
+                record.AddFileDetails(resultItem.Item, versionsDeletedCount.ToString(CultureInfo.InvariantCulture), versionsDeletedMB.ToString(CultureInfo.InvariantCulture));
                 RecordCSV(record);
 
             }
@@ -233,7 +233,7 @@ namespace NovaPointLibrary.Solutions.Automation
             
             if (tenantItemRecord.Item != null)
             {
-                FileID = tenantItemRecord.Item.Id.ToString();
+                FileID = tenantItemRecord.Item.Id.ToString(CultureInfo.InvariantCulture);
                 FileTitle = tenantItemRecord.Item.File.Name;
                 FilePath = tenantItemRecord.Item.File.ServerRelativeUrl;
             }
@@ -244,7 +244,7 @@ namespace NovaPointLibrary.Solutions.Automation
                                      string versionsDeletedMB = "")
         {
             FileVersionNo = oItem.File.UIVersionLabel;
-            FileVersionsCount = ( oItem.File.Versions.Count + 1).ToString();
+            FileVersionsCount = ( oItem.File.Versions.Count + 1).ToString(CultureInfo.InvariantCulture);
 
             ItemSizeMb = Math.Round(Convert.ToDouble(oItem.File.Length) / Math.Pow(1024, 2), 2).ToString(CultureInfo.InvariantCulture);
 
@@ -266,7 +266,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
         public void ParametersCheck()
         {
-            if (!DeleteAll && string.IsNullOrWhiteSpace(KeepNumVersions.ToString()))
+            if (!DeleteAll && string.IsNullOrWhiteSpace(KeepNumVersions.ToString(CultureInfo.InvariantCulture)))
             {
                 throw new Exception($"FORM INCOMPLETED: Number of versions to keep cannot be empty when no deleting all versions");
             }

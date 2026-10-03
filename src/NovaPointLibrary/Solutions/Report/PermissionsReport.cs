@@ -8,6 +8,7 @@ using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Commands.SharePoint.User;
 using NovaPointLibrary.Core.Context;
 using System.Dynamic;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -125,7 +126,7 @@ namespace NovaPointLibrary.Solutions.Report
                 {
                     _ctx.AppClient.IsCancelled();
 
-                    sb.Append($"{oUser.Title}: {oUser.UserPrincipalName} ");
+                    sb.Append(CultureInfo.InvariantCulture, $"{oUser.Title}: {oUser.UserPrincipalName} ");
                 }
 
                 if (string.IsNullOrWhiteSpace(sb.ToString())) { return; }

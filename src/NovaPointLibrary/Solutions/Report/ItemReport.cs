@@ -175,7 +175,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             if (tenantItemRecord.Item != null)
             {
-                ItemID = tenantItemRecord.Item.Id.ToString();
+                ItemID = tenantItemRecord.Item.Id.ToString(CultureInfo.InvariantCulture);
                 ItemUniqueID = ((Guid)tenantItemRecord.Item["UniqueId"]).ToString();
                 ItemPath = (string)tenantItemRecord.Item["FileRef"];
                 ItemType = tenantItemRecord.Item.FileSystemObjectType.ToString();
@@ -202,7 +202,7 @@ namespace NovaPointLibrary.Solutions.Report
             ItemModifiedBy = editor.Email;
 
             ItemVersion = (string)oItem["_UIVersionString"];
-            ItemVersionsCount = oItem.Versions.Count.ToString();
+            ItemVersionsCount = oItem.Versions.Count.ToString(CultureInfo.InvariantCulture);
 
             if (oItem.FileSystemObjectType.ToString() == "Folder")
             {
@@ -210,7 +210,7 @@ namespace NovaPointLibrary.Solutions.Report
             }
             else if (oItem.ParentList.BaseType == BaseType.DocumentLibrary)
             {
-                ItemSizeMb = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2).ToString(CultureInfo.InvariantCulture);
+                ItemSizeMb = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"], CultureInfo.InvariantCulture) / Math.Pow(1024, 2), 2).ToString(CultureInfo.InvariantCulture);
                 try
                 {
                     FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)oItem["SMTotalSize"];
@@ -219,7 +219,7 @@ namespace NovaPointLibrary.Solutions.Report
                 catch
                 {
                     string FileSizeTotalBytes = (string)oItem["SMTotalSize"];
-                    ItemSizeTotalMB = Math.Round(long.Parse(FileSizeTotalBytes) / Math.Pow(1024, 2), 2).ToString(CultureInfo.InvariantCulture);
+                    ItemSizeTotalMB = Math.Round(long.Parse(FileSizeTotalBytes, CultureInfo.InvariantCulture) / Math.Pow(1024, 2), 2).ToString(CultureInfo.InvariantCulture);
                 }
 
                 FileCheckOut = oItem.File.CheckOutType.ToString();

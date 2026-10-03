@@ -61,7 +61,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
         {
             SiteUrl = siteUrl;
 
-            GroupId = oGroup.Id.ToString();
+            GroupId = oGroup.Id.ToString(CultureInfo.InvariantCulture);
             GroupTitle = oGroup.Title;
 
             var titleComponents = oGroup.Title.Split(".");
@@ -71,7 +71,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
             StringBuilder sbUsers = new();
             foreach (var user in oGroup.Users)
             {
-                sbUsers.Append($"{user.Email} ");
+                sbUsers.Append(CultureInfo.InvariantCulture, $"{user.Email} ");
             }
             Users = sbUsers.ToString();
 
@@ -113,7 +113,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
                 StringBuilder sbUsers = new();
                 foreach (var invitation in oLink.linkDetails.Invitations)
                 {
-                    sbUsers.Append($"{invitation.Invitee.Email} ");
+                    sbUsers.Append(CultureInfo.InvariantCulture, $"{invitation.Invitee.Email} ");
                 }
                 Users = sbUsers.ToString();
             }

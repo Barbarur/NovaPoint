@@ -3,6 +3,7 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Core.Context;
+using System.Globalization;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -168,7 +169,7 @@ namespace NovaPointLibrary.Solutions.Automation
 
             if (tenantItemRecord.Item != null)
             {
-                ItemID = tenantItemRecord.Item.Id.ToString();
+                ItemID = tenantItemRecord.Item.Id.ToString(CultureInfo.InvariantCulture);
                 ItemTitle = tenantItemRecord.Item.File.Name;
                 ItemPath = tenantItemRecord.Item.File.ServerRelativeUrl;
             }

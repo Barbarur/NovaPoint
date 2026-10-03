@@ -7,6 +7,7 @@ using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
+using System.Globalization;
 
 
 namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
@@ -96,7 +97,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
                         }
                         if (cell.Key == "ListItemID")
                         {
-                            reportRecord.ItemId = Int32.Parse(cell.Value);
+                            reportRecord.ItemId = Int32.Parse(cell.Value, CultureInfo.InvariantCulture);
                         }
                         if (cell.Key == "Path")
                         {

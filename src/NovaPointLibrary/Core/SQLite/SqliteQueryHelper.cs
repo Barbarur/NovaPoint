@@ -9,13 +9,13 @@ namespace NovaPointLibrary.Core.SQLite
         internal static string GetCreateTableQuery(Type type)
         {
             StringBuilder sbQuery = new StringBuilder();
-            sbQuery.Append($"CREATE TABLE IF NOT EXISTS {type.Name} (");
+            sbQuery.Append(CultureInfo.InvariantCulture, $"CREATE TABLE IF NOT EXISTS {type.Name} (");
 
             foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 string columnName = property.Name;
                 string columnType = GetSqlType(property.PropertyType);
-                sbQuery.Append($" {columnName} {columnType},");
+                sbQuery.Append(CultureInfo.InvariantCulture, $" {columnName} {columnType},");
             }
 
             sbQuery.Length--;
@@ -42,10 +42,10 @@ namespace NovaPointLibrary.Core.SQLite
 
             foreach (var propertyInfo in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                sbColumns.Append($"{propertyInfo.Name},");
+                sbColumns.Append(CultureInfo.InvariantCulture, $"{propertyInfo.Name},");
 
                 object? propertyValue = propertyInfo.GetValue(obj);
-                sbValues.Append($"'{GetLiteralValue(propertyValue)}',");
+                sbValues.Append(CultureInfo.InvariantCulture, $"'{GetLiteralValue(propertyValue)}',");
             }
             sbColumns.Length--;
             sbColumns.Append(')');

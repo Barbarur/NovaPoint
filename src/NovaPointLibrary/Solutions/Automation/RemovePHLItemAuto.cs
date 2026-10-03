@@ -122,10 +122,10 @@ namespace NovaPointLibrary.Solutions.Automation
             recordItem.ItemPreserved = oItem != null ? oItem["PreservationDatePreserved"] : string.Empty;
 
             recordItem.ItemVersion = oItem != null ? oItem["_UIVersionString"] : string.Empty;
-            recordItem.ItemVersionsCount = oItem != null ? oItem.Versions.Count.ToString() : string.Empty;
+            recordItem.ItemVersionsCount = oItem != null ? oItem.Versions.Count.ToString(CultureInfo.InvariantCulture) : string.Empty;
 
 
-            float? itemSizeMb = oItem != null ? (float)Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2) : null;
+            float? itemSizeMb = oItem != null ? (float)Math.Round(Convert.ToDouble(oItem["File_x0020_Size"], CultureInfo.InvariantCulture) / Math.Pow(1024, 2), 2) : null;
             recordItem.ItemSizeMb = itemSizeMb != null ? itemSizeMb.Value.ToString(CultureInfo.InvariantCulture) : string.Empty;
 
             FieldLookupValue? FileSizeTotalBytes = oItem != null ? (FieldLookupValue)oItem["SMTotalSize"] : null;

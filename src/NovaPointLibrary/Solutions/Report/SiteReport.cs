@@ -210,7 +210,7 @@ namespace NovaPointLibrary.Solutions.Report
             try
             {
                 List<Group> collGroups = await new SPOSiteGroupCSOM(_ctx.Logger, _ctx.AppClient).GetSharingLinksAsync(siteRecord.SiteUrl);
-                countSharingLinks = collGroups.Count.ToString();
+                countSharingLinks = collGroups.Count.ToString(CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {

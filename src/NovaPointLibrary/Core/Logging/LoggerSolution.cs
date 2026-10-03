@@ -246,7 +246,7 @@ namespace NovaPointLibrary.Core.Logging
                             // https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject?redirectedfrom=MSDN&view=net-7.0#enumerating-and-deleting-members
                             foreach (var property in (IDictionary<String, Object>)o)
                             {
-                                sb.Append($"\"{property.Key}\",");
+                                sb.Append(CultureInfo.InvariantCulture, $"\"{property.Key}\",");
                             }
                             if (sb.Length > 0) { sb.Length--; }
                             csv.WriteLine(sb.ToString());
@@ -255,7 +255,7 @@ namespace NovaPointLibrary.Core.Logging
 
                         foreach (var property in (IDictionary<String, Object>)o)
                         {
-                            sb.Append($"\"{property.Value}\",");
+                            sb.Append(CultureInfo.InvariantCulture, $"\"{property.Value}\",");
                         }
                         if (sb.Length > 0) { sb.Length--; }
 

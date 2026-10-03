@@ -5,6 +5,7 @@ using NovaPointLibrary.Commands.SharePoint.PreservationHoldLibrary;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Core.Context;
 using System.Dynamic;
+using System.Globalization;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -198,7 +199,7 @@ namespace NovaPointLibrary.Solutions.Automation
             recordItem.ItemPreserved = oItem != null ? oItem["PreservationDatePreserved"] : string.Empty;
 
             recordItem.ItemVersion = oItem != null ? oItem["_UIVersionString"] : string.Empty;
-            recordItem.ItemVersionsCount = oItem != null ? oItem.Versions.Count.ToString() : string.Empty;
+            recordItem.ItemVersionsCount = oItem != null ? oItem.Versions.Count.ToString(CultureInfo.InvariantCulture) : string.Empty;
 
 
             recordItem.Remarks = remarks;

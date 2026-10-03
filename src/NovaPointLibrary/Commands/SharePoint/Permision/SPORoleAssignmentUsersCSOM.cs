@@ -6,6 +6,7 @@ using NovaPointLibrary.Commands.SharePoint.User;
 using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
 using System.Data;
+using System.Globalization;
 using System.Text;
 
 namespace NovaPointLibrary.Commands.SharePoint.Permission
@@ -101,7 +102,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
 
             string accessType = $"SharePoint Group '{spGroup.Title}'";
 
-            SPORoleAssignmentUserRecord record = new($"SharePoint Group '{spGroup.Title}'", spGroup.Id.ToString(), permissionLevels);
+            SPORoleAssignmentUserRecord record = new($"SharePoint Group '{spGroup.Title}'", spGroup.Id.ToString(CultureInfo.InvariantCulture), permissionLevels);
 
             List<SPOKnownSharePointGroupUsers> collKnownGroups = KnownGroups.FindSharePointGroups(siteUrl, spGroup.Title);
             if (collKnownGroups.Any())
@@ -178,7 +179,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
 
             SpoSharingLinksRecord recordSharingLink = await _restSharingLinks.GetFromPrincipalAsync(siteUrl, spGroup);
 
-            SPORoleAssignmentUserRecord record = new($"Sharing link '{recordSharingLink.SharingLink}'", spGroup.Id.ToString(), "User", recordSharingLink.Users, permissionLevels, recordSharingLink.Remarks);
+            SPORoleAssignmentUserRecord record = new($"Sharing link '{recordSharingLink.SharingLink}'", spGroup.Id.ToString(CultureInfo.InvariantCulture), "User", recordSharingLink.Users, permissionLevels, recordSharingLink.Remarks);
 
             return record;
         }
@@ -195,7 +196,7 @@ namespace NovaPointLibrary.Commands.SharePoint.Permission
                 if (roleDefinition.Name == "Limited Access" || roleDefinition.Name == "Web-Only Limited Access") { continue; }
                 else
                 {
-                    sb.Append($"{roleDefinition.Name} | ");
+                    sb.Append(CultureInfo.InvariantCulture, $"{roleDefinition.Name} | ");
                 }
             }
 

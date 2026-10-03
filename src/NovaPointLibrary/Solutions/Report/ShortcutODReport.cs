@@ -4,6 +4,7 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Core.Context;
+using System.Globalization;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Report
@@ -117,7 +118,7 @@ namespace NovaPointLibrary.Solutions.Report
 
             if (tenantItemRecord.Item != null)
             {
-                ItemID = tenantItemRecord.Item.Id.ToString();
+                ItemID = tenantItemRecord.Item.Id.ToString(CultureInfo.InvariantCulture);
                 ShortcutName = (string)tenantItemRecord.Item["FileLeafRef"];
                 ShortcutPath = (string)tenantItemRecord.Item["FileRef"];
             }
