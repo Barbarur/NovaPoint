@@ -2,6 +2,7 @@ using NovaPointLibrary.Commands.Directory.Applications;
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Context;
+using System.Globalization;
 
 namespace NovaPointLibrary.Solutions.Directory;
 
@@ -196,7 +197,7 @@ internal class GetDirectoryServicePrincipalRecord : ISolutionRecord
             _ => string.IsNullOrEmpty(sp.SignInAudience) ? string.Empty : $"Unknown '{sp.SignInAudience}'"
         };
 
-        CreatedDateTime = sp.CreatedDateTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? string.Empty;
+        CreatedDateTime = sp.CreatedDateTime?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) ?? string.Empty;
 
 
         

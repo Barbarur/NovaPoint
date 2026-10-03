@@ -8,6 +8,7 @@ using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions.Directory;
 using PnP.Framework.Utilities;
 using System.Dynamic;
+using System.Globalization;
 
 namespace NovaPointLibrary.Solutions.Automation
 {
@@ -315,7 +316,7 @@ namespace NovaPointLibrary.Solutions.Automation
             recordItem.CreatedByEmail = oRecycleBinItem != null ? oRecycleBinItem.AuthorEmail : String.Empty;
             recordItem.OriginalLocation = oRecycleBinItem != null ? oRecycleBinItem.DirName : String.Empty;
 
-            recordItem.SizeMB = oRecycleBinItem != null ? Math.Round(oRecycleBinItem.Size / Math.Pow(1024, 2), 2).ToString() : String.Empty;
+            recordItem.SizeMB = oRecycleBinItem != null ? Math.Round(oRecycleBinItem.Size / Math.Pow(1024, 2), 2).ToString(CultureInfo.InvariantCulture) : String.Empty;
 
             recordItem.Remarks = remarks;
 

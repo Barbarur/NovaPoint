@@ -7,6 +7,7 @@ using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions.Directory;
+using System.Globalization;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Report
@@ -209,16 +210,16 @@ namespace NovaPointLibrary.Solutions.Report
             }
             else if (oItem.ParentList.BaseType == BaseType.DocumentLibrary)
             {
-                ItemSizeMb = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2).ToString();
+                ItemSizeMb = Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2).ToString(CultureInfo.InvariantCulture);
                 try
                 {
                     FieldLookupValue FileSizeTotalBytes = (FieldLookupValue)oItem["SMTotalSize"];
-                    ItemSizeTotalMB = Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2).ToString();
+                    ItemSizeTotalMB = Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2).ToString(CultureInfo.InvariantCulture);
                 }
                 catch
                 {
                     string FileSizeTotalBytes = (string)oItem["SMTotalSize"];
-                    ItemSizeTotalMB = Math.Round(long.Parse(FileSizeTotalBytes) / Math.Pow(1024, 2), 2).ToString();
+                    ItemSizeTotalMB = Math.Round(long.Parse(FileSizeTotalBytes) / Math.Pow(1024, 2), 2).ToString(CultureInfo.InvariantCulture);
                 }
 
                 FileCheckOut = oItem.File.CheckOutType.ToString();

@@ -3,6 +3,7 @@ using NovaPointLibrary.Core.Settings;
 using NovaPointLibrary.Core.SQLite;
 using NovaPointLibrary.Solutions;
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -46,10 +47,10 @@ namespace NovaPointLibrary.Core.Logging
             UiAddLog = uiAddLog;
             _solutionName = solutionName;
 
-            _solutionFolderPath = Path.Combine(AppFolders.GetOutputFolder(), _solutionName, DateTime.UtcNow.ToString("yyMMddHHmmss"));
+            _solutionFolderPath = Path.Combine(AppFolders.GetOutputFolder(), _solutionName, DateTime.UtcNow.ToString("yyMMddHHmmss", CultureInfo.InvariantCulture));
             Directory.CreateDirectory(_solutionFolderPath);
 
-            _solutionFileName = _solutionName + "_" + DateTime.UtcNow.ToString("yyMMddHHmmss");
+            _solutionFileName = _solutionName + "_" + DateTime.UtcNow.ToString("yyMMddHHmmss", CultureInfo.InvariantCulture);
 
             _txtPath = Path.Combine(_solutionFolderPath, _solutionFileName + "_Logs.txt");
             _csvPath = Path.Combine(_solutionFolderPath, _solutionFileName + "_Report.csv");

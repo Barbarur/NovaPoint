@@ -1,6 +1,7 @@
 ﻿
 
 using PnP.Framework.Diagnostics;
+using System.Globalization;
 using System.IO;
 
 namespace NovaPointLibrary.Core.Logging
@@ -15,7 +16,7 @@ namespace NovaPointLibrary.Core.Logging
 
         internal SolutionLog(string logType, string threadCode, string classMethod, string log)
         {
-            TimeStamp = $"{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss}";
+            TimeStamp = DateTime.UtcNow.ToString("yyyy/MM/dd HH:mm:ss", CultureInfo.InvariantCulture);
             LogType = logType;
             ThreadCode = threadCode;
             ClassMethod = classMethod;

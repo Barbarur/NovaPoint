@@ -1,6 +1,7 @@
 using NovaPointLibrary.Commands.Directory.Applications;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Context;
+using System.Globalization;
 
 namespace NovaPointLibrary.Solutions.Directory;
 
@@ -228,7 +229,7 @@ internal class GetDirectoryRegApplicationRecord : ISolutionRecord
             this.ApplicationAudience = $"Unknown '{app.SignInAudience}'";
         }
 
-        this.CreatedDate = app.CreatedDateTime.ToString("yyyy-MM-dd HH:mm:ss");
+        this.CreatedDate = app.CreatedDateTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
         this.Notes = string.IsNullOrWhiteSpace(app.Notes) ? string.Empty : app.Notes ;
 
         VerifiedPublisher = string.IsNullOrEmpty(app.VerifiedPublisher.DisplayName)

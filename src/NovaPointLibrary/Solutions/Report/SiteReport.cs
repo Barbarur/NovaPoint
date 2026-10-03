@@ -7,6 +7,7 @@ using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions.Directory;
+using System.Globalization;
 using System.Linq.Expressions;
 
 
@@ -300,9 +301,9 @@ namespace NovaPointLibrary.Solutions.Report
             }
             else { TeamsChannel = "NA"; }
 
-            StorageQuotaGB = Math.Round((float)oSiteCollection.StorageMaximumLevel / 1024, 2).ToString();
-            StorageUsedGB = Math.Round((float)oSiteCollection.StorageUsage / 1024, 2).ToString();
-            StorageWarningPercentageLevel = Math.Round((float)oSiteCollection.StorageWarningLevel / (float)oSiteCollection.StorageMaximumLevel * 100, 2).ToString();
+            StorageQuotaGB = Math.Round((float)oSiteCollection.StorageMaximumLevel / 1024, 2).ToString(CultureInfo.InvariantCulture);
+            StorageUsedGB = Math.Round((float)oSiteCollection.StorageUsage / 1024, 2).ToString(CultureInfo.InvariantCulture);
+            StorageWarningPercentageLevel = Math.Round((float)oSiteCollection.StorageWarningLevel / (float)oSiteCollection.StorageMaximumLevel * 100, 2).ToString(CultureInfo.InvariantCulture);
 
             LastContentModifiedDate = oSiteCollection.LastContentModifiedDate.ToString();
             LockState = oSiteCollection.LockState.ToString();

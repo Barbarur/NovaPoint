@@ -2,6 +2,7 @@
 using NovaPointLibrary.Commands.Authentication;
 using NovaPointLibrary.Core.Authentication;
 using NovaPointLibrary.Core.Logging;
+using System.Globalization;
 
 
 namespace NovaPointLibrary.Core.Settings
@@ -47,7 +48,7 @@ namespace NovaPointLibrary.Core.Settings
         {
             try
             {
-                string timestamp = DateTime.Now.ToString("yyMMddHHmmss");
+                string timestamp = DateTime.Now.ToString("yyMMddHHmmss", CultureInfo.InvariantCulture);
                 string backupFile = $"{configFile}.corrupt-{timestamp}";
                 File.Copy(configFile, backupFile, overwrite: true);
 

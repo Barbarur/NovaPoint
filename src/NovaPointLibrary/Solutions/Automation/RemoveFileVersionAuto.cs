@@ -3,6 +3,7 @@ using NovaPointLibrary.Commands.SharePoint.Item;
 using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Core.Context;
+using System.Globalization;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Automation
@@ -121,7 +122,7 @@ namespace NovaPointLibrary.Solutions.Automation
                     }
 
                     RemoveFileVersionAutoRecord record = new(resultItem);
-                    record.AddFileDetails(resultItem.Item, fileVersionCollection.Count.ToString(), versionsDeletedMB.ToString());
+                    record.AddFileDetails(resultItem.Item, fileVersionCollection.Count.ToString(), versionsDeletedMB.ToString(CultureInfo.InvariantCulture));
                     RecordCSV(record);
                 }
             }
@@ -185,7 +186,7 @@ namespace NovaPointLibrary.Solutions.Automation
                 else if ((versionsDeletedCount + errorsCount) < 1) { remarks = $"No versions to delete"; }
 
                 RemoveFileVersionAutoRecord record = new(resultItem, remarks);
-                record.AddFileDetails(resultItem.Item, versionsDeletedCount.ToString(), versionsDeletedMB.ToString());
+                record.AddFileDetails(resultItem.Item, versionsDeletedCount.ToString(), versionsDeletedMB.ToString(CultureInfo.InvariantCulture));
                 RecordCSV(record);
 
             }
@@ -245,10 +246,10 @@ namespace NovaPointLibrary.Solutions.Automation
             FileVersionNo = oItem.File.UIVersionLabel;
             FileVersionsCount = ( oItem.File.Versions.Count + 1).ToString();
 
-            ItemSizeMb = Math.Round(Convert.ToDouble(oItem.File.Length) / Math.Pow(1024, 2), 2).ToString();
+            ItemSizeMb = Math.Round(Convert.ToDouble(oItem.File.Length) / Math.Pow(1024, 2), 2).ToString(CultureInfo.InvariantCulture);
 
             FieldLookupValue MTotalSize = (FieldLookupValue)oItem["SMTotalSize"];
-            ItemSizeTotalMB = Math.Round(Convert.ToDouble(MTotalSize.LookupId) / Math.Pow(1024, 2), 2).ToString();
+            ItemSizeTotalMB = Math.Round(Convert.ToDouble(MTotalSize.LookupId) / Math.Pow(1024, 2), 2).ToString(CultureInfo.InvariantCulture);
 
             DeletedVersionsCount = versionsDeletedCount;
             DeletedVersionsMB = versionsDeletedMB;

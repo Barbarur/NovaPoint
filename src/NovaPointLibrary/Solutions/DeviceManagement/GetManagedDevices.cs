@@ -286,16 +286,16 @@ internal class GetManagedDevicesRecord : ISolutionRecord
         OperatingSystem = device.OperatingSystem;
         OsVersion = device.OsVersion;
         TotalStorageGb = device.TotalStorageSpaceInBytes >= 0
-            ? Math.Round((double)device.TotalStorageSpaceInBytes / 1_073_741_824, 2).ToString()
+            ? Math.Round((double)device.TotalStorageSpaceInBytes / 1_073_741_824, 2).ToString(CultureInfo.InvariantCulture)
             : string.Empty;
         FreeStorageGb = device.FreeStorageSpaceInBytes >= 0
-            ? Math.Round((double)device.FreeStorageSpaceInBytes / 1_073_741_824, 2).ToString()
+            ? Math.Round((double)device.FreeStorageSpaceInBytes / 1_073_741_824, 2).ToString(CultureInfo.InvariantCulture)
             : string.Empty;
         StorageUsedPct = device.TotalStorageSpaceInBytes > 0
-            ? $"{Math.Round((double)(device.TotalStorageSpaceInBytes - device.FreeStorageSpaceInBytes) / device.TotalStorageSpaceInBytes * 100, 0)}%"
+            ? string.Create(CultureInfo.InvariantCulture, $"{Math.Round((double)(device.TotalStorageSpaceInBytes - device.FreeStorageSpaceInBytes) / device.TotalStorageSpaceInBytes * 100, 0)}%")
             : string.Empty;
         PhysicalMemoryGb = device.PhysicalMemoryInBytes >= 0
-            ? Math.Round((double)device.PhysicalMemoryInBytes / 1_073_741_824, 2).ToString()
+            ? Math.Round((double)device.PhysicalMemoryInBytes / 1_073_741_824, 2).ToString(CultureInfo.InvariantCulture)
             : string.Empty;
 
         PrimaryUser = !string.IsNullOrEmpty(device.UserPrincipalName)
@@ -308,11 +308,11 @@ internal class GetManagedDevicesRecord : ISolutionRecord
         EnrollmentType = NormalizeEnrollmentType(device.DeviceEnrollmentType);
         EnrollmentProfile = device.EnrollmentProfileName;
         EnrolledDate = device.EnrolledDateTime != DateTime.MinValue
-            ? device.EnrolledDateTime.ToString("yyyy-MM-dd HH:mm:ss")
+            ? device.EnrolledDateTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
             : string.Empty;
         _lastSyncDateTime = device.LastSyncDateTime;
         LastSyncDate = device.LastSyncDateTime != DateTime.MinValue
-            ? device.LastSyncDateTime.ToString("yyyy-MM-dd HH:mm:ss")
+            ? device.LastSyncDateTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
             : string.Empty;
         DaysSinceLastSync = device.LastSyncDateTime != DateTime.MinValue
             ? ((int)(DateTime.UtcNow - device.LastSyncDateTime).TotalDays).ToString()
@@ -322,14 +322,14 @@ internal class GetManagedDevicesRecord : ISolutionRecord
         else if (device.ManagementCertificateExpirationDate < DateTime.UtcNow)
             ManagementCertExpiration = "Expired";
         else if (device.ManagementCertificateExpirationDate < DateTime.UtcNow.AddDays(30))
-            ManagementCertExpiration = $"Expiring {device.ManagementCertificateExpirationDate:yyyy-MM-dd}";
+            ManagementCertExpiration = string.Create(CultureInfo.InvariantCulture, $"Expiring {device.ManagementCertificateExpirationDate:yyyy-MM-dd}");
         else
             ManagementCertExpiration = "Valid";
 
         ComplianceState = NormalizeComplianceState(device.ComplianceState);
         ComplianceGracePeriodExpiration = device.ComplianceGracePeriodExpirationDateTime != DateTime.MinValue
             && device.ComplianceGracePeriodExpirationDateTime.Year < 9999
-            ? device.ComplianceGracePeriodExpirationDateTime.ToString("yyyy-MM-dd HH:mm:ss")
+            ? device.ComplianceGracePeriodExpirationDateTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
             : string.Empty;
 
         IsEncrypted = device.IsEncrypted?.ToString() ?? string.Empty;

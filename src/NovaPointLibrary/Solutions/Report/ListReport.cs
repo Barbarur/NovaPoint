@@ -4,6 +4,7 @@ using NovaPointLibrary.Commands.SharePoint.List;
 using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Core.Context;
+using System.Globalization;
 using System.Linq.Expressions;
 
 
@@ -218,7 +219,7 @@ namespace NovaPointLibrary.Solutions.Report
 
         internal void AddStorageMetrics(RESTStorageMetrics storageMetrics)
         {
-            TotalSizeGb = Math.Round(storageMetrics.TotalSize / Math.Pow(1024, 3), 2).ToString();
+            TotalSizeGb = Math.Round(storageMetrics.TotalSize / Math.Pow(1024, 3), 2).ToString(CultureInfo.InvariantCulture);
         }
 
     }

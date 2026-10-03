@@ -1,5 +1,6 @@
 using NovaPointLibrary.Commands.Utilities;
 using NovaPointLibrary.Core.Settings;
+using System.Globalization;
 
 namespace NovaPointLibrary.Core.Logging;
 
@@ -14,12 +15,12 @@ public static class LogCrash
     public static string WriteCrashLog(Exception ex, string crashName)
     {
         string version = VersionControl.GetVersion();
-        string logFile = Path.Combine(s_crashFolder, $"{DateTime.Now:yyMMddHHmmss}_{crashName}{VersionTag}{version}{CrashLogExtension}");
+        string logFile = Path.Combine(s_crashFolder, string.Create(CultureInfo.InvariantCulture, $"{DateTime.Now:yyMMddHHmmss}_{crashName}{VersionTag}{version}{CrashLogExtension}"));
 
         try
         {
             Directory.CreateDirectory(s_crashFolder);
-            File.AppendAllText(logFile, $"NovaPointLibrary v{version}{Environment.NewLine}{DateTime.Now:yyyy-MM-dd HH:mm:ss} {ex}{Environment.NewLine}{Environment.NewLine}");
+            File.AppendAllText(logFile, string.Create(CultureInfo.InvariantCulture, $"NovaPointLibrary v{version}{Environment.NewLine}{DateTime.Now:yyyy-MM-dd HH:mm:ss} {ex}{Environment.NewLine}{Environment.NewLine}"));
         }
         catch
         {
