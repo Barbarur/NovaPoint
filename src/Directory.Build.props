@@ -1,0 +1,8 @@
+<Project>
+
+  <!-- One version for every assembly: the installer only replaces a DLL whose file version went up. -->
+  <PropertyGroup>
+    <AssemblyVersion>0.17.0</AssemblyVersion>
+  </PropertyGroup>
+
+</Project>
