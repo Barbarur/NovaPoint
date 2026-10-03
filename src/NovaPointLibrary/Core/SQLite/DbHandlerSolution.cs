@@ -72,7 +72,14 @@ namespace NovaPointLibrary.Core.SQLite
             var sb = new StringBuilder();
             foreach (var p in properties)
             {
-                string s = $"{p.GetValue(record)}";
+                // Interpolation would format dates and numbers with the PC's regional settings.
+                string s = p.GetValue(record) switch
+                {
+                    null => string.Empty,
+                    DateTime dateTime => dateTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                    IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+                    object value => value.ToString() ?? string.Empty,
+                };
                 sb.Append(CultureInfo.InvariantCulture, $"\"{s.Replace("\"", "\"\"")}\",");
             }
             if (sb.Length > 0) sb.Length--;
