@@ -30,7 +30,7 @@ namespace NovaPointWPF
         {
             InitializeComponent();
 
-            this.Content = new MainPage();
+            this.Content = MainPage;
         }
 
 
