@@ -1,6 +1,7 @@
 ﻿using NovaPointLibrary.Commands.Directory;
 using NovaPointLibrary.Commands.Utilities.GraphModel;
 using NovaPointLibrary.Core.Context;
+using System.Globalization;
 
 
 namespace NovaPointLibrary.Solutions.Directory
@@ -142,7 +143,7 @@ namespace NovaPointLibrary.Solutions.Directory
                 MembershipType = "Static";
             }
 
-            CreatedDate = group.CreatedDateTime.ToString();
+            CreatedDate = group.CreatedDateTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 
             Email = group.Email;
             MailEnabled = group.MailEnabled.ToString();

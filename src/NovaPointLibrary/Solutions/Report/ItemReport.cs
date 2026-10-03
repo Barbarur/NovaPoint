@@ -235,8 +235,8 @@ namespace NovaPointLibrary.Solutions.Report
                 }
                 float itemSizeTotalMb = (float)Math.Round(itemSizeTotalBytes / Math.Pow(1024, 2), 2);
 
-                ItemSizeMb = itemSizeTotalMb.ToString();
-                ItemSizeTotalMB = itemSizeTotalMb.ToString();
+                ItemSizeMb = itemSizeTotalMb.ToString(CultureInfo.InvariantCulture);
+                ItemSizeTotalMB = itemSizeTotalMb.ToString(CultureInfo.InvariantCulture);
             }
 
         }

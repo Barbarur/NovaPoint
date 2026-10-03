@@ -4,6 +4,7 @@ using NovaPointLibrary.Commands.SharePoint.Site;
 using NovaPointLibrary.Commands.SharePoint.SiteGroup;
 using NovaPointLibrary.Commands.Utilities.RESTModel;
 using NovaPointLibrary.Core.Context;
+using System.Globalization;
 
 
 namespace NovaPointLibrary.Solutions.Report
@@ -85,7 +86,7 @@ namespace NovaPointLibrary.Solutions.Report
                         {
                             var recordInvitationBreakdown = recordSharingLink.CopyRecord();
                             recordInvitationBreakdown.InvitedBy = invitation.InvitedBy.Email;
-                            recordInvitationBreakdown.InvitedOn = invitation.InvitedOn.ToString();
+                            recordInvitationBreakdown.InvitedOn = invitation.InvitedOn.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
                             recordInvitationBreakdown.InvitedTo = invitation.Invitee.Email;
 
                             RecordCSV(recordInvitationBreakdown);

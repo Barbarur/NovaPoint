@@ -179,8 +179,8 @@ namespace NovaPointLibrary.Solutions.Report
                 ListServerRelativeUrl = list.RootFolder.ServerRelativeUrl;
                 ListId = list.Id.ToString();
 
-                Created = list.Created.ToString();
-                LastModified = list.LastItemUserModifiedDate.ToString();
+                Created = list.Created.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                LastModified = list.LastItemUserModifiedDate.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
                 TotalFileCount = list.ItemCount.ToString();
 
                 ContentApproval = list.EnableModeration.ToString();

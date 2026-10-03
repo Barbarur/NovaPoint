@@ -305,7 +305,7 @@ namespace NovaPointLibrary.Solutions.Report
             StorageUsedGB = Math.Round((float)oSiteCollection.StorageUsage / 1024, 2).ToString(CultureInfo.InvariantCulture);
             StorageWarningPercentageLevel = Math.Round((float)oSiteCollection.StorageWarningLevel / (float)oSiteCollection.StorageMaximumLevel * 100, 2).ToString(CultureInfo.InvariantCulture);
 
-            LastContentModifiedDate = oSiteCollection.LastContentModifiedDate.ToString();
+            LastContentModifiedDate = oSiteCollection.LastContentModifiedDate.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
             LockState = oSiteCollection.LockState.ToString();
 
         }
@@ -318,9 +318,9 @@ namespace NovaPointLibrary.Solutions.Report
             SiteTemplate = SPOWeb.GetSiteTemplateName(web.WebTemplate, false);
             IsSubsite = web.IsSubSite().ToString();
 
-            StorageUsedGB = storageUsedGb.ToString();
+            StorageUsedGB = storageUsedGb.ToString(CultureInfo.InvariantCulture);
 
-            LastContentModifiedDate = web.LastItemUserModifiedDate.ToString();
+            LastContentModifiedDate = web.LastItemUserModifiedDate.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
         }
         
         internal SiteReportRecord(string siteUrl, string errorMessage)

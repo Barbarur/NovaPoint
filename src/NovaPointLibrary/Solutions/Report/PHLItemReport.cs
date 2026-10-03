@@ -8,6 +8,7 @@ using NovaPointLibrary.Core.Context;
 using NovaPointLibrary.Core.Logging;
 using NovaPointLibrary.Solutions.Directory;
 using System.Dynamic;
+using System.Globalization;
 using System.Linq.Expressions;
 
 namespace NovaPointLibrary.Solutions.Report
@@ -131,11 +132,11 @@ namespace NovaPointLibrary.Solutions.Report
 
 
             float? itemSizeMb = oItem != null ?  (float)Math.Round(Convert.ToDouble(oItem["File_x0020_Size"]) / Math.Pow(1024, 2), 2) : null;
-            recordItem.ItemSizeMb = itemSizeMb != null ? itemSizeMb.ToString() : string.Empty;
+            recordItem.ItemSizeMb = itemSizeMb != null ? itemSizeMb.Value.ToString(CultureInfo.InvariantCulture) : string.Empty;
 
             FieldLookupValue? FileSizeTotalBytes = oItem != null ? (FieldLookupValue)oItem["SMTotalSize"] : null;
             float? itemSizeTotalMb = FileSizeTotalBytes != null ? (float)Math.Round(FileSizeTotalBytes.LookupId / Math.Pow(1024, 2), 2) : null;
-            recordItem.ItemSizeTotalMB = itemSizeTotalMb != null ? itemSizeTotalMb.ToString() : string.Empty;
+            recordItem.ItemSizeTotalMB = itemSizeTotalMb != null ? itemSizeTotalMb.Value.ToString(CultureInfo.InvariantCulture) : string.Empty;
 
             recordItem.Remarks = remarks;
 
