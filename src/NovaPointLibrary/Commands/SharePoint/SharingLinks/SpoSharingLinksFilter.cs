@@ -85,7 +85,7 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
             }
             else
             {
-                DateTime createdBeforeThan = DateTime.Today.AddDays(DaysOld * -1);
+                DateTime createdBeforeThan = DateTime.UtcNow.Date.AddDays(DaysOld * -1);
                 if (link.SharingLinkCreated <= createdBeforeThan)
                 {
                     age = true;

@@ -143,9 +143,10 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
 
             SharingLinkIsActive = oLink.linkDetails.IsActive.ToString();
 
-            SharingLinkCreated = DateTime.Parse(oLink.linkDetails.Created, CultureInfo.InvariantCulture);
+            // Keep SharePoint's UTC time; a plain Parse converts it to the PC's time zone.
+            SharingLinkCreated = DateTime.Parse(oLink.linkDetails.Created, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
             SharingLinkCreatedBy = oLink.linkDetails.CreatedBy.email;
-            SharingLinkModified = DateTime.Parse(oLink.linkDetails.LastModified, CultureInfo.InvariantCulture);
+            SharingLinkModified = DateTime.Parse(oLink.linkDetails.LastModified, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
             SharingLinkModifiedBy = oLink.linkDetails.LastModifiedBy.email;
             SharingLinkUrl = oLink.linkDetails.Url;
         }
