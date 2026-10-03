@@ -16,6 +16,10 @@ namespace NovaPointWPF.Pages.Solutions
         public SolutionHandler Handler;
         private readonly IFolderRevealer _folderRevealer = new OsFolderRevealer();
 
+        // A TextBlock re-lays out every inline on each append, so the pane keeps only the newest lines.
+        private const int MaxLogLines = 300;
+        private Run? _trimNotice;
+
         public SolutionProgressView(SolutionHandler handler)
         {
             DataContext = handler;
@@ -38,6 +42,24 @@ namespace NovaPointWPF.Pages.Solutions
             }
 
             BoxText.Inlines.Add(line);
+            TrimLogLines();
+        }
+
+        private void TrimLogLines()
+        {
+            int limit = _trimNotice == null ? MaxLogLines : MaxLogLines + 1;
+            if (BoxText.Inlines.Count <= limit) { return; }
+
+            if (_trimNotice == null)
+            {
+                _trimNotice = new($"Showing the latest {MaxLogLines} lines only. The full log is in _Logs.txt in the output folder. \n")
+                {
+                    FontStyle = FontStyles.Italic
+                };
+                BoxText.Inlines.InsertBefore(BoxText.Inlines.FirstInline, _trimNotice);
+            }
+
+            BoxText.Inlines.Remove(_trimNotice.NextInline);
         }
 
         internal async Task RunSolutionAsync()
