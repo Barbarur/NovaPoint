@@ -78,10 +78,18 @@ namespace NovaPointLibrary.Commands.SharePoint.SharingLinks
                 authorMatch = true;
             }
 
-            DateTime createdBeforeThan = DateTime.Today.AddDays(DaysOld * -1);
-            if (link.SharingLinkCreated <= createdBeforeThan)
+            // 0 means links of any age, including those created today.
+            if (DaysOld == 0)
             {
                 age = true;
+            }
+            else
+            {
+                DateTime createdBeforeThan = DateTime.Today.AddDays(DaysOld * -1);
+                if (link.SharingLinkCreated <= createdBeforeThan)
+                {
+                    age = true;
+                }
             }
 
 
