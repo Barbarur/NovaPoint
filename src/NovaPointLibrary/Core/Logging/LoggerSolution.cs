@@ -255,7 +255,9 @@ namespace NovaPointLibrary.Core.Logging
 
                         foreach (var property in (IDictionary<String, Object>)o)
                         {
-                            sb.Append(CultureInfo.InvariantCulture, $"\"{property.Value}\",");
+                            // Double embedded quotes so they don't end the quoted field early.
+                            string value = Convert.ToString(property.Value, CultureInfo.InvariantCulture) ?? string.Empty;
+                            sb.Append(CultureInfo.InvariantCulture, $"\"{value.Replace("\"", "\"\"")}\",");
                         }
                         if (sb.Length > 0) { sb.Length--; }
 
