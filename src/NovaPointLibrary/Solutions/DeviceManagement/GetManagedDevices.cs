@@ -268,6 +268,9 @@ internal class GetManagedDevicesRecord : ISolutionRecord
     public string NonComplianceAssessment { get; set; } = string.Empty;
     public string Remarks { get; set; } = string.Empty;
 
+    // Kept as a field, not a property, so it doesn't become a report column.
+    private readonly DateTime _lastSyncDateTime = DateTime.MinValue;
+
     public GetManagedDevicesRecord() { }
 
     internal GetManagedDevicesRecord(GraphManagedDevice device)
@@ -307,6 +310,7 @@ internal class GetManagedDevicesRecord : ISolutionRecord
         EnrolledDate = device.EnrolledDateTime != DateTime.MinValue
             ? device.EnrolledDateTime.ToString("yyyy-MM-dd HH:mm:ss")
             : string.Empty;
+        _lastSyncDateTime = device.LastSyncDateTime;
         LastSyncDate = device.LastSyncDateTime != DateTime.MinValue
             ? device.LastSyncDateTime.ToString("yyyy-MM-dd HH:mm:ss")
             : string.Empty;
@@ -452,8 +456,8 @@ internal class GetManagedDevicesRecord : ISolutionRecord
             return;    
         }
         
-        DateTime parsedDate = DateTime.Parse(LastSyncDate, CultureInfo.InvariantCulture);
-        if (parsedDate < DateTime.Now.AddDays(-30))
+        // Graph sends UTC; a device that never synced keeps MinValue and counts as inactive.
+        if (_lastSyncDateTime < DateTime.UtcNow.AddDays(-30))
         {
             NonComplianceAssessment = s_AssessmentInactive;
             return; 
